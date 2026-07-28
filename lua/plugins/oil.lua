@@ -135,10 +135,9 @@ return {
       winhighlight = "CursorLine:OilCursorLine",
     },
     keymaps = {
-      -- Keep LazyVim's window navigation on <C-h>/<C-j>/<C-k>. Oil defaults
+      -- Keep LazyVim's window navigation on <C-j>/<C-k>. Oil defaults
       -- <C-h> to horizontal open and <C-l> to refresh; <CR> remains the
       -- conventional way to select an entry.
-      ["<C-h>"] = false,
       ["<C-j>"] = false,
       ["<C-k>"] = false,
 
@@ -151,6 +150,35 @@ return {
       -- selection, so <C-l> is used below. This intentionally gives up
       -- Oil-local <C-l> right-pane navigation; use <C-w>l when needed.
       ["<C-l>"] = "actions.select",
+
+      -- Backward / forward navigation, mirrored on two key pairs:
+      -- <C-h> + `-` go up to the parent, <C-l> + `=` go back down.
+      -- `=` sits on the same physical key as `+`, without the Shift.
+      --
+      -- <C-h> was previously disabled to keep LazyVim's window-left
+      -- navigation inside Oil. Same trade as <C-l> above: Oil opens
+      -- fullscreen, so there is rarely a left window to reach; use <C-w>h.
+      ["<C-h>"] = "actions.parent",
+
+      -- `-` (Oil default) leaves the cursor on the directory it came out of
+      -- (oil.open -> view.set_last_cursor), so selecting that entry is the
+      -- natural "forward". Guarded to directories, otherwise `=` on a file
+      -- row would open the file instead of navigating.
+      ["="] = {
+        function()
+          local oil = require("oil")
+          local entry = oil.get_cursor_entry()
+          if entry and entry.type == "directory" then
+            oil.select()
+          end
+        end,
+        mode = "n",
+        desc = "Navigate forward (into directory)",
+        -- Yanky (LazyVim extra) maps `=p` / `=P` globally, so without nowait
+        -- Nvim waits out `timeoutlen` (300ms) on every `=` to see whether a
+        -- p/P follows. nowait takes the exact match immediately.
+        nowait = true,
+      },
     },
     float = {
       max_width = 0.8,
