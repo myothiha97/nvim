@@ -14,7 +14,7 @@ return {
         enabled = true,
         -- Auto-suggest alongside blink.cmp. hide_during_completion = false lets
         -- copilot's ghost text render even while blink's menu is open, so both
-        -- engines stay visible. Accept keys are split: <C-l> = blink, <C-o> = copilot.
+        -- engines stay visible. Accept keys are split: <C-l> = blink menu, <C-;> = copilot ghost.
         --
         -- debounce: 300ms gives the server time to finish multi-line generations
         -- before the next keystroke cancels the in-flight request. WebStorm uses
@@ -127,14 +127,19 @@ return {
       --   end,
       -- })
 
-      -- <C-l>: accept current suggestion AND immediately fire a fresh request
+      -- <C-;>: accept current suggestion AND immediately fire a fresh request
       -- at the new cursor position. Mimics WebStorm/Zed's "chained Tab" feel
       -- where the next ghost appears right after accept without waiting for
       -- TextChangedI / debounce. We schedule the next() call so accept()'s
       -- text insertion and ctx reset complete first; otherwise next() would
       -- see the pre-accept context and cycle the old candidate list instead
       -- of fetching for the new cursor position.
-      map("i", "<C-l>", function()
+      --
+      -- Moved off <C-l> so blink.cmp's menu accept can take that key. <C-;> has no
+      -- legacy terminal encoding -- it only arrives via the kitty keyboard protocol,
+      -- which Ghostty speaks and Neovim requests, so it works here but would NOT
+      -- reach a non-negotiating app like zsh.
+      map("i", "<C-;>", function()
         if suggestion.is_visible() then
           suggestion.accept()
           vim.schedule(function()

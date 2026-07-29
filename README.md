@@ -154,7 +154,8 @@ language server scan the whole home directory.
 
 | Key | Action |
 |-----|--------|
-| `<C-l>` | Accept suggestion + trigger next |
+| `<C-;>` | Accept suggestion + trigger next |
+| `<C-l>` | Accept blink completion item |
 | `<C-j>` | Trigger / cycle suggestion |
 | `<C-k>` · `<leader>ad` | Toggle Copilot suggestions |
 | `<M-w>` · `<M-l>` | Accept word · line |

@@ -37,7 +37,7 @@ return {
         preset = "none",
         ["<C-n>"] = { "select_next", "fallback" },
         ["<C-p>"] = { "select_prev", "fallback" },
-        ["<C-o>"] = { "select_and_accept", "fallback" },
+        ["<C-l>"] = { "select_and_accept", "fallback" },
         ["<CR>"] = { "select_and_accept", "fallback" },
         ["<Tab>"] = { "fallback" },
         ["<S-Tab>"] = { "fallback" },
