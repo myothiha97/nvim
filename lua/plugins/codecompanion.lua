@@ -236,10 +236,71 @@ return {
       --     brighter end glares on this near-black background. Walked down in steps,
       --     all rejected as too hot: #ffffff (Ghostty's default foreground, i.e. what
       --     the Claude Code CLI prints at), then #eaeaea (Ghostty's palette 15).
-      --     #d4d4d4 is the third step. All untinted greys -- Tokyo Night's #c0caf5 was
-      --     the first attempt and read FADED rather than soft, because it is tinted
-      --     lavender. Stay on the neutral axis if this is revisited: #dcdcdc is a
-      --     smaller step up, #c6c6c6 a further step down.
+      --     #d4d4d4 was the third step and shipped until 2026-08-05. All untinted
+      --     greys -- Tokyo Night's #c0caf5 was the first attempt and read FADED
+      --     rather than soft, because it is tinted lavender. Stay on the neutral
+      --     axis if this is revisited.
+      --
+      --     2026-08-05: #d4d4d4 -> #b0b0b0, and this step was measured rather than
+      --     eyeballed. #d4d4d4 rendered 27.6 L* BRIGHTER than the code text beside
+      --     it (effective L* 65.4 vs 37.8), which is what read as glare. The
+      --     workaround first attempted was global: `font-thicken-strength` in
+      --     ghostty/config lowered 255 -> 140. That did dim the chat by 10.1 L*, but
+      --     it also cost 5.6 L* on all code text and every other terminal pane, to
+      --     fix one panel worth ~25% of the screen. Reverted there, fixed here
+      --     instead, because this group is already chat-scoped and costs nothing
+      --     elsewhere.
+      --
+      --     Two competing criteria were used, in this order, and they disagree:
+      --
+      --     1. PANE GAP. The panes sit side by side, so the eye judges the chat
+      --        against the code beside it, not in isolation. Absolute lightness is
+      --        therefore the wrong thing to hold fixed: an intermediate #b0b0b0 was
+      --        picked to reproduce the absolute effective L* 55.4 that thicken 140
+      --        had produced, hit it exactly, and still read FADED, because restoring
+      --        thicken to 255 had lifted code text 32.2 -> 37.8 and so squeezed the
+      --        pane gap 23.2 -> 17.6. By this criterion #c4c4c4 (gap 23.2) is correct.
+      --     2. LONG-SESSION READING COMFORT. The gap target above is only a snapshot
+      --        of a terminal setting that was live for a few minutes, so it is a
+      --        reference point, not a requirement. For hours of reading on a
+      --        near-black background the dimmer of two AA-passing options is the
+      --        better pick, because glare from high-luminance text on near-black is
+      --        the fatigue mechanism. By this criterion #b0b0b0 wins.
+      --
+      --     Neither criterion won outright. #c4c4c4 (gap-correct) read BRIGHT and
+      --     #b0b0b0 (comfort-correct) read FADED, so those two reactions bracket the
+      --     answer and the shipped value is the midpoint: #bbbbbb, effective L* 58.5,
+      --     3.1 L* above the faded end and 2.5 L* below the bright end. Both distances
+      --     sit under the ~5 L* perceptual floor, which is the point: from here
+      --     neither end is reachable by eye.
+      --
+      --     Effective (coverage-weighted) L* of each candidate, so these are what
+      --     the eye actually integrates, not the nominal hex lightness. Gap is
+      --     against code base text at effective L* 37.8 (thicken 255). Contrast is
+      --     also on the effective value, which is the conservative reading:
+      --       #d4d4d4  65.4  gap 27.7  7.07:1  first value, too hot
+      --       #cccccc  63.3  gap 25.5  6.58:1
+      --       #c4c4c4  61.0  gap 23.2  6.12:1  bracket TOP, read bright
+      --       #bbbbbb  58.5  gap 20.7  5.62:1  CURRENT -- midpoint of the bracket
+      --       #b0b0b0  55.4  gap 17.6  5.06:1  bracket BOTTOM, read faded
+      --       #aaaaaa  53.7  gap 15.9  4.77:1  last value still clearing WCAG AA
+      --       #a4a4a4  52.0  gap 14.2  4.49:1  FAILS AA -- hard floor, do not go here
+      --
+      --     STOP HERE. The whole live band is #b0b0b0..#c4c4c4, only 5.6 L* wide,
+      --     and #bbbbbb sits in the middle of it. Every remaining move is under the
+      --     ~5 L* perceptual floor for text glyphs, so there is nothing left that can
+      --     be seen -- a 1-hex-point step is 0.28 L*, about 18x below the floor.
+      --     Further nudging cannot improve this, it can only re-enter the loop that
+      --     produced four values in one evening. Never go below #aaaaaa: AA fails at
+      --     #a4a4a4.
+      --     If the code pane's brightness ever changes (font-thicken, font-size, a
+      --     new font), the gap numbers above are void and must be re-derived.
+      --
+      --     Do NOT reach for a terminal-wide font or gamma knob for this again. If
+      --     the chat is the only thing too bright, the chat is the only thing to
+      --     change. See `todos/syntax-palette-followups.md` item 4 for the same
+      --     lesson from the opposite direction (text that looked too DIM was also a
+      --     rasterization question, not a colour one).
       --     `bold = false` is explicit: only the COLOR changes, the weight stays
       --     regular. NormalNC maps to the same group on purpose so the chat doesn't
       --     dim while you work in the code window, and `bg = "NONE"` keeps the
@@ -253,7 +314,10 @@ return {
         {
           name = "CodeCompanionChatText",
           from = { "Normal", "NormalNC" },
-          opts = { fg = "#d4d4d4", bg = "NONE", bold = false },
+          -- opts = { fg = "#d4d4d4", bg = "NONE", bold = false },  -- until 2026-08-05, too hot
+          -- opts = { fg = "#c4c4c4", bg = "NONE", bold = false },  -- bracket top, read bright
+          -- opts = { fg = "#b0b0b0", bg = "NONE", bold = false },  -- bracket bottom, read faded
+          opts = { fg = "#bbbbbb", bg = "NONE", bold = false },
         },
       }
 
