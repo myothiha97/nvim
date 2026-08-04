@@ -1,3 +1,6 @@
+-- base configs
+local base_width = 0.35
+
 return {
   {
     "olimorris/codecompanion.nvim",
@@ -113,8 +116,8 @@ return {
           -- model. Here claude_code is pinned to Sonnet (currently 4.6). Model ids
           -- the ACP bridge accepts: "default" | "sonnet" | "sonnet[1m]" (1M context)
           -- | "opus" | "haiku". (Copilot form would be { name = "copilot", model = .. }.)
-          -- adapter = { name = "claude_code", model = "sonnet" },
-          adapter = { name = "codex" },
+          adapter = { name = "claude_code", model = "opus" },
+          -- adapter = { name = "codex" },
           -- adapter = {
           -- name = "copilot", -- currently having error when open the chat panel with leader aa
           -- },
@@ -156,7 +159,16 @@ return {
             -- Keep the base config numeric. We clamp the real split width in a
             -- ChatOpened autocmd below because CodeCompanion still assumes this
             -- field is a raw number in some code paths.
-            width = 0.3,
+            width = base_width,
+            -- Window-local options, applied to the chat window ONLY
+            -- (shared/ui.lua hands this table to `set_win_options(winnr, ...)`),
+            -- so nothing here leaks into code buffers. Line numbers are noise in a
+            -- conversation and cost columns of a narrow panel. setup() deep-merges,
+            -- so the plugin's own breakindent/linebreak/wrap defaults are kept.
+            opts = {
+              number = false,
+              relativenumber = false,
+            },
           },
         },
       },
@@ -179,11 +191,107 @@ return {
     config = function(_, opts)
       require("codecompanion").setup(opts)
 
+      -- Ratio/max keep the clamp in the same ballpark as `display.chat.window.width`
+      -- above, so it widens the panel instead of silently capping it. `max_width` is
+      -- the knob that actually bites on a normal-size terminal; `min_width` only
+      -- matters on narrow ones.
       local function clamp_chat_width()
         local min_width = 48
-        local max_width = 72
-        local target_width = math.floor(vim.o.columns * 0.3)
+        local max_width = 110
+        local target_width = math.floor(vim.o.columns * base_width)
         return math.max(min_width, math.min(max_width, target_width))
+      end
+
+      -- Chat-window-only colors.
+      --
+      -- Highlight groups are GLOBAL, so recoloring the theme's groups would also
+      -- repaint code buffers, real .md files and LSP hover popups. To keep this to
+      -- the chat we define our OWN groups and remap them per window through
+      -- 'winhighlight' -- Neovim implements that option as a window-local highlight
+      -- namespace, so it covers treesitter (extmark) groups too, not just UI groups.
+      --
+      --   CodeCompanionInlineCode  <- @markup.raw.markdown_inline, the inline `code`
+      --     spans. The theme paints them gold on a dark olive block
+      --     (solarized-osaka/groups/treesitter.lua: fg c.yellow500, bg c.green900),
+      --     which is loud in a chat where most prose contains inline code. `bg =
+      --     "NONE"` drops the block -- the color alone is enough to mark code.
+      --
+      --     A LIFTED, LOW-CHROMA blue, and both halves of that matter. Answers are
+      --     dense with inline code (often every noun in a sentence), so a saturated
+      --     accent stripes the paragraph instead of emphasising anything. Measured
+      --     against the prose color, on this background:
+      --       #268bd2  Solarized blue, tried first. L* 55.6, chroma 172, and only
+      --                5.2:1 contrast on the bg -- the LOWEST-contrast text in the
+      --                chat, i.e. simultaneously the loudest and the hardest to read.
+      --       #1d98cd  `palette.blue` (variants.blue.azure), tried too. Same problem,
+      --                L* 59.1, chroma 176, and it leans cyan.
+      --       #8ab4d8  this. L* 71.6, so 13 apart from the prose instead of 29, with
+      --                chroma cut to 78 and contrast up to 8.7:1.
+      --     Keep the separation from prose in the 9-15 L* band. Do NOT "fix" a dull
+      --     look by raising chroma -- chroma is what stripes the text. #9cc0dc is the
+      --     calmer step if this still reads busy.
+      --
+      --   CodeCompanionChatText  <- Normal + NormalNC, the chat's prose. The theme's
+      --     base0 grey-cyan (about #9facad) reads dull over long answers, but the
+      --     brighter end glares on this near-black background. Walked down in steps,
+      --     all rejected as too hot: #ffffff (Ghostty's default foreground, i.e. what
+      --     the Claude Code CLI prints at), then #eaeaea (Ghostty's palette 15).
+      --     #d4d4d4 is the third step. All untinted greys -- Tokyo Night's #c0caf5 was
+      --     the first attempt and read FADED rather than soft, because it is tinted
+      --     lavender. Stay on the neutral axis if this is revisited: #dcdcdc is a
+      --     smaller step up, #c6c6c6 a further step down.
+      --     `bold = false` is explicit: only the COLOR changes, the weight stays
+      --     regular. NormalNC maps to the same group on purpose so the chat doesn't
+      --     dim while you work in the code window, and `bg = "NONE"` keeps the
+      --     transparent background.
+      local chat_highlights = {
+        {
+          name = "CodeCompanionInlineCode",
+          from = { "@markup.raw.markdown_inline" },
+          opts = { fg = "#8ab4d8", bg = "NONE" },
+        },
+        {
+          name = "CodeCompanionChatText",
+          from = { "Normal", "NormalNC" },
+          opts = { fg = "#d4d4d4", bg = "NONE", bold = false },
+        },
+      }
+
+      -- Built once from the table above, in order, so the value is deterministic.
+      local chat_winhighlight
+      do
+        local parts = {}
+        for _, hl in ipairs(chat_highlights) do
+          for _, from in ipairs(hl.from) do
+            parts[#parts + 1] = from .. ":" .. hl.name
+          end
+        end
+        chat_winhighlight = table.concat(parts, ",")
+      end
+
+      local function define_chat_highlights()
+        for _, hl in ipairs(chat_highlights) do
+          vim.api.nvim_set_hl(0, hl.name, hl.opts)
+        end
+      end
+
+      -- A `:colorscheme` reload clears custom groups, so re-define on ColorScheme.
+      local hl_group = vim.api.nvim_create_augroup("CodeCompanionChatHighlight", { clear = true })
+      define_chat_highlights()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = hl_group,
+        callback = define_chat_highlights,
+      })
+
+      -- Append rather than assign: CodeCompanion appends its own WinBar entries to
+      -- 'winhighlight' (utils/ui.lua set_winbar), so we must not drop what's there.
+      local function apply_chat_highlights(winnr)
+        local current = vim.api.nvim_get_option_value("winhighlight", { win = winnr })
+        if current:find(chat_winhighlight, 1, true) then
+          return
+        end
+        local value = current ~= "" and (current .. "," .. chat_winhighlight) or chat_winhighlight
+        vim.api.nvim_set_option_value("winhighlight", value, { win = winnr })
       end
 
       vim.api.nvim_create_autocmd("User", {
@@ -195,13 +303,16 @@ return {
             return
           end
 
-          local window = require("codecompanion.config").display.chat.window
-          if window.layout ~= "vertical" then
+          local winnr = vim.fn.bufwinid(bufnr)
+          if winnr == -1 or not vim.api.nvim_win_is_valid(winnr) then
             return
           end
 
-          local winnr = vim.fn.bufwinid(bufnr)
-          if winnr == -1 or not vim.api.nvim_win_is_valid(winnr) then
+          apply_chat_highlights(winnr)
+
+          -- Width clamping only makes sense for the vertical split layout.
+          local window = require("codecompanion.config").display.chat.window
+          if window.layout ~= "vertical" then
             return
           end
 
@@ -521,6 +632,14 @@ return {
       -- rules). Fires only on chat creation, so toggling an existing chat won't
       -- re-add. All pcall-guarded: if a future API change breaks it, the chat
       -- still opens, just without the auto-attached file (no error spam).
+      --
+      -- Attaches as a BUFFER (`- <buf>Makefile</buf>`), deliberately, NOT as a file
+      -- (`- <file>Makefile</file>`) like `/file` produces. Switching to a file
+      -- context was tried and reverted: it needs extra code to keep the line
+      -- numbers the buffer formatter gives for free, and it reads from DISK, so
+      -- unsaved edits would not reach the model. The only thing it buys is that its
+      -- id matches `/file`, so adding the same file that way later dedupes instead
+      -- of sending the contents twice -- not worth the code.
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "CodeCompanionChatCreated",
