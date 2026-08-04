@@ -54,6 +54,35 @@ return {
       hl.Visual = { bg = "#3b4261" }
       hl.VisualNOS = { bg = "#3b4261" }
 
+      -- Line numbers. The theme points LineNr at `yellow700` (#664c00), a dark but
+      -- SATURATED warm amber, and that is the problem rather than its lightness:
+      --
+      --   group              value     L*     C*    hue    dL* over bg   contrast
+      --   solarized LineNr   #664c00   34.0   42.9   84    28.8          2.33:1
+      --   tokyonight LineNr  #3b4261   28.6   20.1  287    18.5          1.74:1
+      --
+      -- Chroma is more than double tokyonight's, and hue 84 puts it in the same
+      -- family as this palette's yellow syntax accent (hue 98). So the gutter reads
+      -- as CONTENT competing with code rather than as chrome, which is what makes
+      -- relative-jump numbers tiring to scan. It is also 10 L* further from the
+      -- background than tokyonight's.
+      --
+      -- #2d3f43 is a low-chroma cool grey sitting on the background's own hue (bg
+      -- #001419 is a cyan-ish near-black), and it reproduces tokyonight's
+      -- RELATIONSHIP rather than its absolute value, which is the right invariant
+      -- when the two backgrounds differ (L* 5.2 here vs 10.1 there):
+      --   #2d3f43  L* 25.3  C* 7.7  dL* 20.1  contrast 1.71:1
+      --   vs tokyonight's         dL* 18.5  contrast 1.74:1
+      -- If this ends up too dim to read at a glance, #33474b is the one step up
+      -- (dL* 23.5, 1.92:1). Do not go back toward a saturated hue to make it
+      -- visible -- raise lightness, keep C* under about 10.
+      --
+      -- All three groups carry explicit values in the theme (not links), so all
+      -- three have to be set or above/below the cursor keep the amber.
+      hl.LineNr = { fg = "#2d3f43" }
+      hl.LineNrAbove = { fg = "#2d3f43" }
+      hl.LineNrBelow = { fg = "#2d3f43" }
+
       -- Re-enable with a custom color (e.g. "#073642") to restore the band.
       hl.CursorLine = { bg = "NONE" }
 
