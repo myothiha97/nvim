@@ -26,7 +26,10 @@ local function sync_float_nontext_hl()
     local hl = vim.api.nvim_get_hl(0, { name = name, link = false })
     return hl and hl.bg
   end
-  local bg = bg_of("NormalFloat") or bg_of("Normal")
+  -- LspDocFloat first: doc floats are remapped onto that surface by
+  -- style_doc_float() below, so it -- not NormalFloat -- is the background the
+  -- marker has to disappear into. Falls back for any float we don't restyle.
+  local bg = bg_of("LspDocFloat") or bg_of("NormalFloat") or bg_of("Normal")
   if bg then
     -- fg == bg: the glyph is painted in the background colour, i.e. invisible.
     vim.api.nvim_set_hl(0, "FloatNonTextHidden", { fg = bg, bg = bg })
@@ -46,7 +49,28 @@ vim.api.nvim_create_autocmd("ColorScheme", { group = float_doc_grp, callback = s
 local function hide_float_marker(win)
   local wh = vim.wo[win].winhighlight
   if not wh:find("FloatNonTextHidden", 1, true) then
-    local add = "NonText:FloatNonTextHidden,FoldColumn:NormalFloat"
+    -- FoldColumn -> LspDocFloat, not NormalFloat: both callers (LSP doc floats
+    -- and blink's doc popup) now sit on the base03 surface, so pointing the
+    -- gutter at NormalFloat's bg would paint a visibly darker strip beside the
+    -- text instead of blending into plain padding.
+    local add = "NonText:FloatNonTextHidden,FoldColumn:LspDocFloat"
+    vim.wo[win].winhighlight = (wh ~= "" and wh .. "," or "") .. add
+  end
+end
+
+-- Put `win` on the dedicated LSP-documentation surface (defined in
+-- lua/colorschemes/solarized-osaka.lua). The colours live in the theme; this is
+-- only the mechanism that scopes them to doc floats, so the Snacks picker and
+-- the blink completion menu -- which share NormalFloat / bg_float -- are left
+-- untouched. Same append-and-guard shape as hide_float_marker above.
+local function style_doc_float(win)
+  local wh = vim.wo[win].winhighlight
+  -- Guard on the full `Normal:LspDocFloat` pair, not the bare group name:
+  -- hide_float_marker() above also writes `FoldColumn:LspDocFloat`, and on a
+  -- wrapping float it runs FIRST, so a bare-name check would see that entry and
+  -- skip the surface entirely.
+  if not wh:find("Normal:LspDocFloat", 1, true) then
+    local add = "Normal:LspDocFloat,NormalFloat:LspDocFloat,FloatBorder:LspDocBorder,FloatTitle:LspDocTitle"
     vim.wo[win].winhighlight = (wh ~= "" and wh .. "," or "") .. add
   end
 end
@@ -100,6 +124,11 @@ vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
     vim.wo[winid].spell = false
     vim.wo[winid].conceallevel = 3
     vim.wo[winid].concealcursor = "n"
+    -- Unconditional, unlike the gutter block above: every doc float gets the
+    -- surface, wrapping or not. This branch also runs on the focus-reuse path,
+    -- which is what we want -- winhighlight is idempotent (guarded) and cannot
+    -- re-anchor the window the way nvim_win_set_config can.
+    style_doc_float(winid)
   end
   return bufnr, winid
 end

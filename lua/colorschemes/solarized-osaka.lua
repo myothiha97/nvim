@@ -47,9 +47,48 @@ return {
       hl["@variable.typescript"] = { link = "@variable" }
       hl["@variable.javascript"] = { link = "@variable" }
 
-      -- Go package names, such as `main` in `package main`.
-      -- hl["@module.go"] = { fg = "#fdf6e3" }
-      hl["@module.go"] = { fg = "#eee8d5" }
+      -- Types. The theme sets `Type = yellow500`, which made EVERY type gold:
+      -- Rectangle, Shape, float64, string, int, SlotTableProps, ReactNode,
+      -- Optional, List. Setting the base group is the whole fix -- @type,
+      -- @type.builtin, @type.definition, Typedef and Structure all link to it,
+      -- and so does every @lsp.type.* group (inert here: lua/plugins/lsp.lua
+      -- nils semanticTokensProvider on attach, so treesitter is the only
+      -- painter and nothing can override this back to yellow).
+      -- See `variants.type` in the palette file for the measurements.
+      hl.Type = { fg = palette.type }
+
+      -- Construction should read as the type being built, not as a parameter.
+      -- Both lines are needed: the theme sets `@constructor` to orange500 (the
+      -- same terracotta as @variable.parameter, @variable.builtin and brackets)
+      -- and `@constructor.tsx` separately to blue500.
+      hl["@constructor"] = { fg = palette.type }
+      hl["@constructor.tsx"] = { fg = palette.type }
+
+      -- Fields and properties were each an EXACT duplicate of another role
+      -- (dE2000 0.0), verified by walking treesitter captures over real Go/TSX/
+      -- Python files:
+      --   @variable.member (r.Width, row.count, self.width) == cyan500 == String
+      --   @property        (struct literal keys, JSX attrs)  == blue500 == Function
+      -- One colour for both, on `violet300` (#9b9fec) -- already in the theme's
+      -- palette but unused by any group, so this borrows nothing. L* 67.9,
+      -- C* 42.4, hue 293, contrast 7.75:1. It lands in the largest empty gap on
+      -- the hue wheel (110 degrees clear of the terracotta at 40), and its
+      -- chroma sits inside the existing accent range (function 38.5, terracotta
+      -- 42.9). Nearest neighbours are 19.9 (Type) and 20.6 (@variable), so it
+      -- clears everything by more than the palette's own tightest pair.
+      -- @tag.attribute links to @property, so JSX attributes follow.
+      hl["@variable.member"] = { fg = c.violet300 }
+      hl["@property"] = { fg = c.violet300 }
+
+      -- Module names, such as `main` in `package main` or `typing` in a Python
+      -- import. The theme links `@module` -> Include -> PreProc -> red500, a
+      -- saturated alarm red at 4.01:1 sitting only 31 degrees of hue from the
+      -- error red, so imports read as diagnostics in every language except Go.
+      -- This generalises the old Go-only override to every language and drops
+      -- its magic hex. `c.base2` (#ede7d3) is not byte-identical to the #eee8d5
+      -- that line hardcoded, but the two are dE2000 0.45 apart -- below the
+      -- just-noticeable threshold -- so Go is unchanged in practice.
+      hl["@module"] = { fg = c.base2 }
 
       hl.Visual = { bg = "#3b4261" }
       hl.VisualNOS = { bg = "#3b4261" }
@@ -101,6 +140,37 @@ return {
       for level = 1, 6 do
         hl["@markup.heading." .. level .. ".markdown"] = { fg = c.green, bold = true }
       end
+
+      -- LSP documentation surface (hover, signature help, diagnostic floats,
+      -- mouse hover, blink's doc popup).
+      --
+      -- The problem: `bg_float` is `base04`, which is byte-identical to `bg`
+      -- (#001419), so a float was the same colour as the editor and only
+      -- differed by being opaque. It gets worse than "subtle": `transparent =
+      -- true` leaves Normal bg = NONE, so the editor actually shows Ghostty's
+      -- #031219 at background-opacity 0.9 blended with the wallpaper. That
+      -- lands anywhere from L* 4.1 (black wallpaper) to L* 12.9 (bright one),
+      -- and the float's L* 5.2 sits INSIDE that band -- so it read darker than
+      -- the editor on some wallpapers and lighter on others.
+      --
+      -- Darker is not reachable: bg is already L* 5.15 and the darkest usable
+      -- step is -2.5 L*, below the perceptual threshold. `base03` (L* 15.94) is
+      -- the lowest value that clears the whole drift band, so the float now
+      -- separates the same way whatever is behind the terminal.
+      --
+      -- Deliberately NOT applied to NormalFloat: SnacksPickerBorder and
+      -- SnacksPickerPreviewTitle read `c.bg_float`, and the picker body falls
+      -- back to NormalFloat, so a global change would repaint the picker. These
+      -- are reached only by doc floats, via winhighlight in config/keymaps.lua.
+      hl.LspDocFloat = { fg = c.base1, bg = c.base03 }
+      hl.LspDocBorder = { fg = palette.type, bg = c.base03 }
+      hl.LspDocTitle = { fg = palette.type, bg = c.base03, bold = true }
+
+      -- blink.cmp's doc popup does not route through open_floating_preview, so
+      -- it takes the same surface directly. The completion MENU below keeps
+      -- `bg_float` on purpose -- only the docs panel changes.
+      hl.BlinkCmpDoc = { fg = c.base1, bg = c.base03 }
+      hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.base03 }
 
       hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_float }
       hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_float }

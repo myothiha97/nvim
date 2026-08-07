@@ -94,6 +94,41 @@ local variants = {
     -- muted_contrast, with hue pulled back out of the pink range.
     terracotta = "#b55f4a",
   },
+  -- Type colour. Moved off the theme's `Type = yellow500` on 2026-08-07 because
+  -- every type in Go/TS/Python read as gold. This ALSO resolves the green/yellow
+  -- collision documented above at its source: a keyword only ever touched yellow
+  -- through a type annotation or a JSX tag, so with types on cyan the pair stops
+  -- meeting in real code. That is the "only untried direction" named in
+  -- todos/syntax-palette-followups.md.
+  --
+  -- All four were measured against the live palette on the real background
+  -- (Ghostty #031219 at opacity 0.9, NOT nvim's #001419 -- `transparent = true`
+  -- leaves Normal bg = NONE, so the terminal's colour is what shows).
+  type = {
+    -- THE SELECTION. L* 79.7, C* 33.5, hue 249, contrast 11.08:1.
+    -- Worst neighbour is Function/@property #1d98cd at dE2000 16.2, but the two
+    -- sit 20.6 L* apart on the SAME hue (249 vs 250). That is the axis that
+    -- carries when hue and chroma are flat -- the same lesson the green/yellow
+    -- note above records. Chroma 33.5 lands between string-cyan (34.7) and
+    -- function-blue (38.5), so it adds no glare to an already high-chroma palette.
+    --
+    -- NOTE: this is NOT the type colour in either Tokyo Night. It is `Keyword` in
+    -- tokyonight.nvim and `variable.other.property` in the VSCode theme. Their
+    -- real type colours are saved below and both measure TIGHTER here, because
+    -- this background is darker and cyan-tinted rather than navy.
+    tokyonight = "#7dcfff",
+    -- tokyonight.nvim's actual `Type` (its blue1). Rejected: 15.2 from function,
+    -- 16.4 from string -- tighter than the selection on both counts.
+    nvim_type = "#2ac3de",
+    -- VSCode Tokyo Night's `support.type` / `support.class` (builtin types).
+    -- Rejected: 11.9 from #7dcfff and 15.8 from string cyan.
+    vscode_support_type = "#0db9d7",
+    -- VSCode Tokyo Night's `entity.name.type` -- there, user-defined types are
+    -- just plain foreground. Cleanest against everything (worst 18.9), but reads
+    -- as a neutral rather than an accent. The fallback if the selection's
+    -- same-hue split from function blue turns out not to read.
+    vscode_entity_type = "#c0caf5",
+  },
   blue = {
     blue300 = "#49aef5",
     balanced = "#4488ab",
@@ -116,6 +151,7 @@ return {
   green = variants.green.solarized,
   red = variants.red.terracotta,
   blue = variants.blue.azure,
+  type = variants.type.tokyonight,
 }
 
 -- Theme-native red alternative kept from earlier testing:
