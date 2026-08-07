@@ -132,18 +132,56 @@ local variants = {
   -- Fields and properties (@variable.member / @property, and @tag.attribute by
   -- link). Both used to be exact duplicates of other roles -- fields shared
   -- cyan500 with strings, properties shared blue500 with function names.
+  -- Three rules were learned the hard way here on 2026-08-07, in this order.
+  -- Read them before touching this, because two plausible colours failed:
+  --
+  --   1. NOT the cyan/teal band (hue 170-215). `tokyonight` below is what BOTH
+  --      Tokyo Nights use for properties, and it failed badly: at hue 182 it is
+  --      5 degrees from string cyan (187), so the pair separated on LIGHTNESS
+  --      alone. In a `key = "value"` file -- every Lua config table, every JSX
+  --      attribute -- that repeats on every line and the two stop being
+  --      tellable apart. Same geometry as the green/yellow collision above.
+  --
+  --   2. FREQUENCY IS INVERSELY RELATED TO BRIGHTNESS. This is the general
+  --      lesson and the one worth keeping. `type` can sit at L* 79.7 because
+  --      types are rare landmarks -- a declaration or an annotation. Properties
+  --      are on nearly every line, so the same lightness builds a wall of
+  --      bright that swallows everything around it. At L* 80.8 the teal was
+  --      measurably the brightest thing on screen and drained both function
+  --      blue (59.1) and string cyan (60.4).
+  --
+  --   3. So put properties IN the accent band, not above it. String 60.4,
+  --      keyword 59.6 and function 59.1 already cluster there at chroma 34-38
+  --      and contrast 5.8-6.1. Match all three and let HUE do the separating.
+  --
+  -- Hue is boxed in: 170-215 is strings/@variable, 230-270 is type/function,
+  -- 97-111 is @module/keyword, 40 is terracotta. That leaves 300-345.
   member = {
-    -- THE SELECTION. Both Tokyo Nights use this for properties. L* 80.8,
-    -- C* 33.9, hue 182, 11.42:1. Separates from strings the same way `type`
-    -- separates from functions: same family, 20.4 L* apart.
-    tokyonight = "#73daca",
-    -- The theme's own violet300. Cleanest on paper (worst neighbour 19.9, vs
-    -- 15.7 for the selection) but rejected on looks on 2026-08-07 -- too
-    -- saturated a purple against this palette.
+    -- THE SELECTION. L* 60.1, C* 33.7, hue 330, 6.02:1 -- a peer of the accent
+    -- band on every axis except hue:
+    --   string  #29a298  L* 60.4  C* 34.7  ctr 6.08
+    --   THIS    #b67faf  L* 60.1  C* 33.7  ctr 6.02
+    --   keyword #849900  L* 59.6  C* 67.0  ctr 5.92
+    --   function#1d98cd  L* 59.1  C* 38.5  ctr 5.82
+    -- Separation is dE2000 42.4 from strings and 40.4 from functions, and its
+    -- nearest neighbour anywhere is 21.4 (@variable). Properties do not appear
+    -- in the palette's five tightest pairs at all. Rose-mauve rather than
+    -- blue-purple -- 37 degrees round from the rejected `violet`.
+    rose = "#b67faf",
+    -- Same idea one step warmer / pinker (hue 340) and one step cooler
+    -- (hue 320). Both hold L* 60 and C* 34, so they are drop-in swaps.
+    rose_warm = "#be7ca6",
+    rose_cool = "#ac82b7",
+    -- REJECTED 2026-08-07, all three, in this order. Kept so the same ground
+    -- is not covered twice:
+    --   the theme's own violet300 -- too saturated a blue-purple (C* 42.4,
+    --   hue 293), reads as a near neighbour of the blue family;
     violet = "#9b9fec",
-    -- Same hue as `violet`, chroma pulled 42.4 -> 34.4. The gentler version, if
-    -- the objection was intensity rather than the hue itself.
-    violet_soft = "#a3a9e8",
+    --   a dusty mauve -- right hue family, but still L* 68.7, i.e. above both
+    --   string and function, so it kept breaking rule 2;
+    mauve = "#c49ac6",
+    --   and what both Tokyo Nights use, which breaks rules 1 and 2 at once.
+    tokyonight = "#73daca",
   },
   blue = {
     blue300 = "#49aef5",
@@ -168,7 +206,7 @@ return {
   red = variants.red.terracotta,
   blue = variants.blue.azure,
   type = variants.type.tokyonight,
-  member = variants.member.tokyonight,
+  member = variants.member.rose,
 }
 
 -- Theme-native red alternative kept from earlier testing:

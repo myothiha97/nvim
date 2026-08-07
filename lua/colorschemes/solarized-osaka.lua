@@ -69,18 +69,14 @@ return {
       -- Python files:
       --   @variable.member (r.Width, row.count, self.width) == cyan500 == String
       --   @property        (struct literal keys, JSX attrs)  == blue500 == Function
-      -- One colour for both. `violet300` (#9b9fec) was tried on 2026-08-07 and
-      -- rejected on looks. This is the same move that works for Type: take the
-      -- LIGHTER member of a family the palette already has, and let lightness
-      -- carry the separation.
-      --   fields  #73daca  L* 80.8  vs  strings #29a298  L* 60.4   (20.4 apart)
-      --   types   #7dcfff  L* 79.7  vs  funcs   #1d98cd  L* 59.1   (20.6 apart)
-      -- So no new hue family enters the palette, and it matches both Tokyo
-      -- Nights, which use this exact value for properties.
-      --
-      -- Known and accepted: strings and fields are now two teals, dE2000 15.7.
-      -- That is the same order as the type/function pair above and separates the
-      -- same way -- on lightness, not hue.
+      -- One colour for both. Unlike Type, this one must NOT be lifted above the
+      -- accent band: properties are on nearly every line, so a bright value
+      -- drains everything around it. It instead sits level with string/keyword/
+      -- function (L* ~60, chroma ~34, contrast ~6.0) and separates purely on
+      -- hue -- dE2000 42.4 from strings, 40.4 from functions. Two brighter
+      -- candidates were tried and rejected first; the reasoning, the rules that
+      -- came out of it, and the saved alternatives are in `variants.member` in
+      -- the palette file. Read that before changing this.
       --
       -- @tag.attribute links to @property, so JSX attributes follow.
       hl["@variable.member"] = { fg = palette.member }
