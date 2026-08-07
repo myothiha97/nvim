@@ -129,6 +129,22 @@ local variants = {
     -- same-hue split from function blue turns out not to read.
     vscode_entity_type = "#c0caf5",
   },
+  -- Fields and properties (@variable.member / @property, and @tag.attribute by
+  -- link). Both used to be exact duplicates of other roles -- fields shared
+  -- cyan500 with strings, properties shared blue500 with function names.
+  member = {
+    -- THE SELECTION. Both Tokyo Nights use this for properties. L* 80.8,
+    -- C* 33.9, hue 182, 11.42:1. Separates from strings the same way `type`
+    -- separates from functions: same family, 20.4 L* apart.
+    tokyonight = "#73daca",
+    -- The theme's own violet300. Cleanest on paper (worst neighbour 19.9, vs
+    -- 15.7 for the selection) but rejected on looks on 2026-08-07 -- too
+    -- saturated a purple against this palette.
+    violet = "#9b9fec",
+    -- Same hue as `violet`, chroma pulled 42.4 -> 34.4. The gentler version, if
+    -- the objection was intensity rather than the hue itself.
+    violet_soft = "#a3a9e8",
+  },
   blue = {
     blue300 = "#49aef5",
     balanced = "#4488ab",
@@ -152,6 +168,7 @@ return {
   red = variants.red.terracotta,
   blue = variants.blue.azure,
   type = variants.type.tokyonight,
+  member = variants.member.tokyonight,
 }
 
 -- Theme-native red alternative kept from earlier testing:

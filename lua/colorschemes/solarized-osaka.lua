@@ -69,16 +69,32 @@ return {
       -- Python files:
       --   @variable.member (r.Width, row.count, self.width) == cyan500 == String
       --   @property        (struct literal keys, JSX attrs)  == blue500 == Function
-      -- One colour for both, on `violet300` (#9b9fec) -- already in the theme's
-      -- palette but unused by any group, so this borrows nothing. L* 67.9,
-      -- C* 42.4, hue 293, contrast 7.75:1. It lands in the largest empty gap on
-      -- the hue wheel (110 degrees clear of the terracotta at 40), and its
-      -- chroma sits inside the existing accent range (function 38.5, terracotta
-      -- 42.9). Nearest neighbours are 19.9 (Type) and 20.6 (@variable), so it
-      -- clears everything by more than the palette's own tightest pair.
+      -- One colour for both. `violet300` (#9b9fec) was tried on 2026-08-07 and
+      -- rejected on looks. This is the same move that works for Type: take the
+      -- LIGHTER member of a family the palette already has, and let lightness
+      -- carry the separation.
+      --   fields  #73daca  L* 80.8  vs  strings #29a298  L* 60.4   (20.4 apart)
+      --   types   #7dcfff  L* 79.7  vs  funcs   #1d98cd  L* 59.1   (20.6 apart)
+      -- So no new hue family enters the palette, and it matches both Tokyo
+      -- Nights, which use this exact value for properties.
+      --
+      -- Known and accepted: strings and fields are now two teals, dE2000 15.7.
+      -- That is the same order as the type/function pair above and separates the
+      -- same way -- on lightness, not hue.
+      --
       -- @tag.attribute links to @property, so JSX attributes follow.
-      hl["@variable.member"] = { fg = c.violet300 }
-      hl["@property"] = { fg = c.violet300 }
+      hl["@variable.member"] = { fg = palette.member }
+      hl["@property"] = { fg = palette.member }
+
+      -- React component names. The theme paints `@tag.tsx` / `@tag.javascript`
+      -- with yellow500, so every <Form>, <Fragment>, <RecurringHeader> was gold
+      -- -- the last significant yellow left in a TSX file. HTML elements are a
+      -- SEPARATE capture (`@tag.builtin.tsx`, already orange500), so components
+      -- now simply match them and every JSX tag reads as one thing. That is
+      -- what VSCode Tokyo Night does with `entity.name.tag`, and it adds no new
+      -- hue here.
+      hl["@tag.tsx"] = { fg = c.orange500 }
+      hl["@tag.javascript"] = { fg = c.orange500 }
 
       -- Module names, such as `main` in `package main` or `typing` in a Python
       -- import. The theme links `@module` -> Include -> PreProc -> red500, a
@@ -153,24 +169,29 @@ return {
       -- and the float's L* 5.2 sits INSIDE that band -- so it read darker than
       -- the editor on some wallpapers and lighter on others.
       --
-      -- Darker is not reachable: bg is already L* 5.15 and the darkest usable
-      -- step is -2.5 L*, below the perceptual threshold. `base03` (L* 15.94) is
-      -- the lowest value that clears the whole drift band, so the float now
-      -- separates the same way whatever is behind the terminal.
+      -- A raised `base03` panel (L* 15.94) was tried on 2026-08-07 and rejected
+      -- on looks -- it read as a lighter box pasted over the editor. Reverted to
+      -- `bg_float`, so the separation now comes entirely from the border and a
+      -- brighter foreground. Do not reach for a DARKER bg to compensate: bg is
+      -- already L* 5.15 and the darkest usable step is -2.5 L*, below the
+      -- perceptual threshold, and the editor itself drifts L* 4.1-12.9 with the
+      -- wallpaper (transparent = true), so no bg value separates reliably.
       --
-      -- Deliberately NOT applied to NormalFloat: SnacksPickerBorder and
+      -- Still deliberately NOT applied to NormalFloat: SnacksPickerBorder and
       -- SnacksPickerPreviewTitle read `c.bg_float`, and the picker body falls
-      -- back to NormalFloat, so a global change would repaint the picker. These
-      -- are reached only by doc floats, via winhighlight in config/keymaps.lua.
-      hl.LspDocFloat = { fg = c.base1, bg = c.base03 }
-      hl.LspDocBorder = { fg = palette.type, bg = c.base03 }
-      hl.LspDocTitle = { fg = palette.type, bg = c.base03, bold = true }
+      -- back to NormalFloat, so touching it would repaint the picker. These are
+      -- reached only by doc floats, via winhighlight in config/keymaps.lua.
+      -- fg is `base1` rather than the editor's `base0`, so doc text reads a step
+      -- brighter than the code behind it.
+      hl.LspDocFloat = { fg = c.base1, bg = c.bg_float }
+      hl.LspDocBorder = { fg = palette.type, bg = c.bg_float }
+      hl.LspDocTitle = { fg = palette.type, bg = c.bg_float, bold = true }
 
       -- blink.cmp's doc popup does not route through open_floating_preview, so
-      -- it takes the same surface directly. The completion MENU below keeps
-      -- `bg_float` on purpose -- only the docs panel changes.
-      hl.BlinkCmpDoc = { fg = c.base1, bg = c.base03 }
-      hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.base03 }
+      -- it takes the same surface directly. The completion MENU below is left
+      -- alone on purpose -- only the docs panel changes.
+      hl.BlinkCmpDoc = { fg = c.base1, bg = c.bg_float }
+      hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.bg_float }
 
       hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_float }
       hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_float }
