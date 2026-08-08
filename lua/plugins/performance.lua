@@ -155,7 +155,14 @@ return {
       -- The dirty check reads `b:gitsigns_status_dict` (zero-cost buffer var). The
       -- hunk count calls gitsigns.get_hunks() — only when the file is dirty and
       -- only on lualine's throttled 1000ms refresh, so it's not a hot path.
-      local green = palette.green or "#859900"
+      -- The THEME's green, not the syntax palette's. This marker means "added"
+      -- and has to stay green whatever the keyword colour is doing.
+      --
+      -- It briefly turned yellow on 2026-08-08: the colorscheme used `on_colors`
+      -- to retheme syntax, which mutates the shared ramp this line reads. That
+      -- override is gone (see the note atop solarized-osaka.lua), so the two are
+      -- decoupled at the source and this tracks the theme again.
+      local green = palette.green or "#849900"
       local function git_is_dirty()
         local gs = vim.b.gitsigns_status_dict
         if not gs then
