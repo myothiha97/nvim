@@ -1,6 +1,7 @@
 -- previously we used, the 300 value for performance case
 -- but 300 feels a bit slow and so i re-adjusted to 200 for more snappier feeling at - 09 June 2026
 local debounce_text_change = 200
+local debounce_text_change_ = function() end
 
 local lsp_hover_popup_opts = {
   border = "rounded",
@@ -199,12 +200,18 @@ return {
         flags = { debounce_text_changes = debounce_text_change },
       })
 
-      -- Neovim 0.12 added vim.lsp.document_color with its own internal LspAttach autocmd
-      -- that fires before any plugin-registered handler. Overriding the handler or clearing
-      -- colorProvider in LspAttach is too late — the module is already polling. Replacing
-      -- enable() here (before any client attaches) stops it from ever activating.
+      -- Neovim 0.12 enables vim.lsp.document_color by default. Its provider is created
+      -- from client.lua's post-attach hook, which only checks the capability's enable
+      -- marker -- it never routes through document_color.enable(), so stubbing that
+      -- function out did nothing. Calling the real enable(false) here (before any client
+      -- starts) clears the global marker, so no provider is ever created.
+      --
+      -- This also avoids an upstream 0.12.2 crash: the provider keeps per-client state
+      -- and re-requests documentColor on every buffer change, but a client that exits
+      -- right after attaching leaves a stale id behind, so document_color.lua:225
+      -- (`assert(get_client_by_id(id))`) throws on every keystroke.
       if vim.lsp.document_color then
-        vim.lsp.document_color.enable = function() end
+        vim.lsp.document_color.enable(false)
       end
 
       -- Disable semantic tokens globally: stops LSP from computing/sending token payloads.
