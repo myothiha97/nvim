@@ -2,6 +2,13 @@
 
 ## Status
 
+> **Superseded for current values — see item 5 and
+> `notes/syntax-palette-decisions.md`.** Everything in this Status section and in
+> the sections below it describes the palette as of **2026-07-22**, before the
+> 2026-08 rework moved the palette from colour-named slots to role-named ones.
+> It is kept as the historical record of *why* things were tried, not as a
+> statement of what is set today. The one live item is item 5.
+
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
 Every colour that separates cleanly looks worse than the collision does. The
@@ -166,9 +173,9 @@ strings and function names respectively.
 
 ## Remaining Work
 
-Items 1 and 3 are "slightly better" changes, which rule 1 says is never a reason
-on its own. Review at the 2026-09-20 checkpoint and most likely drop them.
-Items 2 and 4 are closed.
+Item 5 is the only live one. Items 1 and 3 are "slightly better" changes, which
+rule 1 says is never a reason on its own. Review at the 2026-09-20 checkpoint and
+most likely drop them. Items 2 and 4 are closed.
 
 ### 1. Neutral brackets in dense JSX
 
@@ -321,6 +328,43 @@ Knock-on checks before shipping any of these:
 - If base text goes up, the terracotta shortfall from the benchmark above gets
   *relatively* worse. Terracotta is already the lead candidate if the palette is
   reopened, so consider doing both in the same session or neither.
+
+### 5. Keyword: olive vs yellow — OPEN, deferred 2026-08-09
+
+**This is the only live item in this file.** Not a bug and not a regression.
+Deliberately parked: the value works, the *choice* between two working values is
+what is unresolved, and rule 1 says that is never worth a mid-freeze session.
+
+Current: `variants.keyword.olive` `#849900`. Runner-up: `variants.keyword.balanced`
+`#aea10c`, which was the selection from 2026-08-08 until 2026-08-09.
+
+| | olive `#849900` | yellow `#aea10c` |
+| --- | --- | --- |
+| L\* | 59.6 | 65.4 |
+| chroma C\* | 67.0 | 67.4 |
+| Lab hue | 111.0 | 97.9 |
+| contrast vs `#031219` | 5.92:1 | 7.16:1 |
+
+The trade, stated plainly: yellow is the better colour in ordinary files and the
+worse one in keyword-dense files, where it reads loud. Olive gives that up for
+1.24 of contrast, both still clear of the WCAG AA 4.5 floor.
+
+Three things to carry into the review so it is not re-derived:
+
+- **Chroma is not the lever.** The two candidates are 0.4 C\* apart, far under
+  the perceptual floor, so every bit of the difference is lightness and hue.
+  Dropping chroma to calm either one has already failed twice — `drab` at C\* 44
+  read "too fade", and the `subdued`/`hushed` ladder went the same way.
+- **This is the documented exception to rule 2.** Lightness normally returns no
+  signal here, but 5.8 L\* clears the ~5 floor, so between *these two* it is real.
+- **Olive sits on the git-added green.** `#849900` is dE2000 ≈ 0.2 from
+  solarized's `#859900`, which gitsigns and `diffAdded` use. Commit `bdb87f0`
+  had deliberately decoupled the lualine git marker from the keyword colour;
+  that separation is now gone visually. Known and accepted, not a defect.
+
+Decide at the 2026-09-20 checkpoint, in a real session, on real files in the
+languages actually used — Lua and Go are the keyword-dense cases that motivated
+the move, TSX is the sparse one where the yellow looked best.
 
 ## Notes
 

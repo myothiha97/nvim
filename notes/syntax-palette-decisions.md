@@ -34,13 +34,31 @@ measured, and rejected for a recorded reason.
    not the variable — coverage is.** Dimming the hex makes the good files worse
    to fix the bad ones. Move the role instead.
 
-## Keyword colour (2026-08-08)
+## Keyword colour (2026-08-08, reopened 2026-08-09 — still open)
 
-Landed on `#aea10c` (hue 98, L\* 65.4, C\* 67.4, 7.16:1) after four rejections:
+**Current value is `#849900` olive, and it is provisional.** The olive/yellow
+call is parked as a todo in `todos/syntax-palette-followups.md`; do not treat
+either value as settled and do not silently move it back.
+
+The 2026-08-09 reversal: the yellow is good in ordinary files and only reads
+*loud* where keywords cluster densely. That is rules 3 and 4 landing on the
+keyword role itself — a role on nearly every line cannot be the brightest thing
+on screen, and when a colour works in some files and not others the variable is
+coverage, not the value.
+
+The lever is lightness, not saturation. Chroma is 67.0 (olive) against 67.4
+(yellow), which is far under the perceptual floor, so the entire difference is
+L\* 59.6 vs 65.4 plus 13 degrees of hue. Contrast falls 7.16:1 → 5.92:1, both
+clear of the WCAG AA 4.5 floor. This is the one place rule 2 does not apply:
+between these two candidates lightness *is* the axis carrying the difference,
+because a 5.8 L\* gap clears the ~5 floor that rule 2 warns about.
+
+The original 2026-08-08 pass landed on `#aea10c` (hue 98, L\* 65.4, C\* 67.4,
+7.16:1) after four rejections:
 
 | value | hue | L\* | C\* | verdict |
 | --- | --- | --- | --- | --- |
-| `#849900` | 111 | 59.6 | 67 | "gold/yellowish", disliked |
+| `#849900` | 111 | 59.6 | 67 | "gold/yellowish", disliked — **reinstated 2026-08-09** |
 | `#8c9644` | 111 | 59.7 | 44 | "too fade" |
 | `#5da100` | 125 | 59.7 | 75 | "dracula green, ugly" |
 | `#b99004` | 86 | 61.9 | 66 | excluded by hand — the theme's own gold |
@@ -103,7 +121,13 @@ pair to 6.5.
 The overrides are commented out in `solarized-osaka.lua`, so `@variable.member`
 uses the theme's `cyan500` (identical to `String`) and `@property` uses
 `blue500` (identical to `Function`). Both are exact duplicates at dE2000 0.0.
-That is deliberate as of 2026-08-08; re-enabling is a two-line uncomment.
+That is deliberate as of 2026-08-09; re-enabling is a two-line uncomment.
+
+`@variable.member` briefly carried the rose below and it was removed on
+2026-08-09: rose won on measurement but had never been judged on looks the way
+the other roles were, and it did not hold up in large files. Living with the
+key-vs-value collision was preferred to keeping it. Rule 4 again — the value was
+not the problem, the coverage was.
 
 Candidates measured on 2026-08-07/08, if it is ever reopened:
 

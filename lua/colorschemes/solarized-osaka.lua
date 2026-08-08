@@ -165,38 +165,25 @@ return {
       -- See `variants.type` in the palette file for the measurements.
       hl.Type = { fg = palette.type }
 
-      -- Fields and properties were each an EXACT duplicate of another role
-      -- (dE2000 0.0), verified by walking treesitter captures over real Go/TSX/
-      -- Python files:
-      --   @variable.member (r.Width, row.count, self.width) == cyan500 == String
-      --   @property        (struct literal keys, JSX attrs)  == blue500 == Function
-      -- One colour for both. Unlike Type, this one must NOT be lifted above the
-      -- accent band: properties are on nearly every line, so a bright value
-      -- drains everything around it. It instead sits level with string/keyword/
-      -- function (L* ~60, chroma ~34, contrast ~6.0) and separates purely on
-      -- hue -- dE2000 42.4 from strings, 40.4 from functions. Two brighter
-      -- candidates were tried and rejected first; the reasoning, the rules that
-      -- came out of it, and the saved alternatives are in `variants.member` in
-      -- the palette file. Read that before changing this.
+      -- Fields and properties: BOTH are deliberately left at the theme default
+      -- as of 2026-08-09, so both are exact duplicates of another role -- not
+      -- close, identical (dE2000 0.0), verified by walking treesitter captures
+      -- over real Go/TSX/Python files:
+      --   @variable.member (r.Width, row.count, self.width) -> cyan500 == String
+      --   @property        (struct literal keys, JSX attrs)  -> blue500 == Function
+      -- @tag.attribute links to @property, so JSX attributes follow Function.
       --
-      -- @tag.attribute links to @property, so JSX attributes follow.
+      -- What that costs, knowingly: a TS type literal renders `mode: 'selectable'`
+      -- with the key and the string in one colour, and every Lua `key = "value"`
+      -- line does the same. @property duplicating Function is the harmless half --
+      -- those two rarely touch on the same line.
       --
-      -- Without these, both groups fall back to theme values that are exact
-      -- duplicates of other roles -- not close, identical:
-      --   @variable.member -> cyan500 #29a298, which IS String (dE2000 0.0)
-      --   @property        -> blue500 #1d98cd, which IS Function
-      -- A TS type literal then renders `mode: 'selectable'` with the key and the
-      -- string in one colour, and every Lua `key = "value"` line does the same.
-      --
-      -- Only @variable.member is overridden. @property is deliberately LEFT at
-      -- the theme default (blue500 #1d98cd, i.e. the Function colour), and
-      -- @tag.attribute links to it, so JSX attributes follow Function too.
-      --
-      -- The split matters because the two defaults fail differently:
-      -- @variable.member duplicating String makes `mode: 'selectable'`
-      -- unreadable as key-vs-value, whereas @property duplicating Function is
-      -- harmless -- the two rarely touch on the same line.
-      -- NOTE: temporary hot fix by myself
+      -- @variable.member DID carry an override (rose, see `variants.member` in the
+      -- palette file) and it was removed: rose won on measurement but not on looks
+      -- in large files, and the collision was preferred to a colour that had never
+      -- been judged the way the other roles were. Re-enabling is the one-line
+      -- uncomment below; read `variants.member` first, its scores predate the
+      -- keyword move and anything close to keyword needs re-measuring.
       -- hl["@variable.member"] = { fg = palette.member }
 
       -- Module names, such as `main` in `package main` or `typing` in a Python

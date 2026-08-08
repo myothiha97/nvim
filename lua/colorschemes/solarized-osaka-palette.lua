@@ -23,7 +23,23 @@
 local variants = {
   -- Keyword, Statement, @keyword, @keyword.operator, @label.
   keyword = {
-    balanced = "#aea10c", -- SELECTED. hue 98, L* 65.4, C* 67.4, 7.16:1
+    -- SELECTED 2026-08-09, but NOT settled -- the olive/yellow call is an open
+    -- todo (todos/syntax-palette-followups.md). Rejected on 2026-08-08 as
+    -- "gold/yellowish", then reinstated for the opposite reason: it is the
+    -- calmer of the two in KEYWORD-DENSE code. The yellow is fine in ordinary
+    -- files and only reads loud where keywords cluster, which is rule 3
+    -- (frequency vs brightness) and rule 4 (coverage is the variable) applied
+    -- to the keyword role itself.
+    --
+    -- The two differ on lightness, not saturation: chroma is 67.0 vs 67.4,
+    -- which is far under the perceptual floor, so "less intense" here means
+    -- L* 59.6 against 65.4. Do not try to calm either one by dropping chroma --
+    -- `drab` and the subdued/hushed ladder below are that experiment failing.
+    olive = "#849900", -- hue 111, L* 59.6, C* 67.0, 5.92:1
+    -- Runner-up, and the selection from 2026-08-08 to 2026-08-09. Higher
+    -- contrast (clears WCAG AA with more room), and it is the only hue that
+    -- reads as actual yellow -- below ~L* 62 yellow turns khaki.
+    balanced = "#aea10c", -- hue 98, L* 65.4, C* 67.4, 7.16:1
     darker = "#a3970b", -- hue 98, L* 61.6
     brighter = "#baac0d", -- hue 98, L* 69.5
     amber = "#b59a00", -- hue 92, warmer
@@ -31,8 +47,7 @@ local variants = {
     subdued = "#aea134", -- hue 98, C* 56
     hushed = "#aea042", -- hue 98, C* 50 (C* 35 is the muddiness floor)
     gold = "#b99004", -- the theme's own yellow500; ruled out by hand
-    -- Rejected 2026-08-08, in this order.
-    olive = "#849900", -- hue 111, C* 67 -- "gold/yellowish"
+    -- Rejected 2026-08-08 alongside olive. Unlike olive these were not revisited.
     drab = "#8c9644", -- hue 111, C* 44 -- "too fade"
     verdant = "#5da100", -- hue 125, C* 75 -- "dracula green"
     -- Older greens, all rejected on looks as cool/vivid rather than warm.
@@ -117,31 +132,27 @@ local variants = {
   },
 
   -- Fields and properties (@variable.member, @property, and @tag.attribute by
-  -- link). Must NOT be lifted above the accent band: properties are on nearly
-  -- every line, so a bright value drains everything around it. The selection
-  -- sits level with String (60.4), keyword (65.4) and Function (59.1) and
-  -- separates on hue alone.
+  -- link).
+  --
+  -- NOTHING IN THIS TABLE IS APPLIED. The `hl["@variable.member"]` line in
+  -- solarized-osaka.lua is commented out as of 2026-08-09, so member falls back
+  -- to the theme's cyan500 and is an exact duplicate of String (dE2000 0.0).
+  -- The values below are kept for the day this reopens; re-enabling is a
+  -- one-line uncomment there.
+  --
+  -- Why it was turned off: rose was only ever a measurement winner, never judged
+  -- on looks, and it did not hold up in HUGE files -- exactly the coverage
+  -- problem rule 4 describes. Living with the String collision was preferred.
+  --
+  -- If it reopens, the constraints are unchanged: clear String, and stay IN the
+  -- accent band (L* ~60), because these symbols appear on nearly every line and
+  -- a bright value drains its neighbours. Scores below were measured against the
+  -- palette of 2026-08-09, when keyword was still L* 65.4 -- it has since moved
+  -- to 59.6, so re-measure anything that was close to keyword.
   member = {
-    -- todo: revisit this colour. It is TEMPORARY, chosen to unblock a specific
-    -- problem rather than because it is the right rose.
-    --
-    -- The problem it solves: the theme points @variable.member and String at the
-    -- SAME value (cyan500), so key and value render identically -- a TS type
-    -- declaration shows `mode: 'selectable'` in one colour, and every Lua
-    -- `key = "value"` line does the same. Any distinct hue fixes that, and this
-    -- one measured best, so it was taken to move on. It has never been judged on
-    -- looks the way the other roles were, and it was picked twice by elimination
-    -- (`iris` was tried and rejected, and rose itself was ruled out by hand once
-    -- before being reinstated).
-    --
-    -- When revisiting: the constraint is only that it must clear String, and it
-    -- must stay IN the accent band (L* ~60) because these symbols appear on
-    -- nearly every line. The alternatives below are measured against the palette
-    -- as of 2026-08-09; re-measure if any other role has moved since.
-    --
     -- hue 330, L* 60.1, C* 33.6, 6.02:1, worst neighbour 21.4 -- the best score
     -- of anything measured for this slot, level with String (60.4) and Function
-    -- (59.1) rather than above them.
+    -- (59.1) rather than above them. Rejected on looks 2026-08-09.
     rose = "#b67faf",
     -- hue 295, L* 62.0, C* 48.0, worst 20.9. Best option outside the rose
     -- family; tried 2026-08-09 and rejected on looks.
@@ -160,11 +171,15 @@ local variants = {
 
 -- The live selections. Changing a colour is a one-word edit here.
 return {
-  -- keyword = variants.keyword.balanced,
-  -- NOTE: temporary hot fix by myself
+  -- Provisional, 2026-08-09. `balanced` (yellow) is the runner-up and the two
+  -- are still an open call -- see todos/syntax-palette-followups.md. Not a bug,
+  -- do not "fix" it back.
   keyword = variants.keyword.olive,
   punctuation = variants.punctuation.terracotta,
   func = variants.func.azure,
   type = variants.type.tokyonight,
+  -- Currently UNREAD: solarized-osaka.lua has the `@variable.member` override
+  -- commented out, so member uses the theme's cyan500. Kept wired up so the
+  -- override is a one-line uncomment if it reopens.
   member = variants.member.rose,
 }
