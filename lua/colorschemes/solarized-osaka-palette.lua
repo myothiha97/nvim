@@ -1,214 +1,168 @@
--- Previously tested colors are kept as named choices for quick switching.
+-- Colour selections for the solarized-osaka theme.
+--
+-- Every value ever tried is kept here by name, so changing a colour is a
+-- one-word edit to the `return` block at the bottom. Keys are named for the
+-- ROLE they fill, never for a theme slot -- a role can move to any hue, and
+-- naming it after a colour is how `green` ended up holding a yellow.
+--
+-- These feed SYNTAX GROUPS ONLY. solarized-osaka.lua deliberately has no
+-- `on_colors`, so nothing here can reach diagnostics, git signs, lualine or any
+-- other UI. See the note at the top of that file before changing the approach.
+--
+-- Reasoning, measurements and every rejected candidate:
+--   notes/syntax-palette-decisions.md
+-- Read it before changing a value. Most obvious ideas have already been tried,
+-- measured, and rejected for a recorded reason. Four rules in short:
+--   1. Two roles must not share a hue band; splitting by lightness alone fails.
+--   2. Tune hue and chroma -- lightness-only moves land under the perceptual floor.
+--   3. Frequency is inversely related to brightness.
+--   4. If a colour looks right in some files and wrong in others, the variable
+--      is coverage, not value.
+-- Measure against Ghostty's #031219, not nvim's #001419 (transparent = true).
+
 local variants = {
-  yellow = {
-    -- Lab L* 61.6, C* 64.2, hue 98.0. The 2026-07-21 selection.
-    darker = "#a3970b",
-    -- Lab L* 65.4, C* 67.4, hue 97.9. THE SELECTION — the exact midpoint of
-    -- `darker` and `brighter`, and the best-contrasted accent in the palette
-    -- at 7.27:1.
-    --
-    -- It was suspected of being too bright and benchmarked against
-    -- tokyonight-night and catppuccin-mocha on 2026-07-22. It is not. Measured
-    -- perceived lightness (L* with the Fairchild-Pirrotta Helmholtz-Kohlrausch
-    -- correction, which flatters saturated colours):
-    --
-    --   this yellow        L* 65.4  C* 67.4  looks 70.8
-    --   tokyonight yellow  L* 74.5  C* 44.0  looks 77.3
-    --   catppuccin yellow  L* 90.6  C* 27.9  looks 91.2
-    --
-    -- It is the dimmest of the three by a wide margin. What is unusual is
-    -- chroma, not brightness: 67.4 against their 44.0 and 27.9. On this
-    -- near-black background that saturation reads as glare. Do not "fix" it by
-    -- lowering lightness — that only makes an already-dim palette dimmer.
-    balanced = "#aea10c",
-    -- `balanced` with chroma pulled to 56.3, holding its lightness and hue, so
-    -- contrast is unchanged (7.13:1). Tried on 2026-07-22 and judged not
-    -- meaningfully different from `balanced` in practice — an 11-point chroma
-    -- drop is only dE2000 2.9, because the metric divides chroma differences by
-    -- (1 + 0.045*C), a divisor near 4 up here. If a calmer yellow is ever
-    -- wanted, this is the correct axis but it needs a bigger step than this.
-    subdued = "#aea134",
-    -- Same again at C* 50.0 — the size of step that would actually register.
-    -- Do not go far below: the muddiness floor is about C* 35 against the
-    -- hsl(192,100%,5%) background.
-    hushed = "#aea042",
-    -- Lab L* 69.5, C* 70.8, hue 97.9. Same again, further. REJECTED, too hot.
-    brighter = "#baac0d",
-    -- Lab L* 61.9, C* 65.9, hue 86. REJECTED: this is essentially the gold the
-    -- theme ships (hue 84), which reads too orange. Kept only to document that
-    -- the collision must not be solved by moving yellow back toward gold.
-    gold = "#b99004",
+  -- Keyword, Statement, @keyword, @keyword.operator, @label.
+  keyword = {
+    balanced = "#aea10c", -- SELECTED. hue 98, L* 65.4, C* 67.4, 7.16:1
+    darker = "#a3970b", -- hue 98, L* 61.6
+    brighter = "#baac0d", -- hue 98, L* 69.5
+    amber = "#b59a00", -- hue 92, warmer
+    citron = "#9ea100", -- hue 104, cooler
+    subdued = "#aea134", -- hue 98, C* 56
+    hushed = "#aea042", -- hue 98, C* 50 (C* 35 is the muddiness floor)
+    gold = "#b99004", -- the theme's own yellow500; ruled out by hand
+    -- Rejected 2026-08-08, in this order.
+    olive = "#849900", -- hue 111, C* 67 -- "gold/yellowish"
+    drab = "#8c9644", -- hue 111, C* 44 -- "too fade"
+    verdant = "#5da100", -- hue 125, C* 75 -- "dracula green"
+    -- Older greens, all rejected on looks as cool/vivid rather than warm.
+    sage = "#66985e",
+    moss = "#629959",
+    fern = "#5d9a53",
+    clover = "#599e49",
+    juniper = "#569f41",
+    leaf = "#4ea339",
+    grass = "#56a325",
   },
-  -- KNOWN AND ACCEPTED: the selected green (`solarized`) and yellow
-  -- (`balanced`) collide. They sit 12.7 degrees apart in hue at near-identical
-  -- chroma — dE2000 9.9, which is the same colour on small glyphs. It shows
-  -- wherever a keyword touches a type: every Go and Python function signature,
-  -- and every JSX tag.
-  --
-  -- This was measured, every alternative below was tried on real files, and the
-  -- olive was kept anyway on 2026-07-22 because nothing that separates cleanly
-  -- looks as good. That is a deliberate trade, not an oversight. Do not "fix"
-  -- it by swapping in one of the greens below without asking first.
-  --
-  -- Why nothing here works: green reads on HUE, not chroma. Below ~122 it reads
-  -- warm olive, above ~130 it reads vivid kelly green, and dropping chroma does
-  -- not undo that — `clover` at C* 53.8 still read too bright while `solarized`
-  -- at C* 66.9 reads calm. Every green that clears yellow sits above 130, so
-  -- "warm and separated" does not exist. Yellow cannot move either: hue down is
-  -- the theme's stock gold (too orange), hue up is green, and at hue 98 the
-  -- pair does not clear dE2000 20 until L* 85, a near-fluorescent lemon.
-  green = {
-    -- The theme default, and the selection. Warm, and the calmest-reading of
-    -- every option here despite the highest chroma. Collides with yellow,
-    -- knowingly.
-    --
-    -- This is `#849900`, not Solarized's published `#859900`: the theme builds
-    -- its palette through `hsl(68, 100, 30)`, which rounds one step lower in
-    -- red. Matching the theme exactly keeps this override a true no-op, so
-    -- nothing shifts by selecting it.
-    solarized = "#849900",
-    -- All of the below clear yellow (dE2000 ~20-22) and were all rejected on
-    -- looks: at hue 130+ they read cool and vivid rather than warm. Ordered
-    -- calmest to strongest by chroma; all are one-word swaps.
-    sage = "#66985e", -- C* 38.2, matches blue
-    moss = "#629959", -- C* 41.9, matches terracotta — the closest call
-    fern = "#5d9a53", -- C* 46.3
-    clover = "#599e49", -- C* 53.8
-    juniper = "#569f41", -- C* 58.2
-    leaf = "#4ea339", -- C* 64.9
-    grass = "#56a325", -- C* 70.3 — the first attempt
-  },
-  red = {
+
+  -- Special, Debug, @punctuation.bracket, @variable.parameter,
+  -- @variable.builtin, JSX tags and delimiters, @keyword.import.
+  punctuation = {
+    terracotta = "#b55f4a", -- SELECTED. hsl(12,42,50), L* 50.1, 4.26:1
+    -- Measures better on both counts: 7.19:1 (terracotta is under the WCAG AA
+    -- floor) and dE2000 21.3 from the error red against terracotta's 10.1, the
+    -- tightest pair in the palette. Untried in place.
+    tokyonight = "#f7768e",
+    muted_contrast = "#c75b6b",
+    crimson = "#bf2c47",
+    magenta = "#b02669",
     vivid = "#e03857",
     bright = "#ab3a4f",
     lighter = "#b83e55",
-    bright_red = "#b83549",
-    lower_contrast = "#ad4454",
-    muted_contrast = "#c75b6b",
     darker = "#993141",
-    magenta = "#b02669",
-    crimson = "#bf2c47",
-    red300 = "#F6524F",
-    red700 = "#B7211F",
-    -- hsl(12, 42, 50). Less saturated than both stock orange (#c94c16) and
-    -- muted_contrast, with hue pulled back out of the pink range.
-    terracotta = "#b55f4a",
+    red300 = "#f6524f",
+    red700 = "#b7211f",
   },
-  -- Type colour. Moved off the theme's `Type = yellow500` on 2026-08-07 because
-  -- every type in Go/TS/Python read as gold. This ALSO resolves the green/yellow
-  -- collision documented above at its source: a keyword only ever touched yellow
-  -- through a type annotation or a JSX tag, so with types on cyan the pair stops
-  -- meeting in real code. That is the "only untried direction" named in
-  -- todos/syntax-palette-followups.md.
-  --
-  -- All four were measured against the live palette on the real background
-  -- (Ghostty #031219 at opacity 0.9, NOT nvim's #001419 -- `transparent = true`
-  -- leaves Normal bg = NONE, so the terminal's colour is what shows).
-  type = {
-    -- THE SELECTION. L* 79.7, C* 33.5, hue 249, contrast 11.08:1.
-    -- Worst neighbour is Function/@property #1d98cd at dE2000 16.2, but the two
-    -- sit 20.6 L* apart on the SAME hue (249 vs 250). That is the axis that
-    -- carries when hue and chroma are flat -- the same lesson the green/yellow
-    -- note above records. Chroma 33.5 lands between string-cyan (34.7) and
-    -- function-blue (38.5), so it adds no glare to an already high-chroma palette.
-    --
-    -- NOTE: this is NOT the type colour in either Tokyo Night. It is `Keyword` in
-    -- tokyonight.nvim and `variable.other.property` in the VSCode theme. Their
-    -- real type colours are saved below and both measure TIGHTER here, because
-    -- this background is darker and cyan-tinted rather than navy.
-    tokyonight = "#7dcfff",
-    -- tokyonight.nvim's actual `Type` (its blue1). Rejected: 15.2 from function,
-    -- 16.4 from string -- tighter than the selection on both counts.
-    nvim_type = "#2ac3de",
-    -- VSCode Tokyo Night's `support.type` / `support.class` (builtin types).
-    -- Rejected: 11.9 from #7dcfff and 15.8 from string cyan.
-    vscode_support_type = "#0db9d7",
-    -- VSCode Tokyo Night's `entity.name.type` -- there, user-defined types are
-    -- just plain foreground. Cleanest against everything (worst 18.9), but reads
-    -- as a neutral rather than an accent. The fallback if the selection's
-    -- same-hue split from function blue turns out not to read.
-    vscode_entity_type = "#c0caf5",
-  },
-  -- Fields and properties (@variable.member / @property, and @tag.attribute by
-  -- link). Both used to be exact duplicates of other roles -- fields shared
-  -- cyan500 with strings, properties shared blue500 with function names.
-  -- Three rules were learned the hard way here on 2026-08-07, in this order.
-  -- Read them before touching this, because two plausible colours failed:
-  --
-  --   1. NOT the cyan/teal band (hue 170-215). `tokyonight` below is what BOTH
-  --      Tokyo Nights use for properties, and it failed badly: at hue 182 it is
-  --      5 degrees from string cyan (187), so the pair separated on LIGHTNESS
-  --      alone. In a `key = "value"` file -- every Lua config table, every JSX
-  --      attribute -- that repeats on every line and the two stop being
-  --      tellable apart. Same geometry as the green/yellow collision above.
-  --
-  --   2. FREQUENCY IS INVERSELY RELATED TO BRIGHTNESS. This is the general
-  --      lesson and the one worth keeping. `type` can sit at L* 79.7 because
-  --      types are rare landmarks -- a declaration or an annotation. Properties
-  --      are on nearly every line, so the same lightness builds a wall of
-  --      bright that swallows everything around it. At L* 80.8 the teal was
-  --      measurably the brightest thing on screen and drained both function
-  --      blue (59.1) and string cyan (60.4).
-  --
-  --   3. So put properties IN the accent band, not above it. String 60.4,
-  --      keyword 59.6 and function 59.1 already cluster there at chroma 34-38
-  --      and contrast 5.8-6.1. Match all three and let HUE do the separating.
-  --
-  -- Hue is boxed in: 170-215 is strings/@variable, 230-270 is type/function,
-  -- 97-111 is @module/keyword, 40 is terracotta. That leaves 300-345.
-  member = {
-    -- THE SELECTION. L* 60.1, C* 33.7, hue 330, 6.02:1 -- a peer of the accent
-    -- band on every axis except hue:
-    --   string  #29a298  L* 60.4  C* 34.7  ctr 6.08
-    --   THIS    #b67faf  L* 60.1  C* 33.7  ctr 6.02
-    --   keyword #849900  L* 59.6  C* 67.0  ctr 5.92
-    --   function#1d98cd  L* 59.1  C* 38.5  ctr 5.82
-    -- Separation is dE2000 42.4 from strings and 40.4 from functions, and its
-    -- nearest neighbour anywhere is 21.4 (@variable). Properties do not appear
-    -- in the palette's five tightest pairs at all. Rose-mauve rather than
-    -- blue-purple -- 37 degrees round from the rejected `violet`.
-    rose = "#b67faf",
-    -- Same idea one step warmer / pinker (hue 340) and one step cooler
-    -- (hue 320). Both hold L* 60 and C* 34, so they are drop-in swaps.
-    rose_warm = "#be7ca6",
-    rose_cool = "#ac82b7",
-    -- REJECTED 2026-08-07, all three, in this order. Kept so the same ground
-    -- is not covered twice:
-    --   the theme's own violet300 -- too saturated a blue-purple (C* 42.4,
-    --   hue 293), reads as a near neighbour of the blue family;
-    violet = "#9b9fec",
-    --   a dusty mauve -- right hue family, but still L* 68.7, i.e. above both
-    --   string and function, so it kept breaking rule 2;
-    mauve = "#c49ac6",
-    --   and what both Tokyo Nights use, which breaks rules 1 and 2 at once.
-    tokyonight = "#73daca",
-  },
-  blue = {
+
+  -- Function, Identifier, @markup.link.
+  func = {
+    azure = "#1d98cd", -- SELECTED. hsl(198,75,46), L* 59.1, C* 38.5
+    vivid = "#359ee9", -- hsl(205,80,56)
+    deeper = "#2797e7", -- hsl(205,80,53)
+    brighter = "#268bd2", -- the theme's own blue500
     blue300 = "#49aef5",
-    balanced = "#4488ab",
-    brighter = "#268bd2",
-    -- hsl(205, 80, 56). Saturated like blue300, but held level with
-    -- green/cyan/yellow in perceived lightness so blue stays in the accent band.
-    vivid = "#359ee9",
-    -- hsl(205, 80, 53). Same hue and saturation as vivid, three points darker so
-    -- blue sits level with cyan/green instead of leading the accent band.
-    deeper = "#2797e7",
-    -- hsl(198, 75, 46). Leans toward cyan and drops chroma about a fifth versus
-    -- deeper, staying clearly blue and level with green in the accent band.
-    azure = "#1d98cd",
+    balanced = "#4488ab", -- C* 27.2, reads muddy on this background
+  },
+
+  -- Type, @type.builtin, @constructor.
+  --
+  -- Hard to place for two reasons. TSX tags every imported PascalCase name as
+  -- @type -- React components included -- so it is the densest capture there and
+  -- genuinely rare in Go and Python. And the blue band is full: String/member
+  -- cyan sits at hue 187 and Function at 250, leaving only the middle.
+  type = {
+    -- hue 220, L* 82.0, C* 43.6, 11.79:1. The only rung in the blue band that
+    -- clears dE 20 against Function (20.7) -- everything at L* 74-78 scores
+    -- 13-18. Rejected on sight as too bright: it buys that separation purely
+    -- with lightness, and lightness is what made it glare in dense TSX.
+    sky = "#0edfff",
+    -- hue 225, L* 76.0, C* 34.0, 9.96:1. Tried 2026-08-09 and rejected after a
+    -- pass over Go, Lua, TS and TSX. It scores well in isolation, but hue 225
+    -- sits BETWEEN String (187) and Function (250), so it reads as ambiguous
+    -- between the two rather than distinct from either -- its String separation
+    -- falls to 18.8 where #7dcfff holds 25.5. A worst-neighbour score cannot see
+    -- that; only reading real files can.
+    sky_calm = "#56cae7",
+    sky_soft = "#49ddff", -- hue 225, C* 39.6, vs Function 19.8
+    sky_softer = "#61dbff", -- hue 230, C* 36.5, vs Function 19.0
+    sky_dim = "#39cce9", -- hue 222, L* 76, C* 38 -- dE 4.6 from `sky`, borderline
+    -- THE SELECTION. hue 249, L* 79.7, C* 33.5, 11.08:1. Restored 2026-08-09
+    -- after three replacements were tried and rejected on real files.
+    --
+    -- It shares hue 249 with Function and splits on lightness alone (dE 16.2),
+    -- which every replacement was chosen to fix -- and each one cost more
+    -- elsewhere than it gained there. What actually carries this pair is the
+    -- 20.6 L* gap, the largest of any candidate; it is also 25.5 from String,
+    -- where the closest rival managed 18.8.
+    tokyonight = "#7dcfff",
+    -- Both rejected 2026-08-09. `vscode_entity` read "flat": de-accenting via
+    -- chroma failed here exactly as it failed on the keyword ladder, so treat
+    -- chroma as presence in this palette, never as the calming lever.
+    -- `periwinkle` measured best of everything tried (worst 20.9, and it
+    -- dissolved the Type/Function pair entirely) and still lost on looks.
+    vscode_entity = "#c0caf5", -- hue 284, C* 22.9
+    periwinkle = "#a7b1fe", -- hue 290, C* 42.0
+    nvim_type = "#2ac3de", -- rejected: 15.2 from func, 16.4 from string
+    vscode_support = "#0db9d7", -- rejected: 12.7 from func
+  },
+
+  -- Fields and properties (@variable.member, @property, and @tag.attribute by
+  -- link). Must NOT be lifted above the accent band: properties are on nearly
+  -- every line, so a bright value drains everything around it. The selection
+  -- sits level with String (60.4), keyword (65.4) and Function (59.1) and
+  -- separates on hue alone.
+  member = {
+    -- todo: revisit this colour. It is TEMPORARY, chosen to unblock a specific
+    -- problem rather than because it is the right rose.
+    --
+    -- The problem it solves: the theme points @variable.member and String at the
+    -- SAME value (cyan500), so key and value render identically -- a TS type
+    -- declaration shows `mode: 'selectable'` in one colour, and every Lua
+    -- `key = "value"` line does the same. Any distinct hue fixes that, and this
+    -- one measured best, so it was taken to move on. It has never been judged on
+    -- looks the way the other roles were, and it was picked twice by elimination
+    -- (`iris` was tried and rejected, and rose itself was ruled out by hand once
+    -- before being reinstated).
+    --
+    -- When revisiting: the constraint is only that it must clear String, and it
+    -- must stay IN the accent band (L* ~60) because these symbols appear on
+    -- nearly every line. The alternatives below are measured against the palette
+    -- as of 2026-08-09; re-measure if any other role has moved since.
+    --
+    -- hue 330, L* 60.1, C* 33.6, 6.02:1, worst neighbour 21.4 -- the best score
+    -- of anything measured for this slot, level with String (60.4) and Function
+    -- (59.1) rather than above them.
+    rose = "#b67faf",
+    -- hue 295, L* 62.0, C* 48.0, worst 20.9. Best option outside the rose
+    -- family; tried 2026-08-09 and rejected on looks.
+    iris = "#8d8de3",
+    purple = "#a17bcc", -- hue 310, L* 58, worst 20.7 -- one step further round
+    rose_warm = "#be7ca6", -- hue 340
+    rose_cool = "#ac82b7", -- hue 320
+    mauve = "#c49ac6", -- rejected: L* 68.7, above String and Function
+    violet = "#9b9fec", -- rejected: L* 67.9, also above the accent band
+    tokyonight = "#73daca", -- rejected: 5 degrees from String cyan, dE 15.7
+    -- Non-purple families measured and rejected on collisions: green-teal hits
+    -- keyword at hue 135 (20.8) and String from 150 on (15.9 falling to 10.6);
+    -- tan hits punct/tag and keyword from both sides (15.5-17.9).
   },
 }
 
--- Change only these selections to try another saved color.
+-- The live selections. Changing a colour is a one-word edit here.
 return {
-  yellow = variants.yellow.gold,
-  green = variants.green.solarized,
-  red = variants.red.terracotta,
-  blue = variants.blue.azure,
+  keyword = variants.keyword.balanced,
+  punctuation = variants.punctuation.terracotta,
+  func = variants.func.azure,
   type = variants.type.tokyonight,
   member = variants.member.rose,
 }
-
--- Theme-native red alternative kept from earlier testing:
--- c.red = c.red300
--- c.red500 = c.red300
