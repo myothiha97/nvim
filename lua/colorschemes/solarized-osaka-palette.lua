@@ -160,7 +160,9 @@ local variants = {
 
 -- The live selections. Changing a colour is a one-word edit here.
 return {
-  keyword = variants.keyword.balanced,
+  -- keyword = variants.keyword.balanced,
+  -- NOTE: temporary hot fix by myself
+  keyword = variants.keyword.olive,
   punctuation = variants.punctuation.terracotta,
   func = variants.func.azure,
   type = variants.type.tokyonight,

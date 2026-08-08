@@ -70,7 +70,15 @@ local function style_doc_float(win)
   -- wrapping float it runs FIRST, so a bare-name check would see that entry and
   -- skip the surface entirely.
   if not wh:find("Normal:LspDocFloat", 1, true) then
+    -- The last two entries remap TREESITTER capture groups, which winhighlight
+    -- handles the same as any other group. That is what keeps the inline-code
+    -- restyle scoped to doc floats: @markup.raw.markdown_inline is also every
+    -- inline span in a real .md file, and those keep the theme's own colours.
+    -- RenderMarkdownCodeInline is listed defensively -- render-markdown attaches
+    -- to these floats (their filetype is markdown) and paints inline code itself
+    -- on some versions; the entry is a no-op when it does not.
     local add = "Normal:LspDocFloat,NormalFloat:LspDocFloat,FloatBorder:LspDocBorder,FloatTitle:LspDocTitle"
+      .. ",@markup.raw.markdown_inline:LspDocInlineCode,RenderMarkdownCodeInline:LspDocInlineCode"
     vim.wo[win].winhighlight = (wh ~= "" and wh .. "," or "") .. add
   end
 end

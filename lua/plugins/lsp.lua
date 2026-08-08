@@ -1,8 +1,6 @@
 -- previously we used, the 300 value for performance case
 -- but 300 feels a bit slow and so i re-adjusted to 200 for more snappier feeling at - 09 June 2026
 local debounce_text_change = 200
-local debounce_text_change_ = function() end
-
 local lsp_hover_popup_opts = {
   border = "rounded",
   max_width = 65,

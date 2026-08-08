@@ -165,7 +165,6 @@ return {
       -- See `variants.type` in the palette file for the measurements.
       hl.Type = { fg = palette.type }
 
-
       -- Fields and properties were each an EXACT duplicate of another role
       -- (dE2000 0.0), verified by walking treesitter captures over real Go/TSX/
       -- Python files:
@@ -197,7 +196,8 @@ return {
       -- @variable.member duplicating String makes `mode: 'selectable'`
       -- unreadable as key-vs-value, whereas @property duplicating Function is
       -- harmless -- the two rarely touch on the same line.
-      hl["@variable.member"] = { fg = palette.member }
+      -- NOTE: temporary hot fix by myself
+      -- hl["@variable.member"] = { fg = palette.member }
 
       -- Module names, such as `main` in `package main` or `typing` in a Python
       -- import. The theme links `@module` -> Include -> PreProc -> red500, a
@@ -300,6 +300,22 @@ return {
       hl.LspDocFloat = { fg = c.base1, bg = c.bg_float }
       hl.LspDocBorder = { fg = c.yellow700, bg = c.bg_float }
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
+
+      -- Inline code spans inside a hover doc -- the `"nil"`, `"number"` chips in
+      -- a Lua signature. The theme paints @markup.raw.markdown_inline as yellow
+      -- on a dark-green fill (#b28500 on #2c3300), which reads as a row of amber
+      -- boxes in a float that has no other background anywhere.
+      --
+      -- Same colour CodeCompanion uses for the same job (see its
+      -- `CodeCompanionInlineCode`, lua/plugins/codecompanion.lua), so inline code
+      -- reads identically whether it comes from the chat or from an LSP doc.
+      -- `bg = "NONE"` matches that too: the chip becomes coloured text rather
+      -- than a filled box.
+      --
+      -- Scoped via winhighlight in config/keymaps.lua rather than set globally,
+      -- because @markup.raw.markdown_inline is also every inline span in a real
+      -- .md file, and markdown deliberately keeps the theme's own colours.
+      hl.LspDocInlineCode = { fg = "#8ab4d8", bg = "NONE" }
 
       -- blink.cmp's doc popup does not route through open_floating_preview, so
       -- it takes the same surface directly. The completion MENU below is left
