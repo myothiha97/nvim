@@ -254,7 +254,11 @@ return {
   -- green between the laptop panel and the external monitor where yellow shifts
   -- 0.5, and it lands on the git-added green. Do not reinstate it without
   -- reading notes/syntax-palette-decisions.md.
-  keyword = variants.keyword.balanced,
+
+  -- keyword = variants.keyword.balanced,
+  -- NOTE: previously using balanced yellow color but for some reason yellow feel bright in some parts
+  -- so for now i set the keyword color the darker yellow varaint. Date - 10 Aug 2026
+  keyword = variants.keyword.darker,
   -- Currently UNREAD: the whole grammar-dimming experiment was rejected on
   -- 2026-08-09 and solarized-osaka.lua paints nothing with it. Kept wired so the
   -- values stay measured if it ever reopens -- but read the variants note first,
