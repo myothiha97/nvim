@@ -99,9 +99,59 @@ local function float_content_wraps(bufnr, width)
   end
   return false
 end
+-- Put back the gap between a signature block and the prose that describes it.
+--
+-- Servers emit the signature as a fenced block with the description on the very
+-- next line. VSCode renders that to HTML, where the `<pre>` gets a CSS margin
+-- for free. A cell grid has no margins, and render-markdown's
+-- `code.border = "hide"` (plugins/render-markdown.lua) conceals the closing
+-- fence with `conceal_lines`, which removes the ROW rather than blanking it --
+-- so the description ends up welded to the last line of the signature. A blank
+-- line is the only unit of vertical space a grid actually has.
+--
+-- Only after a CLOSING fence, and only when real text follows: that skips the
+-- trailing fence of a signature-help popup (nothing after it) and never doubles
+-- a gap the server already sent. Builds a new table rather than mutating, so the
+-- caller's `contents` is untouched. One pass over ~10-40 lines, once per popup
+-- open -- not a hot path.
+-- NOTE: a top/bottom padding row was built here on 2026-08-09 and REMOVED the
+-- same day. Recorded because the obvious way to add it does not work and the
+-- reason it was dropped is not a bug:
+--   * `""` cannot be the padding row. `_normalize_markdown` trims exactly-empty
+--     lines off the head and tail (measured: 7 lines in, 6 out). A line holding
+--     one SPACE survives, because only truly empty lines are trimmed.
+--   * It has to go in `contents`, not into the window afterwards, so that
+--     open_floating_preview sizes and positions the float with the padding
+--     counted. Resizing after the fact can push a float off screen.
+--   * It cannot be made thinner. Vertical space on a cell grid is quantised to
+--     whole rows -- `nvim_open_win` takes height in cells, there is no pixel or
+--     fractional unit -- so one row is the floor, and one row read as too tall.
+-- Dropped to zero by choice. The gap after the code fence below is kept: that
+-- one separates two things, rather than padding the frame.
+local function space_after_code_fences(contents)
+  local out, in_fence = {}, false
+  for i = 1, #contents do
+    local line = contents[i]
+    out[#out + 1] = line
+    if line:match("^%s*```") then
+      in_fence = not in_fence
+      local next_line = contents[i + 1]
+      if not in_fence and next_line and next_line:match("%S") then
+        out[#out + 1] = ""
+      end
+    end
+  end
+  return out
+end
+
 local orig_open_floating_preview = vim.lsp.util.open_floating_preview
 vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
   opts = opts or {}
+  -- Markdown only. Diagnostic floats come through as "plaintext" and have no
+  -- fences, so they are left exactly as they were.
+  if syntax == "markdown" and type(contents) == "table" then
+    contents = space_after_code_fences(contents)
+  end
   -- so below exp is basically manipulating the bufnr, wind object hover docs pop up behavior
   local bufnr, winid = orig_open_floating_preview(contents, syntax, opts)
   -- Skip post-processing on the focus-reuse path: when the second `K` (or

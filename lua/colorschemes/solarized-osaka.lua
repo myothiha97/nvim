@@ -278,8 +278,28 @@ return {
       -- SnacksPickerPreviewTitle read `c.bg_float`, and the picker body falls
       -- back to NormalFloat, so touching it would repaint the picker. These are
       -- reached only by doc floats, via winhighlight in config/keymaps.lua.
-      -- fg is `base1` rather than the editor's `base0`, so doc text reads a step
-      -- brighter than the code behind it.
+      -- fg paints the DESCRIPTION PROSE and essentially nothing else, which is
+      -- why it is worth a value of its own. Measured 2026-08-09 by dumping the
+      -- top treesitter capture of every cell in a real vtsls hover: markdown
+      -- paragraph text resolves to `@spell`, and the `*@param*` tags to
+      -- `@markup.italic` -- both set attributes only, no foreground -- so the
+      -- prose falls through to Normal, i.e. here. Everything else in the float
+      -- already carries a colour: the fenced signature gets injected
+      -- typescript/go/lua captures, inline chips get LspDocInlineCode, links get
+      -- @markup.link.
+      --
+      -- It was `base1` (#adb7b7, L* 73.7, 9.19:1) until 2026-08-09. That made
+      -- the description the BRIGHTEST text in the popup -- above the signature
+      -- it describes (@variable L* 69.0, @function.call L* 59.1) and above the
+      -- editor's own body text (base0, L* 69.0). VSCode runs that hierarchy the
+      -- other way round, and the inversion is what made hover docs read as a
+      -- wall of text. `c.fg` (#839395, L* 59.8, 5.90:1) drops the prose 13.9 L*
+      -- below the signature's identifiers and still clears WCAG AA for body
+      -- text.
+      --
+      -- Do not go dimmer. The next ramp step, base00 (#637981), is 4.11:1 --
+      -- under AA -- and sits only 5 L* off the comment colour. There is exactly
+      -- one usable value here, so this is not a knob to tune.
       -- A thin amber frame with a readable title. The two need DIFFERENT weights
       -- and that is the whole point here:
       --   border -- chrome, so it wants to be barely there. `yellow700` sits at
@@ -291,7 +311,7 @@ return {
       --     as the border.
       -- Deliberately not `palette.type`: the border used to follow it, so every
       -- retune of the syntax type colour silently moved this chrome with it.
-      hl.LspDocFloat = { fg = c.base1, bg = c.bg_float }
+      hl.LspDocFloat = { fg = c.fg, bg = c.bg_float }
       hl.LspDocBorder = { fg = c.yellow700, bg = c.bg_float }
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 
