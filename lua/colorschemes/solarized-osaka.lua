@@ -107,6 +107,13 @@ return {
       hl["@keyword.import"] = { fg = palette.punctuation }
       hl["@keyword.operator"] = { fg = palette.keyword }
 
+      -- NOTE: quieting Lua's grammar keywords was tried on 2026-08-09 and
+      -- rejected wholesale -- first `local`, then `end`/`then`/`do`. Nothing is
+      -- painted here now, deliberately; every Lua keyword stays on the accent.
+      -- The measurements and the rejected colours are kept in the palette file
+      -- so this is not re-derived. Lua is a config language here, not a daily
+      -- one, and the density it suffers from does not reach the daily stack.
+
       -- Function names and plain identifiers.
       --
       -- No markup/markdown groups appear in any of these three lists, on

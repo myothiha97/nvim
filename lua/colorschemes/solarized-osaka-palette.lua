@@ -23,22 +23,32 @@
 local variants = {
   -- Keyword, Statement, @keyword, @keyword.operator, @label.
   keyword = {
-    -- SELECTED 2026-08-09, but NOT settled -- the olive/yellow call is an open
-    -- todo (todos/syntax-palette-followups.md). Rejected on 2026-08-08 as
-    -- "gold/yellowish", then reinstated for the opposite reason: it is the
-    -- calmer of the two in KEYWORD-DENSE code. The yellow is fine in ordinary
-    -- files and only reads loud where keywords cluster, which is rule 3
-    -- (frequency vs brightness) and rule 4 (coverage is the variable) applied
-    -- to the keyword role itself.
+    -- REJECTED 2026-08-09 after one day in the slot. It IS the calmer of the two
+    -- in keyword-dense code, which is why it was picked, but two things found
+    -- afterwards outweigh that:
     --
-    -- The two differ on lightness, not saturation: chroma is 67.0 vs 67.4,
-    -- which is far under the perceptual floor, so "less intense" here means
-    -- L* 59.6 against 65.4. Do not try to calm either one by dropping chroma --
-    -- `drab` and the subdued/hushed ladder below are that experiment failing.
+    --   1. It is display-unstable. Ghostty tags content display-p3, and between
+    --      the laptop panel and an sRGB external monitor olive shifts 4.2
+    --      degrees toward green while `balanced` shifts 0.5. Hue 111 sits right
+    --      where the gamut difference bites. The external monitor is the main
+    --      work display, so a value that changes identity between the two loses.
+    --   2. It lands dE ~0.2 from the git-added green #859900, undoing the
+    --      decoupling commit bdb87f0 made on purpose.
+    --
+    -- The density complaint that motivated it was also partly a rendering
+    -- artifact: P3 tagging draws the yellow at C* 87.9, not the authored 67.4.
     olive = "#849900", -- hue 111, L* 59.6, C* 67.0, 5.92:1
-    -- Runner-up, and the selection from 2026-08-08 to 2026-08-09. Higher
-    -- contrast (clears WCAG AA with more room), and it is the only hue that
-    -- reads as actual yellow -- below ~L* 62 yellow turns khaki.
+    -- SELECTED. Held the slot 2026-08-08 to 2026-08-09, lost it for one day, and
+    -- was restored the same day. Highest contrast of the two, hue-stable across
+    -- displays, clear of the git green, and the only hue here that reads as
+    -- actual yellow -- below ~L* 62 yellow turns khaki.
+    --
+    -- It IS the loudest colour in the palette, and that is accepted rather than
+    -- solved. It is comfortable up to about 6% of glyphs (measured fine at 5.3%
+    -- in real TSX) and uncomfortable past about 10%. Only Lua exceeds that, at
+    -- 11.6%, and Lua is a config language here rather than a daily one. Do not
+    -- try to fix the dose by moving this value -- the lever is what the colour
+    -- COVERS, which is item 6 in todos/syntax-palette-followups.md.
     balanced = "#aea10c", -- hue 98, L* 65.4, C* 67.4, 7.16:1
     darker = "#a3970b", -- hue 98, L* 61.6
     brighter = "#baac0d", -- hue 98, L* 69.5
@@ -58,6 +68,75 @@ local variants = {
     juniper = "#569f41",
     leaf = "#4ea339",
     grass = "#56a325",
+  },
+
+  -- REJECTED WHOLESALE 2026-08-09. Nothing reads this table; it is kept so the
+  -- experiment is not run a third time. Both halves were built, measured and
+  -- reverted on looks: `local` (240 glyphs) through base0, bronze and warm grey,
+  -- then `end`/`then`/`do` (299 glyphs) through cool grey. The mechanics all
+  -- worked and the coverage numbers were real -- 8.6% of glyphs down to 6.3% --
+  -- but every quiet colour read as out of place next to the accents, and the
+  -- accepted outcome is to leave Lua's keywords loud. Lua is a config language
+  -- here, not part of the daily JS/TS, Go, Python and Bash stack, so the density
+  -- it suffers from is not worth a fourth colour.
+  --
+  -- Redoing it needs after/queries/lua/highlights.scm back (deleted 2026-08-09):
+  -- `; extends`, then `[ "end" "then" "do" ] @keyword.structure`, because the
+  -- runtime query files those tokens under the construct they close.
+  --
+  -- Block grammar: Lua's `end`, `then`, `do`. Not landmarks -- indentation
+  -- already shows where a block closes and `if`/`for` already mark the
+  -- construct -- so they are the closing brace of a language that spells its
+  -- braces out. 287 of the 1125 keyword-painted glyphs in ai-prompts.lua, and
+  -- `end` alone owns 52 whole lines there with nothing else on them.
+  --
+  -- Reached through a custom capture in after/queries/lua/highlights.scm,
+  -- because the runtime query files these tokens under the capture of their
+  -- opening construct and a highlight group alone would take `if` and
+  -- `function` down with them.
+  --
+  -- `local` was the first candidate for this treatment and was REVERTED to the
+  -- keyword colour on 2026-08-09 after base0, bronze and warm grey were each
+  -- rejected on looks. The reason is structural, so do not retry it blind: an
+  -- `end` sits alone on its line, where a quiet colour reads as chrome, while
+  -- `local` sits against a variable name, where the same colour reads as dirt.
+  -- `end` is also the larger share, 287 glyphs against 240.
+  --
+  -- The target is a GREY, and the whole difficulty is that the grey band is
+  -- narrow. Comment sits at L* 44.6 and body text at L* 69.0, so the usable gap
+  -- is 24 points and anything centred in it lands ~12 dE from BOTH neighbours --
+  -- "distinguishable but tiring" by the rule at the bottom of this file, never
+  -- unambiguous. Lightness alone cannot buy the separation, so hue does.
+  --
+  -- Chroma is the axis that decides grey vs colour here. At the theme's own grey
+  -- level (Comment C* 9.2, base00 C* 9.3) a warm hue reads as a grey that leans
+  -- warm. At double that it reads as brown, because hue 98 below L* 62 is no
+  -- longer yellow at all -- see the note on `balanced` above. Same hue, two
+  -- different colour categories, decided entirely by chroma.
+  -- Keep these COOL. Every warm candidate tried on 2026-08-09 was rejected as
+  -- "bronze", and the reason is categorical rather than a matter of degree: a
+  -- warm hue dimmed far enough to recede stops being that hue and becomes
+  -- brown, exactly as hue 98 becomes khaki below L* 62. Orange was measured for
+  -- this slot on the same day and fails the same way -- the only oranges that
+  -- clear both terracotta and the keyword by ~20 dE sit at C* 60, which is a
+  -- fourth accent, and dropping them to C* 30 lands on #9c744c, a bronze.
+  keyword_grammar = {
+    -- SELECTED 2026-08-09. Midway between Comment and body text, on the theme's
+    -- own cool grey axis: 10.7 dE from Comment so it never reads as one, 12.2
+    -- from body text so it clearly recedes. Clears WCAG AA at 5.06:1.
+    cool_grey = "#75878a", -- hue 215, L* 55.0, C* 7.0, 5.06:1
+    -- One step down, the theme's own base00, if `end` should recede further.
+    -- Sits 4.7 dE from Comment, so at this value block grammar and comments read
+    -- as the same layer, and contrast drops under AA to 4.15:1.
+    base00 = "#637981", -- hue 229, L* 49.4, C* 9.3, 4.15:1
+    -- One step up, the theme's own fg, if it recedes too far. Only 7.8 dE from
+    -- body text, so `end` starts to read as ordinary code again.
+    fg = "#839395", -- hue 210, L* 59.8, C* 6.1, 5.95:1
+    -- Rejected 2026-08-09 on looks, all three while this role still meant
+    -- `local`. Kept because the measurements stay valid for any grammar slot.
+    warm_grey = "#888474", -- hue 98, L* 55.1, C* 9.3 -- still read as bronze
+    bronze = "#8b8465", -- hue 98, L* 55.0, C* 17.9 -- double chroma, a brown
+    base0 = "#9eabac", -- L* 69.0, BRIGHTER than the keyword it defers to
   },
 
   -- Special, Debug, @punctuation.bracket, @variable.parameter,
@@ -171,10 +250,16 @@ local variants = {
 
 -- The live selections. Changing a colour is a one-word edit here.
 return {
-  -- Provisional, 2026-08-09. `balanced` (yellow) is the runner-up and the two
-  -- are still an open call -- see todos/syntax-palette-followups.md. Not a bug,
-  -- do not "fix" it back.
-  keyword = variants.keyword.olive,
+  -- SETTLED 2026-08-09 after one day on olive. Olive shifts 4.2 degrees toward
+  -- green between the laptop panel and the external monitor where yellow shifts
+  -- 0.5, and it lands on the git-added green. Do not reinstate it without
+  -- reading notes/syntax-palette-decisions.md.
+  keyword = variants.keyword.balanced,
+  -- Currently UNREAD: the whole grammar-dimming experiment was rejected on
+  -- 2026-08-09 and solarized-osaka.lua paints nothing with it. Kept wired so the
+  -- values stay measured if it ever reopens -- but read the variants note first,
+  -- because the rejection was on looks after five colours, not on mechanics.
+  keyword_grammar = variants.keyword_grammar.cool_grey,
   punctuation = variants.punctuation.terracotta,
   func = variants.func.azure,
   type = variants.type.tokyonight,
