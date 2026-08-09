@@ -2,12 +2,15 @@
 
 ## Status
 
-> **Superseded for current values — see item 5 and
+> **Superseded for current values — see item 6 and
 > `notes/syntax-palette-decisions.md`.** Everything in this Status section and in
 > the sections below it describes the palette as of **2026-07-22**, before the
 > 2026-08 rework moved the palette from colour-named slots to role-named ones.
 > It is kept as the historical record of *why* things were tried, not as a
-> statement of what is set today. The one live item is item 5.
+> statement of what is set today.
+>
+> **Live item: 6 only** (`@punctuation.delimiter` is painted with the keyword
+> colour). Item 5 was closed 2026-08-09 with yellow `#aea10c` selected.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
@@ -329,14 +332,43 @@ Knock-on checks before shipping any of these:
   *relatively* worse. Terracotta is already the lead candidate if the palette is
   reopened, so consider doing both in the same session or neither.
 
-### 5. Keyword: olive vs yellow — OPEN, deferred 2026-08-09
+### 5. Keyword: olive vs yellow — CLOSED 2026-08-09, yellow selected
 
-**This is the only live item in this file.** Not a bug and not a regression.
-Deliberately parked: the value works, the *choice* between two working values is
-what is unresolved, and rule 1 says that is never worth a mid-freeze session.
+**Resolved the same day it was filed.** `variants.keyword.balanced` `#aea10c` is
+the settled value. Olive is kept as a named variant but should not be reinstated
+without reading the three findings below, which were not known when this item was
+written.
 
-Current: `variants.keyword.olive` `#849900`. Runner-up: `variants.keyword.balanced`
-`#aea10c`, which was the selection from 2026-08-08 until 2026-08-09.
+**Why yellow won**, in order of weight:
+
+1. **Olive is unstable across the two displays actually used.** With Ghostty's
+   `window-colorspace = display-p3`, olive moves 4.2° toward green between the
+   MacBook XDR panel and an sRGB external monitor. Yellow moves 0.5°. This is
+   what "olive looks better on the laptop than on the Samsung" was measuring.
+2. **The density complaint was partly a rendering artifact.** P3 tagging emits
+   every accent about 20 C\* more saturated than authored, so the yellow that
+   read "loud" was being drawn at C\* 87.9, not the authored 67.4.
+3. **Olive collides with the git-added green** (dE ≈ 0.2 from `#859900`), which
+   `bdb87f0` had deliberately decoupled. Yellow does not.
+
+**The dose finding that settled it.** Yellow is not too loud in general, it is
+too loud past a threshold. Measured shares of glyphs painted `#aea10c`:
+
+| language | yellow | verdict |
+| --- | --- | --- |
+| Go | 1.6% | comfortable |
+| TSX (real work file) | 5.3% | confirmed comfortable |
+| Python | 5.8% | comfortable |
+| Bash | 7.8% | fine |
+| TypeScript | 10.1% | between the two, closer to the bad end |
+| JavaScript | 10.2% | as above |
+| Lua | 11.6% | rejected |
+
+Lua is the only language in the stack that overdoses it, and Lua is a config
+language here, not part of the daily JS/TS, Go, Python and Bash work. That is the
+accepted trade: Lua stays loud.
+
+Original framing, kept because the measurements are still valid:
 
 | | olive `#849900` | yellow `#aea10c` |
 | --- | --- | --- |
@@ -362,9 +394,49 @@ Three things to carry into the review so it is not re-derived:
   had deliberately decoupled the lualine git marker from the keyword colour;
   that separation is now gone visually. Known and accepted, not a defect.
 
-Decide at the 2026-09-20 checkpoint, in a real session, on real files in the
-languages actually used — Lua and Go are the keyword-dense cases that motivated
-the move, TSX is the sparse one where the yellow looked best.
+### 6. `@punctuation.delimiter` is painted with the keyword colour — OPEN
+
+**This is the only live item in this file.** Filed 2026-08-09, deliberately not
+done in that session. Reads as an inconsistency rather than a preference, so it
+does not need the freeze checkpoint, but it was left because the palette was
+already good enough to work in.
+
+`@punctuation.delimiter` sits in the keyword paint list in `solarized-osaka.lua`
+while its siblings `@punctuation.bracket` and `@punctuation.special` sit in the
+terracotta list. So every `,` `.` `:` `;` is painted `#aea10c`. Nothing in the
+notes argues for that split, and `Operator` was moved to `base0` on 2026-08-08
+with reasoning that applies word for word: "`=` is punctuation, not a keyword, so
+this is also the more correct reading." Today `=` is grey and the `,` beside it
+is yellow.
+
+**Proposed fix:** move `@punctuation.delimiter` out of the keyword list and set
+it to `c.base0`, exactly as `Operator` already is. One line. NOT terracotta —
+that is already 12.7% of TSX glyphs at 947 marks, and adding delimiters would
+push it past 16% and tilt the screen red.
+
+**Measured effect**, simulated on real files:
+
+| | yellow area | separate yellow marks |
+| --- | --- | --- |
+| tsx | 5.3% → 2.7% | 546 → 128 (−77%) |
+| typescript | 10.1% → 6.3% | 1222 → 351 (−71%) |
+| javascript | 10.2% → 6.8% | 655 → 214 (−67%) |
+| python | 5.8% → 3.1% | 434 → 112 (−74%) |
+| lua | 11.6% → 8.6% | 660 → 277 (−58%) |
+| go | 1.6% → 1.5% | 101 → 69 (−32%) |
+
+It lands TypeScript and JavaScript inside the dose already confirmed comfortable
+in TSX, and it removes about three quarters of the yellow *fragments* while only
+removing a third to a half of the yellow *area* — because a `.` or `,` is a
+single character and therefore its own isolated mark.
+
+What each language actually captures as a delimiter, so the effect is not a
+surprise: TypeScript `.` 418, `:` 357, `,` 198, `?.` 23, `|` 21, `;` 8. Python
+`,` 152, `.` 107, `:` 76. Go only `.` 32, which is why Go barely moves.
+
+Expected cosmetic trade: `values.paymentInfo` loses its lit dot, so member
+boundaries are marked by the colour change alone. Same trade already accepted
+for `=`.
 
 ## Notes
 

@@ -34,31 +34,48 @@ measured, and rejected for a recorded reason.
    not the variable — coverage is.** Dimming the hex makes the good files worse
    to fix the bad ones. Move the role instead.
 
-## Keyword colour (2026-08-08, reopened 2026-08-09 — still open)
+## Keyword colour (2026-08-08, reopened and SETTLED 2026-08-09)
 
-**Current value is `#849900` olive, and it is provisional.** The olive/yellow
-call is parked as a todo in `todos/syntax-palette-followups.md`; do not treat
-either value as settled and do not silently move it back.
+**Current value is `#aea10c` yellow (`balanced`), and it is settled.** Olive
+`#849900` held the slot for one day and was reverted. Do not reinstate olive
+without reading the display and dose findings below — they were not known when
+olive was chosen, and both of them favour yellow.
 
-The 2026-08-09 reversal: the yellow is good in ordinary files and only reads
-*loud* where keywords cluster densely. That is rules 3 and 4 landing on the
-keyword role itself — a role on nearly every line cannot be the brightest thing
-on screen, and when a colour works in some files and not others the variable is
-coverage, not the value.
+**Olive lost on display stability, not on looks.** Ghostty runs
+`window-colorspace = display-p3`, so between the MacBook XDR panel and an
+sRGB-gamut external monitor olive shifts 4.2° toward green while yellow shifts
+0.5°. Olive sits at hue 111, right where the gamut difference bites; yellow at
+98 does not. Since the external monitor is the main work display, a value that
+changes identity between the two cannot be the choice. Olive also lands dE ≈ 0.2
+from the git-added green `#859900`, undoing what `bdb87f0` decoupled.
 
-The lever is lightness, not saturation. Chroma is 67.0 (olive) against 67.4
-(yellow), which is far under the perceptual floor, so the entire difference is
-L\* 59.6 vs 65.4 plus 13 degrees of hue. Contrast falls 7.16:1 → 5.92:1, both
-clear of the WCAG AA 4.5 floor. This is the one place rule 2 does not apply:
-between these two candidates lightness *is* the axis carrying the difference,
-because a 5.8 L\* gap clears the ~5 floor that rule 2 warns about.
+**Part of the original complaint was a rendering artifact.** P3 tagging emits
+every accent roughly 20 C\* above its authored value, so the yellow that read
+"loud" was drawn at C\* 87.9 rather than the authored 67.4. Confirmed from
+screenshot pixels — see "What the screen actually shows" below.
+
+The 2026-08-09 reversal that started it: the yellow is good in ordinary files and
+only reads *loud* where keywords cluster densely. That is rules 3 and 4 landing
+on the keyword role itself — a role on nearly every line cannot be the brightest
+thing on screen, and when a colour works in some files and not others the
+variable is coverage, not the value. That reading was right, and the resolution
+was to accept the dose rather than change the value; see "Dose, not value".
+
+Between these two specifically, the lever is lightness rather than saturation.
+Chroma is 67.0 (olive) against 67.4 (yellow), far under the perceptual floor, so
+the entire difference is L\* 59.6 vs 65.4 plus 13 degrees of hue, and contrast
+5.92:1 vs 7.16:1. Both clear the WCAG AA 4.5 floor. This is the one place rule 2
+does not apply: a 5.8 L\* gap clears the ~5 floor that rule 2 warns about. Note
+this was the whole basis for preferring olive, and it was not enough — the hue
+difference turned out to matter more than the lightness one, because 13 degrees
+at hue 111 is what makes olive move between displays.
 
 The original 2026-08-08 pass landed on `#aea10c` (hue 98, L\* 65.4, C\* 67.4,
 7.16:1) after four rejections:
 
 | value | hue | L\* | C\* | verdict |
 | --- | --- | --- | --- | --- |
-| `#849900` | 111 | 59.6 | 67 | "gold/yellowish", disliked — **reinstated 2026-08-09** |
+| `#849900` | 111 | 59.6 | 67 | "gold/yellowish", disliked — reinstated then **re-rejected 2026-08-09** |
 | `#8c9644` | 111 | 59.7 | 44 | "too fade" |
 | `#5da100` | 125 | 59.7 | 75 | "dracula green, ugly" |
 | `#b99004` | 86 | 61.9 | 66 | excluded by hand — the theme's own gold |
@@ -79,6 +96,117 @@ green could not move because it collided with yellow; `Type` moved to cyan and
 `@tag.tsx` to terracotta, so nothing was left painting yellow and the constraint
 was void. **Rejections are only valid against the palette that existed when they
 were made** — this is why they carry dates.
+
+## What the screen actually shows (2026-08-09)
+
+**The hex values in this repo are not what the panel emits.** Ghostty is
+configured with `window-colorspace = display-p3`, which tells macOS to interpret
+these sRGB-authored numbers as Display P3. P3 has more saturated primaries, so
+every accent is drawn more saturated than authored.
+
+Confirmed by decoding a screenshot rather than by theory. `sips` strips the
+profile when converting to BMP, so it converts P3 to sRGB, and every accent
+landed on the value predicted for that conversion:
+
+| authored | predicted in sRGB | measured from pixels |
+| --- | --- | --- |
+| yellow `#aea10c` | `#b1a000` | `#b1a000` |
+| azure `#1d98cd` | `#009bd2` | `#009bd2` |
+| cyan `#2aa298` | `#00a598` | `#00a598` |
+| terracotta `#b55f4a` | `#c25944` | `#c25943` |
+
+Azure's red channel goes 29 → 0 and cyan's 42 → 0, i.e. those accents sit well
+outside sRGB. Practical consequences:
+
+- **Accents are display-dependent, greys are not.** Neutral colours sit on the
+  achromatic axis, which sRGB and P3 share exactly, so `base0` measured
+  `#9eabac` → `#9bacac` and `Comment` `#576d74` → `#516e75`. A grey decision made
+  on the laptop transfers to the external monitor; an accent decision does not.
+- **The absolute chroma figures in the 2026-07-22 benchmark understate reality.**
+  "Max C\* 67.4" is the authored number; the panel emits about 88. The *relative*
+  comparison against tokyonight and catppuccin still holds, because those were
+  measured through the same pipeline.
+- The setting was left alone deliberately on 2026-08-09. Changing it to `srgb`
+  would drop roughly 20 C\* off every accent at once, which is a far larger
+  visual change than any hex edit in this file.
+
+## Dose, not value (2026-08-09)
+
+The most reusable result of the session. A colour is not loud or calm in the
+abstract; it has a **dose** past which it stops being tolerable, and that dose is
+lower the brighter and more saturated the colour is. This is rule 3 with numbers.
+
+The evidence is an accidental controlled experiment. In a real TSX work file and
+in a dense Lua file, two different colours came out with near-identical spatial
+profiles:
+
+| | area | separate marks | avg run |
+| --- | --- | --- | --- |
+| TSX terracotta `#b55f4a` | 12.7% | 947 | 2.3 ch |
+| Lua yellow `#aea10c` | 11.6% | 660 | 2.3 ch |
+
+Same run length, comparable area, terracotta with *more* marks — and terracotta
+was judged fine while the yellow was rejected. Coverage and fragmentation cannot
+be the difference, so the colour is: yellow is L\* 65.4 / C\* 67.4, terracotta is
+L\* 50.1 / C\* 42.9. Empirically yellow is comfortable at 5.3% and rejected at
+11.6%; terracotta is comfortable at 12.7%.
+
+**Measure marks, not just area.** Area alone predicts the wrong thing. In the
+same TSX file cyan covers 44.9% against terracotta's 12.7%, 3.5× more, yet both
+produce about 950 separate marks, because cyan arrives as 8-character Tailwind
+class strings and terracotta as 2.3-character fragments. Large contiguous blocks
+read as one object; scattered fragments are counted individually. The reaction
+"the whole screen is X" is a statement about mark count, not about coverage.
+
+Method for reproducing either number: resolve each non-space glyph through
+capture → `@capture.lang` → `fg`, then either tally by colour, or walk each line
+left to right and start a new "mark" whenever the colour changes or whitespace
+breaks the run.
+
+## Grammar keywords: an experiment that failed twice (2026-08-09)
+
+Quieting Lua's low-information keywords was built, measured and reverted in full.
+Recorded so it is not attempted a third time.
+
+The reasoning was sound and the mechanics worked. `local` is 240 of the 1125
+keyword-painted glyphs in `ai-prompts.lua` and marks nothing; `end`, `then` and
+`do` are 299 more, and `end` alone owns 52 whole lines with nothing else on them.
+Cutting both would have taken keyword coverage from 8.6% to 4.6%.
+
+It failed on looks, five colours in a row:
+
+| candidate | why it failed |
+| --- | --- |
+| `base0` `#9eabac` | L\* 69.0, *brighter* than the keyword it defers to (65.4), and the only near-grey among C\* 67 neighbours. Advanced instead of receding. |
+| bronze `#8b8465` | hue 98 at C\* 17.9 is a brown, not a dim yellow. Read as a fourth accent. |
+| warm grey `#888474` | same hue at the theme's own grey chroma (C\* 9.3). Still read as bronze. |
+| cool grey `#75878a` | belongs to the theme's grey axis, but "did not sync with the rest". |
+| orange | measured, never applied. See below. |
+
+**Two structural traps this surfaced**, both worth remembering for any future
+"quiet" colour:
+
+1. **Dimming a hue changes its category.** Yellow below L\* 62 is khaki; orange
+   dimmed enough to recede is bronze. "Orange, but calm" and "the bronze I
+   rejected" are the same colour. The only oranges that clear both terracotta
+   and the keyword by ~20 dE sit at C\* 60, which is a fourth accent, and
+   dropping them to C\* 30 lands on `#9c744c`.
+2. **The neutral band is too narrow to be unambiguous.** `Comment` is L\* 44.6
+   and body text is L\* 69.0, so any grey centred between them lands ~12 dE from
+   both — "distinguishable but tiring", never clean. Hue is the only axis that
+   buys separation there, and hue is what made every warm candidate read wrong.
+
+Also learned: `local` sits against a variable name, where a muted colour reads as
+dirt, while `end` sits alone on its line, where the same colour would read as
+chrome. If this ever reopens, `end` is the better target and `local` is not.
+
+Redoing the `end`/`then`/`do` half needs `after/queries/lua/highlights.scm`
+(deleted 2026-08-09): `; extends`, then `[ "end" "then" "do" ] @keyword.structure`.
+A highlight group alone cannot reach them, because the runtime query files each
+token under the construct it closes — `end` lands in `@keyword.conditional` after
+an `if` and `@keyword.function` after a `function`, so recolouring by group takes
+`if` and `function` down with it. The query cost was measured at no detectable
+difference over 50 full-file passes.
 
 ## Operators are not keywords (2026-08-08)
 
