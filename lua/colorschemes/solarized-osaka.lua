@@ -83,17 +83,68 @@ return {
         "@variable.parameter",
         "@variable.builtin",
         "@module.builtin",
+        -- JSX tag groups are painted in their own block below rather than
+        -- listed here, so the reasoning stays attached to them. Same colour.
+      }, palette.punctuation)
+
+      -- JSX tags, revisited 2026-08-09. Reference measurement, taken by walking
+      -- treesitter captures over two regions of the SAME production file and
+      -- resolving @cap.tsx -> @cap the way the highlighter does:
+      --
+      --   region                       coverage   marks   run length
+      --   logic-heavy (hooks, consts)     12.5%      74      2.0 ch
+      --   markup-heavy (nested JSX)       34.7%      91      4.3 ch
+      --
+      -- Every group here is language-scoped (.tsx/.javascript/.html/.vue), so
+      -- nothing in this block can reach Go, Python, Lua, bash or plain TS.
+      -- Verified by measuring a 13k-glyph Lua file before and after: identical
+      -- on every row including mark counts.
+      --
+      -- Tag NAMES stay on the punctuation colour, and both tag captures must
+      -- carry the SAME value. This is the load-bearing part.
+      --
+      -- The tsx grammar matches one tag with BOTH @tag and @tag.builtin, and the
+      -- winner is decided by query order, not by what kind of tag it is -- the
+      -- same trap as Lua's `{` being both @punctuation.bracket and @constructor,
+      -- documented above. Measured on real JSX: `Accordion`, `Button`, `If`,
+      -- `SadFaceSVG` resolve through @tag, while `div`, `h2` AND `DragAndDrop`
+      -- resolve through @tag.builtin. So splitting the two captures does NOT
+      -- split "HTML element" from "React component" -- it renders
+      -- `<DragAndDrop.Droppable>` as two different colours inside one name.
+      --
+      -- Sending @tag to the type colour was tried on 2026-08-09 and rejected:
+      -- the sky value is reserved for types, and the split above made tag colour
+      -- look arbitrary in exactly the files it was meant to help.
+      --
+      -- KNOWN COST, accepted deliberately: the punctuation colour reaches 30.2%
+      -- of glyphs in markup-heavy TSX against 12.5% in logic-heavy TSX of the
+      -- same file. Tags are most of that, because a tag is a WORD where a
+      -- bracket is one character. This is a dose problem, not a colour problem
+      -- -- retuning the hex cannot change how much of the screen it covers, so
+      -- do not reach for a new value. The only lever that works is moving
+      -- captures off this list, and the two candidates (@variable.parameter,
+      -- @punctuation.bracket) were measured to be 88% of the terracotta in
+      -- logic-heavy regions, so moving them would strip the files that already
+      -- read well. See notes/syntax-palette-decisions.md.
+      paint({
+        "@tag.tsx",
+        "@tag.javascript",
+        -- Explicit rather than inherited: the theme already lands this on the
+        -- same value, but if that ever drifts, the two captures diverge and the
+        -- split-colour tag name comes back.
+        "@tag.builtin.tsx",
+        "@tag.builtin.javascript",
+      }, palette.punctuation)
+
+      -- The tag DELIMITERS (`<`, `>`, `/`) go neutral, for the same reason
+      -- `Operator` does further down: they are punctuation carrying no meaning
+      -- worth a hue, and they were 13.0% of the terracotta for that.
+      paint({
         "@tag.delimiter.tsx",
         "@tag.delimiter.vue",
         "@tag.delimiter.html",
         "@tag.delimiter.javascript",
-        -- Component and element tags. The theme paints @tag.tsx with yellow500,
-        -- so every <Form> and <Fragment> was gold; HTML elements are a separate
-        -- capture (@tag.builtin.tsx) already on this colour, so matching them
-        -- makes every JSX tag read as one thing without adding a hue.
-        "@tag.tsx",
-        "@tag.javascript",
-      }, palette.punctuation)
+      }, c.base0)
 
       -- Two groups `paint` deliberately cannot handle. Both are stored as bare
       -- string links whose TARGET is outside the lists above, so skipping them
