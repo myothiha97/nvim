@@ -23,6 +23,45 @@
 local variants = {
   -- Keyword, Statement, @keyword, @keyword.operator, @label.
   keyword = {
+    -- SELECTED 2026-08-10. This slot paints the highest-frequency capture in the
+    -- daily stack (Go and TS/TSX), so rule 3 -- frequency is inversely related
+    -- to brightness -- binds harder here than anywhere else in the palette, and
+    -- both previous values broke it.
+    --
+    -- The break is only visible in P3. Ghostty tags content display-p3, so the
+    -- authored numbers are not what the panel emits. Measured off a real Go
+    -- capture, every other accent on screen arrives at C* 38-52 (Function 44.3,
+    -- String 46.2, terracotta 52.0, Type 38.7) while yellow and olive arrive at
+    -- C* ~88. Neither was an accent among accents; each was the only
+    -- supersaturated colour in the field, and it was painting the densest
+    -- capture. That is the whole reason this moved.
+    --
+    -- This value emits L* 58.6, C* 52.3, hue 312, 5.81:1 -- inside the band its
+    -- neighbours occupy, and 10.3 L* BELOW body text, so keywords drop to a
+    -- structural layer and the eye lands on identifiers and call names instead.
+    --
+    -- Share of total on-screen visual pull at the measured dose (5.24% of ink in
+    -- real Go, ink area x dE2000 from the background): violet 7.0%, olive 8.7%,
+    -- yellow 9.4%. Keyword falls from the 5th loudest thing on screen to the 7th
+    -- of 9.
+    --
+    -- KNOWN COST, accepted: worst-neighbour separation drops from yellow's 32.5
+    -- to 19.1, just under the unambiguous line -- but that is against base01,
+    -- 1.55% of ink. The roles that actually cover the screen still clear it
+    -- (Comment 22.3, Normal 21.2) and the pairs that carry meaning are wide open
+    -- (Function 37.8, Type 38.1).
+    --
+    -- STOP RULE: re-measure if keyword dose climbs past ~7% of ink. That is the
+    -- point where the separation yellow buys starts to be worth its loudness.
+    -- Display P3 draws this as #a879d1 on an sRGB capture.
+    warm_violet = "#a17bcc", -- authored L* 58.1, C* 47.7, hue 310
+    -- Measured against warm_violet on 2026-08-10 and not chosen. Kept so the
+    -- purple band is not re-derived a second time.
+    kanagawa = "#957fb8", -- best minimum separation (22.6), but flat at C* 33.5
+    tokyonight = "#9d7cd8", -- more vivid and cooler; moves toward the blue family
+    warm_rose = "#b67faf", -- clearest from blue, but reads rose rather than keyword
+    tokyonight_magenta = "#bb9af7", -- L* 69.7, above body text -- rule 3 again
+    catppuccin_mauve = "#cba6f7", -- L* 74.0, same problem, worse
     -- REJECTED 2026-08-09 after one day in the slot. It IS the calmer of the two
     -- in keyword-dense code, which is why it was picked, but two things found
     -- afterwards outweigh that:
@@ -38,17 +77,21 @@ local variants = {
     -- The density complaint that motivated it was also partly a rendering
     -- artifact: P3 tagging draws the yellow at C* 87.9, not the authored 67.4.
     olive = "#849900", -- hue 111, L* 59.6, C* 67.0, 5.92:1
-    -- SELECTED. Held the slot 2026-08-08 to 2026-08-09, lost it for one day, and
-    -- was restored the same day. Highest contrast of the two, hue-stable across
-    -- displays, clear of the git green, and the only hue here that reads as
-    -- actual yellow -- below ~L* 62 yellow turns khaki.
+    -- REPLACED 2026-08-10 by warm_violet, after holding the slot 2026-08-08 to
+    -- 2026-08-10 (less one day on olive). Highest contrast of the three,
+    -- hue-stable across displays, clear of the git green, and the only hue here
+    -- that reads as actual yellow -- below ~L* 62 yellow turns khaki.
     --
-    -- It IS the loudest colour in the palette, and that is accepted rather than
-    -- solved. It is comfortable up to about 6% of glyphs (measured fine at 5.3%
-    -- in real TSX) and uncomfortable past about 10%. Only Lua exceeds that, at
-    -- 11.6%, and Lua is a config language here rather than a daily one. Do not
-    -- try to fix the dose by moving this value -- the lever is what the colour
-    -- COVERS, which is item 6 in todos/syntax-palette-followups.md.
+    -- It IS the loudest colour in the palette. That was accepted rather than
+    -- solved for two days, on the reasoning that the lever is what the colour
+    -- COVERS, not the value. Half of that was right: delimiters came off the
+    -- keyword colour on 2026-08-10 and that is a real reduction. The other half
+    -- was wrong, and P3 is why -- see warm_violet above. At C* 87.9 emitted, no
+    -- dose this slot can reach is quiet enough for a long session.
+    --
+    -- Dose reference, still valid: comfortable to about 6% of glyphs (measured
+    -- 5.3% in real TSX, 5.24% of ink in real Go), uncomfortable past about 10%.
+    -- Only Lua exceeded that, at 11.6%.
     balanced = "#aea10c", -- hue 98, L* 65.4, C* 67.4, 7.16:1
     darker = "#a3970b", -- hue 98, L* 61.6
     brighter = "#baac0d", -- hue 98, L* 69.5
@@ -250,12 +293,20 @@ local variants = {
 
 -- The live selections. Changing a colour is a one-word edit here.
 return {
-  -- SETTLED 2026-08-09 after one day on olive. Olive shifts 4.2 degrees toward
-  -- green between the laptop panel and the external monitor where yellow shifts
-  -- 0.5, and it lands on the git-added green. Do not reinstate it without
-  -- reading notes/syntax-palette-decisions.md.
+  -- Every candidate above, exposed by role so the alternative colorschemes can
+  -- name one without copying its hex. Read only by
+  -- lua/colorschemes/solarized-osaka-variants.lua; nothing in the theme itself
+  -- touches it, and it costs nothing -- the table is built either way.
+  variants = variants,
 
-  keyword = variants.keyword.balanced,
+  -- SETTLED 2026-08-10 on violet, chosen for long-session focus over both warm
+  -- candidates. Yellow and olive are the same decision at C* ~88 emitted; violet
+  -- is the only one of the three that sits inside the accent band it shares the
+  -- screen with. Full measurements and the stop rule are on the variant above.
+  --
+  -- The warm option is not gone: it is one `:colorscheme solarized-osaka-v2`
+  -- away, on yellow. See lua/colorschemes/solarized-osaka-variants.lua.
+  keyword = variants.keyword.warm_violet,
   -- Currently UNREAD: the whole grammar-dimming experiment was rejected on
   -- 2026-08-09 and solarized-osaka.lua paints nothing with it. Kept wired so the
   -- values stay measured if it ever reopens -- but read the variants note first,

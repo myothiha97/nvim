@@ -9,8 +9,10 @@
 > It is kept as the historical record of *why* things were tried, not as a
 > statement of what is set today.
 >
-> **Live item: 6 only** (`@punctuation.delimiter` is painted with the keyword
-> colour). Item 5 was closed 2026-08-09 with yellow `#aea10c` selected.
+> **No live items.** Item 6 (`@punctuation.delimiter` on the keyword colour) was
+> closed 2026-08-10. Item 5 was closed 2026-08-09 with yellow `#aea10c`, and
+> that selection was itself superseded on 2026-08-10 by warm violet `#a17bcc`;
+> the yellow is still reachable as `:colorscheme solarized-osaka-v2`.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
@@ -394,12 +396,25 @@ Three things to carry into the review so it is not re-derived:
   had deliberately decoupled the lualine git marker from the keyword colour;
   that separation is now gone visually. Known and accepted, not a defect.
 
-### 6. `@punctuation.delimiter` is painted with the keyword colour — OPEN
+### 6. `@punctuation.delimiter` is painted with the keyword colour — DONE 2026-08-10
 
-**This is the only live item in this file.** Filed 2026-08-09, deliberately not
-done in that session. Reads as an inconsistency rather than a preference, so it
-does not need the freeze checkpoint, but it was left because the palette was
-already good enough to work in.
+**Closed.** Applied exactly as proposed below: `@punctuation.delimiter` moved out
+of the keyword paint list and onto `c.base0`, beside `Operator` and the tag
+delimiters, in `lua/colorschemes/solarized-osaka.lua`. Nothing else changed with
+it — it is a coverage change, so it holds for every keyword colour, including
+the variants in `lua/colorschemes/solarized-osaka-variants.lua`.
+
+Landed in the same session as the keyword move to violet `#a17bcc`, but the two
+are independent decisions and were measured separately.
+
+Original filing follows, kept for the reasoning and the numbers.
+
+---
+
+Filed 2026-08-09, deliberately not done in that session. Reads as an
+inconsistency rather than a preference, so it does not need the freeze
+checkpoint, but it was left because the palette was already good enough to work
+in.
 
 `@punctuation.delimiter` sits in the keyword paint list in `solarized-osaka.lua`
 while its siblings `@punctuation.bracket` and `@punctuation.special` sit in the

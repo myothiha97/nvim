@@ -51,7 +51,6 @@ return {
         "@keyword",
         "@keyword.function",
         "@label",
-        "@punctuation.delimiter",
         "@keyword.tsx",
         "@keyword.return.tsx",
         "@keyword.javascript",
@@ -145,6 +144,21 @@ return {
         "@tag.delimiter.html",
         "@tag.delimiter.javascript",
       }, c.base0)
+
+      -- Generic delimiters go neutral too, 2026-08-10. This closes item 6 of
+      -- todos/syntax-palette-followups.md, which had been the live one.
+      --
+      -- The group is `,` `;` `:` AND the `.` of every member access -- the
+      -- theme's own comment on it is literally "For delimiters ie: `.`". On the
+      -- keyword colour that put an accent mark on nearly every line of Go and
+      -- TS, and inside every `fmt.Println`, `currentRoute.pathname` and
+      -- `rolePermission.write`. They are the same case as the tag delimiters
+      -- above and `Operator` below: punctuation carrying no meaning worth a hue.
+      --
+      -- This is a coverage change, not a colour change, so it is independent of
+      -- which keyword colour is selected and stays true for the variants in
+      -- lua/colorschemes/solarized-osaka-variants.lua.
+      paint({ "@punctuation.delimiter" }, c.base0)
 
       -- Two groups `paint` deliberately cannot handle. Both are stored as bare
       -- string links whose TARGET is outside the lists above, so skipping them
