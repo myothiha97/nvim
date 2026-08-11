@@ -1,8 +1,8 @@
 
 # Keymap Native Conflicts
 
-> **Priority: HIGH.** Deferred (needs thought, not a quick patch). Tackle in a planned
-> config session.
+> **Priority: MEDIUM.** High-impact conflicts are resolved. The remaining insert-mode
+> cases are deferred to a planned config session.
 
 ## Goal
 Resolve custom keymaps that shadow native Vim bindings in normal / insert / visual mode,
@@ -13,31 +13,30 @@ When a map conflicts with a native binding, choose the *safest* resolution, not 
 
 - **Fallback** — for plugin maps only meaningful in a transient state (completion menu or
   suggestion open): add `"fallback"` so the key falls through to native when that state is
-  absent. Reference fix already applied: `lua/plugins/blink-cmp.lua`
-  `["<C-h>"] = { "show_documentation", "hide_documentation", "fallback" }`.
+  absent. Reference: `lua/plugins/blink-cmp.lua`
+  `["<C-f>"] = { "show_documentation", "hide_documentation", "fallback" }`.
 - **Relocate** — for unconditional function maps on native keys (no state to gate on): move
   the custom feature to a free key and reclaim the native binding.
 
 ## 🔴 High-impact (native command fully shadowed → relocate)
 
-| Key | Native meaning (lost) | Current override | Safe resolution |
+| Key | Native meaning (previously lost) | Former override | Current resolution |
 |-----|----------------------|------------------|-----------------|
-| `gi` ✅ | Resume insert at last edit position | Line diagnostics float (`keymaps.lua:248`) | Done — moved to `<leader>cd`, native `gi` reclaimed |
-| `ge` ✅ | Motion: back to end of prev word | Next ERROR (`keymaps.lua:266`) | Done — commented out; LazyVim `]e` covers next error |
-| `gp` ✅ | Paste, cursor after pasted text | Prev ERROR (`keymaps.lua:275`) | Done — commented out; LazyVim `[e` covers prev error |
-| `gf` ✅ | Go to file under cursor | Function start, treesitter (`keymaps.lua:530`) | Done — commented out; LazyVim `]f`/`[f` nav functions |
-| `gh` ✅ | Start Select mode | Function end, treesitter (`keymaps.lua:544`) | Done — commented out; LazyVim `]F`/`[F` for function end |
-| `<C-k>` (insert) ✅ | Digraph entry (`<C-k>e'`→é, `->`→→) | Copilot toggle (`copilot.lua:205`) | Done — moved to `<M-k>` (+`<D-k>` Neovide mirror); native digraph reclaimed |
+| `gi` ✅ | Resume insert at last edit position | Line diagnostics float | Moved to `<leader>cd` in `keymaps.lua`; native `gi` reclaimed |
+| `ge` ✅ | Motion: back to end of previous word | Next error | Disabled in `diagnostics-keymaps.lua`; use `]e` |
+| `gp` ✅ | Paste with cursor after text | Previous error | Disabled in `diagnostics-keymaps.lua`; use `[e` |
+| `gf` ✅ | Go to file under cursor | Function start | Disabled in `treesitter-keymaps.lua`; use `]f` / `[f` |
+| `gh` ✅ | Start Select mode | Function end | Disabled in `treesitter-keymaps.lua`; use `]F` / `[F` |
+| `<C-k>` (insert) ✅ | Digraph entry | Copilot toggle | Moved to `<M-k>` plus the Neovide `<D-k>` mirror |
 
 ## 🟡 Medium
 
-- `<C-i>` / `<Tab>` (insert) — `blink-cmp.lua:44` `["<C-i>"] = { "show", "hide" }` has **no
-  `"fallback"`**. Same byte as `<Tab>`; collides with the `<Tab>` map in `keymaps.lua:235`.
-  Fix = add `"fallback"` (mirror the `<C-h>` fix), then test Tab-indent still works.
-- `<S-h>` / `<S-l>` — no active override. The static-tabline experiment that used these
-  keys is parked in `config/_unstable_tabline.lua`; decide whether to keep LazyVim's
-  defaults or reclaim native `H`/`L` when that experiment is resumed.
-- `<C-j>` (insert) — Copilot trigger (`copilot.lua:153`) shadows native newline. Low harm;
+- `<C-i>` / `<Tab>` (insert): `blink-cmp.lua:44` `["<C-i>"] = { "show", "hide" }` has no
+  `"fallback"`. `<Tab>` has its own fallback, but terminal encoding and snippet indentation
+  still need an empirical menu-open/menu-closed test before changing this.
+- `<S-h>` / `<S-l>` ✅: LazyVim's buffer maps are deleted in `keymaps.lua`; native `H`/`L`
+  are reclaimed. The parked static-tabline experiment must not reintroduce them silently.
+- `<C-j>` (insert): Copilot trigger (`copilot.lua:162`) shadows native newline. Low harm;
   move to `<M-j>` if needed.
 
 ## 🟢 Low / keep as-is
@@ -50,12 +49,12 @@ When a map conflicts with a native binding, choose the *safest* resolution, not 
   code review; special/plugin and floating windows keep native cursor movement.
 
 ## ⚠️ Non-native but real self-collisions (fix in the same pass)
-- ✅ `<leader>m` — Resolved. Quickfix "Add line to Quickfix" (`keymaps.lua:669`) is the
+- ✅ `<leader>m`: Resolved. Quickfix "Add line to Quickfix" (`keymaps.lua:807`) is the
   owner. Harpoon is `enabled = false`, so no live clash; a CONFLICT comment at
   `harpoon.lua:76` flags it to relocate (→ `<leader>ha`) if harpoon is ever re-enabled.
-- `<M-i>` in both `keymaps.lua:216` and `mouse-hover.lua` — verify no collision.
+- ✅ `<M-i>`: verified to exist only in `keymaps.lua`; mouse-hover defines no mapping.
 
 ## Notes
-- Line numbers captured 2026-06-07; re-verify before editing as the config evolves.
+- Reconciled with the live config on 2026-08-11. Re-verify line numbers before editing.
 - Leader maps never conflict with native Vim, so only bare keys and `<C->/<M->/<S->` chords
   are in scope here.

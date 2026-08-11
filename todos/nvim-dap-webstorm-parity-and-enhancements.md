@@ -5,22 +5,33 @@
 DAP is set up and working via LazyVim's `lazyvim.plugins.extras.dap.core` extra
 (`nvim-dap`, `nvim-dap-ui`, `mason-nvim-dap`, `nvim-dap-virtual-text`, `nvim-dap-go`).
 Core debugging loop verified working on Go (breakpoints, stepping, call stack,
-locals, continue). Goal: progressively close the convenience/UX gap with WebStorm
-without expecting to match its proprietary, beyond-DAP features.
+locals, continue).
+
+Python support is also installed through the Python extra (`debugpy` and
+`nvim-dap-python`). Rust support is configured through rustaceanvim and codelldb,
+but remains dormant because the system `rustup` toolchain is not installed. Node's
+js-debug adapter is installed; project launch and browser-attach workflows still
+need real-project verification.
+
+Goal: progressively close the convenience/UX gap with WebStorm without expecting
+to match its proprietary features outside the DAP protocol.
 
 ## Goal
 Get the everyday debugging experience as close to WebStorm-level smoothness as the
 DAP protocol allows (~85-90% parity). Enhance incrementally — one plugin/config at
 a time — verifying each before moving on.
 
-## Remaining Work (closeable with config)
+## Remaining Work
 
 ### Adapters — wire up the full stack
-- Python: install `debugpy` via `:Mason`; add `nvim-dap-python` (or LazyVim
-  `extras.lang.python` which includes DAP) for auto launch configs.
-- Rust: install `codelldb` via `:Mason`; configure cargo launch (LazyVim
-  `extras.lang.rust` covers this). `codelldb` has Rust pretty-printers.
-- Go (`delve`) and Node (`js-debug-adapter`) already installed and working.
+
+- [x] Go: delve configured and core workflow verified.
+- [x] Python: debugpy and nvim-dap-python installed through the Python extra.
+- [x] Rust editor config: rustaceanvim and codelldb installed.
+- [ ] Python: verify interpreter selection, launch, stepping, and variables in a
+  real virtual-environment project.
+- [ ] Rust: install `rustup`, then verify Cargo launch and codelldb.
+- [ ] Node/TS: verify project launch and browser attach through js-debug.
 
 ### Workflow / convenience plugins
 - `telescope-dap` — fuzzy-find breakpoints, frames, and launch configurations.

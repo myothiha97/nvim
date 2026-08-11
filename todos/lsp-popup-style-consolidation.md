@@ -8,17 +8,21 @@ Four entry points each carry their own copy of `{ border, max_width, max_height 
 
 | Entry point | File:line | border | max_width | max_height |
 |---|---|---|---|---|
-| `K` (LSP buffer-local) | `lua/plugins/lsp.lua:31` | rounded | 70 | 40 |
-| `K` (global fallback, dead code under LSP) | `lua/config/keymaps.lua:30-32` | rounded | 80 | 30 |
-| `<M-i>` signature | `lua/config/keymaps.lua:169` (uses `hover_opts`) | rounded | 80 | 30 |
-| Mouse hover | `lua/config/mouse-hover.lua:275-277` | rounded | 80 | 20 |
-| Right-click PopUp menu | `lua/config/options.lua:36, 41, 43` | rounded | 80 | 30 |
+| `<leader>k` (LSP buffer-local) | `lua/plugins/lsp.lua:3-8` | rounded | 65 | 20 |
+| `K` (global mapping) | `lua/config/keymaps.lua:213-223` | rounded | 80 | 30 |
+| `<M-i>` signature | `lua/config/keymaps.lua:213-216, 446-449` | rounded | 80 | 30 |
+| Mouse hover | `lua/config/mouse-hover.lua:283-288` | rounded | 80 | 20 |
+| Right-click PopUp menu | `lua/config/options.lua:57-64` | rounded | 80 | 30 |
 
 ## Out of scope (intentionally separate)
-- **Diagnostic floats** — `lua/config/options.lua:75-83`, `lua/config/keymaps.lua:200-209`, `lua/config/keymaps.lua:213-215`. Different content shape (short messages, `source`/`header`/`prefix` opts). Keep their own constant if consolidated later.
-- **Universal LSP-float wrapper** — `lua/config/keymaps.lua:8-30`. Adds `foldcolumn = "1"` and `+2 width` to every float through `vim.lsp.util.open_floating_preview`. Already universal — no change needed. Composes cleanly with per-caller `max_width`/`max_height`.
-- **Bespoke command floats** — `lua/config/keymaps.lua:~337` (Git Who), `~392` (Git Blame Line), `~533` (Unsaved Files). Content-driven sizing; share only `border = "rounded"` for visual consistency.
-- **Plugin popup systems** — `blink-cmp.lua` (own renderer), `oil.lua`, `snacks.lua` (picker), `fidget.lua` (progress). Not routed through LSP util.
+- **Diagnostic floats**: `lua/config/options.lua` and `lua/config/keymaps.lua`.
+  Their short messages and source/header/prefix options justify a separate config.
+- **Universal LSP-float wrapper**: `lua/config/keymaps.lua`. It adds a conditional
+  three-cell gutter only when documentation wraps, then applies the shared doc-float
+  surface. It does not replace the caller-specific width and height options.
+- **Bespoke command floats**: Git Who, Git Blame Line, and Unsaved Files in
+  `lua/config/keymaps.lua`. Their sizing is content-driven.
+- **Plugin popup systems**: blink.cmp, Oil, Snacks, and fidget use their own renderers.
 
 ## Plan
 1. Create `lua/config/lsp-popup.lua` returning a single table:
@@ -26,14 +30,19 @@ Four entry points each carry their own copy of `{ border, max_width, max_height 
    return { border = "rounded", max_width = 80, max_height = 30 }
    ```
 2. Replace the four duplicates above with `require("config.lsp-popup")`.
-3. Special-case `options.lua:36` — it embeds a Lua table as a *string literal* inside a `:anoremenu` Vim command. Either:
+3. Special-case `options.lua:57`: it embeds a Lua table as a string literal inside
+   an `:anoremenu` Vim command. Either:
    - Serialize the table back to a string at load time (`string.format`); or
    - Pre-build the string once after requiring the shared table.
-4. Delete the dead global `K` mapping at `keymaps.lua:30-32` (LazyVim's buffer-local LSP K already wins). Or repoint it at the shared table for symmetry — pick one.
+4. Decide which key owns hover dimensions. `<leader>k` currently uses the LSP table,
+   while global `K` uses the keymaps table. Repoint both at the shared table if the
+   intended dimensions are identical.
 
 ## Risks / things to verify
-- `mouse-hover.lua` currently sets `max_height = 20` deliberately (smaller because mouse popups feel intrusive when tall). Decide: standardize on 30 or keep mouse hover shorter via a per-caller override.
-- The `K` LSP buffer-local entry uses `max_width = 70` / `max_height = 40` — confirm intent before flattening. The taller value was set when debugging gopls hover width; may no longer be needed now that the bug is fixed.
+- `mouse-hover.lua` currently sets `max_height = 20` deliberately because mouse
+  popups feel intrusive when tall. Decide whether to keep this per-caller override.
+- `<leader>k` currently uses `65x20`, while `K` uses `80x30`. Confirm whether that
+  difference is intentional before flattening it.
 - The right-click PopUp menu opts live in a string-cmd context; after the change, reproduce `mouseright` on a symbol → "Show Hover Docs" / "Show Signature Help" and confirm sizing matches `K`.
 
 ## Future extension
