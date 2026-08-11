@@ -1,8 +1,10 @@
--- The three solarized-osaka builds, one `:colorscheme` away from each other.
+-- The solarized-osaka builds, one `:colorscheme` away from each other.
 --
 --   solarized-osaka-original    upstream craftzdog, nothing of ours applied
---   solarized-osaka-custom-v1   the selection we run (violet keyword)  <- default
+--   solarized-osaka-custom-v1   the selection we run  <- default
+--                               violet keyword + copper punctuation
 --   solarized-osaka-custom-v2   the same, on the warm keyword (yellow)
+--   solarized-osaka-custom-v3   the same, on the softer terracotta punctuation
 --
 -- The point of `original` is to have a reference build to diff against, because
 -- what we run is no longer stock. It is a precise thing rather than a vague one:
@@ -70,6 +72,19 @@ local builds = {
   -- Reach for this if violet ever reads as too recessive -- it buys a much
   -- wider worst-neighbour separation, 32.5 against violet's 19.1.
   ["custom-v2"] = { palette = { keyword = palette.variants.keyword.balanced } },
+
+  -- The previous punctuation colour, held until 2026-08-11. Kept as a build
+  -- rather than only as a value because it is the one that satisfies the
+  -- keyword/punctuation chroma pairing perfectly -- gap 0.4, against the
+  -- selection's 23.2 -- so it is the fallback if copper ever reads too hot.
+  --
+  -- Every other value measured that day is grouped under
+  -- `variants.punctuation.explored` in solarized-osaka-palette.lua as values
+  -- only. None of them needs a build: they were all rejected on looks, and the
+  -- reasoning is attached to each one there.
+  ["custom-v3"] = { palette = {
+    punctuation = palette.variants.punctuation.terracotta,
+  } },
 }
 
 local M = {}
@@ -79,10 +94,7 @@ local M = {}
 function M.load(name)
   local build = builds[name]
   if not build then
-    vim.notify(
-      ("solarized-osaka: unknown build %q"):format(tostring(name)),
-      vim.log.levels.ERROR
-    )
+    vim.notify(("solarized-osaka: unknown build %q"):format(tostring(name)), vim.log.levels.ERROR)
     return
   end
 
@@ -116,10 +128,7 @@ function M.load(name)
   end
 
   if not ok then
-    vim.notify(
-      ("solarized-osaka: build %q failed to load: %s"):format(name, err),
-      vim.log.levels.ERROR
-    )
+    vim.notify(("solarized-osaka: build %q failed to load: %s"):format(name, err), vim.log.levels.ERROR)
   end
 
   -- `vim.g.colors_name` is deliberately LEFT as "solarized-osaka", which is what
