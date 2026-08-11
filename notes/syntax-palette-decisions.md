@@ -304,6 +304,109 @@ DevOps script. It moved the least of the three families: real scripts branch wit
 dominated by those. `install-template.sh` is the highest number in the table at
 6.31%, but 6.22 of that predates this change.
 
+## Punctuation: terracotta → copper (2026-08-11)
+
+`#b55f4a` → `#be6421` (`copper_mid`). L\* 50.1 → 52.0, C\* 42.9 → 60.0, hue 40 →
+58. It fixes both of this role's recorded defects: contrast 4.26 → 4.56:1, which
+clears the WCAG AA floor it had been under since it was chosen, and distance from
+the error red 13.4 → 17.8, retiring what was the tightest pair in the palette.
+
+**The complaint was structural, not cosmetic, and the diagnosis is worth keeping.**
+Terracotta did not change; its context did. Count the hues after the keyword moved
+to violet:
+
+| role | hue | |
+| --- | --- | --- |
+| keyword violet | 310 | cool |
+| func azure | 250 | cool |
+| type sky | 249 | cool |
+| string cyan | 187 | cool |
+| **punctuation** | **40** | **warm — alone** |
+
+Under the old yellow keyword (hue 98) there were *two* warm accents. Violet is
+magenta-cool, so punctuation became the only warm colour on screen, carrying that
+whole side of the palette at emitted C\* 52.0 — and it does not have the presence
+for it. That is why the same value that worked beside yellow reads weak beside
+violet, and it is why the fix was chroma rather than lightness.
+
+**The pairing rule, found and then overruled the same day.** The observation:
+keyword and punctuation want the same emitted chroma. Two balanced pairings exist
+— upstream olive 87.3 / orange 90.6 (gap 3.2), and violet 52.3 / terracotta 52.0
+(gap 0.4). Every candidate that raised only punctuation scored 26–45 and was
+rejected on sight while it was being compared against terracotta.
+
+It lost to the warm-anchor argument above, and the reasons are worth recording
+because the rule is still useful otherwise: it rests on two data points, and it
+cannot see temperature — it treats violet+terracotta (cross-temperature) and
+olive+orange (both warm) as the same kind of pair. The selection carries a gap of
+23.2, half of copper's 44.9. **If the screen ever reads punctuation-heavy, that
+number is the first thing to look at.**
+
+`copper_mid` was chosen over `copper_warm` `#c26116` on measurement, not looks:
+the two are dE2000 **1.3** apart, at the just-noticeable threshold against the
+"under 10 is confusable" line this file uses. They are the same colour and this
+one carries 8 points less pairing damage. Do not re-run that comparison.
+
+### "Brighter" meant chroma three times in one session
+
+The most reusable result of the day, and it cost several rebuilt ladders.
+
+| the request | the actual difference |
+| --- | --- |
+| "upstream has higher contrast in the reddish colours" | contrast was *lower* (5.69 vs 5.89:1); chroma was +19 |
+| "copper is significantly brighter than terracotta" | +2.9 L\*, under the perceptual floor; chroma +29.7 |
+| "v6 is a bit brighter than v5" | −0.1 L\*, i.e. darker; chroma +5.1 |
+
+**Before building a ladder, measure which axis the complaint is actually on.**
+The stated axis was wrong every time. A lightness ladder was built, measured and
+discarded on looks ("too pink") because of this — and the reason it read pink is
+the same effect from the other side: perceived saturation falls as lightness
+rises, so holding C\* 43 while going to L\* 58 produces a pastel. **To stay earthy
+while brightening, chroma has to rise with lightness.**
+
+Every value measured that day is grouped under `variants.punctuation.explored`
+in the palette file, by axis, with the reason each one lost.
+
+## Where the palette landed, measured against upstream (2026-08-11)
+
+Answering the question the whole rework was for: is it calmer, and is it still
+Solarized? Weighted by real ink share on real files, emitted rather than authored.
+
+| | upstream | ours | |
+| --- | --- | --- | --- |
+| chroma, weighted (TSX) | 48.8 | **40.7** | −17% |
+| chroma, weighted (Go) | 26.1 | **20.2** | −23% |
+| chroma, accents only | 63.9 | **53.0** | −17% |
+| loudest accent | 90.6 | **75.5** | −17% |
+| lightness, accents only | 56.3 | **59.6** | +3.3 |
+
+**It is not a darker theme, it is a less saturated one**, and that is the right
+axis: the 2026-07-22 benchmark concluded that high chroma against near-black is
+what reads as glare. The composite glare proxy (ink × dE from background) is
+essentially flat at 35.5 → 36.7; the whole win is in saturation.
+
+The mean lightness went *up* because two roles left the accent set entirely —
+`Operator` `#849900` (C\* 87.3) → `base0` (C\* 6.1) and `@module` `#db302d`
+(C\* 93.6) → `base2` (C\* 11.7). Both are lighter and nearly achromatic now: they
+joined body text instead of competing with it. That is about 160 points of chroma
+removed from the screen, and it does not show up in a lightness average.
+
+**Still Solarized**, in family if not in value. dE2000 to the nearest canonical
+Solarized colour:
+
+| role | nearest | dE | |
+| --- | --- | --- | --- |
+| string | cyan | 0.5 | identical |
+| func | blue | 6.6 | same family |
+| punctuation | orange | 8.4 | same family, −16 chroma |
+| keyword | **violet** | 12.1 | same family, +8 L\* |
+| type | blue | **20.0** | **imported** |
+
+Comments, body and module sit on Solarized's own base tones. Even the keyword
+lands on Solarized's *own* violet `#6c71c4`, just lighter — the palette did not
+leave Solarized, it took a lighter and quieter reading of it. `Type` `#7dcfff` is
+the single genuine outsider.
+
 ## Type colour (2026-08-07)
 
 `#7dcfff` (hue 249, L\* 79.7, 11.08:1). Moved off the theme's `Type = yellow500`
