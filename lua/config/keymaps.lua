@@ -59,7 +59,7 @@ local function hide_float_marker(win)
 end
 
 -- Put `win` on the dedicated LSP-documentation surface (defined in
--- lua/colorschemes/solarized-osaka.lua). The colours live in the theme; this is
+-- lua/colorschemes/solarized-osaka/init.lua). The colours live in the theme; this is
 -- only the mechanism that scopes them to doc floats, so the Snacks picker and
 -- the blink completion menu -- which share NormalFloat / bg_float -- are left
 -- untouched. Same append-and-guard shape as hide_float_marker above.

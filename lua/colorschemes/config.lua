@@ -8,7 +8,7 @@ return {
     -- Named explicitly rather than as bare "solarized-osaka", because what we
     -- run is no longer stock and the bare name reads as if it were. The three
     -- builds and the reference `solarized-osaka-original` are in
-    -- lua/colorschemes/solarized-osaka-variants.lua.
+    -- lua/colorschemes/solarized-osaka/variants.lua.
     opts = { colorscheme = "solarized-osaka-custom-v1" },
     -- opts = {
     --   colorscheme = "gruvbox",

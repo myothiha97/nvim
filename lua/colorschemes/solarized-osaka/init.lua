@@ -1,4 +1,4 @@
-local palette = require("colorschemes.solarized-osaka-palette")
+local palette = require("colorschemes.solarized-osaka.palette")
 
 return {
   "craftzdog/solarized-osaka.nvim",
@@ -157,7 +157,7 @@ return {
       --
       -- This is a coverage change, not a colour change, so it is independent of
       -- which keyword colour is selected and stays true for the variants in
-      -- lua/colorschemes/solarized-osaka-variants.lua.
+      -- lua/colorschemes/solarized-osaka/variants.lua.
       paint({ "@punctuation.delimiter" }, c.base0)
 
       -- Two groups `paint` deliberately cannot handle. Both are stored as bare
@@ -210,7 +210,7 @@ return {
       --
       --   file                  real keywords   symbolic ops   total
       --   ai-prompts.lua            5.4%            2.1%        8.0%
-      --   solarized-osaka.lua       0.2%            0.5%        0.7%
+      --   solarized-osaka/init.lua       0.2%            0.5%        0.7%
       --
       -- An 11x spread between two Lua files in the same repo, with the SAME
       -- colour -- so the variation is density, not the value. Symbolic

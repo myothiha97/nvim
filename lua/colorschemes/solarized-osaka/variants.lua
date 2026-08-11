@@ -9,7 +9,7 @@
 -- The point of `original` is to have a reference build to diff against, because
 -- what we run is no longer stock. It is a precise thing rather than a vague one:
 -- the ONLY deviation this config makes from upstream is `on_highlights` in
--- solarized-osaka.lua. `transparent = true` is not ours -- it is the plugin's own
+-- solarized-osaka/init.lua. `transparent = true` is not ours -- it is the plugin's own
 -- default (see `defaults` in solarized-osaka/config.lua). So `original` is
 -- exactly "the same theme with our on_highlights switched off", and any
 -- difference you see between it and custom-v1 is a difference we introduced.
@@ -20,7 +20,7 @@
 -- HOW IT WORKS. Two kinds of override, applied the same way -- swap, rebuild,
 -- swap back:
 --
---   `palette`  swaps a role value in solarized-osaka-palette.lua. `on_highlights`
+--   `palette`  swaps a role value in solarized-osaka/palette.lua. `on_highlights`
 --              is a closure that reads the palette when it RUNS, and `require`
 --              hands every caller the same cached table, so a build does not
 --              re-paint a list of highlight groups. Every group using the role
@@ -37,12 +37,12 @@
 --   1. add an entry to `builds` below -- any role in the palette works, not just
 --      `keyword`, and a build may change several at once
 --   2. create colors/solarized-osaka-custom-vN.lua containing one line:
---        require("colorschemes.solarized-osaka-variants").load("custom-vN")
+--        require("colorschemes.solarized-osaka.variants").load("custom-vN")
 -- Builds are for values worth LIVING with, not for comparing candidates. A
 -- candidate belongs in the palette's variant tables with its numbers; it only
 -- earns a build once you would actually switch to it.
 
-local palette = require("colorschemes.solarized-osaka-palette")
+local palette = require("colorschemes.solarized-osaka.palette")
 
 ---@class SolarizedOsakaBuild
 ---@field palette table<string, string>|nil role overrides, keys from the palette's return block
@@ -58,7 +58,7 @@ local builds = {
   -- you saw could be ours or could be a side effect of the reset.
   original = { config = { on_highlights = function() end } },
 
-  -- The live selection, exactly as solarized-osaka-palette.lua has it. Empty on
+  -- The live selection, exactly as solarized-osaka/palette.lua has it. Empty on
   -- purpose: it exists so the name can be typed and so `config.lua` can name the
   -- build it wants rather than relying on the bare plugin name meaning "ours".
   ["custom-v1"] = {},
@@ -105,7 +105,7 @@ function M.load(name)
   end
 
   -- Rebuilds the whole theme through the same path the plugin's own
-  -- colors/solarized-osaka.lua uses, so every override in solarized-osaka.lua
+  -- colors/solarized-osaka.lua uses, so every override in solarized-osaka/init.lua
   -- is applied exactly as it is by default.
   local ok, err = pcall(function()
     require("solarized-osaka")._load()

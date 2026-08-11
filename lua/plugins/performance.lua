@@ -160,7 +160,7 @@ return {
       --
       -- It briefly turned yellow on 2026-08-08: the colorscheme used `on_colors`
       -- to retheme syntax, which mutates the shared ramp this line reads. That
-      -- override is gone (see the note atop solarized-osaka.lua), so the two are
+      -- override is gone (see the note atop solarized-osaka/init.lua), so the two are
       -- decoupled at the source and this tracks the theme again.
       local green = palette.green or "#849900"
       local function git_is_dirty()

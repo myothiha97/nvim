@@ -1,6 +1,6 @@
 # Syntax palette: decisions and measurements
 
-Reasoning behind the values in `lua/colorschemes/solarized-osaka-palette.lua`.
+Reasoning behind the values in `lua/colorschemes/solarized-osaka/palette.lua`.
 It lives here rather than in the Lua file so the config stays readable — that
 file is a data table, not a document.
 
@@ -290,7 +290,7 @@ by treesitter capture:
 | file | real keywords | symbolic operators | total |
 | --- | --- | --- | --- |
 | `ai-prompts.lua` | 5.4% | 2.1% | **8.0%** |
-| `solarized-osaka.lua` | 0.2% | 0.5% | **0.7%** |
+| `solarized-osaka/init.lua` | 0.2% | 0.5% | **0.7%** |
 
 An 11× spread between two Lua files in the same repo, with the same colour — the
 variation was density, not value. Symbolic operators were 26% of it in the dense
@@ -321,7 +321,7 @@ is the same shape as the `@punctuation.delimiter` inconsistency closed the day
 before, not a preference: nothing argued for the split, it was a side effect.
 
 **No colour was added and no Lua was edited.** `@keyword.operator` is already
-painted with `palette.keyword` in `solarized-osaka.lua`, so the whole change is
+painted with `palette.keyword` in `solarized-osaka/init.lua`, so the whole change is
 re-capturing four tokens into a group the theme already owns. The variant
 colorscheme follows for free, verified: `:colorscheme solarized-osaka-custom-v2`
 moves `@keyword.operator` to the yellow and back.
@@ -497,7 +497,7 @@ pair to 6.5.
 
 ## Fields and properties — currently off
 
-The overrides are commented out in `solarized-osaka.lua`, so `@variable.member`
+The overrides are commented out in `solarized-osaka/init.lua`, so `@variable.member`
 uses the theme's `cyan500` (identical to `String`) and `@property` uses
 `blue500` (identical to `Function`). Both are exact duplicates at dE2000 0.0.
 That is deliberate as of 2026-08-09; re-enabling is a two-line uncomment.
