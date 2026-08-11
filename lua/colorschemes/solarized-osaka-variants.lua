@@ -33,11 +33,14 @@
 -- leaving one mutated would make a later `:colorscheme solarized-osaka` silently
 -- keep this build's colours.
 --
--- ADDING v3, v4, ...:
+-- ADDING A BUILD:
 --   1. add an entry to `builds` below -- any role in the palette works, not just
 --      `keyword`, and a build may change several at once
---   2. create colors/solarized-osaka-custom-v3.lua containing one line:
---        require("colorschemes.solarized-osaka-variants").load("custom-v3")
+--   2. create colors/solarized-osaka-custom-vN.lua containing one line:
+--        require("colorschemes.solarized-osaka-variants").load("custom-vN")
+-- Builds are for values worth LIVING with, not for comparing candidates. A
+-- candidate belongs in the palette's variant tables with its numbers; it only
+-- earns a build once you would actually switch to it.
 
 local palette = require("colorschemes.solarized-osaka-palette")
 
@@ -61,27 +64,15 @@ local builds = {
   ["custom-v1"] = {},
 
   -- The warm keyword, kept switchable after violet won the default on
-  -- 2026-08-10. Yellow rather than olive, which was the other warm candidate:
-  -- the two measure within 0.7 points of each other on visual pull (9.4% vs
-  -- 8.7% of the screen's total, at the same dose), and that margin does not pay
-  -- for olive's two recorded faults -- it shifts 4.2 degrees toward green
-  -- between the laptop panel and the external monitor where yellow shifts 0.5,
-  -- and it lands dE 0.2 from the git-added green. Yellow is also the higher
-  -- contrast of the two, 7.23:1 against 5.93:1 as emitted.
-  --
-  -- Reach for this if violet ever reads as too recessive -- it buys a much
+  -- 2026-08-10. Yellow rather than olive, which is display-unstable -- see the
+  -- notes. Reach for this if violet ever reads as too recessive: it buys a much
   -- wider worst-neighbour separation, 32.5 against violet's 19.1.
   ["custom-v2"] = { palette = { keyword = palette.variants.keyword.balanced } },
 
   -- The previous punctuation colour, held until 2026-08-11. Kept as a build
-  -- rather than only as a value because it is the one that satisfies the
-  -- keyword/punctuation chroma pairing perfectly -- gap 0.4, against the
-  -- selection's 23.2 -- so it is the fallback if copper ever reads too hot.
-  --
-  -- Every other value measured that day is grouped under
-  -- `variants.punctuation.explored` in solarized-osaka-palette.lua as values
-  -- only. None of them needs a build: they were all rejected on looks, and the
-  -- reasoning is attached to each one there.
+  -- because it is the one value that satisfies the keyword/punctuation chroma
+  -- pairing perfectly -- gap 0.4 against the selection's 23.2 -- so it is the
+  -- fallback if copper ever reads too hot in a long session.
   ["custom-v3"] = { palette = {
     punctuation = palette.variants.punctuation.terracotta,
   } },
@@ -90,7 +81,7 @@ local builds = {
 local M = {}
 
 ---Load one of the builds as a colorscheme.
----@param name string build key, e.g. "original", "custom-v1", "custom-v2"
+---@param name string build key: "original", "custom-v1", "custom-v2", "custom-v3"
 function M.load(name)
   local build = builds[name]
   if not build then
@@ -140,7 +131,7 @@ function M.load(name)
   -- silently falls back to its auto theme -- a visibly duller statusline, with no
   -- error. Anything else keyed the same way would break the same way.
   --
-  -- So the three names are ENTRY POINTS, not identities: they are what you type,
+  -- So the build names are ENTRY POINTS, not identities: they are what you type,
   -- not what the editor calls itself afterwards. A build only ever changes syntax
   -- colour, so it IS solarized-osaka as far as the rest of the editor is
   -- concerned. Verified by diffing all 629 highlight groups across custom-v1 and
