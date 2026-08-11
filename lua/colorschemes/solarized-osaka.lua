@@ -74,8 +74,8 @@ return {
         --
         -- Pointed at the type colour on 2026-08-07 so "construction reads as the
         -- type being built" -- reasoned from TSX, which turned out not to use the
-        -- group. The effect was Lua-only: blue `{` `}` beside terracotta `(` `)`
-        -- `[` `]` in the same expression, and beside azure @property on nearly
+        -- group. The effect was Lua-only: blue `{` `}` beside the punctuation
+        -- colour on `[` `]` in the same expression, and beside azure @property on
         -- every line of a config table. Reverted 2026-08-09.
         "@constructor",
         "@constructor.tsx",
@@ -122,7 +122,7 @@ return {
       -- -- retuning the hex cannot change how much of the screen it covers, so
       -- do not reach for a new value. The only lever that works is moving
       -- captures off this list, and the two candidates (@variable.parameter,
-      -- @punctuation.bracket) were measured to be 88% of the terracotta in
+      -- @punctuation.bracket) were measured to be 88% of that colour in
       -- logic-heavy regions, so moving them would strip the files that already
       -- read well. See notes/syntax-palette-decisions.md.
       paint({
@@ -137,7 +137,7 @@ return {
 
       -- The tag DELIMITERS (`<`, `>`, `/`) go neutral, for the same reason
       -- `Operator` does further down: they are punctuation carrying no meaning
-      -- worth a hue, and they were 13.0% of the terracotta for that.
+      -- worth a hue, and they were 13.0% of the punctuation colour for that.
       paint({
         "@tag.delimiter.tsx",
         "@tag.delimiter.vue",
@@ -278,9 +278,11 @@ return {
       --   solarized LineNr   #664c00   34.0   42.9   84    28.8          2.33:1
       --   tokyonight LineNr  #3b4261   28.6   20.1  287    18.5          1.74:1
       --
-      -- Chroma is more than double tokyonight's, and hue 84 puts it in the same
-      -- family as this palette's yellow syntax accent (hue 98). So the gutter reads
-      -- as CONTENT competing with code rather than as chrome, which is what makes
+      -- Chroma is more than double tokyonight's, and hue 84 sat in the same warm
+      -- family as the syntax accents of the day (the keyword was yellow at hue 98
+      -- when this was written; it is violet now, but punctuation is warm at hue
+      -- 58, so the collision argument still holds). So the gutter read as CONTENT
+      -- competing with code rather than as chrome, which is what makes
       -- relative-jump numbers tiring to scan. It is also 10 L* further from the
       -- background than tokyonight's.
       --
@@ -369,11 +371,15 @@ return {
       -- and that is the whole point here:
       --   border -- chrome, so it wants to be barely there. `yellow700` sits at
       --     2.33:1 against the float, in the same register as
-      --     BlinkCmpMenuBorder's base02 (1.43:1). The keyword yellow was tried
-      --     first at 7.09:1 and read as a heavy box.
-      --   title  -- actual text, so it needs contrast. Keeping it on the keyword
-      --     yellow (7.09:1) makes it legible while staying the same hue family
-      --     as the border.
+      --     BlinkCmpMenuBorder's base02 (1.43:1). A syntax accent was tried first
+      --     at ~7:1 and read as a heavy box.
+      --   title  -- actual text, so it needs contrast, which is why it follows
+      --     `palette.keyword` rather than the border's amber.
+      -- NOTE: when this was written the keyword was yellow, so title and border
+      -- shared a hue family by design. The keyword moved to violet on 2026-08-10
+      -- and the title followed it automatically, so the title is now a cool
+      -- colour on a warm frame. Left alone deliberately -- it still reads fine,
+      -- and the alternative is hardcoding a hex that stops tracking the palette.
       -- Deliberately not `palette.type`: the border used to follow it, so every
       -- retune of the syntax type colour silently moved this chrome with it.
       hl.LspDocFloat = { fg = c.fg, bg = c.bg_float }

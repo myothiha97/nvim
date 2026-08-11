@@ -34,12 +34,51 @@ measured, and rejected for a recorded reason.
    not the variable — coverage is.** Dimming the hex makes the good files worse
    to fix the bad ones. Move the role instead.
 
-## Keyword colour (2026-08-08, reopened and SETTLED 2026-08-09)
+## Keyword: yellow → violet (SETTLED 2026-08-10)
 
-**Current value is `#aea10c` yellow (`balanced`), and it is settled.** Olive
-`#849900` held the slot for one day and was reverted. Do not reinstate olive
-without reading the display and dose findings below — they were not known when
-olive was chosen, and both of them favour yellow.
+`#aea10c` yellow → **`#a17bcc` warm violet**, and this is the current value. The
+yellow-vs-olive argument that fills the rest of this section is history: it was
+the right analysis of the wrong question, because both candidates lose to the
+finding below. Read this part first.
+
+**It moved because of dose, and the dose problem is only visible in P3.** This
+slot paints the highest-frequency capture in the daily stack, so rule 3 —
+frequency is inversely related to brightness — binds harder here than anywhere
+else. Measured off a real Go capture, every other accent on screen arrives at
+C\* 38–52 (Function 44.3, String 46.2, terracotta 52.0, Type 38.7) while yellow
+and olive both arrive at **C\* ~88**. Neither was an accent among accents; each
+was the only supersaturated colour in the field, and it was painting the densest
+capture on screen.
+
+Violet emits L\* 58.6, C\* 52.3, hue 312, 5.81:1 — inside the band its neighbours
+occupy, and 10.3 L\* *below* body text, so keywords drop to a structural layer and
+the eye lands on identifiers and call names instead. Share of total on-screen
+visual pull at the measured dose (5.24% of ink in real Go): violet 7.0%, olive
+8.7%, yellow 9.4%. The keyword falls from the 5th loudest thing on screen to the
+7th of 9.
+
+**Known cost, accepted:** worst-neighbour separation drops from yellow's 32.5 to
+19.1, just under the unambiguous line — but that is against `base01`, which is
+1.55% of ink. The roles that actually cover the screen still clear it (Comment
+22.3, Normal 21.2) and the pairs that carry meaning are wide open (Function 37.8,
+Type 38.1).
+
+**Stop rule:** re-measure if keyword dose climbs past ~7% of ink. That is the
+point where the separation yellow buys starts to be worth its loudness. The warm
+option is not gone — `:colorscheme solarized-osaka-custom-v2` is yellow.
+
+Purple candidates measured against violet on 2026-08-10 and not chosen, kept so
+the band is not re-derived: `#957fb8` kanagawa (best minimum separation at 22.6,
+but flat at C\* 33.5), `#9d7cd8` tokyonight (more vivid and cooler, moves toward
+the blue family), `#b67faf` warm rose (clearest from blue, but reads rose rather
+than keyword), `#bb9af7` and `#cba6f7` (L\* 69.7 and 74.0, above body text —
+rule 3 again).
+
+### The yellow-vs-olive argument, now historical
+
+Kept because the display-stability and dose findings in it are reusable, and
+because olive is still a named variant. Olive `#849900` held the slot for one day
+and was reverted. Do not reinstate it without reading the two findings below.
 
 **Olive lost on display stability, not on looks.** Ghostty runs
 `window-colorspace = display-p3`, so between the MacBook XDR panel and an
