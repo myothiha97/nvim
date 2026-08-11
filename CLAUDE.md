@@ -5,6 +5,12 @@
   change-gate (`neovim-config-change-gate.md`) that decides whether a requested
   change should happen at all. Apply that gate to every change request.
 - Then read all the infos and instructions inside `docs/` and follow them closely.
+  `docs/CLAUDE.md` is the canonical one; `docs/AGENTS.md` just points at it.
+
+> This file is the canonical entry point for **every** AI agent, not only Claude.
+> `AGENTS.md` at the repo root is a pointer here so that Codex and anything else
+> looking for that filename lands in the same place. Keep it a pointer — two
+> copies of these rules will drift, and an agent will then follow the stale one.
 
 ## One loose end from the freeze session (review by ~2026-09-20)
 
