@@ -13,7 +13,7 @@ end
 
 -- Active-file band for the Explorer list (same color as OilCursorLine).
 -- The themes disable CursorLine globally (bg NONE — see
--- colorschemes/solarized-osaka.lua), so the row that snacks' `follow_file`
+-- colorschemes/solarized-osaka/init.lua), so the row that snacks' `follow_file`
 -- parks on the active file renders invisible. A winhighlight remap (the
 -- oil.nvim approach) doesn't work here: snacks rewrites the list window's
 -- CursorLine winhighlight entry on every render, which also replaces the
