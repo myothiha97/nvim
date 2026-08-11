@@ -185,10 +185,137 @@ local variants = {
   -- Special, Debug, @punctuation.bracket, @variable.parameter,
   -- @variable.builtin, JSX tags and delimiters, @keyword.import.
   punctuation = {
-    terracotta = "#b55f4a", -- SELECTED. hsl(12,42,50), L* 50.1, 4.26:1
+    -- SELECTED 2026-08-11, replacing terracotta after a session that walked all
+    -- three axes. The complaint it answers: this role read as receding beside the
+    -- violet keyword, and upstream's Lua looked clearer for it.
+    --
+    -- It fixes both of this role's recorded defects. Contrast goes 4.26 -> 4.56:1,
+    -- clearing the WCAG AA floor terracotta had been under since it was chosen.
+    -- Distance from the error red goes 13.4 -> 17.8, because hue 58 sits 22
+    -- degrees off that red's 36 where terracotta's 40 sat only 4 away -- this was
+    -- the tightest pair in the palette and is no longer.
+    --
+    -- KNOWN COST, accepted: it breaks the pairing rule below. It emits C* 75.5
+    -- against the violet keyword's 52.3, a gap of 23.2 where terracotta held 0.4.
+    -- That was measured and stated before it was picked. Half of copper's 44.9,
+    -- which is why this rung and not that one. If the screen ever reads
+    -- punctuation-heavy, the pairing gap is the number to look at first.
+    --
+    -- Chosen over `copper_warm` on measurement, not looks: the two are dE2000
+    -- 1.3 apart -- at the just-noticeable threshold, against the "under 10 is
+    -- confusable" line this file uses -- so they are the same colour, and this
+    -- one carries 8 points less pairing damage. Do not re-run that comparison.
+    copper_mid = "#be6421", -- L* 52.0, C* 60.0, hue 58, 4.56:1, emits C* 75.5
+    -- The previous selection, held from 2026-07 to 2026-08-11. Kept because it
+    -- is the only value that satisfies the pairing rule perfectly (gap 0.4), so
+    -- it is where to return if the new one reads too hot. Its two defects are
+    -- why it moved: the palette's only sub-AA colour, and dE 13.4 from the error
+    -- red, the tightest pair here at the time.
+    terracotta = "#b55f4a", -- L* 50.1, C* 42.9, hue 40, 4.26:1
+    -- Everything measured on 2026-08-11, kept as ONE group rather than scattered
+    -- through this table. Nothing reads it. It exists so the same three ladders
+    -- are not rebuilt a fourth time, and so the reasoning below stays attached to
+    -- values you can actually try.
+    --
+    -- THE FINDING THAT MATTERS, and the reason most of these lost:
+    --
+    -- This role is the only accent outside the band. Measured as emitted:
+    --   comment    44.4      terracotta 50.7      violet 58.6
+    --   azure      58.8      cyan       59.9      base0  68.9
+    -- The three real accents cluster inside 1.3 points of each other and
+    -- terracotta trails them by 9.1. That is the 2026-07-22 benchmark's finding
+    -- ("terracotta is the accent-band outlier, not yellow; if the palette is
+    -- ever reopened, terracotta is the lead") still true after two keyword
+    -- changes, and it is why this role reads as receding next to violet.
+    --
+    -- LIGHTNESS IS THE RIGHT AXIS HERE, and it is the one place rule 2 inverts.
+    -- Rule 2 says lightness-only moves land under the ~5 L* perceptual floor and
+    -- return no signal. The gap to close is 9.1, so it clears that floor
+    -- decisively -- and unlike chroma it is the only axis that does NOT break the
+    -- pairing rule below. Emitted chroma stays locked at violet's 52.3 the whole
+    -- way up the ladder (balance gap 0.0-0.4).
+    --
+    -- THE PAIRING RULE, found 2026-08-11 and the reason a chroma ladder was
+    -- built, measured and thrown away the same day. The keyword and punctuation
+    -- accents must sit at the SAME emitted chroma or one drowns the other. There
+    -- are exactly two balanced pairings: both loud (upstream olive 87.3 /
+    -- orange500 90.6, gap 3.2) or both calm (violet 52.3 / terracotta 52.0, gap
+    -- 0.4). Every value that raised only punctuation scored a gap of 26-45 and
+    -- was rejected on sight. Do not raise one of this pair without the other.
+    --
+    -- Raising lightness was expected to walk into the error red (#ff3b30 sits at
+    -- L* 56.7, hue 36, only 4 degrees off this role's 40). It does not: chroma
+    -- does the separating there, 42.9 against 88.7, so the distance moves 13.4 ->
+    -- 11.8 across the whole ladder and worst-neighbour stays above 30.
+    --
+    -- Dose checked before proposing, since this is 19.10% of ink in real TSX, the
+    -- highest of any accent. Share of on-screen visual pull goes 17.3% -> 19.2%
+    -- at the top of the ladder, still 3rd of 6 behind String 28.8% and body
+    -- 27.6%. It does not become the loudest thing on screen.
+    --
+    -- WATCH FOR A CATEGORY SHIFT. The names are honest: hue 40 is earthy at
+    -- L* 50 and coral at L* 58. This is the "dimming a hue changes its category"
+    -- trap running in reverse, and it is what sank the whole group -- every one
+    -- of them was judged "too orange or too pink" on looks despite measuring
+    -- well. Judge anything from here on looks, never on the numbers alone.
+    explored = {
+      -- LIGHTNESS at hue 40, chroma held at the balance point. The measured
+      -- best direction: it closes the 9.1 gap, fixes the sub-AA contrast, and is
+      -- the only axis that keeps the pairing intact. Rejected on looks -- reads
+      -- pink on the way up.
+      clay = "#c16953", -- L* 54.0 (+4), 4.90:1, vs error red 12.0, worst 32.3
+      coral = "#c76e58", -- L* 56.0 (+6), 5.25:1, vs error red 11.7, worst 31.6
+      -- Lands exactly on the cluster: violet L* 58.1, azure 59.1, cyan 60.4.
+      salmon = "#cd735d", -- L* 58.0 (+8), 5.62:1, vs error red 11.8, worst 31.0
+
+      -- HUE at salmon's lightness. All hold L* 58 and the balance chroma, so hue
+      -- is the only variable and they compare directly against `salmon`.
+      -- Rotating toward red is close to free: contrast is flat (5.58-5.62:1) and
+      -- the error-red distance IMPROVES going red (11.8 at hue 40 -> 13.1 at
+      -- hue 26), because rotating off that red's own hue 36 buys more than
+      -- matching its lightness costs. Worst-neighbour falls 31.0 -> 28.2.
+      sunset = "#cf7163", -- hue 34
+      blush = "#d16f68", -- hue 30
+      dusty_rose = "#d16e6c", -- hue 26
+      -- The browner direction at the same three lightnesses, measured and not
+      -- pursued: hue 46 gives #be6b4d / #c47052 / #ca7557.
+
+      -- CHROMA. All raise punctuation without raising the keyword, so they score
+      -- a pairing gap of 26-45 against the 0.4 the selected pair holds. `copper`
+      -- was promoted out of this group to a live candidate anyway -- see the note
+      -- on it above.
+      ember = "#c85c27", -- C* 63.1, gap 26.0
+      sienna_hot = "#d85d13", -- C* 74.7, gap 44.1
+      -- The one value that satisfied every numeric constraint at once: balanced,
+      -- AA-clean, and the only warm value ever measured to clear dE 20 from the
+      -- error red (24.9). Lost because hue 70 is amber, and this role is 19.1%
+      -- of TSX ink -- it would have put gold back on the screen, which is what
+      -- moved `Type` off yellow in the first place.
+      balanced_amber = "#a67136", -- L* 52.0, C* 43.1, hue 70, 4.56:1
+
+      -- The chroma ladder at hue 58 that produced the selection. All share
+      -- L* ~52, so saturation is the only variable across them and against
+      -- `copper_mid`. Terracotta is the C* 42.9 end of the same axis.
+      copper_soft = "#ba662b", -- C* 54.8, emits 67.9, pairing gap 15.6
+      -- dE2000 1.3 from the selection -- the same colour, 8 points more pairing
+      -- damage. It was a coin flip on looks and lost on the only number that
+      -- separated them.
+      copper_warm = "#c26116", -- C* 65.1, emits 83.7, pairing gap 31.4
+      -- The top of that ladder, tried first and judged "significantly brighter".
+      -- Worth knowing WHY it reads that way: it is only +2.9 L* over terracotta,
+      -- under the perceptual floor, so the whole impression is chroma (+29.7).
+      -- A "make it brighter" request on this role is almost always a chroma
+      -- request -- check which axis before building a ladder.
+      copper = "#cb6001", -- C* 72.6, emits 97.2, pairing gap 44.9
+      -- The real Solarized orange, for reference: copper's saturation at a
+      -- redder hue, and why copper reads as "more solarized". The theme's own
+      -- orange500 #c94c16 is the same colour to within dE 1. Both are sub-AA.
+      solarized_orange = "#cb4b16", -- L* 49.2, C* 72.5, hue 48, 4.13:1
+    },
     -- Measures better on both counts: 7.19:1 (terracotta is under the WCAG AA
     -- floor) and dE2000 21.3 from the error red against terracotta's 10.1, the
-    -- tightest pair in the palette. Untried in place.
+    -- tightest pair in the palette. Untried in place, and at L* 65.5 it clears
+    -- the accent cluster entirely rather than joining it.
     tokyonight = "#f7768e",
     muted_contrast = "#c75b6b",
     crimson = "#bf2c47",
@@ -315,7 +442,12 @@ return {
   -- values stay measured if it ever reopens -- but read the variants note first,
   -- because the rejection was on looks after five colours, not on mechanics.
   keyword_grammar = variants.keyword_grammar.cool_grey,
-  punctuation = variants.punctuation.terracotta,
+  -- SELECTED 2026-08-11, replacing terracotta. Fixes both of this role's
+  -- recorded defects (sub-AA contrast, and the tightest pair in the palette
+  -- against the error red) at the cost of a 23.2 pairing gap. Full reasoning,
+  -- the pairing rule and every value measured on the way are on
+  -- `variants.punctuation` above. `terracotta` is one word away if it reads hot.
+  punctuation = variants.punctuation.copper_mid,
   func = variants.func.azure,
   type = variants.type.tokyonight,
   -- Currently UNREAD: solarized-osaka.lua has the `@variable.member` override

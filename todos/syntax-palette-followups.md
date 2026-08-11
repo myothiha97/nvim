@@ -9,11 +9,19 @@
 > It is kept as the historical record of *why* things were tried, not as a
 > statement of what is set today.
 >
-> **No live items.** Item 7 (symbolic logical operators off `base0`) was closed
-> 2026-08-11. Item 6 (`@punctuation.delimiter` on the keyword colour) was closed
-> 2026-08-10. Item 5 was closed 2026-08-09 with yellow `#aea10c`, and that
-> selection was itself superseded on 2026-08-10 by warm violet `#a17bcc`; the
-> yellow is still reachable as `:colorscheme solarized-osaka-custom-v2`.
+> **One live item: 8 (`Type` brightness).** It is the only role in the palette
+> not yet optimised, it is not blocking, and it needs a real `.ts` file with a
+> large `import type` block to judge. Review at the 2026-09-20 checkpoint.
+>
+> Closed on 2026-08-11: item 7 (symbolic logical operators off `base0`) and the
+> punctuation rework (terracotta `#b55f4a` → copper `#be6421`, recorded in
+> `notes/syntax-palette-decisions.md` rather than as an item here, since it was
+> never filed as one). Item 6 (`@punctuation.delimiter` on the keyword colour)
+> closed 2026-08-10. Item 5 closed 2026-08-09 with yellow `#aea10c`, itself
+> superseded 2026-08-10 by warm violet `#a17bcc`.
+>
+> Both alternatives stay one command away: `:colorscheme solarized-osaka-custom-v2`
+> for the warm keyword, `-custom-v3` for the softer terracotta punctuation.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
@@ -179,9 +187,9 @@ strings and function names respectively.
 
 ## Remaining Work
 
-Nothing is live. Items 1 and 3 are "slightly better" changes, which rule 1 says
-is never a reason on its own. Review at the 2026-09-20 checkpoint and most likely
-drop them. Items 2, 4, 5, 6 and 7 are closed.
+Item 8 is the only live one. Items 1 and 3 are "slightly better" changes, which
+rule 1 says is never a reason on its own. Review all three at the 2026-09-20
+checkpoint and most likely drop 1 and 3. Items 2, 4, 5, 6 and 7 are closed.
 
 ### 1. Neutral brackets in dense JSX
 
@@ -489,6 +497,66 @@ Reverting is `rm -r after/`, or deleting one file to drop one language.
 
 Largest move is +0.88 points against the 7% stop rule on the violet. Bash was
 expected to be the risk and moved least; see the note file for why.
+
+### 8. `Type` is the brightest thing on screen — OPEN, the only role left
+
+**The one genuinely unoptimised colour**, filed 2026-08-11 after the punctuation
+rework closed. Not blocking: it is doing its job, which was to separate types from
+`Function` after every type in Go/TS/Python read as gold. That works. The cost is
+brightness.
+
+`#7dcfff` sits at **L\* 79.5**, the brightest value in the palette by 20 points,
+and it is the only imported colour — dE 20.0 from Solarized's own blue, against
+0.5–12.1 for every other accent.
+
+**It is language-specific, and the numbers say why.** Measured coverage:
+
+| file | area | marks | avg run |
+| --- | --- | --- | --- |
+| `recurringCheckoutService.ts` | **10.86%** | 269 | **18.3 ch** |
+| `index.tsx` | 6.79% | 61 | 7.8 ch |
+| `demo.go` | 4.89% | 101 | 5.2 ch |
+| `test.sh` | 0% | 0 | – |
+
+TS is the bad case because an `import type { ... }` block is 18-character runs of
+the brightest colour, line after line. Go gets 5-character runs of `int`,
+`string`, `error` — the "rare landmark" the value was justified as. Same colour,
+different dose, exactly rule 4.
+
+**Do not try to fix this by dimming it inside the blue band.** Every saved
+candidate was re-scored against the current palette on 2026-08-11 (the previous
+scores predate both the violet keyword and the copper punctuation, and rejections
+are only valid against the palette that existed when they were made):
+
+| candidate | L\* | vs Function |
+| --- | --- | --- |
+| `sky_calm` `#56cae7` | 75.7 | 16.0 |
+| `sky_dim` `#39cce9` | 75.6 | 16.7 |
+| `periwinkle` `#a7b1fe` | 74.3 | 21.9, but worst neighbour 17.3 |
+| `nvim_type` `#2ac3de` | 72.3 | 15.2 |
+| `vscode_support` `#0db9d7` | 68.8 | 12.7 |
+| `sky` `#0edfff` | **81.3** | 20.7 — the only one that clears, and it is *brighter* |
+
+Every dimmer option collides with `Function`. That is arithmetic, not bad luck:
+`Type` and `Function` sit at hue 249 and 250, one degree apart, so their entire
+separation **is** the 20.6 L\* gap. Lowering Type's lightness necessarily
+collapses the pair. The blue band cannot produce a dimmer Type.
+
+**The three real directions, all unexplored:**
+
+1. **Move `Type` out of the blue band.** The 2026-07-22 note measured magenta
+   `#cc3399` at 24.5 and violet `#a3a9e8` at 19.2 for this — but that was scored
+   against a yellow keyword, and violet is now the keyword, so magenta is the
+   surviving lead and needs re-scoring against violet at hue 310.
+2. **Move `Function` instead**, freeing room below for a dimmer Type. Never
+   tried. The existing note only records that Function cannot be *brightened*
+   without collapsing the pair; going the other way was not tested.
+3. **Reduce the dose rather than the value.** No mechanism known — `@type` cannot
+   be scoped to "not inside an import block" by highlight group, and an
+   `after/queries` split would need a capture the grammar does not provide.
+
+Review at the 2026-09-20 checkpoint. Judge on a real `.ts` file with a large
+`import type` block, not on Go.
 
 ## Notes
 
