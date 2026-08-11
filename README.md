@@ -263,7 +263,8 @@ snippets/           VSCode-format snippets
 rules.md            the discipline rules I follow when changing the config
 notes/              guides — safe-editing · freeze-policy · maintenance/delegation · reading codebases · learning · journal
 todos/              backlog — one file per future config idea (not done yet)
-docs/               CHANGELOG · agent instructions
+AGENTS.md           pointer for non-Claude agents → CLAUDE.md (the canonical entry point)
+docs/               CHANGELOG · agent instructions (docs/CLAUDE.md is canonical)
 ```
 
 ---
