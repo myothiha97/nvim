@@ -8,3 +8,7 @@ foo.*
 .nvimlog
 data
 .DS_Store
+
+# Python bytecode from scripts/
+__pycache__/
+*.pyc

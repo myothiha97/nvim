@@ -39,7 +39,7 @@
 -- ROLE they fill, never for a theme slot -- a role can move to any hue, and
 -- naming it after a colour is how `green` ended up holding a yellow.
 --
--- These feed SYNTAX GROUPS ONLY. solarized-osaka.lua deliberately has no
+-- These feed SYNTAX GROUPS ONLY. solarized-osaka/init.lua deliberately has no
 -- `on_colors`, so nothing here can reach diagnostics, git signs, lualine or any
 -- other UI. See the note at the top of that file before changing the approach.
 --
@@ -151,7 +151,7 @@ local variants = {
   -- accent is cool (violet 310, azure 250, sky 249, cyan 187).
   --
   -- HARD CONSTRAINT: keep clear of the error red `#ff3b30` (L* 56.7, C* 88.7,
-  -- hue 36, set in solarized-osaka.lua) so brackets never read as diagnostics.
+  -- hue 36, set in solarized-osaka/init.lua) so brackets never read as diagnostics.
   -- Chroma does that work, not hue -- every warm value here sits within a few
   -- degrees of hue 36, and the only one ever measured to clear dE 20 was an
   -- amber at hue 70 that failed for other reasons (`explored.balanced_amber`).
@@ -304,7 +304,7 @@ local variants = {
   -- Fields and properties (@variable.member, @property, @tag.attribute by link).
   --
   -- NOTHING IN THIS TABLE IS APPLIED. The `hl["@variable.member"]` line in
-  -- solarized-osaka.lua is commented out as of 2026-08-09, so member falls back
+  -- solarized-osaka/init.lua is commented out as of 2026-08-09, so member falls back
   -- to the theme's cyan500 and is an exact duplicate of String (dE2000 0.0).
   -- Re-enabling is a one-line uncomment there.
   --
@@ -338,7 +338,7 @@ local variants = {
 return {
   -- Every candidate above, exposed by role so the alternative colorschemes can
   -- name one without copying its hex. Read only by
-  -- lua/colorschemes/solarized-osaka-variants.lua; nothing in the theme itself
+  -- lua/colorschemes/solarized-osaka/variants.lua; nothing in the theme itself
   -- touches it, and it costs nothing -- the table is built either way.
   variants = variants,
 
@@ -346,7 +346,7 @@ return {
   -- accent band it shares the screen with, on the densest capture in the stack.
   keyword = variants.keyword.warm_violet,
   -- UNREAD. The grammar-dimming experiment was rejected 2026-08-09 and
-  -- solarized-osaka.lua paints nothing with it. Kept wired so the values stay
+  -- solarized-osaka/init.lua paints nothing with it. Kept wired so the values stay
   -- measured if it reopens.
   keyword_grammar = variants.keyword_grammar.cool_grey,
   -- Copper over terracotta: fixes the sub-AA contrast and the error-red
@@ -357,7 +357,7 @@ return {
   -- Off the theme's yellow500, which made every type in Go/TS/Python read as
   -- gold. Known weak pair with Function -- see the note on the variant.
   type = variants.type.tokyonight,
-  -- UNREAD. solarized-osaka.lua has the `@variable.member` override commented
+  -- UNREAD. solarized-osaka/init.lua has the `@variable.member` override commented
   -- out, so member uses the theme's cyan500. One-line uncomment if it reopens.
   member = variants.member.rose,
 }

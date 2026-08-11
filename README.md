@@ -258,6 +258,7 @@ init.lua            bootstrap
 lua/config/         options · keymaps · autocmds · lazy · mouse-hover · ai-prompts
 lua/plugins/        one file per plugin (disabled specs kept for reference)
 lua/colorschemes/   active theme (config.lua) + reference-only alternates
+scripts/palette/    measuring tools for the syntax colours (see its README)
 snippets/           VSCode-format snippets
 rules.md            the discipline rules I follow when changing the config
 notes/              guides — safe-editing · freeze-policy · maintenance/delegation · reading codebases · learning · journal

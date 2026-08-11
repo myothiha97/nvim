@@ -202,7 +202,7 @@ Only do this if dense JSX actually reads busy in daily work.
 
 ### 2. TS/JS variables are an accent, other languages are not — DONE
 
-Closed. `solarized-osaka.lua` links `@variable.typescript` and
+Closed. `solarized-osaka/init.lua` links `@variable.typescript` and
 `@variable.javascript` back to `@variable`, so plain variables use `base0` in
 every JS/TS file and match Go and Python.
 
@@ -334,7 +334,7 @@ the perceptual threshold and will return no signal, which is the same trap the
 Knock-on checks before shipping any of these:
 
 - `base0` is used well beyond `Normal`. Grep the plugin theme and
-  `solarized-osaka.lua` for every consumer (statusline, floats, `@variable`,
+  `solarized-osaka/init.lua` for every consumer (statusline, floats, `@variable`,
   which item 2 deliberately links back to `@variable` for the JS/TS family) and
   confirm none of them get too loud.
 - Raising base text widens the gap to `Comment` (3.45:1). Comments are
@@ -409,9 +409,9 @@ Three things to carry into the review so it is not re-derived:
 
 **Closed.** Applied exactly as proposed below: `@punctuation.delimiter` moved out
 of the keyword paint list and onto `c.base0`, beside `Operator` and the tag
-delimiters, in `lua/colorschemes/solarized-osaka.lua`. Nothing else changed with
+delimiters, in `lua/colorschemes/solarized-osaka/init.lua`. Nothing else changed with
 it — it is a coverage change, so it holds for every keyword colour, including
-the variants in `lua/colorschemes/solarized-osaka-variants.lua`.
+the variants in `lua/colorschemes/solarized-osaka/variants.lua`.
 
 Landed in the same session as the keyword move to violet `#a17bcc`, but the two
 are independent decisions and were measured separately.
@@ -425,7 +425,7 @@ inconsistency rather than a preference, so it does not need the freeze
 checkpoint, but it was left because the palette was already good enough to work
 in.
 
-`@punctuation.delimiter` sits in the keyword paint list in `solarized-osaka.lua`
+`@punctuation.delimiter` sits in the keyword paint list in `solarized-osaka/init.lua`
 while its siblings `@punctuation.bracket` and `@punctuation.special` sit in the
 terracotta list. So every `,` `.` `:` `;` is painted `#aea10c`. Nothing in the
 notes argues for that split, and `Operator` was moved to `base0` on 2026-08-08
@@ -471,7 +471,7 @@ operators are keywords too".
 Raised from a real TSX file where `{isChangedBg && !!description}` showed its
 branch condition and its double negation in the same grey as everything around
 them. Like item 6, this reads as an inconsistency rather than a preference:
-`solarized-osaka.lua` puts `@keyword.operator` on the keyword colour on purpose,
+`solarized-osaka/init.lua` puts `@keyword.operator` on the keyword colour on purpose,
 so Python's `not x` and Lua's `and` are violet, while `!x` and `&&` in Go, the
 JS/TS family and Bash fell through `Operator` to `base0`. The languages that lose
 the accent are exactly the ones that spell the concept with symbols.
