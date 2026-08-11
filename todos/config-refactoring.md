@@ -14,24 +14,32 @@ Refactor and simplify configuration files to make them more consistent, maintain
 
 ## Language Priorities and Current State
 
-| Language | Status |
-|----------|--------|
-| TS/JS    | Fully configured |
-| Go       | Not configured yet |
-| Python   | ~30% configured; some LSP features may already work |
-| Rust     | Not configured yet |
-| C        | Not configured yet |
+| Language / area | Current state |
+|---|---|
+| TS/JS/React | Daily-driver ready: vtsls, prettierd, js-debug, Vitest |
+| Go | Production-ready: gopls, formatters, golangci-lint, delve, neotest |
+| Python | Configured: basedpyright, ruff, debugpy, neotest, venv selector; real-project verification remains |
+| DevOps | YAML/Docker/Terraform/Helm extras and tools installed; Docker/Terraform/Helm attachment remains to verify |
+| Bash | bashls, shellcheck, and shfmt configured |
+| Rust | Extra and codelldb installed, dormant until `rustup` is installed |
+| C/C++ | Deferred; clangd extra is not enabled |
 
 ## Planned Additions
 
 ### AI Action Keymaps / Commands
-- Generate commit messages
-- Analyze the codebase
-- Review new changes
+
+- [x] Generate commit prompts (`lua/config/ai-prompts.lua`).
+- [x] Analyze the codebase (`lua/config/ai-prompts.lua`).
+- [x] Review changes (`lua/config/ai-prompts.lua`).
+- [x] Inline and agentic edits (`lua/plugins/codecompanion.lua`).
 
 ### Code Analysis Keymaps / Commands
-- Check code coverage or code quality → display results in a popup or dedicated pane
-- Analyze all variables, functions, classes, objects, and symbols used in a file (with usage counts) → display in a popup or dedicated pane
+
+- [x] Test and coverage panels through neotest and nvim-coverage.
+- [x] Current-file symbol outline through Trouble.
+- [ ] Advanced semantic inspector with categorization or usage counts. This remains
+  optional and is specified under `docs/phases/phase-2/`; do not build it during the
+  freeze unless it unblocks real work.
 
 ### Make the Neovim config as lean as possible
 

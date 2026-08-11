@@ -70,11 +70,8 @@ Add as rules 9 and 10, then link this file from the References section.
 
 ## Also fix while in here
 
-- **Rule 4 is now stale.** It says "Never edit the config directly on `main`. Always
-  switch to a `dev` or feature branch first." As of 2026-08-05 the workflow moved to
-  working on `main` directly (`dev` was merged and fast-forwarded). Either update
-  rule 4 to match, or go back to branching. Right now the rulebook contradicts the
-  actual workflow, and the change gate cites `rules.md` as its source of truth.
+- **Resolved:** keep rule 4. The repository returned to branch-first work, and recent
+  changes were merged through `dev` or feature branches. Do not weaken the rule.
 - Add this file to the References list in `rules.md` so the reasoning stays findable
   once the rules themselves are compressed to one line each.
 
