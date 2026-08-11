@@ -1,34 +1,63 @@
--- Alternative solarized-osaka colour selections, one `:colorscheme` away.
+-- The three solarized-osaka builds, one `:colorscheme` away from each other.
 --
--- The default theme (`solarized-osaka`) holds the considered selection, in
--- solarized-osaka-palette.lua. This file exists so a measured-but-not-chosen
--- candidate stays SWITCHABLE rather than deleted, without becoming a second
--- palette that has to be kept in sync with the first.
+--   solarized-osaka-original    upstream craftzdog, nothing of ours applied
+--   solarized-osaka-custom-v1   the selection we run (violet keyword)  <- default
+--   solarized-osaka-custom-v2   the same, on the warm keyword (yellow)
+--
+-- The point of `original` is to have a reference build to diff against, because
+-- what we run is no longer stock. It is a precise thing rather than a vague one:
+-- the ONLY deviation this config makes from upstream is `on_highlights` in
+-- solarized-osaka.lua. `transparent = true` is not ours -- it is the plugin's own
+-- default (see `defaults` in solarized-osaka/config.lua). So `original` is
+-- exactly "the same theme with our on_highlights switched off", and any
+-- difference you see between it and custom-v1 is a difference we introduced.
 --
 -- Costs nothing at startup: nothing here is read until `:colorscheme` names a
--- variant, because the only entry points are the one-line files in `colors/`.
+-- build, because the only entry points are the one-line files in `colors/`.
 --
--- HOW IT WORKS. `on_highlights` in solarized-osaka.lua is a closure that reads
--- `palette.keyword` when it RUNS, and `require` hands every caller the same
--- cached table. So a variant does not re-paint a list of highlight groups --
--- it swaps the value in the palette, rebuilds the theme, and puts the value
--- back. Every group that uses the role follows automatically, including ones
--- added later, so there is no group list here to drift out of sync with the
--- theme. Restoring afterwards is load-bearing: the table is shared, so leaving
--- it mutated would make a later `:colorscheme solarized-osaka` silently keep
--- the variant's colour.
+-- HOW IT WORKS. Two kinds of override, applied the same way -- swap, rebuild,
+-- swap back:
+--
+--   `palette`  swaps a role value in solarized-osaka-palette.lua. `on_highlights`
+--              is a closure that reads the palette when it RUNS, and `require`
+--              hands every caller the same cached table, so a build does not
+--              re-paint a list of highlight groups. Every group using the role
+--              follows automatically, including ones added later, so there is no
+--              group list here to drift out of sync with the theme.
+--   `config`   swaps an entry in the plugin's own resolved options. Only
+--              `original` uses it, to disable `on_highlights`.
+--
+-- Restoring afterwards is load-bearing in both cases: the tables are shared, so
+-- leaving one mutated would make a later `:colorscheme solarized-osaka` silently
+-- keep this build's colours.
 --
 -- ADDING v3, v4, ...:
---   1. add an entry to `variants` below -- any role in the palette works, not
---      just `keyword`, and a variant may change several at once
---   2. create colors/solarized-osaka-v3.lua containing one line:
---        require("colorschemes.solarized-osaka-variants").load("v3")
+--   1. add an entry to `builds` below -- any role in the palette works, not just
+--      `keyword`, and a build may change several at once
+--   2. create colors/solarized-osaka-custom-v3.lua containing one line:
+--        require("colorschemes.solarized-osaka-variants").load("custom-v3")
 
 local palette = require("colorschemes.solarized-osaka-palette")
 
----Role overrides per variant. Keys must be role names from the palette's
----return block; values come from `palette.variants`, so a hex is never copied.
-local variants = {
+---@class SolarizedOsakaBuild
+---@field palette table<string, string>|nil role overrides, keys from the palette's return block
+---@field config table|nil plugin option overrides
+
+---Values come from `palette.variants`, so a hex is never copied.
+---@type table<string, SolarizedOsakaBuild>
+local builds = {
+  -- Upstream, untouched. Everything this repo decided about syntax colour is
+  -- carried by `on_highlights`, so switching it off is the whole difference.
+  -- Deliberately NOT a full `config.setup({})`: that would also throw away
+  -- anything the plugin spec sets for non-syntax reasons, and then a difference
+  -- you saw could be ours or could be a side effect of the reset.
+  original = { config = { on_highlights = function() end } },
+
+  -- The live selection, exactly as solarized-osaka-palette.lua has it. Empty on
+  -- purpose: it exists so the name can be typed and so `config.lua` can name the
+  -- build it wants rather than relying on the bare plugin name meaning "ours".
+  ["custom-v1"] = {},
+
   -- The warm keyword, kept switchable after violet won the default on
   -- 2026-08-10. Yellow rather than olive, which was the other warm candidate:
   -- the two measure within 0.7 points of each other on visual pull (9.4% vs
@@ -40,27 +69,36 @@ local variants = {
   --
   -- Reach for this if violet ever reads as too recessive -- it buys a much
   -- wider worst-neighbour separation, 32.5 against violet's 19.1.
-  v2 = { keyword = palette.variants.keyword.balanced },
+  ["custom-v2"] = { palette = { keyword = palette.variants.keyword.balanced } },
 }
 
 local M = {}
 
----Load an alternative selection as a colorscheme.
----@param name string variant key, e.g. "v2"
+---Load one of the builds as a colorscheme.
+---@param name string build key, e.g. "original", "custom-v1", "custom-v2"
 function M.load(name)
-  local overrides = variants[name]
-  if not overrides then
+  local build = builds[name]
+  if not build then
     vim.notify(
-      ("solarized-osaka: unknown variant %q"):format(tostring(name)),
+      ("solarized-osaka: unknown build %q"):format(tostring(name)),
       vim.log.levels.ERROR
     )
     return
   end
 
-  local saved = {}
-  for role, value in pairs(overrides) do
-    saved[role] = palette[role]
+  local saved_roles = {}
+  for role, value in pairs(build.palette or {}) do
+    saved_roles[role] = palette[role]
     palette[role] = value
+  end
+
+  -- `options` is reassigned rather than mutated because the plugin's own
+  -- `extend()` reassigns it too, and every consumer reads it through
+  -- `require("solarized-osaka.config").options` at call time.
+  local plugin_config = build.config and require("solarized-osaka.config") or nil
+  local saved_options = plugin_config and plugin_config.options or nil
+  if plugin_config then
+    plugin_config.options = vim.tbl_deep_extend("force", {}, saved_options, build.config)
   end
 
   -- Rebuilds the whole theme through the same path the plugin's own
@@ -70,32 +108,38 @@ function M.load(name)
     require("solarized-osaka")._load()
   end)
 
-  for role, value in pairs(saved) do
+  for role, value in pairs(saved_roles) do
     palette[role] = value
+  end
+  if plugin_config then
+    plugin_config.options = saved_options
   end
 
   if not ok then
     vim.notify(
-      ("solarized-osaka: variant %q failed to load: %s"):format(name, err),
+      ("solarized-osaka: build %q failed to load: %s"):format(name, err),
       vim.log.levels.ERROR
     )
   end
 
   -- `vim.g.colors_name` is deliberately LEFT as "solarized-osaka", which is what
-  -- `_load()` just set it to. Do not "fix" this to the variant name.
+  -- `_load()` just set it to. Do not "fix" this to the build name.
   --
   -- It is not a label, it is the key plugins look themselves up by. lualine
   -- resolves `lualine/themes/<colors_name>`, and the theme ships exactly one, so
-  -- naming this "solarized-osaka-v2" orphans that lookup and lualine silently
-  -- falls back to its auto theme -- a visibly duller statusline, with no error.
-  -- Anything else keyed the same way would break the same way.
+  -- naming this "solarized-osaka-custom-v1" orphans that lookup and lualine
+  -- silently falls back to its auto theme -- a visibly duller statusline, with no
+  -- error. Anything else keyed the same way would break the same way.
   --
-  -- Since a variant only ever changes syntax colours, it IS solarized-osaka as
-  -- far as the rest of the editor is concerned, so it keeps the name. Verified
-  -- by diffing all 629 highlight groups across the two: only the keyword groups
-  -- differ. The trade is that `:colorscheme` reports the base name, and a plugin
-  -- that reloads via `:colorscheme <g:colors_name>` drops back to the default --
-  -- which is the safe direction to fail.
+  -- So the three names are ENTRY POINTS, not identities: they are what you type,
+  -- not what the editor calls itself afterwards. A build only ever changes syntax
+  -- colour, so it IS solarized-osaka as far as the rest of the editor is
+  -- concerned. Verified by diffing all 629 highlight groups across custom-v1 and
+  -- custom-v2: only the keyword groups differ. The trade is that `:colorscheme`
+  -- reports the base name, and a plugin that reloads via
+  -- `:colorscheme <g:colors_name>` drops back to custom-v1 -- which is the safe
+  -- direction to fail, and the reason bare `solarized-osaka` must keep meaning
+  -- custom-v1 rather than being repointed at `original`.
 end
 
 return M
