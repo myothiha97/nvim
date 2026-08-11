@@ -11,7 +11,7 @@
 >
 > **One live item: 8 (`Type` brightness).** It is the only role in the palette
 > not yet optimised, it is not blocking, and it needs a real `.ts` file with a
-> large `import type` block to judge. Review at the 2026-09-20 checkpoint.
+> large `import type` block to judge. Review at the 2026-10-20 checkpoint.
 >
 > Closed on 2026-08-11: item 7 (symbolic logical operators off `base0`) and the
 > punctuation rework (terracotta `#b55f4a` → copper `#be6421`, recorded in
@@ -188,7 +188,7 @@ strings and function names respectively.
 ## Remaining Work
 
 Item 8 is the only live one. Items 1 and 3 are "slightly better" changes, which
-rule 1 says is never a reason on its own. Review all three at the 2026-09-20
+rule 1 says is never a reason on its own. Review all three at the 2026-10-20
 checkpoint and most likely drop 1 and 3. Items 2, 4, 5, 6 and 7 are closed.
 
 ### 1. Neutral brackets in dense JSX
@@ -555,7 +555,7 @@ collapses the pair. The blue band cannot produce a dimmer Type.
    be scoped to "not inside an import block" by highlight group, and an
    `after/queries` split would need a capture the grammar does not provide.
 
-Review at the 2026-09-20 checkpoint. Judge on a real `.ts` file with a large
+Review at the 2026-10-20 checkpoint. Judge on a real `.ts` file with a large
 `import type` block, not on Go.
 
 ## Notes

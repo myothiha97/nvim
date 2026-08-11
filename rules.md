@@ -31,13 +31,27 @@ From here on:
   current workflow** — a real bug or broken flow (rule #2 / the 30-minute rule).
   "Nicer", "cleaner", "more beautiful", or "slightly better" is never a reason.
 
-### ❄️ Freeze window: 2026-06-20 → 2026-09-20 (~3 months)
+### ❄️ Freeze window: 2026-06-20 → 2026-10-20 (~4 months)
 
-The config is **frozen until ~2026-09-20**. This is a *review checkpoint*, not a
+The config is **frozen until ~2026-10-20**. This is a *review checkpoint*, not a
 hard ban: workflow-blocking fixes are still allowed throughout (rule #2), but no
 features, polish, or preference changes until the freeze lifts. At the checkpoint,
 batch-review the ideas collected in `todos/` and decide what — if anything — is
 worth doing, then set the next freeze window.
+
+> **Extended 2026-08-11, from 2026-09-20.** Not because more time was needed, but
+> because the freeze was not held. Several sessions in August spent real hours on
+> the syntax palette — a preference change, exactly the category rule #1 names —
+> and each one was justified at the time by the override in the change-gate. The
+> gate worked as designed; the problem is that "one conscious confirmation" is
+> cheap to give and the overrides stacked up.
+>
+> So the clock resets. **Time spent inside a freeze buys more freeze, not less.**
+> If that feels backwards, that is the point: the cost of reopening the config
+> should land on the decision to reopen it, or the freeze is only a suggestion.
+>
+> The relevant check at the next checkpoint is not "what else could be improved"
+> but "how many overrides did I sign, and were they worth it".
 
 > **Enforcement (AI agents / Claude Code):** apply the change-gate in
 > [`neovim-config-change-gate.md`](neovim-config-change-gate.md) to **every**

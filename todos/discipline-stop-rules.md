@@ -1,6 +1,6 @@
 # Discipline: add stop rules to `rules.md`
 
-**For the 2026-09-20 checkpoint session. ~10 minutes, doc-only, touches no Lua.**
+**For the 2026-10-20 checkpoint session. ~10 minutes, doc-only, touches no Lua.**
 
 Filed 2026-08-05 after a session that produced three genuinely correct findings and
 then spent most of its time past the point where any further change was visible.
