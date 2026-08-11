@@ -70,7 +70,7 @@ What makes this feel less like vanilla Neovim:
 | **Languages** | TypeScript/React daily driver, Go + Python enabled, Rust lazy/deferred |
 | **Markdown** | render-markdown.nvim — `.md` files · LSP hover popups · Avante (flat, no-highlight) |
 | **UI** | lualine · noice (cmdline only) · fidget · which-key |
-| **Theme** | solarized-osaka |
+| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-v1` (default, violet keyword) · `-custom-v2` (warm keyword) · `-original` (untouched upstream, kept to diff against) |
 
 ---
 

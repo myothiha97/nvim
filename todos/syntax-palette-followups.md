@@ -9,10 +9,11 @@
 > It is kept as the historical record of *why* things were tried, not as a
 > statement of what is set today.
 >
-> **No live items.** Item 6 (`@punctuation.delimiter` on the keyword colour) was
-> closed 2026-08-10. Item 5 was closed 2026-08-09 with yellow `#aea10c`, and
-> that selection was itself superseded on 2026-08-10 by warm violet `#a17bcc`;
-> the yellow is still reachable as `:colorscheme solarized-osaka-v2`.
+> **No live items.** Item 7 (symbolic logical operators off `base0`) was closed
+> 2026-08-11. Item 6 (`@punctuation.delimiter` on the keyword colour) was closed
+> 2026-08-10. Item 5 was closed 2026-08-09 with yellow `#aea10c`, and that
+> selection was itself superseded on 2026-08-10 by warm violet `#a17bcc`; the
+> yellow is still reachable as `:colorscheme solarized-osaka-custom-v2`.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
@@ -178,9 +179,9 @@ strings and function names respectively.
 
 ## Remaining Work
 
-Item 5 is the only live one. Items 1 and 3 are "slightly better" changes, which
-rule 1 says is never a reason on its own. Review at the 2026-09-20 checkpoint and
-most likely drop them. Items 2 and 4 are closed.
+Nothing is live. Items 1 and 3 are "slightly better" changes, which rule 1 says
+is never a reason on its own. Review at the 2026-09-20 checkpoint and most likely
+drop them. Items 2, 4, 5, 6 and 7 are closed.
 
 ### 1. Neutral brackets in dense JSX
 
@@ -452,6 +453,42 @@ surprise: TypeScript `.` 418, `:` 357, `,` 198, `?.` 23, `|` 21, `;` 8. Python
 Expected cosmetic trade: `values.paymentInfo` loses its lit dot, so member
 boundaries are marked by the colour change alone. Same trade already accepted
 for `=`.
+
+### 7. `&&`, `||`, `!` are painted as body text — DONE 2026-08-11
+
+**Closed the day it was filed.** Reasoning, the two grammar carve-outs and the
+full dose table are in `notes/syntax-palette-decisions.md`, section "Logical
+operators are keywords too".
+
+Raised from a real TSX file where `{isChangedBg && !!description}` showed its
+branch condition and its double negation in the same grey as everything around
+them. Like item 6, this reads as an inconsistency rather than a preference:
+`solarized-osaka.lua` puts `@keyword.operator` on the keyword colour on purpose,
+so Python's `not x` and Lua's `and` are violet, while `!x` and `&&` in Go, the
+JS/TS family and Bash fell through `Operator` to `base0`. The languages that lose
+the accent are exactly the ones that spell the concept with symbols.
+
+**Applied:** five new `; extends` files under `after/queries/`
+(`tsx`, `typescript`, `javascript`, `go`, `bash`) re-capturing `&&`, `||`, `??`
+and `!` as `@keyword.operator`. No Lua was edited and no colour was added — the
+theme already paints that capture. `Operator = base0` is untouched, so `=`, `+`,
+`=>`, `:=`, `===`, `!==` and `!=` stay neutral, and so do TypeScript's `foo!`
+and bash's `${!ref}`, neither of which is a negation.
+
+Reverting is `rm -r after/`, or deleting one file to drop one language.
+
+**Measured effect** on real files, keyword-colour area and separate marks:
+
+| file | glyphs | area | marks |
+| --- | --- | --- | --- |
+| `index.tsx` (the file that raised it) | 7,028 | 2.65% → 3.53% | 60 → 98 |
+| gin `context.go` | 38,402 | 4.92% → 5.01% | 425 → 447 |
+| rust `ci/run.sh` | 9,316 | 2.81% → 3.06% | 91 → 103 |
+| rust `install-template.sh` | 21,183 | 6.22% → 6.31% | 395 → 411 |
+| `free-disk-space-linux.sh` | 8,406 | 4.28% → 4.53% | 110 → 122 |
+
+Largest move is +0.88 points against the 7% stop rule on the violet. Bash was
+expected to be the risk and moved least; see the note file for why.
 
 ## Notes
 

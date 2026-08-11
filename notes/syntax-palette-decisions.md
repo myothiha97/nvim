@@ -229,6 +229,81 @@ difference between files instead of dimming the colour everywhere.
 keywords spelled as operators, and they chain `@keyword.operator → @operator →
 Operator`, so they would otherwise go neutral with the `=` signs.
 
+## Logical operators are keywords too (2026-08-11)
+
+The other half of the section above, and it sat unnoticed for three days. Sending
+`Operator` to `base0` was right about `=`, `+` and `=>`. It also swept up `&&`,
+`||`, `??` and `!`, which are not punctuation, and that produced a split the
+palette could not justify:
+
+| language | logical operators | capture | painted before |
+| --- | --- | --- | --- |
+| Python | `and` `or` `not` `in` `is` | `@keyword.operator` | keyword colour |
+| Lua | `and` `or` `not` | `@keyword.operator` | keyword colour |
+| Go, TS/TSX/JS, Bash | `&&` `\|\|` `??` `!` | `@operator` | `base0` |
+
+So the two daily languages were the two that lost the accent, purely because they
+spell the concept with symbols. `not x` was violet and `!x` was body text. This
+is the same shape as the `@punctuation.delimiter` inconsistency closed the day
+before, not a preference: nothing argued for the split, it was a side effect.
+
+**No colour was added and no Lua was edited.** `@keyword.operator` is already
+painted with `palette.keyword` in `solarized-osaka.lua`, so the whole change is
+re-capturing four tokens into a group the theme already owns. The variant
+colorscheme follows for free, verified: `:colorscheme solarized-osaka-custom-v2`
+moves `@keyword.operator` to the yellow and back.
+
+**Why it needs a query and not a highlight group.** The base queries file logical
+and arithmetic operators in one flat list — `ecma/highlights.scm:224-265`,
+`go/highlights.scm:55-94`, `bash/highlights.scm:22-47` all put `&&` next to `=`
+and `+`. No group assignment can separate them. Five files under `after/queries/`
+do it instead, each `; extends`, each ~4 lines. Same mechanism as the Lua `end`
+experiment, whose query cost was measured at no detectable difference over 50
+full-file passes.
+
+**Two carve-outs, both found by parsing rather than by reading the grammar.** A
+bare `"!"` is wrong in two of the five languages:
+
+```
+tsx:   !   parent=unary_expression      (!!d, both bangs)   -> moved
+       !   parent=non_null_expression   (foo!.bar)          -> LEFT ALONE
+bash:  !   parent=unary_expression      ([[ ! -f x ]])      -> moved
+       !   parent=negated_command       (! cmd)             -> moved
+       !   parent=expansion             (${!arr[@]})        -> LEFT ALONE
+```
+
+TypeScript's `foo!` asserts a type and bash's `${!ref}` is variable indirection;
+neither is a negation. `!=` and `!==` are single tokens and never match. Go needs
+no scoping at all — it has no non-null assertion and no `${}`. Re-run the probe
+if these files are ever edited; a wrong node name makes the whole query file fail
+to parse and silently breaks that language's highlighting.
+
+**Why five files instead of one `after/queries/ecma/`.**
+`vim/treesitter/query.lua:227-231` concatenates
+`[inherited langs] → [this lang's base] → [this lang's extensions]`, so an
+`ecma` extension is spliced in *before* tsx's and typescript's own base queries.
+A file named for the language being edited always lands last and always wins.
+
+**Dose.** Measured with the method below, before and after, on real files:
+
+| file | glyphs | keyword area | marks | moved |
+| --- | --- | --- | --- | --- |
+| `index.tsx` (the file that raised it) | 7,028 | 2.65% → **3.53%** | 60 → 98 | 62 glyphs / 38 tokens |
+| gin `context.go` | 38,402 | 4.92% → **5.01%** | 425 → 447 | 35 / 22 |
+| rust `ci/run.sh` | 9,316 | 2.81% → **3.06%** | 91 → 103 | 23 / 12 |
+| rust `install-template.sh` | 21,183 | 6.22% → **6.31%** | 395 → 411 | 20 / 16 |
+| `free-disk-space-linux.sh` | 8,406 | 4.28% → **4.53%** | 110 → 122 | 21 / 12 |
+
+Largest move is +0.88 points, on the TSX file, against the 7% stop rule on the
+violet. Nothing is close.
+
+**The prediction about bash was wrong and is worth recording.** Bash was expected
+to be the risk, on the reasoning that `&&` chains on nearly every line of a
+DevOps script. It moved the least of the three families: real scripts branch with
+`if`/`then`/`fi` far more than they chain, and bash's keyword dose is already
+dominated by those. `install-template.sh` is the highest number in the table at
+6.31%, but 6.22 of that predates this change.
+
 ## Type colour (2026-08-07)
 
 `#7dcfff` (hue 249, L\* 79.7, 11.08:1). Moved off the theme's `Type = yellow500`
