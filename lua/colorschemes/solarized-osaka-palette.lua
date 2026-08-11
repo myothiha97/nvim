@@ -304,8 +304,11 @@ return {
   -- is the only one of the three that sits inside the accent band it shares the
   -- screen with. Full measurements and the stop rule are on the variant above.
   --
-  -- The warm option is not gone: it is one `:colorscheme solarized-osaka-v2`
-  -- away, on yellow. See lua/colorschemes/solarized-osaka-variants.lua.
+  -- The warm option is not gone: it is one
+  -- `:colorscheme solarized-osaka-custom-v2` away, on yellow. That file also
+  -- registers `solarized-osaka-original`, the untouched upstream build kept as a
+  -- reference to diff against. See
+  -- lua/colorschemes/solarized-osaka-variants.lua.
   keyword = variants.keyword.warm_violet,
   -- Currently UNREAD: the whole grammar-dimming experiment was rejected on
   -- 2026-08-09 and solarized-osaka.lua paints nothing with it. Kept wired so the

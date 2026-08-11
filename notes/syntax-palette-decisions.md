@@ -250,8 +250,8 @@ before, not a preference: nothing argued for the split, it was a side effect.
 **No colour was added and no Lua was edited.** `@keyword.operator` is already
 painted with `palette.keyword` in `solarized-osaka.lua`, so the whole change is
 re-capturing four tokens into a group the theme already owns. The variant
-colorscheme follows for free, verified: `:colorscheme solarized-osaka-v2` moves
-`@keyword.operator` to the yellow and back.
+colorscheme follows for free, verified: `:colorscheme solarized-osaka-custom-v2`
+moves `@keyword.operator` to the yellow and back.
 
 **Why it needs a query and not a highlight group.** The base queries file logical
 and arithmetic operators in one flat list — `ecma/highlights.scm:224-265`,

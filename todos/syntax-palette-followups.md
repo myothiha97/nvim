@@ -13,7 +13,7 @@
 > 2026-08-11. Item 6 (`@punctuation.delimiter` on the keyword colour) was closed
 > 2026-08-10. Item 5 was closed 2026-08-09 with yellow `#aea10c`, and that
 > selection was itself superseded on 2026-08-10 by warm violet `#a17bcc`; the
-> yellow is still reachable as `:colorscheme solarized-osaka-v2`.
+> yellow is still reachable as `:colorscheme solarized-osaka-custom-v2`.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
