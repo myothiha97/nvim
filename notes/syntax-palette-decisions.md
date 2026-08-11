@@ -130,6 +130,40 @@ outside sRGB. Practical consequences:
   would drop roughly 20 C\* off every accent at once, which is a far larger
   visual change than any hex edit in this file.
 
+### The external monitor clips, and which channel it clips matters (2026-08-11)
+
+The other half of the same mechanism, found when the same file read differently
+on the Samsung than on the laptop. The XDR panel covers P3 and shows the authored
+numbers as authored. An sRGB-gamut monitor cannot, so macOS converts and
+**clips** anything outside sRGB. What arrives:
+
+| authored | shown on an sRGB monitor | |
+| --- | --- | --- |
+| terracotta `#b55f4a` | `#c25944` | in gamut, all three channels intact |
+| copper_mid `#be6421` | `#cc5e00` | **blue clipped to 00** |
+| copper `#cb6001` | `#db5800` | blue clipped, −17 C\*, −8° hue |
+| violet `#a17bcc` | `#a879d1` | in gamut |
+
+**Read the channel, not just the dE.** Terracotta keeps `blue = 0x44`, and that
+residual blue is what makes it an earthy red rather than an orange. Copper's blue
+clips to zero, so on that monitor it stops being a burnt orange with depth and
+becomes a flat pure orange. In Lab terms the shift is only dC\* −2.1 and 1.1° of
+hue — under the perceptual floor — so a dE score does not see this at all. A
+channel going to zero is a category change that dE understates.
+
+Terracotta is the display-stable option and copper is not, which is the same test
+that removed olive from the keyword slot. Copper was kept anyway on 2026-08-11,
+knowingly: `custom-v3` is the terracotta fallback, one `:colorscheme` away.
+
+**The confound worth remembering before blaming a display.** That comparison was
+made in two different rooms — a cafe on the laptop, a desk on the monitor.
+Ambient light moves perceived saturation on a dark theme more than a 2.1 C\* clip
+does: bright surroundings raise the effective black floor and wash chroma out, so
+a value that needed more chroma in a cafe reads hot at a dim desk. PPI compounds
+it, and the base-text item in `todos/syntax-palette-followups.md` already measured
+stroke coverage worth 6.9 L\* on a byte-identical colour. **Judge two builds on
+both displays in the same room before concluding the display is the variable.**
+
 ## Dose, not value (2026-08-09)
 
 The most reusable result of the session. A colour is not loud or calm in the
