@@ -1,18 +1,28 @@
 
-# Avante: UI Optimization
+# Avante: UI Optimization (Parked)
 
 ## Status
-Avante is fully working with both Copilot and Codex providers. Core functionality is stable.
+
+Avante has been disabled since 2026-05-26. CodeCompanion is the active AI chat and
+inline-edit workflow. The existing Avante config is retained as reference code and
+currently targets the Codex ACP provider, not an active Copilot/Codex switching workflow.
+
+Do not perform UI work unless Avante is deliberately re-enabled for a real workflow.
 
 ## Remaining Work
 
-### UI Enhancements
-- The current UI config is basic; needs enhancement for better UX.
-- Research Avante UI customization options (window layout, borders, sizing, icons).
+### If Avante Is Re-enabled
+
+- First compare it with the active CodeCompanion workflow and confirm both are needed.
+- Then verify the retained provider config still matches the installed Avante version.
+- Only after that, consider window layout, borders, sizing, and icons.
 
 ### Known Item
-- Disabled markdown preview when using the Avante chats panel — verify this is still intentional and document the reason.
+
+- Render-markdown still includes the `Avante` filetype, but this path is inactive while
+  Avante is disabled. Re-test it only if Avante returns.
 
 ## Notes
-- Do not break provider switching (Copilot ↔ Codex) while refining UI.
-- Keep changes in `lua/plugins/avante.lua`.
+
+- Active AI ownership is in `lua/plugins/codecompanion.lua`.
+- Retained Avante code lives in `lua/plugins/avante.lua`.
