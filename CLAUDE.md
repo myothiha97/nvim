@@ -12,7 +12,7 @@
 > looking for that filename lands in the same place. Keep it a pointer — two
 > copies of these rules will drift, and an agent will then follow the stale one.
 
-## One loose end from the freeze session (review by ~2026-09-20)
+## One loose end from the freeze session (review by ~2026-10-20)
 
 LOW priority, non-blocking. The pre-freeze build-out is committed + pushed; this is the
 only thing not yet eyeballed. Do it casually next time you open one of these files — it is
