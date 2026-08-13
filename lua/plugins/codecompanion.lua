@@ -93,11 +93,17 @@ return {
           -- the adapters configured below.
           codex = function()
             return require("codecompanion.adapters").extend("codex", {
+              -- defaults = {
+              --   auth_method = "chatgpt",
+              --   session_config_options = {
+              --     -- model = "gpt-5.5", -- for serious coding tasks
+              --     model = "gpt-5.4", -- for every day tasks and token efficiency
+              --   },
+              -- },
               defaults = {
                 auth_method = "chatgpt",
                 session_config_options = {
-                  -- model = "gpt-5.5", -- for serious coding tasks
-                  model = "gpt-5.4", -- for every day tasks and token efficiency
+                  model = "gpt-5.5",
                 },
               },
             })
@@ -116,8 +122,8 @@ return {
           -- model. Here claude_code is pinned to Sonnet (currently 4.6). Model ids
           -- the ACP bridge accepts: "default" | "sonnet" | "sonnet[1m]" (1M context)
           -- | "opus" | "haiku". (Copilot form would be { name = "copilot", model = .. }.)
-          adapter = { name = "claude_code", model = "opus" },
-          -- adapter = { name = "codex" },
+          -- adapter = { name = "claude_code", model = "opus" },
+          adapter = { name = "codex" },
           -- adapter = {
           -- name = "copilot", -- currently having error when open the chat panel with leader aa
           -- },
