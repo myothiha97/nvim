@@ -380,11 +380,11 @@ local function editor_scroll_or_arrow(scroll_key, arrow_key)
   end
 end
 
-vim.keymap.set("n", "<Down>", editor_scroll_or_arrow("<C-e>", "<Down>"), {
+vim.keymap.set("n", "<Up>", editor_scroll_or_arrow("<C-e>", "<Down>"), {
   expr = true,
   desc = "Scroll Viewport Down",
 })
-vim.keymap.set("n", "<Up>", editor_scroll_or_arrow("<C-y>", "<Up>"), {
+vim.keymap.set("n", "<Down>", editor_scroll_or_arrow("<C-y>", "<Up>"), {
   expr = true,
   desc = "Scroll Viewport Up",
 })
