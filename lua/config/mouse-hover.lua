@@ -235,6 +235,13 @@ local function fire_hover(pos)
     return
   end
 
+  -- LSP servers may return the nearest parent symbol for whitespace or
+  -- punctuation. Require an actual word under the pointer before requesting.
+  local word_start, word_end = word_bounds(bufnr, pos.line, pos.column)
+  if not word_start then
+    return
+  end
+
   local clients = vim.lsp.get_clients({ bufnr = bufnr, method = "textDocument/hover" })
   if #clients == 0 then
     return
@@ -306,12 +313,11 @@ local function fire_hover(pos)
       end
     end
 
-    local s, e = word_bounds(bufnr, pos.line, pos.column)
     hover_anchor = {
       winid = pos.winid,
       line = pos.line,
-      col_start = s or pos.column,
-      col_end = e or pos.column,
+      col_start = word_start,
+      col_end = word_end,
     }
   end)
 end
