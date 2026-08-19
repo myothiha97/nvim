@@ -388,11 +388,11 @@ vim.keymap.set("n", "<Down>", editor_scroll_or_arrow("<C-y>", "<Up>"), {
   expr = true,
   desc = "Scroll Viewport Up",
 })
-vim.keymap.set("n", "<Right>", editor_scroll_or_arrow("zl", "<Right>"), {
+vim.keymap.set("n", "<Right>", editor_scroll_or_arrow("2zl", "<Right>"), {
   expr = true,
   desc = "Scroll Viewport Right",
 })
-vim.keymap.set("n", "<Left>", editor_scroll_or_arrow("zh", "<Left>"), {
+vim.keymap.set("n", "<Left>", editor_scroll_or_arrow("2zh", "<Left>"), {
   expr = true,
   desc = "Scroll Viewport Left",
 })
