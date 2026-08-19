@@ -75,7 +75,7 @@ return {
     opts = function(_, opts)
       opts.options = opts.options or {}
       opts.options.refresh = {
-        statusline = 1000,
+        statusline = 400,
         tabline = 1000,
         winbar = 1000,
         events = {
@@ -154,7 +154,7 @@ return {
       -- count. Both hidden on a clean file, green to stay clear of diagnostic red.
       -- The dirty check reads `b:gitsigns_status_dict` (zero-cost buffer var). The
       -- hunk count calls gitsigns.get_hunks() — only when the file is dirty and
-      -- only on lualine's throttled 1000ms refresh, so it's not a hot path.
+      -- only on lualine's throttled 400ms refresh, so it's not a hot path.
       -- The THEME's green, not the syntax palette's. This marker means "added"
       -- and has to stay green whatever the keyword colour is doing.
       --
