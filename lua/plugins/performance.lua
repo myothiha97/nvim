@@ -206,16 +206,21 @@ return {
       end
       opts.sections.lualine_c = lualine_c
 
-      -- Custom percent badge styling: keep the same statusline background as the
-      -- line indicator, but use a Solarized Osaka accent for the text.
+      -- Custom percent badge styling: a Solarized Osaka accent for the text.
       -- If the colorscheme or lualine theme changes, revisit this block.
       -- Previous green fallback, if yellow reads worse:
-      -- { fg = "#849900", bg = "#002c38", gui = "bold" }
-      local percent_color = { fg = "#b28500", bg = "#002c38", gui = "bold" }
+      -- { fg = "#849900", gui = "bold" }
+      --
+      -- No explicit `bg` here. It used to force bg_statusline so the badge kept
+      -- the statusline background while sitting inside lualine_y, whose theme
+      -- background is lighter. Now that it lives in lualine_c — which already
+      -- uses the statusline background — a hardcoded bg would only be a second
+      -- source of truth to keep in sync, so the section colour is inherited.
+      local percent_color = { fg = "#b28500", gui = "bold" }
       local ok, solarized_colors = pcall(require, "solarized-osaka.colors")
       if ok then
         local colors = solarized_colors.setup({ transform = true })
-        percent_color = { fg = colors.yellow500 or colors.yellow, bg = colors.bg_statusline, gui = "bold" }
+        percent_color = { fg = colors.yellow500 or colors.yellow, gui = "bold" }
       end
 
       opts.sections.lualine_y = {
@@ -227,17 +232,31 @@ return {
           end,
           padding = { left = 1, right = 1 },
         },
-        {
-          function()
-            local current = vim.fn.line(".")
-            local total = vim.api.nvim_buf_line_count(0)
-            local percent = total > 0 and math.floor((current / total) * 100 + 0.5) or 0
-            return string.format("%d%%%%", percent)
-          end,
-          color = percent_color,
-          padding = { left = 2, right = 1 },
-        },
       }
+
+      -- Scroll progress sits at the right-hand end of lualine_c, after the
+      -- filename and the git markers, rather than over on the right with the
+      -- line counter.
+      --
+      -- dirty_marker and hunk_badge both carry `cond`, so on a clean file they
+      -- render nothing and the percentage lands directly beside the filename;
+      -- on a dirty file it follows the git markers. Appending covers both cases
+      -- without branching on git state.
+      --
+      -- separator = "" suppresses lualine's thin divider, matching the filename
+      -- and git markers ahead of it. The left padding of 2 is the visual gap
+      -- that keeps it from crowding the hunk count.
+      table.insert(opts.sections.lualine_c, {
+        function()
+          local current = vim.fn.line(".")
+          local total = vim.api.nvim_buf_line_count(0)
+          local percent = total > 0 and math.floor((current / total) * 100 + 0.5) or 0
+          return string.format("%d%%%%", percent)
+        end,
+        color = percent_color,
+        separator = "",
+        padding = { left = 2, right = 1 },
+      })
 
       -- Copilot status indicator (LSP status + autocomplete toggle state)
       -- Color reflects vim.g.copilot_enabled (toggled via <leader>ad / <C-k>):

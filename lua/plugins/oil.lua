@@ -121,9 +121,12 @@ return {
   lazy = false,
   dependencies = { "nvim-tree/nvim-web-devicons" },
   keys = {
-    { "<leader>e", toggle_oil, desc = "Toggle Oil" },
+    { "<leader>E", toggle_oil, desc = "Toggle Oil" },
   },
   opts = {
+    -- Kept true so `:e <dir>` mid-session still opens oil. The telescope file
+    -- browser only takes over the STARTUP case (`nvim <dir>`), via a VimEnter
+    -- hook in telescope-file-browser.lua that mounts over whatever oil put up.
     default_file_explorer = true,
     skip_confirm_for_simple_edits = true,
     view_options = { show_hidden = true },

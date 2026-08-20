@@ -1,0 +1,518 @@
+local backdrop_buf = nil
+local backdrop_win = nil
+local saved_winhl = {}
+
+-- Flip to `true` to switch <leader>e back to the floating popup (original
+-- implementation, fully preserved below). `false` opens Oil fullscreen in
+-- the current window instead.
+local USE_FLOAT = false
+
+-- ---------------------------------------------------------------------------
+-- Miller columns
+-- ---------------------------------------------------------------------------
+-- Navigating into a directory opens it as a new pane to the right; navigating
+-- back closes the current pane and returns focus to the one on its left. This
+-- only applies to the fullscreen path (USE_FLOAT = false) — a float cannot hold
+-- the split chain, so the float branch below is untouched.
+--
+-- Relies on `splitright` being on (it is), so `vertical = true` lands the new
+-- pane to the right rather than the left.
+--
+-- Cap on simultaneous panes. A deep path drops its shallowest columns instead
+-- of shrinking every pane toward nothing.
+local MAX_COLUMNS = 4
+
+-- Width given to each parent column. The rightmost (newest) column keeps
+-- whatever is left over, so the pane you are actually working in is the widest
+-- rather than every pane being an equal slice.
+local PARENT_COLUMN_WIDTH = 32
+
+-- Parent columns are never allowed to eat more than this fraction of the
+-- screen between them, so the active column stays usable on a narrow terminal.
+local PARENT_COLUMN_MAX_SHARE = 0.5
+local PARENT_COLUMN_MIN_WIDTH = 14
+
+local function is_oil_win(win)
+  if not vim.api.nvim_win_is_valid(win) then
+    return false
+  end
+  -- Floats are never part of the column chain.
+  if vim.api.nvim_win_get_config(win).relative ~= "" then
+    return false
+  end
+  return vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "oil"
+end
+
+--- Oil panes in the current tabpage, ordered left to right.
+local function oil_columns()
+  local wins = {}
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if is_oil_win(win) then
+      wins[#wins + 1] = win
+    end
+  end
+  table.sort(wins, function(a, b)
+    return vim.api.nvim_win_get_position(a)[2] < vim.api.nvim_win_get_position(b)[2]
+  end)
+  return wins
+end
+
+--- Shrink the parent columns so the rightmost one gets the remaining space.
+--- Nvim's `equalalways` re-equalises every window on each split and close, so
+--- this has to run after any change to the chain rather than once at setup.
+local function layout_columns()
+  local cols = oil_columns()
+  local parents = #cols - 1
+  if parents < 1 then
+    return
+  end
+
+  local width = PARENT_COLUMN_WIDTH
+  -- Available space excluding the vertical separators between panes.
+  local budget = math.floor((vim.o.columns - parents) * PARENT_COLUMN_MAX_SHARE)
+  if parents * width > budget then
+    width = math.max(PARENT_COLUMN_MIN_WIDTH, math.floor(budget / parents))
+  end
+
+  -- Only the parents are set; the last column absorbs what is left.
+  for i = 1, parents do
+    if vim.api.nvim_win_is_valid(cols[i]) then
+      vim.api.nvim_win_set_width(cols[i], width)
+    end
+  end
+end
+
+--- Navigating forward from a middle column discards the deeper ones, the way a
+--- column browser does — otherwise the new pane would be inserted mid-chain.
+local function close_columns_right(win)
+  local col = vim.api.nvim_win_get_position(win)[2]
+  for _, other in ipairs(oil_columns()) do
+    if other ~= win and vim.api.nvim_win_get_position(other)[2] > col then
+      vim.api.nvim_win_close(other, true)
+    end
+  end
+end
+
+--- Forward: directory opens as the next column, file ends the browse.
+---@param dirs_only boolean When true, do nothing on a file row (used by `=`).
+local function oil_forward(dirs_only)
+  return function()
+    local oil = require("oil")
+    local entry = oil.get_cursor_entry()
+    if not entry then
+      return
+    end
+
+    local is_dir = entry.type == "directory"
+    if dirs_only and not is_dir then
+      return
+    end
+
+    local win = vim.api.nvim_get_current_win()
+    close_columns_right(win)
+
+    if not is_dir then
+      -- A file ends the browse: collapse the other columns and open it here, so
+      -- you land in a normal editor rather than in column N+1. The panes are
+      -- closed in the callback because select() finishes asynchronously.
+      local others = {}
+      for _, other in ipairs(oil_columns()) do
+        if other ~= win then
+          others[#others + 1] = other
+        end
+      end
+      oil.select({}, function(err)
+        if err then
+          return
+        end
+        for _, other in ipairs(others) do
+          if vim.api.nvim_win_is_valid(other) then
+            vim.api.nvim_win_close(other, true)
+          end
+        end
+      end)
+      return
+    end
+
+    -- Make room before adding a column, dropping the shallowest.
+    local cols = oil_columns()
+    if #cols >= MAX_COLUMNS and cols[1] ~= win then
+      vim.api.nvim_win_close(cols[1], true)
+    end
+    oil.select({ vertical = true }, function(err)
+      if not err then
+        layout_columns()
+      end
+    end)
+  end
+end
+
+--- Back: close this column and focus the one to its left. On the leftmost
+--- column there is nothing to close, so fall back to plain parent navigation.
+local function oil_back()
+  local win = vim.api.nvim_get_current_win()
+  local cols = oil_columns()
+
+  local index
+  for i, w in ipairs(cols) do
+    if w == win then
+      index = i
+      break
+    end
+  end
+
+  if index and index > 1 then
+    local target = cols[index - 1]
+    vim.api.nvim_win_close(win, true)
+    if vim.api.nvim_win_is_valid(target) then
+      vim.api.nvim_set_current_win(target)
+    end
+    layout_columns()
+    return
+  end
+
+  require("oil").open() -- no argument = navigate to parent
+end
+
+--- Path chain from the project root down to `dir`:
+--- /p → /p/backend → /p/backend/cmd → /p/backend/cmd/server
+local function path_chain(dir)
+  local root = vim.fs.normalize(vim.fn.getcwd())
+  dir = vim.fs.normalize(dir)
+
+  if dir == root then
+    return { root }
+  end
+  -- Outside the project root there is no meaningful chain to build.
+  if not vim.startswith(dir .. "/", root .. "/") then
+    return { dir }
+  end
+
+  local chain = { root }
+  local acc = root
+  for part in vim.gsplit(dir:sub(#root + 2), "/", { plain = true }) do
+    if part ~= "" then
+      acc = acc .. "/" .. part
+      chain[#chain + 1] = acc
+    end
+  end
+
+  -- Keep the deepest levels: those are the ones near the file you came from.
+  while #chain > MAX_COLUMNS do
+    table.remove(chain, 1)
+  end
+  return chain
+end
+
+--- Open the whole chain for the current buffer, one pane per level, so
+--- <leader>e on a deeply nested file lands you in a full column view.
+local function open_oil_columns()
+  local oil = require("oil")
+  local buf = vim.api.nvim_get_current_buf()
+  local name = vim.api.nvim_buf_get_name(buf)
+
+  local dir, file
+  if name ~= "" and vim.bo[buf].buftype == "" then
+    dir = vim.fs.dirname(name)
+    file = vim.fs.basename(name)
+  else
+    dir = vim.fn.getcwd()
+  end
+
+  local chain = path_chain(dir)
+
+  -- Seed each pane's cursor on the child it leads to, so the chain reads as a
+  -- single path. Oil stores this per directory URL and applies it on open.
+  local view = require("oil.view")
+  for i, d in ipairs(chain) do
+    local child = chain[i + 1] and vim.fs.basename(chain[i + 1]) or file
+    if child then
+      view.set_last_cursor("oil://" .. d .. "/", child)
+    end
+  end
+
+  oil.open(chain[1])
+  for i = 2, #chain do
+    vim.cmd("vsplit") -- splitright puts the new pane on the right
+    oil.open(chain[i])
+  end
+  layout_columns()
+end
+
+--- Close every column. The leftmost one restores the original buffer.
+local function close_oil_columns()
+  local cols = oil_columns()
+  for i = 2, #cols do
+    if vim.api.nvim_win_is_valid(cols[i]) then
+      vim.api.nvim_win_close(cols[i], true)
+    end
+  end
+
+  local first = cols[1]
+  if first and vim.api.nvim_win_is_valid(first) then
+    vim.api.nvim_set_current_win(first)
+    require("oil").close()
+    if vim.api.nvim_win_is_valid(first) then
+      vim.wo[first].winbar = " "
+    end
+  end
+end
+
+local function close_backdrop()
+  -- Restore search highlights in background windows
+  for win, hl in pairs(saved_winhl) do
+    if vim.api.nvim_win_is_valid(win) then
+      vim.wo[win].winhighlight = hl
+    end
+  end
+  saved_winhl = {}
+
+  if backdrop_win and vim.api.nvim_win_is_valid(backdrop_win) then
+    vim.api.nvim_win_close(backdrop_win, true)
+  end
+  if backdrop_buf and vim.api.nvim_buf_is_valid(backdrop_buf) then
+    vim.api.nvim_buf_delete(backdrop_buf, { force = true })
+  end
+  backdrop_win = nil
+  backdrop_buf = nil
+end
+
+local function create_backdrop()
+  backdrop_buf = vim.api.nvim_create_buf(false, true)
+  backdrop_win = vim.api.nvim_open_win(backdrop_buf, false, {
+    relative = "editor",
+    width = vim.o.columns,
+    height = vim.o.lines,
+    row = 0,
+    col = 0,
+    style = "minimal",
+    focusable = false,
+    zindex = 40,
+  })
+  vim.api.nvim_set_hl(0, "OilBackdrop", { bg = "#000000" })
+  vim.wo[backdrop_win].winhighlight = "Normal:OilBackdrop"
+  vim.wo[backdrop_win].winblend = 60
+end
+
+local function hide_bg_search_highlights()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    local name = vim.api.nvim_buf_get_name(buf)
+    -- Skip Oil buffer and backdrop
+    if not name:match("^oil://") and win ~= backdrop_win then
+      saved_winhl[win] = vim.wo[win].winhighlight
+      local current = vim.wo[win].winhighlight
+      local hide_search = "Search:None,IncSearch:None,CurSearch:None"
+      if current ~= "" then
+        vim.wo[win].winhighlight = current .. "," .. hide_search
+      else
+        vim.wo[win].winhighlight = hide_search
+      end
+    end
+  end
+end
+
+local function is_oil_float_open()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    local name = vim.api.nvim_buf_get_name(buf)
+    local config = vim.api.nvim_win_get_config(win)
+    if name:match("^oil://") and config.relative ~= "" then
+      return true, win
+    end
+  end
+  return false, nil
+end
+
+local function toggle_oil_float()
+  local open, win = is_oil_float_open()
+  if open then
+    close_backdrop()
+    if win then
+      vim.api.nvim_win_close(win, true)
+    end
+  else
+    create_backdrop()
+    require("oil").open_float()
+    hide_bg_search_highlights()
+  end
+end
+
+local function toggle_oil_fullscreen()
+  if vim.bo.filetype == "oil" then
+    close_oil_columns()
+  else
+    open_oil_columns()
+  end
+end
+
+local function toggle_oil()
+  if USE_FLOAT then
+    toggle_oil_float()
+  else
+    toggle_oil_fullscreen()
+  end
+end
+
+-- Path label followed by a horizontal divider that fills the rest of the
+-- row, separating it from the file list on the line below.
+local function set_oil_winbar(win)
+  local title = require("oil.util").get_title(win)
+  local used = vim.fn.strdisplaywidth(title) + 2 -- leading space + space before divider
+  local divider = string.rep("─", math.max(0, vim.api.nvim_win_get_width(win) - used))
+  vim.wo[win].winbar = " %#FloatTitle#" .. title .. "%* %#WinSeparator#" .. divider .. "%*"
+end
+
+return {
+  "stevearc/oil.nvim",
+  lazy = false,
+  dependencies = { "nvim-tree/nvim-web-devicons" },
+  keys = {
+    { "<leader>e", toggle_oil, desc = "Toggle Oil" },
+  },
+  opts = {
+    default_file_explorer = true,
+    skip_confirm_for_simple_edits = true,
+    view_options = { show_hidden = true },
+    -- CursorLine is disabled globally (see colorschemes/solarized-osaka/init.lua),
+    -- so remap it to OilCursorLine for Oil windows only. Applied once per
+    -- window by Oil itself — no CursorMoved autocmd, zero hot-path cost.
+    win_options = {
+      cursorline = true,
+      winhighlight = "CursorLine:OilCursorLine",
+    },
+    keymaps = {
+      -- Keep LazyVim's window navigation on <C-j>/<C-k>. Oil defaults
+      -- <C-h> to horizontal open and <C-l> to refresh; <CR> remains the
+      -- conventional way to select an entry.
+      ["<C-j>"] = false,
+      ["<C-k>"] = false,
+
+      -- Earlier alternative: disable Oil's <C-l> mapping so LazyVim's <C-l>
+      -- could focus the right pane, then use <C-o> as another selection key:
+      -- ["<C-l>"] = false,
+      -- ["<C-o>"] = "actions.select",
+
+      -- Decision (20 Jul 2026): <C-o> proved less ergonomic for frequent
+      -- selection, so <C-l> is used below. This intentionally gives up
+      -- Oil-local <C-l> right-pane navigation; use <C-w>l when needed.
+      -- Forward into a directory opens the next column (see "Miller columns"
+      -- at the top of this file). On a file row these collapse the chain and
+      -- open the file in place.
+      ["<C-l>"] = { oil_forward(false), mode = "n", desc = "Open entry / next column" },
+      ["<CR>"] = { oil_forward(false), mode = "n", desc = "Open entry / next column" },
+
+      -- Backward / forward navigation, mirrored on two key pairs:
+      -- <C-h> + `-` go up to the parent, <C-l> + `=` go back down.
+      -- `=` sits on the same physical key as `+`, without the Shift.
+      --
+      -- <C-h> was previously disabled to keep LazyVim's window-left
+      -- navigation inside Oil. Same trade as <C-l> above: Oil opens
+      -- fullscreen, so there is rarely a left window to reach; use <C-w>h.
+      -- Back closes the current column and focuses the one on its left; on the
+      -- leftmost column it falls back to plain parent navigation as before.
+      ["<C-h>"] = { oil_back, mode = "n", desc = "Close column / parent" },
+      ["-"] = { oil_back, mode = "n", desc = "Close column / parent" },
+
+      -- `-` (Oil default) leaves the cursor on the directory it came out of
+      -- (oil.open -> view.set_last_cursor), so selecting that entry is the
+      -- natural "forward". Guarded to directories, otherwise `=` on a file
+      -- row would open the file instead of navigating.
+      ["="] = {
+        -- Still directory-only: unlike <CR>/<C-l>, `=` on a file row does
+        -- nothing rather than opening the file.
+        oil_forward(true),
+        mode = "n",
+        desc = "Navigate forward (into directory)",
+        -- Yanky (LazyVim extra) maps `=p` / `=P` globally, so without nowait
+        -- Nvim waits out `timeoutlen` (300ms) on every `=` to see whether a
+        -- p/P follows. nowait takes the exact match immediately.
+        nowait = true,
+      },
+    },
+    float = {
+      max_width = 0.8,
+      max_height = 0.8,
+      border = "rounded",
+    },
+    confirmation = {
+      keymaps = {
+        ["<CR>"] = "actions.confirm",
+        ["y"] = "actions.confirm",
+        ["n"] = "actions.close",
+        ["<Esc>"] = "actions.close",
+      },
+    },
+  },
+  config = function(_, opts)
+    require("oil").setup(opts)
+
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "oil",
+      callback = function()
+        local close_oil = function()
+          close_backdrop()
+          local win = vim.api.nvim_get_current_win()
+          require("oil").close()
+          if vim.api.nvim_win_is_valid(win) then
+            vim.wo[win].winbar = " "
+          end
+        end
+
+        vim.keymap.set("n", "q", close_oil, { buffer = true })
+
+        -- <Esc> only clears search highlights — does not close the popup.
+        -- Use `q` to close.
+        vim.keymap.set("n", "<ESC>", function()
+          if vim.v.hlsearch == 1 then
+            vim.cmd("nohlsearch")
+          end
+        end, { buffer = true })
+      end,
+    })
+
+    vim.api.nvim_create_autocmd("WinClosed", {
+      callback = function()
+        vim.schedule(function()
+          local open = is_oil_float_open()
+          if not open then
+            close_backdrop()
+          end
+        end)
+      end,
+    })
+
+    -- Fullscreen Oil has no float border to show a title on, so the global
+    -- 1-row winbar (set in options.lua) is repurposed to show the current
+    -- directory path. Fires on every directory navigation (each becomes a
+    -- new "oil" buffer) and resets to the default " " once Oil buffer leaves.
+    vim.api.nvim_create_autocmd("BufWinEnter", {
+      callback = function(args)
+        local win = vim.api.nvim_get_current_win()
+        if vim.api.nvim_win_get_config(win).relative ~= "" then
+          return
+        end
+        if vim.bo[args.buf].filetype == "oil" then
+          set_oil_winbar(win)
+        else
+          vim.wo[win].winbar = " "
+        end
+      end,
+    })
+
+    -- Recompute the divider width when the Oil window is resized (e.g.
+    -- terminal resize, split toggled) so it keeps spanning the full row.
+    vim.api.nvim_create_autocmd("WinResized", {
+      callback = function()
+        for _, win in ipairs(vim.v.event.windows) do
+          if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
+            local buf = vim.api.nvim_win_get_buf(win)
+            if vim.bo[buf].filetype == "oil" then
+              set_oil_winbar(win)
+            end
+          end
+        end
+      end,
+    })
+  end,
+}

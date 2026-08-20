@@ -130,7 +130,9 @@ return {
     vim.api.nvim_create_autocmd("ColorScheme", { callback = set_snacks_hl })
   end,
   opts = {
-    explorer = { enabled = true },
+    -- enabled, but it must not claim directory buffers: the telescope file
+    -- browser is the startup explorer now (see telescope-file-browser.lua).
+    explorer = { enabled = true, replace_netrw = false },
     dashboard = { enabled = true },
     scroll = { enabled = false },
     animate = { enabled = false },
