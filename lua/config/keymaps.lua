@@ -450,17 +450,17 @@ end, { desc = "Signature Help" })
 -- terminal mode
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { noremap = true })
 
--- Override LazyVim's <C-/> to open terminal on the right
-local function toggle_right_term()
+-- Override LazyVim's <C-/> to open terminal at the bottom
+local function toggle_bottom_term()
   Snacks.terminal.toggle(nil, {
     win = {
-      position = "right",
-      width = 0.3,
+      position = "bottom",
+      height = 0.4,
     },
   })
 end
-vim.keymap.set({ "n", "t" }, "<C-->", toggle_right_term, { desc = "Toggle Terminal (right)" })
-vim.keymap.set({ "n", "t" }, "<C-_>", toggle_right_term, { desc = "Toggle Terminal (right)" })
+vim.keymap.set({ "n", "t" }, "<C-->", toggle_bottom_term, { desc = "Toggle Terminal (bottom)" })
+vim.keymap.set({ "n", "t" }, "<C-_>", toggle_bottom_term, { desc = "Toggle Terminal (bottom)" })
 
 vim.keymap.set("i", "<Tab>", function()
   local bufnr = vim.api.nvim_get_current_buf()
