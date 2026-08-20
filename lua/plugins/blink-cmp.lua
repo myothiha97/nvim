@@ -85,6 +85,15 @@ return {
       },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        -- SQL only: postgres_lsp returns items solely from a live database schema,
+        -- so without a reachable DB it answers with an empty list and SQL buffers
+        -- get zero suggestions. `sql_keywords` adds the static keyword/type/function
+        -- layer that other editors' SQL extensions ship built in. `inherit_defaults`
+        -- keeps lsp/path/snippets/buffer, so schema completion still appears on top
+        -- once a `postgres-language-server.jsonc` points at a database.
+        per_filetype = {
+          sql = { inherit_defaults = true, "sql_keywords" },
+        },
         transform_items = function(_, items)
           return items
         end,
@@ -108,6 +117,14 @@ return {
           buffer = {
             min_keyword_length = 3,
             max_items = 10,
+          },
+          sql_keywords = {
+            name = "SQL",
+            module = "config.sql-keyword-source",
+            -- No score_offset: keywords stay below lsp/snippets (100) so real
+            -- schema names outrank them. Needs 1 typed character -- the source
+            -- buckets its word list by first letter and returns only that bucket.
+            min_keyword_length = 1,
           },
         },
       },

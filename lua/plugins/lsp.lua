@@ -49,6 +49,22 @@ return {
         -- with the zbirenbaum/copilot.lua plugin for the "copilot" client slot — the plugin's
         -- per-buffer state never initializes and ghost text never renders.
         copilot = { enabled = false },
+        -- nvim-lspconfig otherwise requires postgres-language-server.jsonc before
+        -- starting. Attach to SQL projects for syntax support, while still
+        -- preferring that file when a project provides database settings.
+        postgres_lsp = {
+          root_dir = function(bufnr, on_dir)
+            local fname = vim.api.nvim_buf_get_name(bufnr)
+            local root = vim.fs.root(fname, { "postgres-language-server.jsonc" })
+            if not root then
+              local git = vim.fs.root(fname, { ".git" })
+              if git and git ~= vim.uv.os_homedir() then
+                root = git
+              end
+            end
+            on_dir(root or vim.fs.dirname(fname))
+          end,
+        },
         emmet_ls = {
           -- Only HTML/CSS - TSX/JSX use custom snippets for tag completion
           filetypes = {
