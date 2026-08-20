@@ -161,6 +161,7 @@ return {
 
       display = {
         chat = {
+          fold_context = true,
           window = {
             -- Keep the base config numeric. We clamp the real split width in a
             -- ChatOpened autocmd below because CodeCompanion still assumes this
