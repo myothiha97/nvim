@@ -264,6 +264,24 @@ end
 -- reached the global mapping and opened a SECOND browser on top of the first.
 local active_prompt_buf
 
+--- Directory to open in, derived from the current buffer.
+---
+--- `%:p:h` is not safe on its own: for a scheme buffer it returns the URL
+--- verbatim — `oil:///path`, `term://…`, `fugitive://…` — and file_browser then
+--- errors with "Given path ... doesn't exist". Pressing the browser key from
+--- inside oil is the common way to hit that. Strip a leading scheme, then fall
+--- back to the cwd for anything that still is not a real directory.
+local function resolve_dir()
+  local dir = vim.fn.expand("%:p:h")
+  if type(dir) == "string" then
+    dir = (dir:gsub("^%w[%w+.-]*://", ""))
+    if vim.fn.isdirectory(dir) == 1 then
+      return dir
+    end
+  end
+  return vim.fn.getcwd()
+end
+
 local open_browser -- forward declaration: the stat toggle reopens the picker
 
 --- Toggle the stat columns.
@@ -315,7 +333,7 @@ open_browser = function(opts)
   -- relative path "." and the prompt shows a bare "/" until you navigate
   -- somewhere else. Anchoring cwd at the project root makes the prefix read as
   -- `lua/plugins/` — the actual location — from the first frame.
-  local path = opts.path or vim.fn.expand("%:p:h")
+  local path = opts.path or resolve_dir()
   local root = vim.fn.getcwd()
 
   open_backdrop(origin_win)
@@ -525,7 +543,7 @@ return {
                 -- is toggle_hidden, so an accidental press would silently
                 -- change what the listing shows. `false` blocks that default
                 -- without binding anything, so the keys just move the cursor.
-                ["h"] = false,
+                ["h"] = parent,
                 ["l"] = false,
 
                 -- Move the selection, same keys in both modes. Insert already
@@ -601,6 +619,18 @@ return {
           -- window and gets that wrong if it mounts too early.
           vim.schedule(function()
             require("lazy").load({ plugins = { "telescope-file-browser.nvim" } })
+
+            -- oil has already claimed the directory buffer by now (it still
+            -- owns `:e <dir>` mid-session). Left alone it sits behind the
+            -- picker, so closing the browser drops you into oil instead of an
+            -- empty editor. Swap it for a blank buffer first.
+            local dir_buf = vim.api.nvim_get_current_buf()
+            if vim.bo[dir_buf].filetype == "oil" then
+              local blank = vim.api.nvim_create_buf(true, false)
+              vim.api.nvim_win_set_buf(0, blank)
+              pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
+            end
+
             -- Through open_browser, not the picker directly, so the startup
             -- window gets the same keymaps, backdrop and teardown as every
             -- other open.
