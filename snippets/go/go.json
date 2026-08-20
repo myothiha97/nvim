@@ -99,6 +99,31 @@
     "body": "defer ${1:resource}.Close()",
     "description": "Defer resource close"
   },
+  "HTTP ResponseWriter Request": {
+    "prefix": "wr",
+    "body": "${1:w} http.ResponseWriter, ${2:r} *http.Request",
+    "description": "HTTP handler parameters"
+  },
+  "HTTP HandleFunc": {
+    "prefix": "hf",
+    "body": "${1:http}.HandleFunc(\"${2:/}\", ${3:handler})",
+    "description": "Register named HTTP handler"
+  },
+  "HTTP Handler Declaration": {
+    "prefix": "hand",
+    "body": "func $1(${2:w} http.ResponseWriter, ${3:r} *http.Request) {\n\t$0\n}",
+    "description": "HTTP handler declaration"
+  },
+  "HTTP Redirect": {
+    "prefix": "rd",
+    "body": "http.Redirect(${1:w}, ${2:r}, \"${3:/}\", ${4:http.StatusFound})",
+    "description": "Redirect HTTP request"
+  },
+  "HTTP Error": {
+    "prefix": "herr",
+    "body": "http.Error(${1:w}, ${2:err}.Error(), ${3:http.StatusInternalServerError})",
+    "description": "Write HTTP error response"
+  },
   "HTTP Handler": {
     "prefix": "http",
     "body": "http.HandleFunc(\"${1:/}\", func(w http.ResponseWriter, r *http.Request) {\n\t${0}\n})",
