@@ -7,8 +7,10 @@
 -- `winhighlight` and destroy themselves on focus loss. That cost two hacks to
 -- survive another picker opening on top, made a dim impossible on a transparent
 -- theme, and poisoned snacks' transparency detection so every popup blacked out
--- the editor. snacks.explorer has neither property: `auto_close = false` keeps it
--- up by design, and its windows use `NormalFloat:…`, so nothing to work around.
+-- the editor. snacks pickers have neither property: they ignore focus lost to
+-- another float (`Snacks.util.is_float()`, picker/core/picker.lua:288-291), so a
+-- picker stacked on this one leaves it alone, and their windows use
+-- `NormalFloat:…`, so nothing to work around.
 --
 -- TWO MODES, deliberately separate, sharing nothing but the plugin:
 --   * <leader>r — the tree sidebar on the left. Configured in snacks.lua, NOT
@@ -647,9 +649,25 @@ local function open(opts)
     -- file and opened it instead of entering the highlighted directory. The
     -- sidebar mode keeps it on, which is where following actually helps.
     follow_file = false,
-    -- Never tear down because another float took the focus. This is the default
-    -- for the explorer source and the single biggest reason this mode exists.
-    auto_close = false,
+    -- ON, unlike the explorer source's default (config/sources.lua:63).
+    --
+    -- `auto_close` does NOT mean "close whenever focus leaves". snacks' handler
+    -- returns early for any float (picker/core/picker.lua:288-291, via
+    -- `Snacks.util.is_float()`), so another picker opening on top of the browser
+    -- never closes it — which is the property this mode was built for and the
+    -- reason `false` was set here at first. What `false` additionally suppresses
+    -- is the close when focus lands in a NORMAL window, and that case is the
+    -- whole point: opening a file from a picker stacked on the browser (e.g.
+    -- <leader><leader>, confirm) left the popup floating over the file with the
+    -- cursor already editing underneath it. `true` closes it there and nowhere
+    -- else.
+    --
+    -- Nothing else changes. The other half of the `false` branch only toggles a
+    -- main-window preview off (picker/core/picker.lua:300-306), and this mode
+    -- runs `preview = false`. Closing is snacks' own scheduled `picker:close()`,
+    -- which unregisters from `_active` so <leader>e keeps toggling correctly, and
+    -- it does not touch the focus unless the current window is a picker window.
+    auto_close = true,
     -- Opening a file ends the browse, matching telescope's select_default. The
     -- sidebar mode keeps `close = false` because it stays open beside your work.
     jump = { close = true },
