@@ -570,6 +570,14 @@ return {
       local group = vim.api.nvim_create_augroup("CodeCompanionFidget", { clear = true })
       local handle = nil
       local count = 0
+      local track_au = nil
+
+      local function stop_tracking()
+        if track_au then
+          pcall(vim.api.nvim_del_autocmd, track_au)
+          track_au = nil
+        end
+      end
 
       local function open()
         if handle then
@@ -605,7 +613,12 @@ return {
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "CodeCompanionRequestFinished",
-        callback = function()
+        callback = function(args)
+          -- InlineFinished is success-only. RequestFinished also covers errors
+          -- and cancellation, so the cursor tracker cannot leak into the session.
+          if args.data and args.data.interaction == "inline" then
+            stop_tracking()
+          end
           count = math.max(0, count - 1)
           if count == 0 then
             -- Defer so a follow-up request (classify -> generate) reuses the
@@ -643,7 +656,6 @@ return {
       -- We read it, stop tracking (so the deferred jump can't overwrite it), then
       -- schedule the restore. The tracker autocmd exists only during generation,
       -- so there is no steady-state hot-path cost.
-      local track_au = nil
       local user_pos = nil
 
       local function record()
@@ -652,13 +664,6 @@ return {
           cursor = vim.api.nvim_win_get_cursor(0),
           view = vim.fn.winsaveview(),
         }
-      end
-
-      local function stop_tracking()
-        if track_au then
-          pcall(vim.api.nvim_del_autocmd, track_au)
-          track_au = nil
-        end
       end
 
       vim.api.nvim_create_autocmd("User", {
