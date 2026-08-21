@@ -176,6 +176,14 @@ return {
               box = "horizontal",
               width = 0.8,
               height = 0.5,
+              -- Repeated from the picker-wide layout below, and it has to be:
+              -- a source layout that spells out its own `box` REPLACES the
+              -- picker-wide one instead of merging with it
+              -- (Snacks.picker.config.layout skips preset resolution once
+              -- `layout.layout[1]` exists). Without this line grep is the one
+              -- picker that still draws the full-screen black veil. Reasoning
+              -- for the setting itself is on the picker-wide copy.
+              backdrop = false,
               {
                 box = "vertical",
                 border = true,
@@ -409,6 +417,35 @@ return {
         layout = {
           width = 0.3,
           height = 0.4,
+          -- No dim behind a picker. The theme runs `transparent = true`, so the
+          -- editor background is Ghostty's, while snacks' backdrop is a
+          -- full-editor float of pure black at winblend 60 — with nothing else
+          -- painting a background, it renders as a pitch-black screen.
+          --
+          -- snacks already skips its backdrop for a transparent colorscheme, but
+          -- the detection is unreliable here. `Snacks.util.is_transparent()`
+          -- samples `Normal`'s background ONCE per session, and `nvim_get_hl`
+          -- resolves in the context of the CURRENT WINDOW's `winhighlight`.
+          -- Telescope's floats set `Normal:TelescopePromptNormal` and the
+          -- lazy.nvim UI sets `Normal:LazyNormal`, both carrying the theme's
+          -- opaque `bg_float` (#001419). A picker opened from inside the file
+          -- browser — the startup explorer, where <leader><leader> gets pressed
+          -- constantly — therefore samples #001419, concludes the theme is
+          -- opaque, and caches that until the next ColorScheme. Every popup for
+          -- the rest of the session then gets the veil, browser or no browser.
+          -- Measurements and the rejected alternatives are in
+          -- notes/popup-backdrop-darkening-investigation.md.
+          --
+          -- Turning it off is what correct detection would do for this theme
+          -- anyway, and it cannot regress: no cache, no sampling order, no
+          -- dependence on another plugin's winhighlight. Pickers only —
+          -- Snacks.input, the notifier and the lazygit terminal keep their own
+          -- backdrop settings.
+          --
+          -- It has to live HERE, inside this table: `picker` already has a
+          -- `layout` key, and a second one in the same constructor is silently
+          -- dropped by Lua.
+          backdrop = false,
         },
       },
     },
