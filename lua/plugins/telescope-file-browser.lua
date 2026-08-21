@@ -7,7 +7,20 @@
 --   * oil-mirrored close and navigation keys
 --   * stat columns shown by default, toggled with STAT_KEY
 --   * opens in normal mode
---   * confined to the current window, with a dim behind it
+--   * confined to the current window
+--   * stays mounted when another picker takes the focus
+--
+-- There is deliberately NO dim behind the popup, and adding one back is a
+-- mistake this file has already made twice. Telescope has no backdrop feature
+-- (its only related option is `winblend`, which makes the picker ITSELF
+-- translucent); craftzdog's config, which this borrows its look from, has none
+-- either; and a custom one cannot work here. `transparent = true` means nvim
+-- paints no background, so a black float has nothing to blend against and emits
+-- raw #000000 at every winblend value — measured in a real terminal, blend 80
+-- and blend 0 both sent #000000 with ZERO default-background cells, i.e. the dim
+-- replaced Ghostty's transparency with solid black rather than shading it. The
+-- separation comes from the popup's own opaque background and its border. See
+-- notes/popup-backdrop-darkening-investigation.md.
 --
 -- Scope is deliberately narrow so this can be deleted in one step:
 --   * lazy-loaded by a single key, so startup cost is zero
@@ -17,9 +30,13 @@
 --   * the two `optional` telescope specs in LazyVim's terraform extra are
 --     force-disabled below (see the note on them)
 --
--- Flip to `false` to park the trial without deleting the file. To remove it
--- for good: delete this file, then `NVIM_LAZY_UNLOCK=1 nvim` + `:Lazy clean`.
-local ENABLED = true
+-- PARKED 2026-08-21: `false` because snacks.explorer took over the same job in
+-- snacks-file-browser.lua, without telescope's float problems (modal teardown,
+-- `Normal` remapping, no workable dim). Flip back to `true` to A/B them — but
+-- then change TRIAL_KEY, since <leader>e now belongs to the snacks version.
+-- To remove for good: delete this file, then `NVIM_LAZY_UNLOCK=1 nvim` +
+-- `:Lazy clean`.
+local ENABLED = false
 
 -- <leader>e opens the browser. The other two explorers keep their own keys:
 -- <leader>E is oil.nvim, <leader>r is snacks.explorer.
@@ -95,53 +112,6 @@ local STAT_COLUMNS = { mode = true, size = true, date = true }
 -- Session state for the toggle. Deliberately not persisted: each session starts
 -- back at the default listing.
 local show_stat = true
-
--- Dim behind the popup, so the browser is what your eye lands on. Covers only
--- the window the picker opened in — the other splits are left at full
--- brightness, matching the window-scoped popup.
---
--- Matched to a MUI dialog backdrop, which is rgba(0, 0, 0, 0.5). `winblend` is
--- transparency rather than opacity (0 = solid black, 100 = invisible), so 50%
--- opacity is winblend 50. The previous 30 was ~70% opaque, far darker than the
--- reference.
-local DIM_BLEND = 50
-
--- Telescope's own floats are zindex 50, so the backdrop must sit below them.
-local BACKDROP_ZINDEX = 40
-
-local backdrop_win, backdrop_buf
-
-local function close_backdrop()
-  if backdrop_win and vim.api.nvim_win_is_valid(backdrop_win) then
-    vim.api.nvim_win_close(backdrop_win, true)
-  end
-  if backdrop_buf and vim.api.nvim_buf_is_valid(backdrop_buf) then
-    vim.api.nvim_buf_delete(backdrop_buf, { force = true })
-  end
-  backdrop_win, backdrop_buf = nil, nil
-end
-
---- Dim just `win`, not the whole editor.
-local function open_backdrop(win)
-  close_backdrop() -- never stack two backdrops
-  vim.api.nvim_set_hl(0, "TelescopeFbBackdrop", { bg = "#000000", default = true })
-
-  local pos = vim.api.nvim_win_get_position(win)
-
-  backdrop_buf = vim.api.nvim_create_buf(false, true)
-  backdrop_win = vim.api.nvim_open_win(backdrop_buf, false, {
-    relative = "editor",
-    row = pos[1],
-    col = pos[2],
-    width = vim.api.nvim_win_get_width(win),
-    height = vim.api.nvim_win_get_height(win),
-    focusable = false,
-    style = "minimal",
-    zindex = BACKDROP_ZINDEX,
-  })
-  vim.wo[backdrop_win].winhighlight = "Normal:TelescopeFbBackdrop"
-  vim.wo[backdrop_win].winblend = DIM_BLEND
-end
 
 --- Size and position the picker inside `win` instead of over the whole editor.
 ---
@@ -282,6 +252,38 @@ local function resolve_dir()
   return vim.fn.getcwd()
 end
 
+--- Is `win` one of the picker's own floats?
+---
+--- <C-w> cycles through floating windows, so stepping out of the prompt lands
+--- in the results window rather than in the next split. That still counts as
+--- leaving the browser, so it must not be mistaken for another picker opening
+--- on top of it. The ids come from telescope's live status table (see
+--- pickers.lua state.set_status), which covers the border windows too.
+local function is_picker_window(prompt_buf, win)
+  local status = require("telescope.state").get_status(prompt_buf)
+  local parts =
+    { "prompt_win", "prompt_border_win", "results_win", "results_border_win", "preview_win", "preview_border_win" }
+  for _, part in ipairs(parts) do
+    if status[part] == win then
+      return true
+    end
+  end
+  return false
+end
+
+--- Should the browser stay up, given where the focus is right now?
+---
+--- Yes for the prompt itself, and yes for any float that is not part of the
+--- picker — another picker, its preview, a notification. Anything else is a
+--- real window, which means the browser is done.
+local function keeps_browser_open(prompt_buf, prompt_win)
+  local win = vim.api.nvim_get_current_win()
+  if win == prompt_win then
+    return true
+  end
+  return vim.api.nvim_win_get_config(win).relative ~= "" and not is_picker_window(prompt_buf, win)
+end
+
 local open_browser -- forward declaration: the stat toggle reopens the picker
 
 --- Toggle the stat columns.
@@ -336,8 +338,6 @@ open_browser = function(opts)
   local path = opts.path or resolve_dir()
   local root = vim.fn.getcwd()
 
-  open_backdrop(origin_win)
-
   require("telescope").extensions.file_browser.file_browser({
     -- Window-local for the normal popup; omitted for the startup fullscreen
     -- open, where the point is to fill the editor rather than one window.
@@ -378,11 +378,80 @@ open_browser = function(opts)
   })
 
   local prompt_buf = vim.api.nvim_get_current_buf()
+  local prompt_win = vim.api.nvim_get_current_win()
   active_prompt_buf = prompt_buf
+
+  -- Losing focus must NOT tear the browser down.
+  --
+  -- Telescope closes a picker the moment its prompt buffer is left: it puts a
+  -- `nested` BufLeave autocmd on the prompt in the PickerInsert group
+  -- (pickers.lua) that calls on_close_prompt. That fires in the middle of
+  -- whatever is stealing the focus, and it broke every other picker: pressing
+  -- <leader><leader> for snacks made snacks build its layout, telescope's
+  -- BufLeave ran halfway through it, on_close_prompt closed the browser's
+  -- floats and that put the cursor back in the origin window, and snacks —
+  -- which closes itself on a WinEnter into a window that is neither a float nor
+  -- part of its own layout (picker/core/picker.lua) — saw that as the user
+  -- walking away and closed too. Both pickers vanished on one keypress.
+  --
+  -- Dropping that autocmd leaves the browser mounted while another float has
+  -- the focus, the way oil.nvim's buffer stays behind a picker. Teardown moves
+  -- to the watcher below, which fires on the same events but only for the ones
+  -- that actually mean "done with the browser".
+  pcall(vim.api.nvim_clear_autocmds, {
+    group = "PickerInsert",
+    event = "BufLeave",
+    buffer = prompt_buf,
+  })
+
+  -- Close the browser when the focus lands in a REAL window, leave it mounted
+  -- when it lands in another float.
+  --
+  -- That single test separates the two cases: cancelling a picker returns the
+  -- cursor to the prompt float and the browser is simply live again, while
+  -- opening a file puts it in the origin window (snacks resolves its target
+  -- window with floats excluded) and the browser has served its purpose.
+  -- Moving to another split with <C-w> lands in a real window too, which is
+  -- the same close telescope did before.
+  --
+  -- The decision is confirmed one tick later rather than taken on the spot.
+  -- Plugins move the focus transiently — snacks itself steps through the origin
+  -- window while resolving where a file should open — and acting on the first
+  -- event tore the browser down mid-flicker. Re-asking after the dust settles
+  -- costs nothing and only closes when the focus really stayed away.
+  --
+  -- The delay is also required: closing a window from inside WinEnter is not
+  -- allowed (E1312, "Not allowed to change the window layout in this autocmd"),
+  -- which a plain <C-w>w out of the browser hits.
+  --
+  -- on_close_prompt rather than actions.close: close() also warps the cursor to
+  -- the picker's original window, which would undo the <C-w> that got here.
+  local watcher ---@type integer
+  watcher = vim.api.nvim_create_autocmd("WinEnter", {
+    desc = "Close the file browser once the focus lands outside every float",
+    callback = function()
+      if not vim.api.nvim_win_is_valid(prompt_win) then
+        return true -- picker already gone: `q`, `l`, actions.close
+      end
+      if keeps_browser_open(prompt_buf, prompt_win) then
+        return
+      end
+      vim.schedule(function()
+        if not vim.api.nvim_win_is_valid(prompt_win) or keeps_browser_open(prompt_buf, prompt_win) then
+          return -- the focus bounced back; the browser stays
+        end
+        pcall(require("telescope.pickers").on_close_prompt, prompt_buf)
+        -- By id, because a scheduled callback cannot return true to delete
+        -- itself. Exactly one watcher exists per open, and it dies with the
+        -- picker either here or through the check above.
+        pcall(vim.api.nvim_del_autocmd, watcher)
+      end)
+    end,
+  })
 
   -- `-` / `=` are the back/forward pair, oil-style: `-` goes to the parent
   -- (bound with the other navigation keys), `=` selects — entering a directory
-  -- or opening a file, the same as <C-l>. No directory guard: the pair is meant
+  -- or opening a file, the same as `l`. No directory guard: the pair is meant
   -- to be symmetric.
   --
   -- `=` and STAT_KEY are set directly on the prompt buffer rather than through
@@ -410,19 +479,15 @@ open_browser = function(opts)
     desc = "Toggle permissions/size/date columns",
   })
 
-  -- Tear the backdrop down on whatever ends the picker — `q`, <CR>, <C-l>,
-  -- actions.close, or the window being closed some other way. BufWinLeave on
-  -- the prompt buffer covers every one of those paths, so there is no
-  -- per-keymap cleanup to keep in sync.
-  --
-  -- STAT_KEY reopens the picker, which calls open_backdrop again; that closes
-  -- the previous backdrop first, so the two never stack.
+  -- Release the toggle slot when the picker's window goes away, whatever ended
+  -- it — `q`, `l`, actions.close, or the window being closed some other way.
+  -- BufWinLeave on the prompt buffer covers every one of those paths, so there
+  -- is no per-keymap cleanup to keep in sync.
   vim.api.nvim_create_autocmd("BufWinLeave", {
     buffer = prompt_buf,
     once = true,
     callback = function()
       vim.schedule(function()
-        close_backdrop()
         -- Only clear if this is still the picker on screen. STAT_KEY closes and
         -- immediately reopens, and that reopen has already claimed the slot by
         -- the time this scheduled callback runs.
@@ -532,19 +597,21 @@ return {
                 end,
 
                 -- ---- navigate ---------------------------------------------
-                -- <C-h> / <C-l> rather than bare h / l: the plain letters were
-                -- too easy to hit by accident and would jump a directory.
-                ["<C-h>"] = parent,
-                ["<C-l>"] = actions.select_default,
+                -- h / l are the working pair, netrw/oil-style: `h` to the
+                -- parent, `l` to enter the directory or open the file. `-` is
+                -- the second way up. Both chords are deliberately dead: they
+                -- were the old pair, and leaving them live meant a stray <C-l>
+                -- could open something.
+                ["<C-h>"] = false,
+                ["<C-l>"] = false,
                 ["-"] = parent,
 
-                -- h / l are deliberately dead. Leaving them unset is not the
-                -- same thing: file_browser's own normal-mode default for `h`
-                -- is toggle_hidden, so an accidental press would silently
-                -- change what the listing shows. `false` blocks that default
-                -- without binding anything, so the keys just move the cursor.
+                -- Both letters must be bound, not left unset: file_browser's
+                -- own normal-mode default for `h` is toggle_hidden, so an
+                -- accidental press would silently change what the listing
+                -- shows. `false` blocks a default without binding anything.
                 ["h"] = parent,
-                ["l"] = false,
+                ["l"] = actions.select_default,
 
                 -- Move the selection, same keys in both modes. Insert already
                 -- has these from telescope; normal mode does not.
@@ -632,8 +699,7 @@ return {
             end
 
             -- Through open_browser, not the picker directly, so the startup
-            -- window gets the same keymaps, backdrop and teardown as every
-            -- other open.
+            -- window gets the same keymaps and teardown as every other open.
             open_browser({ path = dir, fullscreen = true })
           end)
         end,
