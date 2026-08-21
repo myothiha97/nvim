@@ -12,6 +12,28 @@
 > looking for that filename lands in the same place. Keep it a pointer — two
 > copies of these rules will drift, and an agent will then follow the stale one.
 
+## In progress: telescope file-browser trial (2026-08-21)
+
+Uncommitted work lives on the branch **`trial/telescope-file-browser`**, being used
+day-to-day before any decision. Two things a new session must know before touching
+`lua/plugins/telescope-file-browser.lua` or `lua/plugins/snacks.lua`:
+
+- **Never add a dim/backdrop behind the file browser**, and **never re-enable
+  snacks' picker backdrop.** With `transparent = true` a black float has nothing
+  to blend against and renders as solid black at every `winblend`. Both were
+  measured; both have already been tried and reverted.
+- The whole-editor darkening behind popups is a **snacks transparency
+  mis-detection triggered by telescope's and lazy.nvim's `winhighlight`**, not a
+  browser bug. It is fixed by `backdrop = false` in two places in `snacks.lua`.
+  That fix is the **trial's dependency, not a standalone one**: measured, the
+  pre-trial workflow (picker over a file, picker from a picker, picker over oil or
+  the snacks explorer) never poisoned the detection, which is why this only
+  started the night telescope landed. If the trial is dropped, those two lines can
+  go with it.
+
+Full reasoning, measurements and the rejected alternatives:
+[`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md).
+
 ## One loose end from the freeze session (review by ~2026-10-20)
 
 LOW priority, non-blocking. The pre-freeze build-out is committed + pushed; this is the
