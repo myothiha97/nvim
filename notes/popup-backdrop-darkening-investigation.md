@@ -11,9 +11,10 @@ poisons the whole session.
 
 ## STATE — read this first (2026-08-21, ~03:00)
 
-**Resolved.** Both fixes applied, verified in a real terminal, and sitting
-**uncommitted** on the branch `trial/telescope-file-browser` (which was already at
-the same commit as `main`).
+**Resolved.** Both fixes applied, verified in a real terminal, and **committed**
+(`2099ded`). Later work moved to `trial/file-explorer-test`, where the browser is
+now a snacks picker and telescope is parked; the fix below is unaffected and
+stays. See the 2026-08-21 evening update at the end of this section.
 
 | file | change |
 | --- | --- |
@@ -29,11 +30,12 @@ the same commit as `main`).
    it emits raw black at *every* `winblend`. Measured — blend 80 and blend 0 both
    sent `#000000` with zero default-background cells; removing the dim took
    `#000000` emissions from 268 to 0. This mistake has already been made twice.
-2. **Do not re-enable snacks' picker backdrop while telescope is in the config.**
-   Same physics: measured 371 `#000000` cells for a picker over a plain file.
-   With correct detection snacks would draw no backdrop at all for a transparent
-   theme, so `backdrop = false` is not an override — it pins snacks to what it
-   would already do if it could read the theme.
+2. **Do not re-enable snacks' picker backdrop.** Same physics: measured 371
+   `#000000` cells for a picker over a plain file. With correct detection snacks
+   would draw no backdrop at all for a transparent theme, so `backdrop = false` is
+   not an override — it pins snacks to what it would already do if it could read
+   the theme. (Originally written as "while telescope is in the config"; telescope
+   has since gone and the rule still holds, see the update below.)
 
 ### Scope of the snacks fix — it is the trial's dependency, not a standalone fix
 
@@ -53,10 +55,22 @@ the config as it stood before the fix:
 `NormalFloat:…`, not `Normal:…`, so snacks skipped its own backdrop correctly.
 That is why the darkening only started the night telescope landed.
 
-Consequence for a keep/drop decision on the trial: if telescope goes, the two
-`backdrop = false` lines can go with it. Keeping them is cheap insurance against
-the one remaining route (`:Lazy` open, then a picker key pressed inside its UI),
-but nothing in the pre-trial workflow needs them.
+Consequence, as written at the time: if telescope goes, the two `backdrop = false`
+lines could go with it.
+
+### Update 2026-08-21, evening — the two lines stay
+
+Telescope did go (`lua/plugins/telescope-file-browser.lua` is parked at
+`ENABLED = false`, which leaves telescope itself uninstalled) and the browser was
+rebuilt as a snacks picker in `lua/plugins/snacks-file-browser.lua`. The lines are
+kept anyway, and the reasoning above is why: the *one remaining route* it called
+cheap insurance is not going anywhere. The lazy.nvim UI sets
+`Normal:LazyNormal` with the theme's opaque `bg_float`, ships with the config, and
+is focused often enough (`:Lazy`, then any picker key inside it) to poison the
+sample for the rest of the session. The new browser cannot cause the problem — a
+snacks picker uses `NormalFloat:…`, which is exactly the case measured as clean
+above — so this is no longer a trial dependency at all. It is a standing fix for a
+latent snacks bug, and it costs nothing on a transparent theme.
 
 ### Open follow-up
 

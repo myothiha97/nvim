@@ -1,8 +1,9 @@
 # Shape snacks explorer into the telescope-browser experience
 
-Direction chosen 2026-08-21 (~03:00). **In progress since ~11:30 the same day** —
-implemented in `lua/plugins/snacks-file-browser.lua`, uncommitted on
-`trial/telescope-file-browser`, being used before a keep/drop decision.
+Direction chosen 2026-08-21 (~03:00), built the same day. Implemented in
+`lua/plugins/snacks-file-browser.lua`, **committed on `trial/file-explorer-test`**
+and in day-to-day use for about a week (review ~2026-08-28) before a keep/drop
+decision.
 
 ## Status
 
@@ -103,25 +104,37 @@ Measured with `Snacks.explorer.open({...})` in a real terminal:
   actually missed.
 - **`gs` toggle** for those columns: a small custom action.
 
-## Decisions to make before starting
+## Decisions taken
 
-1. **netrw ownership.** `replace_netrw = true` is the clean startup mechanism but
-   takes directory buffers from oil, so `:e <dir>` mid-session opens snacks
-   explorer instead of oil. `lua/plugins/oil.lua` currently keeps
-   `default_file_explorer = true` on purpose for that case. Either accept the
-   swap, or keep oil on netrw and add a startup-only hook (more custom code, the
-   thing this change exists to avoid).
-2. **Keys and layouts.** Two entry points are possible since layout can be passed
-   per call: keep `<leader>r` as today's 25% sidebar, and give the browser-style
-   flat dropdown its own key (`<leader>e`, freed when the telescope trial goes).
-3. **Fullscreen at startup, dropdown on demand** — matching the current telescope
-   behaviour — or one geometry everywhere.
+1. **netrw ownership: oil keeps it.** `replace_netrw` is NOT used — it hooks every
+   directory buffer and would take `:e <dir>` as well. Only the startup case is
+   claimed, through a one-shot `VimEnter` hook that swaps oil's directory buffer
+   for a blank one and opens the browser fullscreen. So `nvim <dir>` gives the
+   browser, `:e <dir>` mid-session still gives oil.
+2. **Keys: both modes kept.** `<leader>r` stays the 25% sidebar (configured in
+   `snacks.lua`), `<leader>e` is this flat dropdown, `<leader>E` is oil.
+3. **Geometry: fullscreen at startup, 90x25 dropdown on demand.** Same rounded
+   frame and title in both, so they read as one thing.
 
-## Order of work
+## Fixed during the trial (2026-08-21, evening)
 
-1. Draft the browser-style explorer alongside the existing sidebar, on
-   `trial/telescope-file-browser` or a fresh branch, and use both for a few days.
-2. If it wins: delete `lua/plugins/telescope-file-browser.lua`, revert the two
-   `backdrop = false` lines, set oil's `default_file_explorer` per decision 1,
-   then `NVIM_LAZY_UNLOCK=1 nvim` + `:Lazy clean` to drop telescope.
-3. If it loses: keep the telescope trial as it stands and close this out.
+- **`auto_close = true`.** The popup used to survive a stacked picker opening a
+  file, leaving it floating over the buffer with the cursor already editing
+  underneath. `auto_close` never closed a picker for another FLOAT taking focus
+  (snacks skips floats), only for a normal window, so `false` was suppressing
+  exactly the case that mattered.
+- **`<C-e>` / `<C-y>`.** The list is virtually scrolled (its buffer holds only the
+  visible rows), so the native keys had nothing to move. Bound to `list:scroll()`,
+  the same call snacks' own mouse wheel makes in that window.
+
+## What is left
+
+1. Use it for the week. Decide keep or drop by ~2026-08-28.
+2. **If it wins:** merge to `dev` and `main`, delete
+   `lua/plugins/telescope-file-browser.lua`, then `NVIM_LAZY_UNLOCK=1 nvim` +
+   `:Lazy clean` to drop telescope from disk. **Do not** revert the two
+   `backdrop = false` lines in `snacks.lua` — telescope was only one trigger for
+   the transparency mis-detection; the lazy.nvim UI is the other one and it ships
+   with the config.
+3. **If it loses:** drop this branch and keep oil on `<leader>E` plus the snacks
+   sidebar on `<leader>r`. The telescope trial stays parked either way.

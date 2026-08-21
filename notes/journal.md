@@ -1,4 +1,4 @@
-> Policies and personal rules for editing this config live in [`rules.md`](rules.md).
+> Policies and personal rules for editing this config live in [`rules.md`](../rules.md).
 > The freeze policy (2026-05-24) is the active one — read it before opening any plugin file.
 
 ## May 2026 change summary

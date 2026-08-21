@@ -12,27 +12,39 @@
 > looking for that filename lands in the same place. Keep it a pointer — two
 > copies of these rules will drift, and an agent will then follow the stale one.
 
-## In progress: telescope file-browser trial (2026-08-21)
+## In progress: file-browser trial (started 2026-08-21, review ~2026-08-28)
 
-Uncommitted work lives on the branch **`trial/telescope-file-browser`**, being used
-day-to-day before any decision. Two things a new session must know before touching
-`lua/plugins/telescope-file-browser.lua` or `lua/plugins/snacks.lua`:
+`<leader>e` is a **snacks** file browser, not oil and not telescope. It lives in
+`lua/plugins/snacks-file-browser.lua`, committed on the branch
+**`trial/file-explorer-test`**, and is being used day-to-day for about a week
+before a keep/drop decision. Oil moved to `<leader>E` and still owns `:e <dir>`.
+
+The telescope attempt at the same thing is **parked, not deleted**:
+`lua/plugins/telescope-file-browser.lua` with `ENABLED = false`, which also keeps
+telescope itself uninstalled. Do not revive it to "compare" without a reason.
+
+Three things a new session must know before touching that file, `snacks.lua`, or
+`oil.lua`:
 
 - **Never add a dim/backdrop behind the file browser**, and **never re-enable
   snacks' picker backdrop.** With `transparent = true` a black float has nothing
   to blend against and renders as solid black at every `winblend`. Both were
   measured; both have already been tried and reverted.
 - The whole-editor darkening behind popups is a **snacks transparency
-  mis-detection triggered by telescope's and lazy.nvim's `winhighlight`**, not a
-  browser bug. It is fixed by `backdrop = false` in two places in `snacks.lua`.
-  That fix is the **trial's dependency, not a standalone one**: measured, the
-  pre-trial workflow (picker over a file, picker from a picker, picker over oil or
-  the snacks explorer) never poisoned the detection, which is why this only
-  started the night telescope landed. If the trial is dropped, those two lines can
-  go with it.
+  mis-detection triggered by another plugin's `winhighlight`**, not a browser bug.
+  It is fixed by `backdrop = false` in two places in `snacks.lua`. Those two lines
+  now **stay regardless of the trial**: telescope was one trigger and is gone, but
+  the lazy.nvim UI (`Normal:LazyNormal`) is the other and ships with the config.
+- **The browser is a snacks picker, so it inherits picker semantics.** Two
+  behaviours had to be set explicitly rather than worked around, and both are
+  documented in place: `auto_close = true` (a picker stacked on top still leaves
+  it open, but opening a file closes it instead of leaving the popup floating over
+  the buffer you are editing), and `<C-e>` / `<C-y>` bound to `list:scroll()` (the
+  list is virtually scrolled, so the native keys have nothing to move).
 
 Full reasoning, measurements and the rejected alternatives:
-[`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md).
+[`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md)
+and [`todos/snacks-explorer-as-file-browser.md`](todos/snacks-explorer-as-file-browser.md).
 
 ## One loose end from the freeze session (review by ~2026-10-20)
 

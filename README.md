@@ -49,6 +49,7 @@ What makes this feel less like vanilla Neovim:
 | 📋 **AI prompt-copy system** | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent — or `<leader>aci` to pick a template / ask freeform interactively. |
 | 📌 **Persistent quickfix curation** | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project. |
 | 🗂️ **Symbols outline** | `<leader>cs` opens an IDE-style structure pane that follows your cursor. |
+| 📂 **One-directory file browser** | `<leader>e` opens a flat, single-directory browser in a dropdown (`nvim <dir>` opens it edge-to-edge): path in the prompt, `h`/`l` to walk, permissions/size/date on `gs`, full CRUD on marked rows. Built on the snacks picker, so it costs nothing until pressed. |
 | 🔍 **In-buffer git blame** | `<leader>gw` / `<leader>gb` show compact and full blame as floats, without leaving the file. |
 | 📝 **Rendered markdown in-buffer** | `.md` files render inline (headings, code blocks, inline code) with flat no-highlight styling; `<leader>uh` flips the buffer back to raw for editing. Same renderer polishes LSP hover popups and Avante windows. |
 
@@ -60,17 +61,17 @@ What makes this feel less like vanilla Neovim:
 |----------|--------|
 | **Completion** | blink.cmp — LSP · local snippets · path · buffer |
 | **AI** | copilot.lua (inline) + copilot-lsp (NES) + CodeCompanion (inline/agentic/chat) + prompt-copy system |
-| **File nav** | Snacks — picker · explorer · dashboard · terminal · oil.nvim (fullscreen) |
+| **File nav** | Snacks — picker · explorer (sidebar + browser modes) · dashboard · terminal · oil.nvim (fullscreen) |
 | **Code nav** | Trouble (symbols outline + quickfix views) · treesitter textobjects |
 | **Git** | gitsigns (hunks) + diffview.nvim + custom blame floats |
 | **Search** | grug-far — project/file search-replace & rename |
 | **Multi-cursor** | vim-visual-multi |
 | **Folding** | nvim-ufo — treesitter + indent, async |
-| **Formatting** | conform.nvim — prettierd for web/JSON/Markdown, goimports/gofumpt for Go |
-| **Languages** | TypeScript/React daily driver, Go + Python enabled, Rust lazy/deferred |
+| **Formatting** | conform.nvim — prettierd for web/JSON/Markdown, goimports/gofumpt for Go, shfmt for shell |
+| **Languages** | TypeScript/React daily driver, Go + Python enabled, DevOps filetypes (YAML · Docker · Terraform · Helm) enabled, Rust lazy/deferred |
 | **Markdown** | render-markdown.nvim — `.md` files · LSP hover popups · Avante (flat, no-highlight) |
 | **UI** | lualine · noice (cmdline only) · fidget · which-key |
-| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-v1` (default, violet keyword) · `-custom-v2` (warm keyword) · `-original` (untouched upstream, kept to diff against) |
+| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-v1` (default, violet keyword + copper punctuation) · `-custom-v2` (warm/yellow keyword) · `-custom-v3` (softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against) |
 
 ---
 
@@ -82,6 +83,11 @@ What makes this feel less like vanilla Neovim:
 | Go | Enabled | `gopls`, `goimports`, `gofumpt`, `delve`; project roots guarded to `go.mod` / `go.work` |
 | Python | Enabled | `basedpyright` + `ruff`, `openFilesOnly` diagnostics, safe roots for both servers, `venv-selector.nvim` lazy on Python |
 | JSON | Enabled | LazyVim JSON extra + `prettierd` |
+| YAML | Enabled | `yamlls`; the daily DevOps filetype |
+| Docker | Enabled | `dockerls` — `Dockerfile` / compose |
+| Terraform | Enabled | `terraform-ls` |
+| Helm | Enabled | `helm-ls` — chart templates and `values.yaml` |
+| Shell | Enabled | `shfmt` formatting |
 | Rust | Deferred | Lazy extra is installed but filetype-gated; no runtime cost until opening Rust/Cargo files |
 
 Python and Go root detection intentionally avoids treating `$HOME/.git` as a
@@ -103,8 +109,9 @@ language server scan the whole home directory.
 | `<leader><leader>` | Smart finder (recent + buffers + files) |
 | `<leader>ff` · `<leader>fi` | Find files — root · current dir |
 | `<leader>fp` | Switch project |
-| `<leader>r` | Toggle Snacks explorer |
-| `<leader>e` | Oil file manager (fullscreen) |
+| `<leader>r` | Toggle Snacks explorer (tree sidebar) |
+| `<leader>e` | File browser (one directory at a time, dropdown) |
+| `<leader>E` | Oil file manager (fullscreen) |
 | `<leader>sl` | Grep within current file |
 | `<leader>sf` · `<leader>sF` | Search & replace — project · current file |
 | `<leader>sr` · `<leader>sR` | Rename word under cursor — file · project |
@@ -199,7 +206,7 @@ language server scan the whole home directory.
 | `<C-s>` | Save |
 | `<C-->` | Terminal (right split) |
 | `<C-d>` · `<C-u>` | Half-page scroll + recenter |
-| `<C-e>` · `<C-y>` | Scroll popup, else viewport |
+| `<C-e>` · `<C-y>` | Scroll popup / file-browser list, else viewport |
 | `<Down>` · `<Up>` | Scroll editor viewport down · up one line |
 | `<Right>` · `<Left>` | Scroll editor viewport right · left one column |
 | `<leader>uH` | Toggle mouse-hover docs |
@@ -220,14 +227,14 @@ The whole point. What's tuned, and what's off on purpose.
 - Snacks `words` · `scope` · `indent` · `scroll` · `animate` all off
 - treesitter-context off; treesitter highlight stops above 100KB files
 - LSP semantic tokens · `document_color` · inlay hints off; `update_in_insert = false`
-- lualine throttled to 1000ms; git-diff component removed from the statusline
+- lualine statusline throttled to 400ms (tabline/winbar 1000ms); git-diff component removed
 - LSP `debounce_text_changes = 300ms` applied globally through `vim.lsp.config("*", ...)`
 - Python/Go LSP roots guard against `$HOME/.git` workspace scans
 - noice restricted to the cmdline popup; python/ruby/perl/node providers disabled
 
 **Disabled by decision** — don't re-add without a reason:
-> gitsigns · bufferline · flash · harpoon · spectre · avante · sidekick ·
-> nvim-lint · persistence · mini.\* · friendly-snippets
+> bufferline · flash · harpoon · spectre · avante · sidekick · telescope ·
+> treesitter-context · nvim-lint · persistence · mini.\* · friendly-snippets
 
 **Version freeze** — `:Lazy update/sync/restore` is blocked at the Lua level
 (`lua/config/lazy-freeze.lua`). Unlock one session with `NVIM_LAZY_UNLOCK=1 nvim`.
@@ -264,7 +271,7 @@ rules.md            the discipline rules I follow when changing the config
 notes/              guides — safe-editing · freeze-policy · maintenance/delegation · reading codebases · learning · journal
 todos/              backlog — one file per future config idea (not done yet)
 AGENTS.md           pointer for non-Claude agents → CLAUDE.md (the canonical entry point)
-docs/               CHANGELOG · agent instructions (docs/CLAUDE.md is canonical)
+docs/               agent instructions (docs/CLAUDE.md is canonical) · parked phase specs
 ```
 
 ---
