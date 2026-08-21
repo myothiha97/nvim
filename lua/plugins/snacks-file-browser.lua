@@ -193,6 +193,33 @@ local function up(picker)
   reroot(picker, vim.fs.dirname(picker:cwd()), true)
 end
 
+--- Scroll the LIST by `delta` rows, the way <C-e> / <C-y> scroll a buffer.
+---
+--- Native <C-e> / <C-y> do nothing in here, which is why this exists. The list
+--- is virtually scrolled: its buffer only ever holds the rows currently on
+--- screen, and `list.top` is what maps a row back to an item
+--- (picker/core/list.lua:189-203). There is no text below the last line for
+--- Neovim to scroll to, so the keys were not being swallowed by a mapping —
+--- they had nothing to move. The global normal-mode <C-e> / <C-y> already skip
+--- snacks pickers on purpose and fall through to native (config/keymaps.lua:352),
+--- so this window has to answer for itself.
+---
+--- `list:scroll()` moves `top` instead, and is the same call snacks' own mouse
+--- wheel makes in this window (list.lua:55). The selection comes along only when
+--- it would otherwise leave the view (list.lua:251) — what <C-e> / <C-y> do in a
+--- file window too. At either end of the listing there is nothing left to scroll,
+--- so snacks steps the selection by `delta` instead (list.lua:247-249); the wheel
+--- has always behaved that way here, so the keys match it rather than inventing a
+--- second rule.
+local function scroll(picker, delta)
+  -- Honour a count (`5<C-e>`) like the native keys, but only from normal mode:
+  -- `v:count1` keeps the LAST normal-mode count while in insert, so reading it in
+  -- the prompt scrolls by a number nobody typed. Same guard snacks puts on
+  -- list_down / list_up (picker/actions.lua:29-33).
+  local count = vim.fn.mode():sub(1, 1) == "i" and 1 or vim.v.count1
+  picker.list:scroll(delta * count)
+end
+
 --- Type the key literally, bypassing this mapping.
 ---
 --- "tn" is what telescope-file-browser uses for the same fall-through
@@ -525,6 +552,13 @@ local function open(opts)
     ["h"] = { "fb_up", mode = { "n" }, desc = "Parent directory" },
     ["-"] = { "fb_up", mode = { "n" }, desc = "Parent directory" },
     ["q"] = { "close", mode = { "n" }, desc = "Close" },
+    -- Same fine viewport nudge they are in a file window
+    -- (config/keymaps.lua:363-368), for a listing taller than the popup. Insert
+    -- mode is included because in the prompt the native meaning (insert the
+    -- character below / above the cursor) has nothing to act on, while scrolling
+    -- the rows you are filtering does.
+    ["<C-e>"] = { "fb_scroll_down", mode = { "n", "i" }, desc = "Scroll list down" },
+    ["<C-y>"] = { "fb_scroll_up", mode = { "n", "i" }, desc = "Scroll list up" },
     ["<C-f>"] = { "close", mode = { "n", "i" }, desc = "Close" },
     -- oil binds `q` to close and makes <Esc> clear search highlights WITHOUT
     -- closing; the telescope browser mirrored that, so this does too. snacks'
@@ -682,6 +716,12 @@ local function open(opts)
       fb_backspace = backspace,
       fb_path_separator = path_separator,
       fb_toggle_stat = toggle_stat,
+      fb_scroll_down = function(picker)
+        scroll(picker, 1)
+      end,
+      fb_scroll_up = function(picker)
+        scroll(picker, -1)
+      end,
       -- `stopinsert` then focus on the NEXT tick, in that order.
       --
       -- Both halves are needed. `focus()` only moves the window, it does not
