@@ -590,10 +590,10 @@ local function open(opts)
     -- pressing one threw the focus into a file window and left the popup
     -- orphaned. `false` disables a key without binding anything, the same way
     -- the sidebar disables `/` and `?`.
-    ["<C-h>"] = false,
+    ["<C-h>"] = { "fb_up", mode = { "n" }, desc = "Parent directory" },
+    ["<C-l>"] = { "fb_enter", mode = { "n" }, desc = "Enter directory / open file" },
     ["<C-j>"] = false,
     ["<C-k>"] = false,
-    ["<C-l>"] = false,
   }
 
   local list_keys = vim.tbl_extend("force", nav, {
