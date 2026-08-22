@@ -283,6 +283,14 @@ vim.keymap.set("i", "<S-ScrollWheelRight>", "<C-o>3zl", { noremap = true, silent
 vim.keymap.del("n", "<S-h>")
 vim.keymap.del("n", "<S-l>")
 
+-- paste and yanking
+-- Paste over selected text without overwriting the yank register
+vim.keymap.set("x", "<leader>p", [["_dP]])
+
+-- Yank into the system clipboard (Normal & Visual mode)
+vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
+vim.keymap.set("n", "<leader>Y", [["+Y]])
+
 vim.keymap.set("n", "<leader>L", "<cmd>restart<cr>", { desc = "Restart Neovim" })
 vim.keymap.set("n", "<leader>R", "<cmd>Lazy log<cr>", { desc = "Lazy Log" })
 vim.keymap.set("n", "<leader>we", "<cmd>split<cr>", { desc = "Split Window Horizontal" })
