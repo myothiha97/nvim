@@ -477,7 +477,7 @@ local function layout(fullscreen)
       -- border is `bottom` only — a separator line, matching the dropdown — and a
       -- bottom border has nowhere to draw a title, which is why "File Browser"
       -- was missing from the frame while telescope showed it.
-      title = " File Browser ",
+      title = " Explorer ", -- File Browser
       title_pos = "center",
       { win = "input", height = 1, border = "bottom" },
       { win = "list", border = "none" },
