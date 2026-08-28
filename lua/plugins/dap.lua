@@ -143,4 +143,50 @@ return {
       end
     end,
   },
+
+  -- Bigger Stacks panel: with concurrency the goroutine list is the panel you
+  -- read most, and a quarter of the sidebar is not enough for it.
+  {
+    "rcarriga/nvim-dap-ui",
+    opts = {
+      layouts = {
+        {
+          elements = {
+            { id = "scopes", size = 0.35 },
+            { id = "stacks", size = 0.35 },
+            { id = "watches", size = 0.15 },
+            { id = "breakpoints", size = 0.15 },
+          },
+          size = 46,
+          position = "left",
+        },
+        {
+          elements = { "repl", "console" },
+          size = 12,
+          position = "bottom",
+        },
+      },
+    },
+  },
+
+  -- Inline values are already on; Go struct values are just long enough to push
+  -- the code off screen, so cap them.
+  {
+    "theHamsta/nvim-dap-virtual-text",
+    -- Required. This plugin has no lazy trigger of its own; it only ships as a
+    -- dependency of nvim-dap. Declaring it at the top level here would make
+    -- lazy.nvim treat it as a root spec (`lazy = false`), and since it
+    -- `require`s dap at module scope that pulls the whole debug stack into
+    -- startup. Measured, not theoretical.
+    lazy = true,
+    opts = {
+      display_callback = function(variable, _, _, _, opts)
+        local value = variable.value:gsub("%s+", " ")
+        if #value > 60 then
+          value = vim.fn.strcharpart(value, 0, 59) .. "…"
+        end
+        return opts.virt_text_pos == "inline" and (" = " .. value) or (variable.name .. " = " .. value)
+      end,
+    },
+  },
 }
