@@ -163,6 +163,16 @@ return {
   {
     "rcarriga/nvim-dap-ui",
     opts = {
+      -- Long values (a sync.WaitGroup prints ~200 chars) stay inside the panel.
+      -- Both defaults are wrong for a narrow sidebar:
+      --   wrap = false          cuts the value off at the panel edge
+      --   expand_lines = true   opens a borderless 1-line float as wide as the
+      --                         whole value whenever the cursor lands on it,
+      --                         which paints over the editor next to it
+      -- Wrapping keeps the text in the panel and drops the CursorMoved /
+      -- WinScrolled autocmd that fed the float.
+      wrap = true,
+      expand_lines = false,
       layouts = {
         {
           elements = {

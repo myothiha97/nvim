@@ -61,6 +61,9 @@ Probed the adapter directly over DAP, not guessed:
 - [x] Auto open/close listeners: LazyVim wires them, verified.
 - [x] Inline values via `nvim-dap-virtual-text`, with long Go struct values
   truncated to 60 chars.
+- [x] `wrap = true` + `expand_lines = false`. A `sync.WaitGroup` renders as a
+  169-char line; the defaults cut it at the panel edge and, on cursor, opened a
+  borderless float as wide as the whole value that painted over the editor.
 
 ### JS/TS/React specifics
 - [ ] Add a `.tsx` launch config (Node attach + Chrome attach via `js-debug-adapter`).
