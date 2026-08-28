@@ -189,4 +189,19 @@ return {
       end,
     },
   },
+
+  -- nvim-dap-go already registers seven Go configurations; mason-nvim-dap
+  -- appends four more ("Delve: ...") that duplicate them under a second adapter.
+  -- Keep its adapter, drop the duplicate entries from the run picker.
+  {
+    "jay-babu/mason-nvim-dap.nvim",
+    opts = {
+      handlers = {
+        delve = function(config)
+          config.configurations = nil
+          require("mason-nvim-dap").default_setup(config)
+        end,
+      },
+    },
+  },
 }
