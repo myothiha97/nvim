@@ -85,7 +85,10 @@ These are missing in VS Code + Go too, not just here. Do not spend effort on the
 ## Keys added or changed (`lua/plugins/dap.lua`)
 | Key | Action |
 |---|---|
-| `<leader>dG` | Goroutine list in a float (expand to stack, `<CR>` jumps) |
+| `<leader>dG` | Focus the Stacks panel (goroutines + call stack), float if closed |
+| `<leader>dv` | Focus Scopes (variables) |
+| `<leader>dW` | Focus Watches |
+| `<leader>dp` | Focus Breakpoints |
 | `<leader>dB` | Clear breakpoints in current file (**replaces** LazyVim's default) |
 | `<leader>dN` | Breakpoint condition (**moved** off `<leader>dB`) |
 | `<leader>dH` | Breakpoint hit condition |
@@ -93,6 +96,10 @@ These are missing in VS Code + Go too, not just here. Do not spend effort on the
 | `<leader>dF` | Toggle function breakpoint by name |
 | `<leader>dR` | Restart session |
 | `<leader>dx` | Exception breakpoint filters |
+
+Inside Stacks: `o` on a frame jumps to it and repoints Scopes at that frame,
+`t` toggles the runtime-internal frames. `<leader>dj` / `<leader>dk` walk the
+call stack without leaving the source window.
 
 ## Notes
 - Keep all changes additive to the LazyVim DAP extra; don't fight its defaults.

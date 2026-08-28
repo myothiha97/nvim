@@ -94,16 +94,21 @@ local function clear_buffer_breakpoints()
   vim.notify(("Cleared %d breakpoint%s"):format(#in_buf, #in_buf == 1 and "" or "s"))
 end
 
--- Goroutine list in a float: every goroutine Delve reports, expandable to its
--- own stack, `<CR>` on a frame jumps there and repoints the Scopes panel at it.
--- This is how you read a goroutine that is parked on a channel or a mutex.
-local function goroutines()
-  if not require("dap").session() then
-    vim.notify("No debug session", vim.log.levels.WARN)
-    return
+-- Jump straight to a dap-ui panel instead of walking windows with <C-w>.
+-- If the panel is on screen its window is focused; if the sidebar is closed the
+-- element opens as a float with the same contents and mappings, so one key
+-- works in both states.
+local function focus_element(name)
+  return function()
+    local ft = "dapui_" .. name
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == ft then
+        vim.api.nvim_set_current_win(win)
+        return
+      end
+    end
+    require("dapui").float_element(name, { enter = true })
   end
-  local widgets = require("dap.ui.widgets")
-  widgets.centered_float(widgets.threads)
 end
 
 return {
@@ -111,7 +116,12 @@ return {
     "mfussenegger/nvim-dap",
     -- stylua: ignore
     keys = {
-      { "<leader>dG", goroutines, desc = "Goroutines / Threads" },
+      -- Panels. In Stacks: `o` on a frame jumps to it and repoints Scopes at
+      -- that frame, `t` toggles the runtime-internal frames.
+      { "<leader>dG", focus_element("stacks"), desc = "Goroutines / Call Stack" },
+      { "<leader>dv", focus_element("scopes"), desc = "Variables (Scopes)" },
+      { "<leader>dW", focus_element("watches"), desc = "Watches" },
+      { "<leader>dp", focus_element("breakpoints"), desc = "Breakpoints Panel" },
       -- LazyVim puts "Breakpoint Condition" on <leader>dB; clearing a file's
       -- breakpoints is the more frequent action, so it takes dB and the
       -- condition prompt moves to dN.
