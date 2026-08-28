@@ -100,12 +100,15 @@ end
 -- option to add a button, change the spacing, or reach `run_to_cursor`. So the
 -- function is wrapped once, on load, and three things change:
 --
---   * gaps widen from 2 to 4 columns. A click region runs from its own icon to
+--   * gaps widen from 2 to 3 columns. A click region runs from its own icon to
 --     the start of the next one, so the gap is part of the button. The glyph
 --     itself is one terminal cell; only the terminal font size changes that.
 --   * a Run to Cursor button is appended.
 --   * the last region is closed with `%X`. Upstream leaves it open, so every
 --     click to the right of the last icon fires `disconnect`.
+--   * `%<` puts the truncation point at the end. The bar is 38 columns and the
+--     repl pane is often narrower; Neovim's default is to truncate from the
+--     LEFT, which eats the play button and leaves a bare `<` in its place.
 local RUN_TO_CURSOR_ICON = "" -- codicon debug-continue (U+EACF)
 
 -- The winbar lives on the repl panel, so `dap.run_to_cursor()` would read that
@@ -155,8 +158,8 @@ local function patch_controls()
     else
       hl = is_active and "DapUIUnavailable" or "DapUIUnavailableNC"
     end
-    local bar = build(is_active):gsub("  %%#", "    %%#")
-    return bar .. ("    %%#%s#%%0@v:lua._dapui_extra.run_to_cursor@%s  %%X"):format(hl, RUN_TO_CURSOR_ICON)
+    local bar = build(is_active):gsub("  %%#", "   %%#")
+    return bar .. ("   %%#%s#%%0@v:lua._dapui_extra.run_to_cursor@%s  %%X%%<"):format(hl, RUN_TO_CURSOR_ICON)
   end
 end
 
