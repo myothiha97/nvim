@@ -26,9 +26,29 @@ local delve_opts = {
   stackTraceDepth = 100,
 }
 
+-- Goroutine list in a float: every goroutine Delve reports, expandable to its
+-- own stack, `<CR>` on a frame jumps there and repoints the Scopes panel at it.
+-- This is how you read a goroutine that is parked on a channel or a mutex.
+local function goroutines()
+  if not require("dap").session() then
+    vim.notify("No debug session", vim.log.levels.WARN)
+    return
+  end
+  local widgets = require("dap.ui.widgets")
+  widgets.centered_float(widgets.threads)
+end
+
 return {
   {
     "mfussenegger/nvim-dap",
+    -- stylua: ignore
+    keys = {
+      { "<leader>dG", goroutines, desc = "Goroutines / Threads" },
+      { "<leader>dR", function() require("dap").restart() end, desc = "Restart Session" },
+      { "<leader>dL", function() require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: ")) end, desc = "Log Point" },
+      { "<leader>dH", function() require("dap").set_breakpoint(nil, vim.fn.input("Hit condition (e.g. > 5): ")) end, desc = "Breakpoint Hit Condition" },
+      { "<leader>dx", function() require("dap").set_exception_breakpoints() end, desc = "Exception Breakpoints" },
+    },
     opts = function()
       local dap = require("dap")
 
