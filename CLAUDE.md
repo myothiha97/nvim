@@ -12,12 +12,18 @@
 > looking for that filename lands in the same place. Keep it a pointer — two
 > copies of these rules will drift, and an agent will then follow the stale one.
 
-## In progress: file-browser trial (started 2026-08-21, review ~2026-08-28)
+## File browser: snacks (trial concluded 2026-08-28, KEPT)
 
 `<leader>e` is a **snacks** file browser, not oil and not telescope. It lives in
-`lua/plugins/snacks-file-browser.lua`, committed on the branch
-**`trial/file-explorer-test`**, and is being used day-to-day for about a week
-before a keep/drop decision. Oil moved to `<leader>E` and still owns `:e <dir>`.
+`lua/plugins/snacks-file-browser.lua`. Oil moved to `<leader>E` and still owns
+`:e <dir>`.
+
+The week-long trial (2026-08-21 to 2026-08-28) ended in a keep. Day-to-day use
+turned up no bugs in the main flows: navigating, filtering, opening, and the CRUD
+operations. That is a week of real use, not exhaustive testing, so an odd
+behaviour is possible rather than impossible. Report one, do not redesign around
+it. Merged to `main` on 2026-08-28; the `trial/file-explorer-test` branch is now
+just history.
 
 The telescope attempt at the same thing is **parked, not deleted**:
 `lua/plugins/telescope-file-browser.lua` with `ENABLED = false`, which also keeps

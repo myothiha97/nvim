@@ -1,9 +1,12 @@
 # Shape snacks explorer into the telescope-browser experience
 
 Direction chosen 2026-08-21 (~03:00), built the same day. Implemented in
-`lua/plugins/snacks-file-browser.lua`, **committed on `trial/file-explorer-test`**
-and in day-to-day use for about a week (review ~2026-08-28) before a keep/drop
-decision.
+`lua/plugins/snacks-file-browser.lua`.
+
+**Outcome 2026-08-28: KEPT and merged to `main`.** A week of daily use with no
+bugs in the main flows (navigate, filter, open, CRUD). Not exhaustively tested,
+so treat a future oddity as a bug to report rather than proof the approach is
+wrong.
 
 ## Status
 
