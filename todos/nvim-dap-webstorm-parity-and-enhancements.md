@@ -89,6 +89,8 @@ These are missing in VS Code + Go too, not just here. Do not spend effort on the
 | `<leader>dv` | Focus Scopes (variables) |
 | `<leader>dW` | Focus Watches |
 | `<leader>dp` | Focus Breakpoints |
+| `<leader>do` | Step over (**swapped** with LazyVim's default) |
+| `<leader>dO` | Step out (**swapped** with LazyVim's default) |
 | `<leader>dB` | Clear breakpoints in current file (**replaces** LazyVim's default) |
 | `<leader>dN` | Breakpoint condition (**moved** off `<leader>dB`) |
 | `<leader>dH` | Breakpoint hit condition |

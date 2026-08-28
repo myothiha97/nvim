@@ -128,6 +128,10 @@ return {
       { "<leader>dB", clear_buffer_breakpoints, desc = "Clear Breakpoints (File)" },
       { "<leader>dN", function() require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, desc = "Breakpoint Condition" },
       { "<leader>dF", toggle_fn_breakpoint, desc = "Toggle Function Breakpoint" },
+      -- LazyVim ships these the other way round (do = step out, dO = step over).
+      -- Step over is the far more frequent action, so it gets the unshifted key.
+      { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
+      { "<leader>dO", function() require("dap").step_out() end, desc = "Step Out" },
       { "<leader>dR", function() require("dap").restart() end, desc = "Restart Session" },
       { "<leader>dL", function() require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: ")) end, desc = "Log Point" },
       { "<leader>dH", function() require("dap").set_breakpoint(nil, vim.fn.input("Hit condition (e.g. > 5): ")) end, desc = "Breakpoint Hit Condition" },
