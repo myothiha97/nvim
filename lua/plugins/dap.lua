@@ -94,6 +94,72 @@ local function clear_buffer_breakpoints()
   vim.notify(("Cleared %d breakpoint%s"):format(#in_buf, #in_buf == 1 and "" or "s"))
 end
 
+-- Run to Cursor from the dap-ui control bar.
+--
+-- dap-ui builds that bar as a fixed list in `dapui.controls.controls()` with no
+-- option to add a button, change the spacing, or reach `run_to_cursor`. So the
+-- function is wrapped once, on load, and three things change:
+--
+--   * gaps widen from 2 to 4 columns. A click region runs from its own icon to
+--     the start of the next one, so the gap is part of the button. The glyph
+--     itself is one terminal cell; only the terminal font size changes that.
+--   * a Run to Cursor button is appended.
+--   * the last region is closed with `%X`. Upstream leaves it open, so every
+--     click to the right of the last icon fires `disconnect`.
+local RUN_TO_CURSOR_ICON = "" -- codicon debug-continue (U+EACF)
+
+-- The winbar lives on the repl panel, so `dap.run_to_cursor()` would read that
+-- window's cursor. Run it against the source window instead.
+local function source_window()
+  local function usable(win)
+    return vim.bo[vim.api.nvim_win_get_buf(win)].buftype == ""
+  end
+  local current = vim.api.nvim_get_current_win()
+  if usable(current) then
+    return current
+  end
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if usable(win) then
+      return win
+    end
+  end
+end
+
+_G._dapui_extra = {
+  run_to_cursor = function()
+    local win = source_window()
+    if not win then
+      vim.notify("Run to cursor: no source window open", vim.log.levels.WARN)
+      return
+    end
+    vim.api.nvim_win_call(win, function()
+      require("dap").run_to_cursor()
+    end)
+  end,
+}
+
+local function patch_controls()
+  local controls = require("dapui.controls")
+  if controls._run_to_cursor_added then
+    return
+  end
+  controls._run_to_cursor_added = true
+
+  local build = controls.controls
+  controls.controls = function(is_active)
+    local session = require("dap").session()
+    local available = session ~= nil and session.stopped_thread_id ~= nil
+    local hl
+    if available then
+      hl = is_active and "DapUIStepOver" or "DapUIStepOverNC"
+    else
+      hl = is_active and "DapUIUnavailable" or "DapUIUnavailableNC"
+    end
+    local bar = build(is_active):gsub("  %%#", "    %%#")
+    return bar .. ("    %%#%s#%%0@v:lua._dapui_extra.run_to_cursor@%s  %%X"):format(hl, RUN_TO_CURSOR_ICON)
+  end
+end
+
 -- Jump straight to a dap-ui panel instead of walking windows with <C-w>.
 -- If the panel is on screen its window is focused; if the sidebar is closed the
 -- element opens as a float with the same contents and mappings, so one key
@@ -149,6 +215,9 @@ return {
         end
         return config
       end
+
+      -- dap-ui is a hard dependency of nvim-dap, so it is already loaded here.
+      pcall(patch_controls)
 
       dap.listeners.after.event_initialized["go_fn_breakpoints"] = function(session)
         if #fn_breakpoints > 0 then

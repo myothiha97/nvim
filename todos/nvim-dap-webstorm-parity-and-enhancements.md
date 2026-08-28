@@ -61,6 +61,11 @@ Probed the adapter directly over DAP, not guessed:
 - [x] Auto open/close listeners: LazyVim wires them, verified.
 - [x] Inline values via `nvim-dap-virtual-text`, with long Go struct values
   truncated to 60 chars.
+- [x] Control bar (winbar on the repl panel): gaps widened from 2 to 4 columns,
+  a Run to Cursor button appended, and the last click region closed with `%X`.
+  Upstream leaves it open, so every click right of the last icon fired
+  `disconnect`. Done by wrapping `dapui.controls.controls`, which is a fixed
+  list with no config for extra buttons.
 - [x] `wrap = true` + `expand_lines = false`. A `sync.WaitGroup` renders as a
   169-char line; the defaults cut it at the panel edge and, on cursor, opened a
   borderless float as wide as the whole value that painted over the editor.
@@ -105,6 +110,15 @@ These are missing in VS Code + Go too, not just here. Do not spend effort on the
 Inside Stacks: `o` on a frame jumps to it and repoints Scopes at that frame,
 `t` toggles the runtime-internal frames. `<leader>dj` / `<leader>dk` walk the
 call stack without leaving the source window.
+
+## Mouse support (audited 2026-08-28)
+- Expanding a variable is `<2-LeftMouse>`, a **double**-click. A single click
+  only moves the cursor, which is why it can feel like it "sometimes" works.
+- Focusing any dap panel with the mouse leaves you in normal mode. Only
+  `dapui_watches` and `dap-repl` are `buftype=prompt`; typing in those enters
+  insert, and `guicursor` renders insert as `ver25`, a thin bar. That is the
+  "cursor went thin and small" symptom, not a bug. `<Esc>` returns to normal.
+- Not investigated further, and no speculative code added.
 
 ## Notes
 - Keep all changes additive to the LazyVim DAP extra; don't fight its defaults.
