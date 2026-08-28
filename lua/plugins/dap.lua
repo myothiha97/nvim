@@ -26,6 +26,53 @@ local delve_opts = {
   stackTraceDepth = 100,
 }
 
+-- Function breakpoints: stop on entry to a function by name, e.g. `main.worker`
+-- or `(*Server).Handle`, without opening the file. Delve supports them
+-- (`supportsFunctionBreakpoints`), but nvim-dap keeps no state for them, so the
+-- list lives here and is re-sent on every session start.
+local fn_breakpoints = {}
+
+local function sync_fn_breakpoints(session)
+  session = session or require("dap").session()
+  if not session then
+    return
+  end
+  local breakpoints = vim.tbl_map(function(name)
+    return { name = name }
+  end, fn_breakpoints)
+  session:request("setFunctionBreakpoints", { breakpoints = breakpoints }, function(err)
+    if err then
+      vim.notify("Function breakpoints: " .. tostring(err), vim.log.levels.ERROR)
+    end
+  end)
+end
+
+local function toggle_fn_breakpoint()
+  vim.ui.input({ prompt = "Function breakpoint (e.g. main.worker): " }, function(name)
+    name = name and vim.trim(name) or ""
+    if name == "" then
+      return
+    end
+    local removed = false
+    for i, existing in ipairs(fn_breakpoints) do
+      if existing == name then
+        table.remove(fn_breakpoints, i)
+        removed = true
+        break
+      end
+    end
+    if not removed then
+      table.insert(fn_breakpoints, name)
+    end
+    sync_fn_breakpoints()
+    vim.notify(
+      #fn_breakpoints == 0 and "Function breakpoints: none"
+        or ("Function breakpoints: " .. table.concat(fn_breakpoints, ", ")),
+      vim.log.levels.INFO
+    )
+  end)
+end
+
 -- Goroutine list in a float: every goroutine Delve reports, expandable to its
 -- own stack, `<CR>` on a frame jumps there and repoints the Scopes panel at it.
 -- This is how you read a goroutine that is parked on a channel or a mutex.
@@ -44,6 +91,7 @@ return {
     -- stylua: ignore
     keys = {
       { "<leader>dG", goroutines, desc = "Goroutines / Threads" },
+      { "<leader>dF", toggle_fn_breakpoint, desc = "Toggle Function Breakpoint" },
       { "<leader>dR", function() require("dap").restart() end, desc = "Restart Session" },
       { "<leader>dL", function() require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: ")) end, desc = "Log Point" },
       { "<leader>dH", function() require("dap").set_breakpoint(nil, vim.fn.input("Hit condition (e.g. > 5): ")) end, desc = "Breakpoint Hit Condition" },
@@ -60,6 +108,12 @@ return {
           return vim.tbl_extend("keep", config, delve_opts)
         end
         return config
+      end
+
+      dap.listeners.after.event_initialized["go_fn_breakpoints"] = function(session)
+        if #fn_breakpoints > 0 then
+          sync_fn_breakpoints(session)
+        end
       end
     end,
   },
