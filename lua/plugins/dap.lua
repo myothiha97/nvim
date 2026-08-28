@@ -73,6 +73,27 @@ local function toggle_fn_breakpoint()
   end)
 end
 
+-- Clear every breakpoint in the current file. nvim-dap only ships an
+-- all-buffers `clear_breakpoints()`, so drop this buffer's signs and push the
+-- now-empty list to any running session (an empty table would be a no-op, the
+-- buffer key has to be present).
+local function clear_buffer_breakpoints()
+  local bps = require("dap.breakpoints")
+  local bufnr = vim.api.nvim_get_current_buf()
+  local in_buf = bps.get(bufnr)[bufnr] or {}
+  if #in_buf == 0 then
+    vim.notify("No breakpoints in this file", vim.log.levels.INFO)
+    return
+  end
+  for _, bp in ipairs(in_buf) do
+    bps.remove(bufnr, bp.line)
+  end
+  for _, session in pairs(require("dap").sessions()) do
+    session:set_breakpoints({ [bufnr] = {} })
+  end
+  vim.notify(("Cleared %d breakpoint%s"):format(#in_buf, #in_buf == 1 and "" or "s"))
+end
+
 -- Goroutine list in a float: every goroutine Delve reports, expandable to its
 -- own stack, `<CR>` on a frame jumps there and repoints the Scopes panel at it.
 -- This is how you read a goroutine that is parked on a channel or a mutex.
@@ -91,6 +112,11 @@ return {
     -- stylua: ignore
     keys = {
       { "<leader>dG", goroutines, desc = "Goroutines / Threads" },
+      -- LazyVim puts "Breakpoint Condition" on <leader>dB; clearing a file's
+      -- breakpoints is the more frequent action, so it takes dB and the
+      -- condition prompt moves to dN.
+      { "<leader>dB", clear_buffer_breakpoints, desc = "Clear Breakpoints (File)" },
+      { "<leader>dN", function() require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, desc = "Breakpoint Condition" },
       { "<leader>dF", toggle_fn_breakpoint, desc = "Toggle Function Breakpoint" },
       { "<leader>dR", function() require("dap").restart() end, desc = "Restart Session" },
       { "<leader>dL", function() require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: ")) end, desc = "Log Point" },
