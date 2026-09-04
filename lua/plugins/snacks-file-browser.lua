@@ -20,10 +20,14 @@
 --
 -- Scope is narrow so this can be deleted in one step: one file, per-call opts
 -- only, no `opts` block, nothing registered globally.
-local ENABLED = true
+--
+-- RETIRED 2026-09-04: `false`. oil.nvim took <leader>e back because this
+-- browser never felt as smooth as oil in daily use. Nothing here is deleted —
+-- flip to `true` to bring it back, but then pick a KEY other than <leader>e,
+-- which oil owns again (lua/plugins/oil.lua).
+local ENABLED = false
 
--- <leader>e was the telescope browser's key; that trial is parked
--- (ENABLED = false in telescope-file-browser.lua) so this can take it.
+-- The key this browser claims when ENABLED. Held by oil.nvim while retired.
 local KEY = "<leader>e"
 
 -- Matches the telescope browser's dropdown exactly, so the two are comparable.
@@ -803,10 +807,16 @@ end
 return {
   {
     "folke/snacks.nvim",
-    enabled = ENABLED,
+    -- Deliberately NO `enabled = ENABLED` here. lazy.nvim chains every fragment
+    -- of the same plugin through `__index` (core/meta.lua), so the last fragment
+    -- that sets `enabled` wins for the WHOLE plugin — and `plugins.snacks-file-
+    -- browser` sorts after `plugins.snacks`. `enabled = false` in this file would
+    -- therefore switch off snacks.nvim itself, taking LazyVim's pickers, explorer,
+    -- notifier and dashboard with it. Gate the keymap and the init hook instead.
+    --
     -- No `opts` block on purpose: everything is per-call, so the tree sidebar in
     -- snacks.lua and every other picker are untouched by this file.
-    keys = {
+    keys = ENABLED and {
       {
         KEY,
         function()
@@ -814,17 +824,30 @@ return {
         end,
         desc = "File Explorer (snacks, browser mode)",
       },
-    },
+    } or {},
     -- Startup explorer: `nvim <dir>` opens this fullscreen.
     --
     -- oil.nvim keeps netrw (`default_file_explorer = true`), so `:e <dir>`
     -- mid-session still opens oil — unchanged on purpose. Only the startup case
     -- is claimed here, which is why snacks' own `replace_netrw` is NOT used: it
     -- hooks every directory buffer and would take `:e <dir>` as well.
-    init = function()
-      if not ENABLED then
-        return
-      end
+    --
+    -- `init` COLLIDES with lua/plugins/snacks.lua, which also defines one for
+    -- snacks.nvim. lazy.nvim chains the fragments of a plugin through `__index`,
+    -- so only the LAST fragment's `init` runs -- and `plugins.snacks-file-browser`
+    -- sorts after `plugins.snacks`. While this key existed, snacks.lua's `init`
+    -- never ran at all: no `SnacksPickerMatch`, the indent guides stayed on the
+    -- theme's near-invisible colour, and `SnacksExplorerActiveFile` was undefined,
+    -- so the explorer's active-file band silently did nothing.
+    --
+    -- Hence `ENABLED and ... or nil`: while retired this key is ABSENT, not empty,
+    -- which is what lets the lookup fall through to snacks.lua's. An `init` that
+    -- merely returns early is NOT good enough -- it still wins the lookup.
+    --
+    -- If this browser is ever revived, do not just flip ENABLED: move the body
+    -- below into snacks.lua's `set_snacks_hl` / `init` instead, or the same
+    -- silent breakage comes back.
+    init = ENABLED and function()
       -- Dim by default, and `default = true` so the colorscheme wins if it ever
       -- defines this group.
       local function set_hl()
@@ -882,6 +905,6 @@ return {
           end)
         end,
       })
-    end,
+    end or nil,
   },
 }
