@@ -67,6 +67,12 @@ two retired browsers:
   calls there. Done for the `<leader>r` sidebar (`explorer_scroll` in
   `snacks.lua`) and in the retired browser. **If a new picker gets its own
   keymaps, it needs this too.**
+- **A picker has TWO windows, and keys bound on the list are unreachable from the
+  input.** After typing a filter, focus sits in the input — where snacks binds
+  `j`/`k` to list movement but leaves `h`/`l` as native text motion, so the tree
+  walked but would not collapse/expand. Tree keys are now bound on both windows,
+  **normal mode only**, so the prompt still types those letters while filtering.
+  When adding a picker key, ask which window will have focus when it is pressed.
 - **The oil path label is built once and rendered two ways** — as a border-title
   chunk list for the popup (`float.get_win_title`) and as a winbar string for a
   real oil window. Change `path_segments` / `SEPARATOR` and both follow. Its

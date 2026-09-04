@@ -539,6 +539,22 @@ return {
               keys = vim.tbl_extend("force", explorer_window_keys(), {
                 ["<C-e>"] = { "explorer_scroll_down", mode = { "n", "i" }, desc = "Scroll list down" },
                 ["<C-y>"] = { "explorer_scroll_up", mode = { "n", "i" }, desc = "Scroll list up" },
+                -- Tree keys, NORMAL MODE ONLY, so the prompt still types `h`/`l`
+                -- while filtering.
+                --
+                -- Snacks binds these on the LIST window only, and binds `j`/`k`
+                -- here to list_down/list_up but not `h`/`l`. The result after
+                -- typing a filter -- when focus sits in this window -- is that
+                -- j/k walk the tree while h/l silently move the prompt's text
+                -- cursor instead of collapsing/expanding. Same two actions the
+                -- list uses, so both windows behave the same.
+                --
+                -- This does give up native `h`/`l` cursor motion inside the filter
+                -- text in normal mode. Consistent with `j`/`k`, which snacks
+                -- already took for the same reason; `w`/`b`/`0`/`$` and the arrows
+                -- still move the cursor.
+                ["h"] = { "explorer_close", mode = { "n" }, desc = "Collapse directory" },
+                ["l"] = { "confirm", mode = { "n" }, desc = "Expand directory / open file" },
               }),
             },
             list = {
