@@ -42,6 +42,29 @@ local snacks_keymaps = {
   },
 }
 
+--- Scroll the explorer LIST by `delta` rows, the way <C-e> / <C-y> scroll a buffer.
+---
+--- Native <C-e> / <C-y> do NOTHING in here, and not because a mapping swallows
+--- them -- they have nothing to move. A picker list is virtually scrolled: its
+--- buffer only ever holds the rows currently on screen and `list.top` maps a row
+--- back to an item, so there is no text below the last line for Neovim to scroll
+--- to. The global handler in config/keymaps.lua deliberately skips any
+--- `^snacks_picker` float and falls through to native, so this window has to
+--- answer for itself.
+---
+--- `list:scroll()` moves `top` instead, and is the same call snacks' own mouse
+--- wheel makes here -- so the keys and the wheel agree rather than inventing two
+--- rules. At either end of the listing snacks steps the selection by `delta`
+--- instead, which is what the wheel has always done here.
+local function explorer_scroll(picker, delta)
+  -- Honour a count (`5<C-e>`) like the native keys, but only from normal mode:
+  -- `v:count1` keeps the LAST normal-mode count while in insert, so reading it in
+  -- the prompt would scroll by a number nobody typed. Same guard snacks puts on
+  -- its own list_down / list_up actions.
+  local count = vim.fn.mode():sub(1, 1) == "i" and 1 or vim.v.count1
+  picker.list:scroll(delta * count)
+end
+
 local function explorer_window_keys()
   local function focus(direction)
     return function()
@@ -350,6 +373,12 @@ return {
             end)
           end,
           actions = {
+            explorer_scroll_down = function(picker)
+              explorer_scroll(picker, 1)
+            end,
+            explorer_scroll_up = function(picker)
+              explorer_scroll(picker, -1)
+            end,
             explorer_single_click = function(picker)
               local pos = vim.fn.getmousepos()
               local list_win = picker.list.win.win
@@ -497,10 +526,20 @@ return {
             -- In Explorer, reserve the complete Ctrl-hjkl set for window
             -- navigation, matching LazyVim everywhere else.
             input = {
-              keys = explorer_window_keys(),
+              -- Insert mode is included because in the prompt the native meaning
+              -- (insert the character below / above the cursor) has nothing to act
+              -- on, while scrolling the rows you are filtering does.
+              keys = vim.tbl_extend("force", explorer_window_keys(), {
+                ["<C-e>"] = { "explorer_scroll_down", mode = { "n", "i" }, desc = "Scroll list down" },
+                ["<C-y>"] = { "explorer_scroll_up", mode = { "n", "i" }, desc = "Scroll list up" },
+              }),
             },
             list = {
               keys = vim.tbl_extend("force", explorer_window_keys(), {
+                -- Same fine viewport nudge they are in a file window; see the note
+                -- on `explorer_scroll` for why the native keys are inert here.
+                ["<C-e>"] = { "explorer_scroll_down", mode = { "n" }, desc = "Scroll list down" },
+                ["<C-y>"] = { "explorer_scroll_up", mode = { "n" }, desc = "Scroll list up" },
                 ["<Esc>"] = false, -- don't close on Esc
                 ["q"] = { "close", mode = { "n" }, desc = "Close explorer" },
                 ["/"] = false, -- use vim search instead of explorer filter

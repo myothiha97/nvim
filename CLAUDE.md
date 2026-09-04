@@ -58,6 +58,15 @@ two retired browsers:
   (`Normal:LazyNormal`) is the other and ships with the config.
 - **`snacks.explorer` is still enabled**, for the `<leader>r` tree sidebar only,
   with `replace_netrw = false`. That is deliberate: oil must keep netrw.
+- **A picker list is VIRTUALLY scrolled, so native `<C-e>`/`<C-y>` are inert in
+  it.** The buffer only holds the rows on screen and `list.top` maps a row to an
+  item, so there is no text below the last line to scroll to — the keys are not
+  being swallowed, they have nothing to move. `config/keymaps.lua` also skips any
+  `^snacks_picker` float on purpose, so each picker window must answer for
+  itself: bind them to `list:scroll()`, which is what the mouse wheel already
+  calls there. Done for the `<leader>r` sidebar (`explorer_scroll` in
+  `snacks.lua`) and in the retired browser. **If a new picker gets its own
+  keymaps, it needs this too.**
 - **The oil path label is built once and rendered two ways** — as a border-title
   chunk list for the popup (`float.get_win_title`) and as a winbar string for a
   real oil window. Change `path_segments` / `SEPARATOR` and both follow. Its
