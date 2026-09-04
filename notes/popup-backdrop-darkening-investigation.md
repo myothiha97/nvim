@@ -1,5 +1,35 @@
 # Why every popup darkens the whole editor
 
+> **UPDATE 2026-09-04 — this document's central premise no longer holds.**
+> Everything measured below is still correct, but all of it was conditional on
+> `transparent = true`. **The theme went opaque the same day**: `transparent =
+> false` with the background in `lua/config/ui.lua` (`#030e12` since
+> 2026-09-04, `#031116` before that). That
+> hex is what Ghostty was already emitting (`background = #031219` at
+> `background-opacity = 0.9` over a dark desktop), sampled off a screenshot at a
+> flat #031116 across 600/600 pixels and agreeing to within one unit with the
+> same blend computed in linear light.
+>
+> So there IS a background to blend against now, and the "a `#000000` backdrop
+> emits raw black at every `winblend`" result is no longer reachable. Read the
+> measurements below as history of the transparent era, not as current
+> constraints.
+>
+> Consequences:
+>
+> - **The oil popup backdrop is ON and is a genuine dim.** `USE_BACKDROP = true`
+>   in `lua/plugins/oil.lua`, strength in `BACKDROP_BLEND`. It was asked for while
+>   the theme was still transparent, with the failure below stated first and
+>   confirmed; the failure was then designed out by the opacity switch. Do not
+>   revert it on the strength of this note — ask.
+> - **The two settings are coupled.** Turning `transparent` back on turns the
+>   backdrop into a black sheet again.
+> - **snacks' picker backdrop stays off anyway** — that is a preference (no dim
+>   behind pickers), and separately the `Snacks.util.is_transparent()`
+>   mis-detection this document diagnoses will now sample an opaque `Normal`
+>   correctly. The two `backdrop = false` lines are still the thing keeping the
+>   veil away; leave them.
+
 Investigation of the 2026-08-21 report: *"whenever any popup window appears, the
 Neovim background gets completely darkened"*.
 

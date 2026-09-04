@@ -8,6 +8,21 @@ bugs in the main flows (navigate, filter, open, CRUD). Not exhaustively tested,
 so treat a future oddity as a bug to report rather than proof the approach is
 wrong.
 
+**REVERSED 2026-09-04: RETIRED, `<leader>e` is oil.nvim again.** Nothing below
+turned out to be wrong — the browser did everything it says it does. It simply
+did not feel as smooth as oil in day-to-day use, which is the one thing a week of
+bug-hunting could not settle. `ENABLED = false` in
+`lua/plugins/snacks-file-browser.lua` unbinds it and stops the startup hook; the
+code is untouched and the flag is the only thing to flip to bring it back (with a
+key other than `<leader>e`).
+
+Note for whoever flips it: `enabled = ENABLED` was REMOVED from the spec at the
+same time, and must not come back. lazy.nvim chains every fragment of the same
+plugin through `__index`, and `plugins.snacks-file-browser` sorts after
+`plugins.snacks`, so `enabled = false` there switches off snacks.nvim itself —
+pickers, explorer, notifier, dashboard and all. The keymap and the `init` hook are
+gated on `ENABLED` instead.
+
 ## Status
 
 Built and verified in a real terminal:
