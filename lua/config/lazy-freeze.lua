@@ -12,10 +12,7 @@ local UNLOCK_ENV = "NVIM_LAZY_UNLOCK"
 local function blocked(action)
   return function()
     vim.notify(
-      ("lazy.nvim is frozen — `%s` blocked.\nRun `%s=1 nvim` to unlock for one session."):format(
-        action,
-        UNLOCK_ENV
-      ),
+      ("lazy.nvim is frozen — `%s` blocked.\nRun `%s=1 nvim` to unlock for one session."):format(action, UNLOCK_ENV),
       vim.log.levels.WARN,
       { title = "lazy-freeze" }
     )
