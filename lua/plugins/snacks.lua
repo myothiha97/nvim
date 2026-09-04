@@ -268,7 +268,14 @@ return {
           -- `update_win` merges the box entry over that snapshot, so a `wo` here is
           -- the one thing the layout cannot undo.
           layout = {
-            preview = "main",
+            -- `false`, NOT the sidebar preset's "main". The preset previews into
+            -- the main window on every cursor move; snacks' own explorer SOURCE
+            -- overrides that with `preview = false` (picker/config/sources.lua),
+            -- because a tree you navigate with j/k should not be loading a file
+            -- into the right pane on every row. Spelling the layout out means
+            -- inheriting the preset instead of the source, so this has to be
+            -- restated -- it was briefly lost that way on 2026-09-05.
+            preview = false,
             layout = {
               backdrop = false,
               width = 0.25,
