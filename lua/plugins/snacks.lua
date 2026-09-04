@@ -119,10 +119,36 @@ return {
     local function set_snacks_hl()
       vim.api.nvim_set_hl(0, "SnacksPickerMatch", { link = "DiffText" })
       vim.api.nvim_set_hl(0, "SnacksIndent", { fg = INDENT_GUIDE_FG, nocombine = true })
-      -- Full-width band on the active file's row in the Explorer. Matches
-      -- OilCursorLine (#073642 = solarized base02); only used by the explorer
-      -- format wrapper, so no other picker or window is affected.
-      vim.api.nvim_set_hl(0, "SnacksExplorerActiveFile", { bg = "#073642" })
+      -- Full-width band on the active file's row in the Explorer. Only used by
+      -- the explorer format wrapper, so no other picker or window is affected.
+      --
+      -- Raised from #073642 (solarized base02) on 2026-09-04. Both axes moved a
+      -- little, and the CEILING is what decided how far: the cursor-row band is
+      -- `Visual` (#3b4261, L* 28.6), and these two must stay tellable apart.
+      --
+      --   #073642  L* 20.3  C* 15.6   was: 8.3 L* below the cursor row
+      --   #003f52  L* 24.2  C* 19.4   now: 4.4 L* below it, +3.9 L*, +3.8 chroma
+      --
+      -- Going to L* 26 would leave a 2.6 L* gap and L* 28 only 0.6 -- at which
+      -- point you cannot see which row the cursor is on. Chroma is the axis with
+      -- room here (and the one that reads as "intensity"), but it is nearly out of
+      -- room too: every candidate above C* 20 clips the red channel to 0 at this
+      -- lightness. The hue gap does the rest of the work -- 229 vs the cursor
+      -- row's 287.
+      vim.api.nvim_set_hl(0, "SnacksExplorerActiveFile", { bg = "#003f52" })
+      -- Invisible text: fg matched to the background. Used only through the
+      -- explorer input's `winhighlight`, to blank the `x/y` counter (see the
+      -- explorer source below).
+      vim.api.nvim_set_hl(0, "SnacksExplorerBlank", { fg = require("config.ui").bg })
+      -- Invisible border: glyphs the same colour as the background, so the box
+      -- around the explorer's search row disappears while the row itself, and the
+      -- "Explorer" title drawn ON that border, both stay. Same trick as oil's
+      -- `OilFloatBorder`. The border cannot simply be removed -- Neovim renders a
+      -- window title on the border, so with `border = "none"` the title goes too.
+      vim.api.nvim_set_hl(0, "SnacksExplorerInvisibleBorder", {
+        fg = require("config.ui").bg,
+        bg = require("config.ui").bg,
+      })
     end
     set_snacks_hl()
     -- Re-apply on theme switch: snacks links its own groups with default=true,
@@ -130,8 +156,9 @@ return {
     vim.api.nvim_create_autocmd("ColorScheme", { callback = set_snacks_hl })
   end,
   opts = {
-    -- enabled, but it must not claim directory buffers: the telescope file
-    -- browser is the startup explorer now (see telescope-file-browser.lua).
+    -- Enabled for the <leader>r tree sidebar, but it must not claim directory
+    -- buffers: oil.nvim owns netrw and is the file explorer, on <leader>e and
+    -- on `nvim <dir>` (lua/plugins/oil.lua).
     explorer = { enabled = true, replace_netrw = false },
     dashboard = { enabled = true },
     scroll = { enabled = false },
@@ -196,11 +223,86 @@ return {
           },
         },
         explorer = {
+          -- The sidebar preset, spelled out.
+          --
+          -- It HAS to be spelled out. Two of the three changes below live on box
+          -- entries rather than on the picker, and providing any `box` of our own
+          -- REPLACES the preset's rather than merging into it (snacks skips preset
+          -- resolution once `layout.layout[1]` exists) -- so a partial override
+          -- would silently drop the list and preview entries. Kept in sync with
+          -- snacks' `M.sidebar` (picker/config/layouts.lua); only `width` and the
+          -- input's `wo` differ.
+          --
+          -- WHY the input's `winhighlight` is HERE and nowhere else. Two earlier
+          -- placements were tried and both silently did nothing:
+          --   * `win.input.wo` -- snacks builds the input as
+          --     `Snacks.win.resolve(opts.win.input, { ...defaults })`, and resolve
+          --     lets the LAST table win, which is snacks' defaults.
+          --   * assigning to the live window in `on_show` -- the layout snapshots
+          --     `win.opts` when it adopts a window and RESTORES that snapshot on
+          --     every update (snacks/layout.lua, `update_win`), so the assignment
+          --     is overwritten on the next redraw.
+          -- `update_win` merges the box entry over that snapshot, so a `wo` here is
+          -- the one thing the layout cannot undo.
           layout = {
+            preview = "main",
             layout = {
+              backdrop = false,
               width = 0.25,
+              min_width = 40,
+              height = 0,
+              position = "left",
+              border = "none",
+              box = "vertical",
+              {
+                win = "input",
+                height = 1,
+                -- "top" not `true`: a full border box drew a visible rectangle
+                -- around the blank search row (reported 2026-09-04). Only the top
+                -- edge is kept, because that is where Nvim draws the title, and
+                -- that edge is then made invisible via the winhighlight below. Net
+                -- result above the tree: the "Explorer" row, then one blank row.
+                border = "top",
+                title = "{title} {live} {flags}",
+                title_pos = "center",
+                wo = {
+                  -- The five SnacksPickerInput* entries reproduce what snacks
+                  -- sets for this window (`highlight.winhl("SnacksPickerInput")`);
+                  -- this table replaces that string rather than extending it, so
+                  -- leaving them out would strip the input's own colours.
+                  winhighlight = table.concat({
+                    "NormalFloat:SnacksPickerInput",
+                    "FloatBorder:SnacksExplorerInvisibleBorder",
+                    "FloatTitle:SnacksPickerInputTitle",
+                    "FloatFooter:SnacksPickerInputFooter",
+                    "CursorLine:SnacksPickerInputCursorLine",
+                    "SnacksPickerTotals:SnacksExplorerBlank",
+                  }, ","),
+                },
+              },
+              { win = "list", border = "none" },
+              { win = "preview", title = "{preview}", height = 0.4, border = "top" },
             },
           },
+          -- Blank the search row, keep the "Explorer" title above it.
+          --
+          -- The row is NOT removed from the layout. `hidden = { "input" }` would
+          -- do that, but the title lives on the input box's border, so hiding the
+          -- window takes the title with it and the layout has to be respelled to
+          -- move the title onto the list. Emptying the row instead keeps the title
+          -- exactly where it is and turns the row itself into the gap between the
+          -- title and the tree -- which is what was wanted -- and typing still
+          -- filters, with the pattern appearing where the prompt used to be.
+          --
+          -- Two things are drawn in that row and each needs its own switch:
+          --   * the `>` prompt icon, rendered into the input's statuscolumn from
+          --     `opts.prompt` (snacks picker/core/input.lua) -- emptied here.
+          --   * the `x/y` counter, a right-aligned virt_text extmark on the input
+          --     line carrying `SnacksPickerTotals`. There is no option for it, so
+          --     the group is remapped to an invisible one through this window's
+          --     `winhighlight`, in the layout below. Window-scoped, so every other
+          --     picker keeps its counter.
+          prompt = "",
           -- Default file format plus the active-file band (see
           -- explorer_track_active at the top of this file).
           format = function(item, picker)
@@ -215,6 +317,19 @@ return {
           -- when the edited buffer changes. Runs only while the explorer is
           -- open, and only re-renders when the active file actually changed.
           on_show = function(picker)
+            -- Seed the band for the FIRST render, whatever opened the explorer.
+            -- `picker.main` is the window the picker attached to, so its buffer is
+            -- the file being edited -- `nvim_get_current_buf()` is unreliable here,
+            -- because by now it can already be the picker's own input.
+            local main = picker.main
+            if main and vim.api.nvim_win_is_valid(main) then
+              local main_buf = vim.api.nvim_win_get_buf(main)
+              local name = vim.api.nvim_buf_get_name(main_buf)
+              if name ~= "" and vim.bo[main_buf].buftype == "" then
+                explorer_active_file = vim.fs.normalize(name)
+              end
+            end
+
             local ref = picker:ref()
             picker.list.win:on({ "WinEnter", "BufEnter" }, function()
               vim.schedule(function()
