@@ -5,9 +5,57 @@ return {
   lazy = false,
   priority = 1000,
   opts = {
-    -- Terminal-transparent so Ghostty's `background` + `background-opacity`
-    -- blend the wallpaper through. Set to false to force solid #001419.
-    transparent = true,
+    -- OPAQUE since 2026-09-04. Nvim paints its own background now, so Ghostty's
+    -- `background-opacity = 0.9` and `background-blur-radius = 20` no longer show
+    -- through the editor area -- only the window padding still gets them.
+    --
+    -- It must be an explicit `false`, NOT a commented-out line: `transparent`
+    -- defaults to `true` inside the plugin (solarized-osaka/config.lua), so
+    -- deleting this line turns transparency back ON rather than off.
+    transparent = false,
+    -- ONE background for the whole editor, from `lua/config/ui.lua`.
+    --
+    -- This is the ONE legitimate use of `on_colors`, and it does not reopen the
+    -- ban explained below. That ban is about the syntax RAMP (green500,
+    -- orange500, blue500, cyan500) -- names shared with the UI, where a syntax
+    -- choice silently repaints git signs and diagnostics. A background is not a
+    -- syntax colour: repainting the UI is the entire point here, so the
+    -- propagation that makes the ramp dangerous is what makes this correct.
+    --
+    -- WHY all five keys and not just `bg`. The theme deliberately spreads four
+    -- other backgrounds around it, and every one of them shows up as a panel that
+    -- does not match the editor:
+    --
+    --   bg_float     -> NormalFloat, FloatBorder, FloatTitle. Every popup: the
+    --                   oil browser, snacks pickers and the explorer sidebar,
+    --                   blink-cmp's docs window, the lazy.nvim UI.
+    --   bg_sidebar   -> NormalSB, i.e. the `sidebars` filetypes (qf, help).
+    --
+    -- `bg_popup` is deliberately NOT set, and must stay that way. The
+    -- completion-menu family in `on_highlights` below (Pmenu, BlinkCmpMenu,
+    -- BlinkCmpDoc and their borders) is pointed at it precisely so the menu keeps
+    -- a darker panel of its own instead of joining the editor background. Pointing
+    -- them at the shared background was tried on 2026-09-04 and reverted: measured,
+    -- the menu interior and the code beside it were both #031216, so only the
+    -- selected-row band separated them.
+    --
+    -- `bg_statusline` is deliberately NOT set. It looks like the key for the
+    -- statusline and the winbar and it is not: the theme writes
+    -- `StatusLine = { bg = c.base03 }` directly and links `WinBar` to it
+    -- (solarized-osaka/groups/editor.lua), so overriding `bg_statusline` here
+    -- changes nothing visible -- measured, WinBar stayed #002c38. WinBar is
+    -- handled in `on_highlights` instead; the statusline is left to lualine.
+    --
+    -- `on_colors` runs LAST in the theme's colour setup (solarized-osaka/colors.lua
+    -- calls it after every derived value), so these assignments are not
+    -- overwritten and nothing needs to be recomputed. Lualine is unaffected: it
+    -- carries its own theme rather than reading StatusLine.
+    on_colors = function(c)
+      local bg = require("config.ui").bg
+      c.bg = bg
+      c.bg_float = bg
+      c.bg_sidebar = bg
+    end,
     -- NO `on_colors`. Recolouring the theme's base ramp (c.green500, c.orange500,
     -- c.blue500) is the obvious way to retheme syntax and it is the wrong one:
     -- those names are shared with the UI, so a syntax choice silently repaints
@@ -41,6 +89,18 @@ return {
           end
         end
       end
+
+      -- The winbar sits on the editor background, not the statusline's.
+      --
+      -- It is a real, visible row in two places: the global 1-row winbar set in
+      -- options.lua, and the padding row under oil's path label. The theme links
+      -- `WinBar` -> `StatusLine`, whose background is `base03` (#002c38), so both
+      -- read as a lighter strip against `Normal`. Linking to Normal/NormalNC
+      -- instead makes the row take whatever background the window already has,
+      -- which is the point of a blank winbar. The statusline itself is untouched
+      -- -- lualine draws that from its own theme.
+      hl.WinBar = { link = "Normal" }
+      hl.WinBarNC = { link = "NormalNC" }
 
       -- Keywords. `Operator` is deliberately NOT here -- see the note further
       -- down -- but `@keyword.operator` (`and`, `or`, `not`) is, because those
@@ -405,16 +465,24 @@ return {
       -- blink.cmp's doc popup does not route through open_floating_preview, so
       -- it takes the same surface directly. The completion MENU below is left
       -- alone on purpose -- only the docs panel changes.
-      hl.BlinkCmpDoc = { fg = c.base1, bg = c.bg_float }
-      hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.bg_float }
+      -- `c.bg_popup`, NOT `c.bg_float`, for the whole completion-menu family
+      -- below. Both were the same value (base04) until 2026-09-04, when
+      -- `on_colors` repointed `bg_float` at the shared editor background -- which
+      -- silently dragged the completion menu with it and left it with no panel of
+      -- its own (measured: menu interior and the code beside it both #031216, so
+      -- only the selected-row band separated them). `bg_popup` is still base04
+      -- (#001419), i.e. exactly the darker background these had before, and it is
+      -- the semantically right key: these are popups, not floats.
+      hl.BlinkCmpDoc = { fg = c.base1, bg = c.bg_popup }
+      hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.bg_popup }
 
-      hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_float }
-      hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_float }
+      hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_popup }
+      hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_popup }
       hl.BlinkCmpMenuSelection = { fg = c.base2, bg = c.base02, bold = true }
       hl.BlinkCmpLabel = { fg = c.base1, bg = c.none }
       hl.BlinkCmpLabelMatch = { fg = c.blue300, bg = c.none }
 
-      hl.Pmenu = { fg = c.base1, bg = c.bg_float }
+      hl.Pmenu = { fg = c.base1, bg = c.bg_popup }
       hl.PmenuSel = { fg = c.base2, bg = c.base02, bold = true }
       hl.PmenuSbar = { bg = c.bg_highlight }
       hl.PmenuThumb = { bg = c.base01 }
