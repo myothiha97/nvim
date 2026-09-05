@@ -200,11 +200,16 @@ return {
       -- float it finds, so with a picker open on top of the oil popup it
       -- scrolled OIL. A buffer-local mapping in the picker window takes
       -- precedence over that global one, so the picker now answers first.
+      -- NAMES MATTER HERE. `list_scroll_down` / `list_scroll_up` are snacks
+      -- BUILT-IN actions bound to <C-d>/<C-u> (a page scroll). Defining actions
+      -- with those names here silently REPLACES them for every picker, turning
+      -- <C-d>/<C-u> into a one-line scroll. Done by accident on 2026-09-05 and
+      -- caught before it shipped -- keep these names distinct from snacks'.
       actions = {
-        list_scroll_down = function(picker)
+        list_scroll_line_down = function(picker)
           picker_scroll(picker, 1)
         end,
-        list_scroll_up = function(picker)
+        list_scroll_line_up = function(picker)
           picker_scroll(picker, -1)
         end,
       },
@@ -215,15 +220,15 @@ return {
             -- Insert mode included: in the prompt the native meaning (insert the
             -- character below / above the cursor) has nothing to act on, while
             -- scrolling the rows you are filtering does.
-            ["<C-e>"] = { "list_scroll_down", mode = { "n", "i" }, desc = "Scroll list down" },
-            ["<C-y>"] = { "list_scroll_up", mode = { "n", "i" }, desc = "Scroll list up" },
+            ["<C-e>"] = { "list_scroll_line_down", mode = { "n", "i" }, desc = "Scroll list down" },
+            ["<C-y>"] = { "list_scroll_line_up", mode = { "n", "i" }, desc = "Scroll list up" },
           },
         },
         list = {
           keys = {
             ["<C-l>"] = { "confirm", mode = { "n", "i" }, desc = "Confirm selection" },
-            ["<C-e>"] = { "list_scroll_down", mode = { "n" }, desc = "Scroll list down" },
-            ["<C-y>"] = { "list_scroll_up", mode = { "n" }, desc = "Scroll list up" },
+            ["<C-e>"] = { "list_scroll_line_down", mode = { "n" }, desc = "Scroll list down" },
+            ["<C-y>"] = { "list_scroll_line_up", mode = { "n" }, desc = "Scroll list up" },
           },
         },
       },
