@@ -34,6 +34,9 @@ local USE_BACKDROP = true
 local BACKDROP_COLOR = "#000000"
 local BACKDROP_BLEND = 60
 
+-- WARN: SILENT FAILURE. A backdrop ABOVE another floating panel HIDES it --
+-- `winblend` does not composite over a lower float the way it does over a
+-- split. The snacks explorer sidebar goes blank, not dim, and nothing errors.
 -- 40 puts the backdrop above every other floating panel in this config, so the
 -- dim covers the WHOLE screen. Measured zindexes, for reference:
 --
@@ -404,6 +407,9 @@ local function set_oil_winbar(win)
   vim.wo[win].winbar = string.rep(" ", indent) .. table.concat(parts) .. " %#WinSeparator#" .. divider .. "%*"
 end
 
+-- WARN: SILENT FAILURE. Must be set in BOTH `win_options` and
+-- `float.win_options`. Oil applies the top-level table AFTER the float one, so
+-- a float-only value is silently overwritten.
 -- Oil windows only, so every other float keeps its visible border. Set in BOTH
 -- `win_options` and `float.win_options` -- see the note at the second one.
 -- `FloatBorder` is simply unused in a real (non-float) Oil window.
@@ -462,6 +468,9 @@ end
 -- A winbar DOES occupy a row in a floating window -- measured on 0.12.5, buffer
 -- line 1 moves from screen row 5 to 6 when one is set.
 --
+-- WARN: SILENT FAILURE. Neovim does not DRAW `virt_lines_above` on the FIRST
+-- buffer line, yet `nvim_win_text_height` counts it -- so the extmark looks
+-- applied and measures correctly while rendering nothing.
 -- REJECTED, and do not retry it: an extmark with `virt_lines_above` on the first
 -- buffer line. It looks like the right tool -- no text, so Oil's line-to-entry
 -- map and its save-time diff never see it -- and `nvim_win_text_height` even
@@ -580,6 +589,8 @@ return {
       win_options = {
         winblend = 0,
         cursorline = true,
+        -- WARN: SILENT FAILURE. Anything per-directory placed in `float.win_options`
+        -- is overwritten on every navigation, because Oil re-applies this whole table.
         -- Repeated from the top-level `win_options` on purpose: Oil sets the
         -- float's options first and then loads the directory, and loading it
         -- applies the top-level table over the top. Measured -- a value set only

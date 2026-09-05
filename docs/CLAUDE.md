@@ -123,6 +123,27 @@ affected workflow, and checking for startup errors or regressions. For plugin,
 completion, formatting or LSP changes, do a manual pass over the related feature
 and run `:Lazy sync` when specs changed.
 
+**A clean result is not proof — parts of this config fail silently.** Fourteen
+known places accept a wrong value and simply do nothing instead of erroring: an
+unresolved picker action name is typed as keystrokes, an action name matching a
+snacks built-in replaces it everywhere, spelling out a layout `box` drops the
+preset's overrides, `virt_lines_above` on line 1 renders nothing while still being
+counted by `win_text_height`, deleting `transparent = false` re-enables
+transparency. All are marked `-- WARN: SILENT FAILURE` in code —
+`:TodoLocList keywords=WARN` lists them, and
+[`notes/silent-failure-surfaces.md`](../notes/silent-failure-surfaces.md) explains
+what each one actually broke.
+
+So when checking one of these areas: **run the check once against a deliberately
+broken version first.** If it reports the same thing either way, the check is
+worthless and the "it works" result means nothing. Several checks reported success
+for both the fixed and the broken config during the session that produced that
+list, which is how two regressions shipped and had to be caught later.
+
+Headless caveat: `nvim --headless` never loads `lua/config/keymaps.lua` (LazyVim
+defers it to `VeryLazy`, which hangs off `UIEnter`), and window geometry is not
+real — so keymap probes report "not mapped" and layout measurements can mislead.
+
 ## Committing
 
 - When asked to commit, automatically load the `/perf-review` skill to analyse the changes for performance safety

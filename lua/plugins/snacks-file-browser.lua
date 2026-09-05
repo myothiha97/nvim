@@ -832,6 +832,9 @@ return {
     -- is claimed here, which is why snacks' own `replace_netrw` is NOT used: it
     -- hooks every directory buffer and would take `:e <dir>` as well.
     --
+    -- WARN: SILENT FAILURE. lazy.nvim keeps only the LAST fragment's `init` per
+    -- plugin, ordered by module name. Defining one here kills snacks.lua's
+    -- entirely, with no error -- highlight groups simply never get set.
     -- `init` COLLIDES with lua/plugins/snacks.lua, which also defines one for
     -- snacks.nvim. lazy.nvim chains the fragments of a plugin through `__index`,
     -- so only the LAST fragment's `init` runs -- and `plugins.snacks-file-browser`

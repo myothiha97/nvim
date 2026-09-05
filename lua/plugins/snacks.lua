@@ -42,6 +42,8 @@ local snacks_keymaps = {
   },
 }
 
+-- WARN: SILENT FAILURE. Native <C-e>/<C-y> are inert in a picker list -- it is
+-- virtually scrolled, so there is no text to move and no error is raised.
 --- Scroll a picker LIST by `delta` rows, the way <C-e> / <C-y> scroll a buffer.
 ---
 --- Native <C-e> / <C-y> do NOTHING in here, and not because a mapping swallows
@@ -200,6 +202,10 @@ return {
       -- float it finds, so with a picker open on top of the oil popup it
       -- scrolled OIL. A buffer-local mapping in the picker window takes
       -- precedence over that global one, so the picker now answers first.
+      -- WARN: SILENT FAILURE. An action name here that matches a snacks BUILT-IN
+      -- replaces it for every picker, with no warning. And a name that matches
+      -- nothing is TYPED as literal keystrokes rather than erroring -- so a typo
+      -- does nothing visible. Check names against snacks/picker/actions.lua.
       -- NAMES MATTER HERE. `list_scroll_down` / `list_scroll_up` are snacks
       -- BUILT-IN actions bound to <C-d>/<C-u> (a page scroll). Defining actions
       -- with those names here silently REPLACES them for every picker, turning
@@ -277,6 +283,9 @@ return {
         explorer = {
           -- The sidebar preset, spelled out.
           --
+          -- WARN: SILENT FAILURE. Providing any `box` REPLACES snacks' preset instead of
+          -- merging into it, so every source-level override the preset carried is lost
+          -- without warning. `preview = false` below is one such casualty -- see it.
           -- It HAS to be spelled out. Two of the three changes below live on box
           -- entries rather than on the picker, and providing any `box` of our own
           -- REPLACES the preset's rather than merging into it (snacks skips preset
@@ -297,6 +306,9 @@ return {
           -- `update_win` merges the box entry over that snapshot, so a `wo` here is
           -- the one thing the layout cannot undo.
           layout = {
+            -- WARN: SILENT FAILURE. Must stay restated. Spelling out the layout inherits
+            -- the PRESET (preview = "main"), not the explorer SOURCE (preview = false),
+            -- which silently turns auto-preview on for every j/k.
             -- `false`, NOT the sidebar preset's "main". The preset previews into
             -- the main window on every cursor move; snacks' own explorer SOURCE
             -- overrides that with `preview = false` (picker/config/sources.lua),
@@ -343,6 +355,10 @@ return {
               { win = "preview", title = "{preview}", height = 0.4, border = "top" },
             },
           },
+          -- WARN: SILENT FAILURE. The input's `winhighlight` only sticks from the LAYOUT
+          -- BOX ENTRY. Setting it in `win.input.wo` loses to snacks' defaults, and
+          -- assigning it in `on_show` is undone when the layout restores its own
+          -- `win.opts` snapshot. Both fail with no error.
           -- Blank the search row, keep the "Explorer" title above it.
           --
           -- The row is NOT removed from the layout. `hidden = { "input" }` would
@@ -560,6 +576,9 @@ return {
               -- (insert the character below / above the cursor) has nothing to act
               -- on, while scrolling the rows you are filtering does.
               keys = vim.tbl_extend("force", explorer_window_keys(), {
+                -- WARN: SILENT FAILURE. A picker has TWO windows. Keys bound on the list are
+                -- unreachable when focus is in the input (i.e. after typing a filter), and
+                -- fall through to native motion instead of erroring.
                 -- Tree keys, NORMAL MODE ONLY, so the prompt still types `h`/`l`
                 -- while filtering.
                 --

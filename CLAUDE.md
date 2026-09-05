@@ -101,6 +101,25 @@ Full reasoning, measurements and the rejected alternatives:
 [`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md)
 and [`todos/snacks-explorer-as-file-browser.md`](todos/snacks-explorer-as-file-browser.md).
 
+## Silent-failure surfaces — read before debugging "my change did nothing"
+
+Fourteen places in this config accept a wrong value and **do nothing** rather than
+erroring: unresolved picker action names get typed as keystrokes, an action name
+matching a snacks built-in replaces it everywhere, spelling out a layout `box`
+drops the preset's overrides, `virt_lines_above` on line 1 renders nothing while
+still being counted, `transparent` re-enables itself when the line is deleted, and
+so on. Each is marked in code with `-- WARN: SILENT FAILURE`.
+
+- List them: `:TodoLocList keywords=WARN` or `rg "WARN: SILENT" lua/`
+- Full explanations, with what each one actually broke:
+  [`notes/silent-failure-surfaces.md`](notes/silent-failure-surfaces.md)
+
+**The rule that comes out of it:** in these areas a clean test result proves
+nothing unless the test can also detect the broken state. Run the check once
+against a deliberately broken version first; if it cannot tell the two apart, it
+is worthless. Several checks reported "working" for both the fixed and broken
+config during the session that produced this list.
+
 ## Two structural traps in this config (read before editing plugin specs)
 
 **One `init`/`config`/`opts`-function per plugin, across ALL spec files.**

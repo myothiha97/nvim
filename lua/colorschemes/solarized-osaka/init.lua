@@ -9,6 +9,8 @@ return {
     -- `background-opacity = 0.9` and `background-blur-radius = 20` no longer show
     -- through the editor area -- only the window padding still gets them.
     --
+    -- WARN: SILENT FAILURE. Deleting or commenting out this line does NOT disable
+    -- transparency -- the plugin defaults it to `true`, so removal re-enables it.
     -- It must be an explicit `false`, NOT a commented-out line: `transparent`
     -- defaults to `true` inside the plugin (solarized-osaka/config.lua), so
     -- deleting this line turns transparency back ON rather than off.
@@ -31,6 +33,9 @@ return {
     --                   blink-cmp's docs window, the lazy.nvim UI.
     --   bg_sidebar   -> NormalSB, i.e. the `sidebars` filetypes (qf, help).
     --
+    -- WARN: SILENT NO-OP. `bg_popup` is NOT the key the theme's `Pmenu` reads --
+    -- that is written from `c.base02` directly, so overriding `bg_popup` in
+    -- `on_colors` changes nothing. The completion menu is moved in `on_highlights`.
     -- `bg_popup` is deliberately NOT set, and must stay that way. The
     -- completion-menu family in `on_highlights` below (Pmenu, BlinkCmpMenu,
     -- BlinkCmpDoc and their borders) is pointed at it precisely so the menu keeps
