@@ -71,7 +71,7 @@ What makes this feel less like vanilla Neovim:
 | **Languages** | TypeScript/React daily driver, Go + Python enabled, DevOps filetypes (YAML · Docker · Terraform · Helm) enabled, Rust lazy/deferred |
 | **Markdown** | render-markdown.nvim — `.md` files · LSP hover popups · Avante (flat, no-highlight) |
 | **UI** | lualine · noice (cmdline only) · fidget · which-key |
-| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-v1` (default, violet keyword + copper punctuation) · `-custom-v2` (warm/yellow keyword) · `-custom-v3` (softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against) |
+| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-latest` (default: yellow warm side, two-rung grey punctuation, raised body text) · `-custom-v1` (the copper build it replaced, 2026-08-11 to 2026-09-05) · `-custom-v2` (v1 + warm/yellow keyword) · `-custom-v3` (v1 + softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against). `custom-latest` is a moving name; the numbered builds are frozen snapshots. |
 
 ---
 

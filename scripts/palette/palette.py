@@ -282,6 +282,17 @@ def nearest_solarized(hex_colour):
 ROLES = [
     ("keyword", "Keyword"),
     ("punctuation", "Special"),
+    # Split off `punctuation` on 2026-09-05 so a build could move parameters
+    # without moving brackets and tags. No SHIPPING build separates them today,
+    # so this row is expected to duplicate the one above -- that is the point: if
+    # the two ever drift apart unintentionally, this row is what shows it.
+    ("parameter", "@variable.parameter"),
+    # Split off `punctuation` on 2026-09-05 along with `parameter`. `bracket` and
+    # `delimiter` are NEUTRAL by design in the default build, so they are
+    # expected to score close to each other and far from every accent -- that is
+    # the "punctuation is chrome" shape, not a collision.
+    ("bracket", "@punctuation.bracket"),
+    ("delimiter", "@punctuation.delimiter"),
     ("function", "Function"),
     ("type", "Type"),
     ("string", "@string"),

@@ -6,10 +6,14 @@ return {
   {
     "LazyVim/LazyVim",
     -- Named explicitly rather than as bare "solarized-osaka", because what we
-    -- run is no longer stock and the bare name reads as if it were. The three
-    -- builds and the reference `solarized-osaka-original` are in
+    -- run is no longer stock and the bare name reads as if it were.
+    --
+    -- `custom-latest` is a MOVING name -- it always points at whatever we run
+    -- today -- so this line does not need changing when the palette does. The
+    -- numbered builds beside it are frozen snapshots of what it used to be. All
+    -- of them, and the reference `solarized-osaka-original`, are in
     -- lua/colorschemes/solarized-osaka/variants.lua.
-    opts = { colorscheme = "solarized-osaka-custom-v1" },
+    opts = { colorscheme = "solarized-osaka-custom-latest" },
     -- opts = {
     --   colorscheme = "gruvbox",
     -- },

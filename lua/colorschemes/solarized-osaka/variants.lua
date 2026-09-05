@@ -1,10 +1,23 @@
 -- The solarized-osaka builds, one `:colorscheme` away from each other.
 --
---   solarized-osaka-original    upstream craftzdog, nothing of ours applied
---   solarized-osaka-custom-v1   the selection we run  <- default
---                               violet keyword + copper punctuation
---   solarized-osaka-custom-v2   the same, on the warm keyword (yellow)
---   solarized-osaka-custom-v3   the same, on the softer terracotta punctuation
+--   solarized-osaka-custom-latest  the selection we run  <- default
+--                                  yellow warm side, grey punctuation on two
+--                                  rungs, raised body text (2026-09-05)
+--   solarized-osaka-custom-v1      the copper build custom-latest replaced
+--   solarized-osaka-custom-v2      custom-v1 on the warm keyword (yellow)
+--   solarized-osaka-custom-v3      custom-v1 on the softer terracotta punctuation
+--   solarized-osaka-original       upstream craftzdog, nothing of ours applied
+--
+-- `custom-latest` IS A MOVING NAME and the numbered ones are not. It always
+-- means "whatever we run today", so `config.lua` never has to be repointed and
+-- muscle memory never goes stale. The numbered builds are frozen snapshots of
+-- what it used to be, newest first.
+--
+-- SO WHEN custom-latest IS SUPERSEDED: give its current values a number (the
+-- next one up, e.g. `custom-v4`) with the reasoning that justified them, THEN
+-- move the new values into the palette. Never edit a numbered build -- the whole
+-- value of one is that it still renders what it rendered on the day it was
+-- named. Verify with the group diff described at the bottom of M.load.
 --
 -- The point of `original` is to have a reference build to diff against, because
 -- what we run is no longer stock. It is a precise thing rather than a vague one:
@@ -12,7 +25,7 @@
 -- solarized-osaka/init.lua. `transparent = true` is not ours -- it is the plugin's own
 -- default (see `defaults` in solarized-osaka/config.lua). So `original` is
 -- exactly "the same theme with our on_highlights switched off", and any
--- difference you see between it and custom-v1 is a difference we introduced.
+-- difference you see between it and custom-latest is a difference we introduced.
 --
 -- Costs nothing at startup: nothing here is read until `:colorscheme` names a
 -- build, because the only entry points are the one-line files in `colors/`.
@@ -36,11 +49,14 @@
 -- ADDING A BUILD:
 --   1. add an entry to `builds` below -- any role in the palette works, not just
 --      `keyword`, and a build may change several at once
---   2. create colors/solarized-osaka-custom-vN.lua containing one line:
---        require("colorschemes.solarized-osaka.variants").load("custom-vN")
+--   2. create colors/solarized-osaka-<name>.lua containing one line:
+--        require("colorschemes.solarized-osaka.variants").load("<name>")
 -- Builds are for values worth LIVING with, not for comparing candidates. A
 -- candidate belongs in the palette's variant tables with its numbers; it only
--- earns a build once you would actually switch to it.
+-- earns a build once you would actually switch to it. The 2026-09-05 rebuild
+-- broke that rule on purpose -- ten builds existed at once so they could be
+-- compared side by side in real files -- and then collapsed back to the winner.
+-- Do that again the same way: many builds while deciding, none afterwards.
 
 local palette = require("colorschemes.solarized-osaka.palette")
 
@@ -61,27 +77,103 @@ local builds = {
   -- The live selection, exactly as solarized-osaka/palette.lua has it. Empty on
   -- purpose: it exists so the name can be typed and so `config.lua` can name the
   -- build it wants rather than relying on the bare plugin name meaning "ours".
-  ["custom-v1"] = {},
+  --
+  -- IT IS EMPTY FOR A SECOND REASON, and this is why `custom-latest` rather than
+  -- a numbered build holds the palette's own values. `vim.g.colors_name` stays "solarized-osaka" whatever
+  -- you load (see the note at the bottom of M.load), so anything that reloads
+  -- the theme with `:colorscheme <g:colors_name>` gets the palette defaults. If
+  -- the default build carried overrides instead, every such reload would
+  -- silently drop the editor back to a different colour scheme. Keeping the live
+  -- values in the palette makes that reload a no-op.
+  --
+  -- WHAT IT IS, in one line each. Full argument and measurements:
+  -- notes/syntax-palette-decisions.md, "The 2026-09-05 rebuild".
+  --
+  --   punctuation + parameter  yellow `#aea134`, replacing copper. Copper was
+  --     the palette's only sub-AA colour and its tightest pair against the error
+  --     red; removing it also drops the chroma outlier from the accent set, so
+  --     hue spacing holds a 60 degree minimum and emitted spread falls 31.2 to
+  --     24.0. That evenness is what reads as "it mixes with the cyan and violet".
+  --   bracket  grey `#7f9195`, NOT an accent. Brackets are the most scattered
+  --     glyph on screen -- 3.21% of ink in 17210 marks, 1.20 chars each -- so
+  --     colouring them turns the accent into confetti. Measured across 237 real
+  --     files: with brackets on the accent it made 21518 marks at 2.25 chars;
+  --     with them grey, 5887 marks at 4.72 chars. Same hex, 73% fewer marks.
+  --     This is also what gives a yellow parameter an edge against its own
+  --     brackets, which no other build has.
+  --   delimiter  grey `#8b9b9e`, one rung ABOVE bracket. Operators and
+  --     separators carry more than brackets do, so they sit higher.
+  --   body  `#b1bebf`, +7.0 L*. Fixes "variables look faded": upstream framed
+  --     every name in olive punctuation, and moving punctuation to base0 in
+  --     2026-08 had put it on the SAME value as `@variable`. Raising the body
+  --     and lowering the punctuation restores the edge from both sides.
+  --
+  -- The shape to preserve if any of this is retuned: FOUR LIGHTNESS STEPS
+  -- ordered by meaning -- body 76.0, names 65.5, delimiters 62.8, brackets 58.9,
+  -- comments 44.6 -- and ONE warm accent hue, not two.
+  ["custom-latest"] = {},
+
+  -- The build that ran from 2026-08-11 to 2026-09-05: copper punctuation, body
+  -- and punctuation both on the theme's base0. Kept because it is a full month
+  -- of proven daily use and the only fallback that needs no argument.
+  --
+  -- Explicit rather than empty now that `custom-latest` holds the palette's
+  -- values -- it was the empty one until 2026-09-05. The three
+  -- `false`s are meaningful, not padding: they mean "follow the theme's own
+  -- base0" for body and delimiters, and "follow `punctuation`" for brackets,
+  -- which is exactly how those roles behaved before they were split out.
+  ["custom-v1"] = {
+    palette = {
+      punctuation = palette.variants.punctuation.copper_mid,
+      parameter = palette.variants.punctuation.copper_mid,
+      bracket = false,
+      body = false,
+      delimiter = false,
+    },
+  },
 
   -- The warm keyword, kept switchable after violet won the default on
   -- 2026-08-10. Yellow rather than olive, which is display-unstable -- see the
   -- notes. Reach for this if violet ever reads as too recessive: it buys a much
   -- wider worst-neighbour separation, 32.5 against violet's 19.1.
-  ["custom-v2"] = { palette = { keyword = palette.variants.keyword.balanced } },
+  --
+  -- Built on custom-v1, not on v4: v4 already spends this yellow on the warm
+  -- side, and a yellow keyword beside a yellow bracket is the collision the
+  -- whole 2026-09-05 rebuild removed.
+  ["custom-v2"] = {
+    palette = {
+      keyword = palette.variants.keyword.balanced,
+      punctuation = palette.variants.punctuation.copper_mid,
+      parameter = palette.variants.punctuation.copper_mid,
+      bracket = false,
+      body = false,
+      delimiter = false,
+    },
+  },
 
-  -- The previous punctuation colour, held until 2026-08-11. Kept as a build
+  -- The punctuation colour from before 2026-08-11, on the custom-v1 base. Kept
   -- because it is the one value that satisfies the keyword/punctuation chroma
-  -- pairing perfectly -- gap 0.4 against the selection's 23.2 -- so it is the
-  -- fallback if copper ever reads too hot in a long session.
-  ["custom-v3"] = { palette = {
-    punctuation = palette.variants.punctuation.terracotta,
-  } },
+  -- pairing perfectly -- gap 0.4 against copper's 23.2.
+  --
+  -- `parameter` is named alongside `punctuation` and MUST be: it defaults to the
+  -- punctuation VALUE, not the punctuation ROLE, so a build that moves
+  -- `punctuation` alone silently leaves parameters behind. Any future build has
+  -- the same decision to make, and nothing errors if it gets it wrong.
+  ["custom-v3"] = {
+    palette = {
+      punctuation = palette.variants.punctuation.terracotta,
+      parameter = palette.variants.punctuation.terracotta,
+      bracket = false,
+      body = false,
+      delimiter = false,
+    },
+  },
 }
 
 local M = {}
 
 ---Load one of the builds as a colorscheme.
----@param name string build key: "original", "custom-v1", "custom-v2", "custom-v3"
+---@param name string build key: "custom-latest", "custom-v1" .. "custom-v3", "original"
 function M.load(name)
   local build = builds[name]
   if not build then

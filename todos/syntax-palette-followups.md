@@ -21,7 +21,9 @@
 > superseded 2026-08-10 by warm violet `#a17bcc`.
 >
 > Both alternatives stay one command away: `:colorscheme solarized-osaka-custom-v2`
-> for the warm keyword, `-custom-v3` for the softer terracotta punctuation.
+> for the warm keyword and `-custom-v3` for the softer terracotta punctuation.
+> Both are built on `-custom-v1`, the copper build that `-custom-latest` replaced on
+> 2026-09-05.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.

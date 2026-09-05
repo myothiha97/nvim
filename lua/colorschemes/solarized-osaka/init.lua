@@ -95,6 +95,28 @@ return {
         end
       end
 
+      -- Neutral punctuation: the theme's base0 unless a build overrides it.
+      -- `palette.delimiter` is `false` by default so the default stays COUPLED
+      -- to the theme's own ramp rather than a copy of its hex. `custom-v1`
+      -- overrides it; see the note in palette.lua for why it is not `nil`.
+      local delimiter = palette.delimiter or c.base0
+
+      -- Brackets default to the punctuation accent, so v1 is unchanged. A build
+      -- may point them at `delimiter` instead; see palette.lua.
+      local bracket = palette.bracket or palette.punctuation
+
+      -- Body text: `Normal`, `NormalFloat` and `@variable` are one value by
+      -- design -- a plain identifier IS body text here. Same `false`-not-`nil`
+      -- default as `delimiter`. `custom-v1` sets it back to `false`.
+      --
+      -- Painted rather than left to the theme so a build can raise it. `Normal`
+      -- keeps its background: `paint` merges `fg` and leaves everything else.
+      -- The other 15 groups the theme puts on base0 are chrome (TabLine,
+      -- SignColumn, StatusLineNC, Trouble) and stay where they are on purpose.
+      if palette.body then
+        paint({ "Normal", "NormalFloat", "@variable" }, palette.body)
+      end
+
       -- The winbar sits on the editor background, not the statusline's.
       --
       -- It is a real, visible row in two places: the global 1-row winbar set in
@@ -122,34 +144,65 @@ return {
         "@keyword.return.javascript",
       }, palette.keyword)
 
-      -- Parameters, brackets, tags and other "structural" symbols. Feeds what
-      -- the theme calls orange500.
+      -- Brackets, tags and other "structural" symbols. Feeds what the theme
+      -- calls orange500.
       paint({
         "Special",
         "Debug",
-        "@punctuation.bracket",
-        "@punctuation.special",
-        -- Lua table braces. Lua captures `{` as BOTH @punctuation.bracket and
-        -- @constructor -- the same character, matched twice -- and @constructor
-        -- wins only because it comes later in the highlights query. So it marks
-        -- a quirk of the grammar, not a distinct construct: Go's composite
-        -- literals (`Rectangle{...}`, `[]int{2,3,4}`, `map[string]int{...}`) are
-        -- the same thing and are plain @punctuation.bracket, and TSX emits no
-        -- @constructor at all.
-        --
-        -- Pointed at the type colour on 2026-08-07 so "construction reads as the
-        -- type being built" -- reasoned from TSX, which turned out not to use the
-        -- group. The effect was Lua-only: blue `{` `}` beside the punctuation
-        -- colour on `[` `]` in the same expression, and beside azure @property on
-        -- every line of a config table. Reverted 2026-08-09.
-        "@constructor",
-        "@constructor.tsx",
-        "@variable.parameter",
         "@variable.builtin",
         "@module.builtin",
         -- JSX tag groups are painted in their own block below rather than
         -- listed here, so the reasoning stays attached to them. Same colour.
       }, palette.punctuation)
+
+      -- The brackets themselves, on their own role so a build can move them
+      -- without moving tags and the rest of the warm side.
+      paint({ "@punctuation.bracket" }, bracket)
+
+      -- `${` and its `}` inside a template literal. Deliberately NOT with the
+      -- brackets above, even though it is brace-shaped: it is a MODE SWITCH, not
+      -- structure. It marks where a string stops being text and becomes an
+      -- expression, so it carries meaning and the "punctuation carrying no
+      -- meaning worth a hue" rule does not apply to it.
+      --
+      -- It also has to survive being read INSIDE the string colour, which is the
+      -- measurement that settled it. Separation from `@string` cyan `#29a298`:
+      -- copper 46.9, the accent yellow 32.9, the neutral grey only 17.7. Grouped
+      -- with the brackets in the first cut of the rebuild and moved out on
+      -- 2026-09-05 because the marker was disappearing into the string.
+      --
+      -- Language-free in practice: Go and Lua emit ZERO of this capture, and it
+      -- is 0.16% of TSX / 0.24% of TS.
+      paint({ "@punctuation.special" }, palette.punctuation)
+
+      -- Parameter names and `new X()` callees. Split off the punctuation list
+      -- above on 2026-09-05 so a build can move them WITHOUT moving brackets and
+      -- tags; the two shared one role until then. `palette.parameter` holds the
+      -- punctuation value, so only `custom-latest` renders differently.
+      --
+      -- What is in here, from walking the highlights query: @variable.parameter
+      -- is the parameter name in every language; @constructor is the callee of
+      -- `new` in TS (`URLSearchParams` matches @variable, @type AND @constructor,
+      -- last capture wins). Go emits no @constructor and neither does TSX.
+      paint({
+        "@variable.parameter",
+        "@constructor",
+        "@constructor.tsx",
+      }, palette.parameter)
+
+      -- Lua table braces, pinned back to the bracket colour. Lua captures `{` as
+      -- BOTH @punctuation.bracket and @constructor -- the same character, matched
+      -- twice -- so Lua's @constructor is a grammar quirk, not a construct (Go's
+      -- composite literals are plain @punctuation.bracket). Without this, a build
+      -- that moves `palette.parameter` recolours every `{` `}` in every Lua file.
+      -- Language-scoped like `@keyword.tsx`: the highlighter tries
+      -- `@constructor.lua` before `@constructor`.
+      --
+      -- Pointing @constructor at the TYPE colour was tried 2026-08-07, reasoned
+      -- from TSX, which turned out not to use the group. Effect was Lua-only:
+      -- blue `{` `}` beside copper `[` `]` in the same expression. Reverted
+      -- 2026-08-09; this line is what keeps that revert true per-language.
+      paint({ "@constructor.lua" }, bracket)
 
       -- JSX tags, revisited 2026-08-09. Reference measurement, taken by walking
       -- treesitter captures over two regions of the SAME production file and
@@ -208,7 +261,7 @@ return {
         "@tag.delimiter.vue",
         "@tag.delimiter.html",
         "@tag.delimiter.javascript",
-      }, c.base0)
+      }, delimiter)
 
       -- Generic delimiters go neutral too, 2026-08-10. This closes item 6 of
       -- todos/syntax-palette-followups.md, which had been the live one.
@@ -223,7 +276,7 @@ return {
       -- This is a coverage change, not a colour change, so it is independent of
       -- which keyword colour is selected and stays true for the variants in
       -- lua/colorschemes/solarized-osaka/variants.lua.
-      paint({ "@punctuation.delimiter" }, c.base0)
+      paint({ "@punctuation.delimiter" }, delimiter)
 
       -- Two groups `paint` deliberately cannot handle. Both are stored as bare
       -- string links whose TARGET is outside the lists above, so skipping them
@@ -290,7 +343,7 @@ return {
       -- colour -- they are in the keyword list above, which has to come after
       -- this line would otherwise reach them via
       -- @keyword.operator -> @operator -> Operator.
-      hl.Operator = { fg = c.base0 }
+      hl.Operator = { fg = delimiter }
 
       -- Types. The theme sets `Type = yellow500`, which made EVERY type gold:
       -- Rectangle, Shape, float64, string, int, SlotTableProps, ReactNode,

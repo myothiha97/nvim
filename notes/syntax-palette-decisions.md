@@ -552,3 +552,170 @@ read calm. Confirmed again on 2026-08-08 when hue 125 at C\* 75 was rejected as
 palette, and the thing the "keep punctuation red clear of diagnostics" rule was
 written about. `#f7768e` (tokyonight's red) measures 7.19:1 and 21.3, fixing both
 at once. Untried in place; it is saved as `punctuation.tokyonight`.
+
+## The 2026-09-05 rebuild
+
+The largest change since the palette was written: five roles moved in one day,
+two new roles created, and the warm accent replaced. `custom-latest` is the result;
+`custom-v1` is the copper build it replaced and is still one `:colorscheme` away.
+
+Ten builds existed at once during the day so they could be compared in real
+files, then collapsed to the winner. **`custom-v5` through `custom-v10` no longer
+exist** — they are named below only to say what was tried and why it lost. The
+builds that ship are `custom-latest`, `custom-v1`, `custom-v2`, `custom-v3` and
+`original`. That deliberately breaks the "builds are for
+values worth living with" rule at the top of `variants.lua`. Do it the same way
+next time: many builds while deciding, none afterwards.
+
+### Where it started
+
+`({ path, query, origin })` and `new URLSearchParams()` rendered in the same
+copper as the brackets around them, so a signature read as one unbroken run.
+
+Both were painted from `palette.punctuation` — the same role as
+`@punctuation.bracket`, JSX tags, `Special` and `@variable.builtin` — so no value
+could move one without all of them. That is why the day started with a role
+split rather than a colour change, and it is the pattern for the whole rebuild:
+**every complaint here turned out to be a grouping error, not a hex.**
+
+Three new roles came out of it, all defaulting to their old value so nothing
+moved until a build asked: `parameter` (`@variable.parameter`, `@constructor`),
+`delimiter` (`Operator`, `@punctuation.delimiter`, `@tag.delimiter.*`) and
+`bracket` (`@punctuation.bracket`).
+
+### Two things the first split broke, both found by measuring
+
+- Lua captures `{` as `@constructor` as well as `@punctuation.bracket`, so moving
+  `parameter` turned every Lua table brace yellow. `@constructor.lua` is now
+  pinned to follow `bracket`.
+- `custom-v3` silently lost its parameters. It overrode `punctuation` alone, and
+  `parameter` defaults to the punctuation **value**, not the **role**. Every
+  build now names both. Nothing errors if a future one forgets.
+
+### "Variables look faded next to upstream" — dose, not value
+
+The variable colour had never changed: `Normal`, `@variable` and `@variable.lua`
+were `#9eabac` in upstream and in every build. What changed was its neighbours.
+Upstream paints operators and delimiters olive `#849900`; we moved them to base0
+in 2026-08, which is the **same value as `@variable`**.
+
+Measured on `lua/config/quickfix-persistence.lua`:
+
+| | base0 coverage | separate base0 runs |
+| --- | --- | --- |
+| upstream | 32.0% | 272 |
+| ours, before | 38.1% | 464 |
+
+Every `=`, `.`, `,` around a name became the same grey as the name, so a variable
+lost the coloured edge its operators used to give it. Rule 4, and the fix was to
+move the punctuation, not to retune the variable.
+
+### The grey is a maximin, not a preference
+
+Punctuation has to stay clear of body text above it and Comment below it, and
+those pull in opposite directions, so the best value is the crossover. Against
+body `#b1bebf` and Comment `#576d74`:
+
+| hex | L\* | contrast | dE body | dE comment | worst |
+| --- | --- | --- | --- | --- | --- |
+| `#798c91` | 56.9 | 5.54:1 | 15.7 | 12.4 | 12.4 |
+| `#7f9195` | 58.9 | 5.93:1 | 13.8 | 14.4 | **13.8** |
+| `#859699` | 60.9 | 6.33:1 | 12.1 | 16.2 | 12.1 |
+| `#8b9b9e` | 62.8 | 6.75:1 | 10.4 | 17.9 | 10.4 |
+| `#91a0a2` | 64.8 | 7.19:1 | 8.7 | 19.5 | 8.7 |
+
+**"Brighter to distinguish it better" is false above 58.9** — every step past it
+buys comment separation by spending body separation and the worst pair gets
+worse. Do not rebuild this ladder. Brackets sit on the maximin rung and
+delimiters one above it, because a bracket carries less than an operator does.
+
+Body text went the other way, +7.0 L\* to `#b1bebf`. The theme's own next rung
+(base1) is +4.6 and measured under the perceptual floor, i.e. invisible.
+
+### Copper to yellow: harmony, measured
+
+| accent set | hues | tightest gap | emitted chroma sd |
+| --- | --- | --- | --- |
+| copper | 58, 187, 250, 310 | 60° | 12.4 |
+| **yellow** | 98, 187, 250, 310 | **60°** | **9.5** |
+| copper + yellow | 58, **98**, 187, 250, 310 | **40°** | 12.4 |
+
+Copper was the chroma outlier (emitted 75.5 against everything else's 38–52), so
+dropping it tightens the accent spread from 31.2 to 24.0. That evenness is what
+reads as "the yellow mixes with the cyan and violet".
+
+The middle row is the trap: keeping copper for brackets *and* adding yellow for
+names puts two warm hues 40° apart doing different jobs — the tightest gap in the
+palette. It was built (`custom-v8`) and rejected for that.
+
+Yellow also fixes two recorded defects: copper was the palette's **only** sub-AA
+colour (4.56:1 → 7.37:1) and its tightest pair against the error red (dE 17.8).
+
+### Brackets go grey — the decisive measurement
+
+Across 237 real `.ts`/`.tsx`/`.lua`/`.go` files, 645,195 glyphs:
+
+| brackets are… | accent coverage | accent marks | chars per mark |
+| --- | --- | --- | --- |
+| an accent | 7.51% | **21,518** | **2.25** |
+| neutral | 4.31% | **5,887** | **4.72** |
+
+Coverage falls 43% but marks fall **73%**, because a bracket is one character and
+a name is five. On the accent, brackets are confetti; the same hex marking only
+names averages 4.72 characters and reads as words. The scatter doesn't vanish, it
+moves to the grey (39,817 marks at 1.22 chars), which is what chrome is for.
+
+This also gives a yellow parameter an edge against its own brackets without a
+second hue, which is what `custom-v7` could not do (`param` and `bracket` were
+dE 0.0) and what `custom-v8` needed a 40° hue clump to buy.
+
+Brackets are 3.21% of ink in 17,210 marks at 1.20 chars; plain variables are
+14.94% in 18,300 marks at 5.27 chars. **Nearly the same mark count at four times
+the run length** — which is also why body-coloured brackets were rejected
+(`custom-v10`): it merges the most scattered thing on screen with the least.
+
+### `${}` is a mode switch, not a bracket
+
+Grouped with the brackets in the first cut and moved out the same day. It has to
+be read *inside* the string colour, so what matters is separation from that cyan:
+copper 46.9, the accent yellow 32.9, the neutral grey only **17.7**. Grey threw
+away 63% of it and the interpolation marker merged into the text.
+
+Note the side effect: in TypeScript `@punctuation.special` is also the optional
+marker `?`, and that is the majority of the group (116 of 242 in `.ts`). So `?`
+is an accent now. Kept — optionality is information, not structure, and it is
+0.09% of glyphs.
+
+### Rejected, with reasons
+
+- **Body-coloured punctuation** (`custom-v10`). See the mark numbers above; it
+  also re-creates a dE 0.0 name/symbol pair and pushes the brightest colour past
+  51% of ink.
+- **`punctuation.explored.balanced_amber` `#a67136`** for the warm accent: dE
+  **8.5** from copper. Anything at hue 70 or below is the same colour as copper.
+- **Un-greying type-level `&` and `|`.** A real inconsistency — `a && b` is
+  `@keyword.operator` (violet) while `DateProps & {` is `@punctuation.delimiter`
+  (grey) — but there is no capture to split on, so it needs an `after/queries`
+  override for typescript *and* tsx, maintained across grammar updates, to move
+  0.14% of `.ts` and 0.04% of `.tsx` glyphs and 0% of Go. Not worth it.
+- **Yellow on the whole warm side** (`custom-v7`): 13.4% of TSX glyphs, past the
+  ~10% discomfort line, and it leaves `param` = `bracket` at dE 0.0.
+
+### Where it landed
+
+| role | value | L\* | contrast |
+| --- | --- | --- | --- |
+| body / `@variable` | `#b1bebf` | 76.0 | 10.19:1 |
+| names — params, `new X()`, tags, `${}` | `#aea134` | 65.5 | 7.37:1 |
+| delimiters — `=` `,` `.` `:` | `#8b9b9e` | 62.8 | 6.75:1 |
+| brackets — `(` `[` `{` | `#7f9195` | 58.9 | 5.93:1 |
+| comments | `#576d74` | 44.6 | 3.57:1 |
+
+**Four lightness steps ordered by how much the thing means, and one warm accent
+hue rather than two.** That is the shape to preserve if any single value is
+retuned. Even on markup-heavy TSX the accent makes 1,994 marks at 5.37 chars
+against `custom-v1`'s 5,867 at 2.65 — fewer, longer marks than the build that ran
+for the previous month.
+
+The known cost: brackets are no longer an accent, so bracket *matching* is by
+shape and indent. `MatchParen` still colours the pair under the cursor.

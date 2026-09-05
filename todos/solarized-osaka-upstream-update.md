@@ -31,13 +31,15 @@ justifies taking that risk during the freeze.
 3. Start one unlocked session with `NVIM_LAZY_UNLOCK=1 nvim` and update only
    solarized-osaka.nvim.
 4. Run the Lua parse check, clean boot, and `git diff --check`.
-5. Load and inspect all four entry points:
+5. Load and inspect all five entry points:
+   - `solarized-osaka-custom-latest` (the default)
    - `solarized-osaka-custom-v1`
    - `solarized-osaka-custom-v2`
    - `solarized-osaka-custom-v3`
    - `solarized-osaka-original`
-6. Confirm custom-v1 still has the selected violet keyword, copper punctuation,
-   neutral delimiters and symbolic operators, and the intended Type color.
+6. Confirm custom-latest still has the violet keyword, the yellow warm side, brackets
+   one grey rung below delimiters, the raised body text and the intended Type
+   color; and that custom-v1 still renders the copper build unchanged.
 7. Confirm diagnostics, git signs, lualine, CodeCompanion, LSP doc floats, and Trouble
    colors did not inherit syntax-palette changes.
 8. Inspect real TSX, Go, and Lua files in Ghostty. Compare against the pinned build.

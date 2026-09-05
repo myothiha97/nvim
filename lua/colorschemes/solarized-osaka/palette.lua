@@ -143,8 +143,75 @@ local variants = {
     base0 = "#9eabac", -- L* 69.0, BRIGHTER than the keyword it defers to
   },
 
-  -- Special, Debug, @punctuation.bracket, @variable.parameter,
-  -- @variable.builtin, JSX tags and delimiters, @keyword.import.
+  -- Body text: `Normal`, `NormalFloat` and `@variable`, which are the same value
+  -- by design here (a plain identifier IS body text in this palette).
+  --
+  -- Rule 3 binds hardest on this role -- it is the most frequent colour on
+  -- screen -- so it is raised only far enough to be seen, and it must stay below
+  -- the Type colour `#7dcfff` (L* 79.7), which is the palette's deliberate
+  -- brightest landmark.
+  body = {
+    base0 = "#9eabac", -- L* 69.0, 8.23:1 -- the theme's own, and the default
+    base1 = "#adb7b7", -- L* 73.7 -- the theme's next rung, but only +4.6 L* and
+    -- dE 3.7, i.e. at the perceptual floor: measured, and too small to see.
+    brighter = "#b1bebf", -- L* 76.0, +7.0, 10.19:1, dE 5.3 -- SELECTED for
+    -- the live selection. Clears the floor, still 3.7 L* under the Type colour.
+    brightest = "#bcc9ca", -- L* 80.0, +11.0 -- passes the Type colour; rule 3
+    base2 = "#ede7d3", -- the theme's base2: L* 91.6 and a CREAM, not a grey
+  },
+
+  -- Operators and delimiters. The grey ladder is the theme's own base ramp, so
+  -- these are the theme's hexes, not new colours.
+  --
+  -- Why there is a choice here at all: upstream paints these olive `#849900`,
+  -- and moving them to base0 put them on the SAME value as `@variable`. The
+  -- value of a variable never changed, but base0 went from 32.0% to 38.1% of
+  -- glyphs on lua/config/quickfix-persistence.lua and from 272 to 464 separate
+  -- runs (+71%), so a name lost the coloured edge its operators used to give it.
+  -- That is what reads as "variables look faded next to upstream". Rule 4: the
+  -- variable is not the variable.
+  delimiter = {
+    base0 = "#9eabac", -- L* 69.0, 8.23:1 -- the default, identical to @variable
+    base00 = "#637981", -- L* 49.4, 4.25:1 -- one rung down; dE 18.0 from base0,
+    -- which is the edge that comes back, but it is SUB-AA and only dE 4.7 from
+    -- Comment `#576d74`, so punctuation starts reading as commented-out. That
+    -- trade was judged by eye on 2026-09-05 and lost to the maximin rung below.
+    base01 = "#576d74", -- Comment itself. Listed to be explicit that it is not a
+    -- candidate: punctuation would be exactly the comment colour.
+
+    -- The theme's ramp jumps 19.6 L* from base00 to base0 with nothing between,
+    -- so these are synthesised on the SAME grey axis (hue 206, C* interpolated)
+    -- to land the rung the ramp does not have. They exist because base00 is
+    -- sub-AA and `=` `==` `>` `<` `&&` carry logic -- measured at 1.5% of glyphs
+    -- across the real TS/TSX/Lua stack, 78% of which is `=` alone.
+    -- SELECTED 2026-09-05, and it is the MAXIMIN rung:
+    -- this colour has to stay clear of body text ABOVE it and Comment BELOW it,
+    -- and those two pull in opposite directions, so the best value is the
+    -- crossover where they balance. Measured against body `#b1bebf`, Comment
+    -- `#576d74` and the yellow accent:
+    --
+    --   hex       L*     AA     dE body  dE comment   worst
+    --   #798c91  56.9  5.54:1     15.7       12.4      12.4   (`mid`)
+    --   #7f9195  58.9  5.93:1     13.8       14.4      13.8   <- SELECTED
+    --   #859699  60.9  6.33:1     12.1       16.2      12.1
+    --   #8b9b9e  62.8  6.75:1     10.4       17.9      10.4
+    --   #91a0a2  64.8  7.19:1      8.7       19.5       8.7
+    --
+    -- So "make it brighter to distinguish it better" is FALSE above this rung:
+    -- past 58.9 every step buys comment separation by giving up more body
+    -- separation, and the worst pair gets worse. Do not rebuild this ladder.
+    mid_high = "#7f9195", -- L* 58.9, 5.93:1, worst separation 13.8
+    mid = "#798c91", -- L* 56.9, 5.54:1 -- one rung down, worst 12.4
+    mid_low = "#73878d", -- L* 55.0, 5.18:1 -- most body edge, closest to Comment
+    -- Above the maximin, kept only so the table shows the curve turning over.
+    brighter = "#859699", -- L* 60.9, worst 12.1
+    brightest = "#8b9b9e", -- L* 62.8, worst 10.4
+  },
+
+  -- Special, Debug, @punctuation.bracket, @variable.builtin, JSX tags and
+  -- delimiters, @keyword.import -- and, via the `parameter` role below, also
+  -- @variable.parameter and @constructor, which held this value on their own
+  -- until 2026-09-05 and still default to it.
   --
   -- The densest accent in the palette: 19.1% of ink in markup-heavy TSX. Whatever
   -- sits here is the warm side of the screen on its own, because every other
@@ -349,10 +416,70 @@ return {
   -- solarized-osaka/init.lua paints nothing with it. Kept wired so the values stay
   -- measured if it reopens.
   keyword_grammar = variants.keyword_grammar.cool_grey,
-  -- Copper over terracotta: fixes the sub-AA contrast and the error-red
-  -- collision, and gives the warm side enough presence to stand beside violet.
-  -- Costs a 23.2 pairing gap. `terracotta` is the one-word revert.
-  punctuation = variants.punctuation.copper_mid,
+  -- THE 2026-09-05 SELECTION. Five roles moved together on that day, after ten
+  -- builds were measured against each other; `custom-latest` is the name for it and
+  -- `custom-v1` is the copper look that preceded it. The argument for each value
+  -- is on `custom-latest` in variants.lua, and the measurements are in
+  -- notes/syntax-palette-decisions.md, "The 2026-09-05 rebuild".
+  --
+  -- The shape in one sentence: FOUR LIGHTNESS STEPS, ordered by how much the
+  -- thing means -- body text 76.0, names 65.5, punctuation 62.8/58.9, comments
+  -- 44.6 -- with exactly one accent hue on the warm side instead of two.
+
+  -- Yellow replaced copper here. It is the same value the keyword wore as
+  -- `custom-v2`, and it wins on two things copper could not fix: copper was the
+  -- palette's ONLY sub-AA colour (4.56:1 -> 7.37:1) and its tightest pair
+  -- against the error red (dE 17.8 -> far). Dropping copper also removes the
+  -- chroma outlier from the accent set, so emitted spread falls 31.2 -> 24.0.
+  -- `variants.punctuation.copper_mid` is the one-word revert.
+  punctuation = variants.keyword.subdued,
+  -- Parameter names and `new X()` callees. Split off `punctuation` on 2026-09-05
+  -- so a build can recolour them alone; it holds the same yellow here, because
+  -- what separates a parameter from its brackets is now the BRACKET being grey,
+  -- not the name being a different hue.
+  --
+  -- No variant table of its own: every candidate is already measured under
+  -- `punctuation` or `keyword`. One constraint is specific to this role -- hue 70
+  -- and below is the same colour as copper punctuation
+  -- (`punctuation.explored.balanced_amber` measures dE 8.5 from it), which is why
+  -- the warm band below yellow is closed to it.
+  parameter = variants.keyword.subdued,
+  -- Operators and delimiters (`=` `.` `,` `;` `:`, JSX `<` `>` `/`). These left
+  -- the body colour on 2026-09-05: they had been painted base0 since
+  -- 2026-08-08/08-10, which is the SAME value as `@variable`, so a name had no
+  -- edge against the punctuation around it. That is what "variables look faded
+  -- next to upstream" turned out to be -- coverage, not value.
+  --
+  -- `false` would mean "follow the theme's own base0"; init.lua reads it as
+  -- `palette.delimiter or c.base0`, and `custom-v1` sets it back to `false`.
+  --
+  -- WARN: SILENT FAILURE. A build that wants the old behaviour must write
+  -- `delimiter = false`, never `nil`. `nil` is not a value in a Lua table, it is
+  -- the absence of the key, so `variants.load` iterates the build with `pairs`,
+  -- never sees it, and the override simply does not happen -- the build renders
+  -- as if that line were not there, and nothing reports it. Verified.
+  --
+  -- (The related leak -- a build's colour surviving into the NEXT
+  -- `:colorscheme` because `pairs` skipped a nil while restoring -- is closed
+  -- for this role only because the default below is a real value rather than
+  -- `nil`. Keep it that way.)
+  delimiter = variants.delimiter.brightest,
+  -- Body text, raised +7.0 L* on 2026-09-05. The theme's own next rung (base1)
+  -- is only +4.6 and measured under the perceptual floor, i.e. invisible. Same
+  -- `false`-not-`nil` rule as `delimiter`.
+  body = variants.body.brighter,
+  -- Brackets: `(` `)` `[` `]` `{` `}` and Lua's table braces. Split off
+  -- `punctuation` on 2026-09-05 and sent to the GREY, not to an accent -- they
+  -- are the same "punctuation carrying no meaning worth a hue" class as
+  -- `Operator` and `@punctuation.delimiter` and were simply never moved with
+  -- them. This is what lets a yellow name sit inside neutral punctuation.
+  --
+  -- One rung DIMMER than `delimiter` on purpose: a bracket is the most scattered
+  -- glyph on screen (1.20 chars per mark, measured), so it recedes furthest.
+  --
+  -- WARN: SILENT FAILURE. `false`, never `nil` -- see `delimiter` above: a `nil`
+  -- here is an absent key, so the override silently never happens.
+  bracket = variants.delimiter.mid_high,
   func = variants.func.azure,
   -- Off the theme's yellow500, which made every type in Go/TS/Python read as
   -- gold. Known weak pair with Function -- see the note on the variant.
