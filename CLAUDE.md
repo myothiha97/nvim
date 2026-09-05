@@ -64,9 +64,12 @@ two retired browsers:
   being swallowed, they have nothing to move. `config/keymaps.lua` also skips any
   `^snacks_picker` float on purpose, so each picker window must answer for
   itself: bind them to `list:scroll()`, which is what the mouse wheel already
-  calls there. Done for the `<leader>r` sidebar (`explorer_scroll` in
-  `snacks.lua`) and in the retired browser. **If a new picker gets its own
-  keymaps, it needs this too.**
+  calls there. Bound **picker-wide** in `snacks.lua` (`picker_scroll` +
+  `list_scroll_down`/`list_scroll_up`), so every picker gets it, not just the
+  explorer. Binding it on the picker window also matters for a second reason:
+  the global handler scrolls the first focusable NON-picker float it finds, so
+  with a picker open over the oil popup it scrolled OIL. A buffer-local mapping
+  in the picker window takes precedence and fixes that too.
 - **A picker has TWO windows, and keys bound on the list are unreachable from the
   input.** After typing a filter, focus sits in the input — where snacks binds
   `j`/`k` to list movement but leaves `h`/`l` as native text motion, so the tree

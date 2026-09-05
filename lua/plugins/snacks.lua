@@ -42,7 +42,7 @@ local snacks_keymaps = {
   },
 }
 
---- Scroll the explorer LIST by `delta` rows, the way <C-e> / <C-y> scroll a buffer.
+--- Scroll a picker LIST by `delta` rows, the way <C-e> / <C-y> scroll a buffer.
 ---
 --- Native <C-e> / <C-y> do NOTHING in here, and not because a mapping swallows
 --- them -- they have nothing to move. A picker list is virtually scrolled: its
@@ -56,7 +56,7 @@ local snacks_keymaps = {
 --- wheel makes here -- so the keys and the wheel agree rather than inventing two
 --- rules. At either end of the listing snacks steps the selection by `delta`
 --- instead, which is what the wheel has always done here.
-local function explorer_scroll(picker, delta)
+local function picker_scroll(picker, delta)
   -- Honour a count (`5<C-e>`) like the native keys, but only from normal mode:
   -- `v:count1` keeps the LAST normal-mode count while in insert, so reading it in
   -- the prompt would scroll by a number nobody typed. Same guard snacks puts on
@@ -191,15 +191,39 @@ return {
     scope = { enabled = false }, -- treesitter scope tracking on every cursor move
     dim = { enabled = false },
     picker = {
+      -- PICKER-WIDE, deliberately: every picker needs these, not just the
+      -- explorer. See the note on `picker_scroll` for why the native keys are
+      -- inert in a picker list.
+      --
+      -- Binding them here also fixes a second symptom: the global <C-e>/<C-y>
+      -- handler (config/keymaps.lua) scrolls the first focusable NON-picker
+      -- float it finds, so with a picker open on top of the oil popup it
+      -- scrolled OIL. A buffer-local mapping in the picker window takes
+      -- precedence over that global one, so the picker now answers first.
+      actions = {
+        list_scroll_down = function(picker)
+          picker_scroll(picker, 1)
+        end,
+        list_scroll_up = function(picker)
+          picker_scroll(picker, -1)
+        end,
+      },
       win = {
         input = {
           keys = {
             ["<C-l>"] = { "confirm", mode = { "n", "i" }, desc = "Confirm selection" },
+            -- Insert mode included: in the prompt the native meaning (insert the
+            -- character below / above the cursor) has nothing to act on, while
+            -- scrolling the rows you are filtering does.
+            ["<C-e>"] = { "list_scroll_down", mode = { "n", "i" }, desc = "Scroll list down" },
+            ["<C-y>"] = { "list_scroll_up", mode = { "n", "i" }, desc = "Scroll list up" },
           },
         },
         list = {
           keys = {
             ["<C-l>"] = { "confirm", mode = { "n", "i" }, desc = "Confirm selection" },
+            ["<C-e>"] = { "list_scroll_down", mode = { "n" }, desc = "Scroll list down" },
+            ["<C-y>"] = { "list_scroll_up", mode = { "n" }, desc = "Scroll list up" },
           },
         },
       },
@@ -380,12 +404,6 @@ return {
             end)
           end,
           actions = {
-            explorer_scroll_down = function(picker)
-              explorer_scroll(picker, 1)
-            end,
-            explorer_scroll_up = function(picker)
-              explorer_scroll(picker, -1)
-            end,
             explorer_single_click = function(picker)
               local pos = vim.fn.getmousepos()
               local list_win = picker.list.win.win
@@ -537,8 +555,6 @@ return {
               -- (insert the character below / above the cursor) has nothing to act
               -- on, while scrolling the rows you are filtering does.
               keys = vim.tbl_extend("force", explorer_window_keys(), {
-                ["<C-e>"] = { "explorer_scroll_down", mode = { "n", "i" }, desc = "Scroll list down" },
-                ["<C-y>"] = { "explorer_scroll_up", mode = { "n", "i" }, desc = "Scroll list up" },
                 -- Tree keys, NORMAL MODE ONLY, so the prompt still types `h`/`l`
                 -- while filtering.
                 --
@@ -559,10 +575,6 @@ return {
             },
             list = {
               keys = vim.tbl_extend("force", explorer_window_keys(), {
-                -- Same fine viewport nudge they are in a file window; see the note
-                -- on `explorer_scroll` for why the native keys are inert here.
-                ["<C-e>"] = { "explorer_scroll_down", mode = { "n" }, desc = "Scroll list down" },
-                ["<C-y>"] = { "explorer_scroll_up", mode = { "n" }, desc = "Scroll list up" },
                 ["<Esc>"] = false, -- don't close on Esc
                 ["q"] = { "close", mode = { "n" }, desc = "Close explorer" },
                 ["/"] = false, -- use vim search instead of explorer filter
