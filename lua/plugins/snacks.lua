@@ -192,6 +192,13 @@ return {
     indent = { enabled = false }, -- decoration provider + scope listener on hot paths
     scope = { enabled = false }, -- treesitter scope tracking on every cursor move
     dim = { enabled = false },
+    lazygit = {
+      theme = {
+        -- FloatBorder can be invisible by design in another panel. Match
+        -- standalone lazygit with the theme's bright foreground instead.
+        inactiveBorderColor = { fg = "Normal" },
+      },
+    },
     picker = {
       -- PICKER-WIDE, deliberately: every picker needs these, not just the
       -- explorer. See the note on `picker_scroll` for why the native keys are
