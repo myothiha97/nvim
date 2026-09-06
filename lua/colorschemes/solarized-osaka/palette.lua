@@ -39,9 +39,8 @@
 -- ROLE they fill, never for a theme slot -- a role can move to any hue, and
 -- naming it after a colour is how `green` ended up holding a yellow.
 --
--- These feed SYNTAX GROUPS ONLY. solarized-osaka/init.lua deliberately has no
--- `on_colors`, so nothing here can reach diagnostics, git signs, lualine or any
--- other UI. See the note at the top of that file before changing the approach.
+-- These feed SYNTAX GROUPS ONLY. The separate `on_colors` callback changes the
+-- shared UI background and does not read this table.
 --
 -- THIS FILE IS A DATA TABLE, NOT A DOCUMENT. Each value carries its verdict and
 -- its numbers so a candidate can be judged in place. The reasoning, the
@@ -56,7 +55,7 @@
 --   3. Frequency is inversely related to brightness.
 --   4. If a colour looks right in some files and wrong in others, the variable
 --      is coverage, not value.
--- Measure against Ghostty's #031219, not nvim's #001419 (transparent = true).
+-- Measure against Nvim's opaque #000f13 background.
 -- Ghostty tags content display-p3, so authored numbers are NOT what the panel
 -- emits -- accents arrive ~20 C* higher. Note both where it matters.
 
@@ -147,15 +146,15 @@ local variants = {
   -- by design here (a plain identifier IS body text in this palette).
   --
   -- Rule 3 binds hardest on this role -- it is the most frequent colour on
-  -- screen -- so it is raised only far enough to be seen, and it must stay below
-  -- the Type colour `#7dcfff` (L* 79.7), which is the palette's deliberate
-  -- brightest landmark.
+  -- screen -- so it is raised only far enough to be seen. The base build keeps
+  -- it below Type `#7dcfff`; custom-latest deliberately uses the dimmer
+  -- `#2ac3de` Type instead.
   body = {
     base0 = "#9eabac", -- L* 69.0, 8.23:1 -- the theme's own, and the default
     base1 = "#adb7b7", -- L* 73.7 -- the theme's next rung, but only +4.6 L* and
     -- dE 3.7, i.e. at the perceptual floor: measured, and too small to see.
     brighter = "#b1bebf", -- L* 76.0, +7.0, 10.19:1, dE 5.3 -- SELECTED for
-    -- the live selection. Clears the floor, still 3.7 L* under the Type colour.
+    -- the base selection. Clears the floor, still 3.7 L* under the base Type.
     brightest = "#bcc9ca", -- L* 80.0, +11.0 -- passes the Type colour; rule 3
     base2 = "#ede7d3", -- the theme's base2: L* 91.6 and a CREAM, not a grey
   },
@@ -348,11 +347,9 @@ local variants = {
   -- genuinely rare in Go and Python. And the blue band is full: String/member
   -- cyan sits at hue 187 and Function at 250, leaving only the middle.
   --
-  -- OPEN: this is the only role not yet optimised, and the brightest value in the
-  -- palette by 20 L*. See item 8 of todos/syntax-palette-followups.md -- and note
-  -- that every DIMMER candidate below collides with Function, because Type and
-  -- Function sit one degree apart in hue and their whole separation IS the 20.6
-  -- L* gap. The blue band cannot produce a dimmer Type.
+  -- CLOSED 2026-09-07. The base keeps the historical bright selection, while
+  -- custom-latest uses `nvim_type` after dense JS/TS objects exposed the final
+  -- practical issue. See item 8 of todos/syntax-palette-followups.md.
   type = {
     -- The only rung in the blue band that clears dE 20 against Function (20.7);
     -- everything at L* 74-78 scores 13-18. Rejected on sight as too bright: it
@@ -367,7 +364,7 @@ local variants = {
     sky_soft = "#49ddff", -- hue 225, C* 39.6, vs Function 19.8
     sky_softer = "#61dbff", -- hue 230, C* 36.5, vs Function 19.0
     sky_dim = "#39cce9", -- hue 222, L* 76, C* 38 -- dE 4.6 from `sky`, borderline
-    -- THE SELECTION. Restored 2026-08-09 after three replacements were tried and
+    -- THE BASE SELECTION. Restored 2026-08-09 after three replacements were tried and
     -- rejected on real files. It shares hue 249 with Function and splits on
     -- lightness alone (dE 16.2) -- rule 1 broken knowingly. What carries the pair
     -- is the 20.6 L* gap, the largest of any candidate; it is also 25.5 from
@@ -380,7 +377,7 @@ local variants = {
     -- dissolved the Type/Function pair entirely) and still lost on looks.
     vscode_entity = "#c0caf5", -- hue 284, C* 22.9
     periwinkle = "#a7b1fe", -- hue 290, C* 42.0
-    nvim_type = "#2ac3de", -- rejected: 15.2 from func, 16.4 from string
+    nvim_type = "#2ac3de", -- custom-latest: 15.2 from func, 16.4 from string
     vscode_support = "#0db9d7", -- rejected: 12.7 from func
   },
 
@@ -414,10 +411,8 @@ local variants = {
   },
 }
 
--- THE LIVE SELECTIONS. Changing a colour is a one-word edit here; every group
--- that uses the role follows automatically. Each line names why it won in one
--- sentence -- the full argument is on the variant above it, and the measurements
--- are in notes/syntax-palette-decisions.md.
+-- THE BASE SELECTIONS. `custom-latest` overrides Type and bracket in variants.lua.
+-- Every other build starts from these values before applying its own overrides.
 return {
   -- Every candidate above, exposed by role so the alternative colorschemes can
   -- name one without copying its hex. Read only by
@@ -503,19 +498,20 @@ return {
   -- `Operator` and `@punctuation.delimiter` and were simply never moved with
   -- them. This is what lets a yellow name sit inside neutral punctuation.
   --
-  -- The SAME value as `delimiter` since 2026-09-06. It was one rung dimmer for a
+  -- The SAME base value as `delimiter` since 2026-09-06. It was one rung dimmer for a
   -- day, on the argument that a bracket is the most scattered glyph on screen
   -- (1.20 chars per mark, measured) and should recede furthest. That held right
   -- up until the gap was measured at dE 3.5, below the threshold this palette
   -- already treats as invisible. The role stays separate so a build can split
-  -- them again; it just is not worth a rung today.
+  -- them again. `custom-latest` does so deliberately with body.base0 after the
+  -- dense JS/TS object-literal issue found on 2026-09-06.
   --
   -- WARN: SILENT FAILURE. `false`, never `nil` -- see `delimiter` above: a `nil`
   -- here is an absent key, so the override silently never happens.
   bracket = variants.delimiter.mid_high,
   func = variants.func.azure,
-  -- Off the theme's yellow500, which made every type in Go/TS/Python read as
-  -- gold. Known weak pair with Function -- see the note on the variant.
+  -- Base value. `custom-latest` uses nvim_type; numbered builds retain this
+  -- brighter value.
   type = variants.type.tokyonight,
   -- UNREAD. solarized-osaka/init.lua has the `@variable.member` override commented
   -- out, so member uses the theme's cyan500. One-line uncomment if it reopens.

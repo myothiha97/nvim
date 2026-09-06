@@ -257,10 +257,9 @@ return {
       -- `Operator` does further down: they are punctuation carrying no meaning
       -- worth a hue, and they were 13.0% of the punctuation colour for that.
       --
-      -- They follow the BRACKET rung rather than the delimiter one: `<div>` is a
-      -- name wrapped in punctuation exactly as `foo(bar)` is, so the wrapper
-      -- recedes one step further than an operator does. Same reasoning that put
-      -- `@punctuation.bracket` a rung below `@punctuation.delimiter`.
+      -- They follow the BRACKET role rather than the delimiter one: `<div>` is a
+      -- name wrapped in punctuation exactly as `foo(bar)` is. This keeps tag and
+      -- code structure aligned when a build separates brackets from operators.
       --
       -- NOT the `bracket` local above, deliberately. That one falls back to
       -- `palette.punctuation`, so builds with `bracket = false` (custom-v1/v2/v3,

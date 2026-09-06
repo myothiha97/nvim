@@ -3,7 +3,7 @@
 > **UPDATE 2026-09-04 — this document's central premise no longer holds.**
 > Everything measured below is still correct, but all of it was conditional on
 > `transparent = true`. **The theme went opaque the same day**: `transparent =
-> false` with the background in `lua/config/ui.lua` (`#030e12` since
+> false` with the background in `lua/config/ui.lua` (`#000f13` since
 > 2026-09-04, `#031116` before that). That
 > hex is what Ghostty was already emitting (`background = #031219` at
 > `background-opacity = 0.9` over a dark desktop), sampled off a screenshot at a
