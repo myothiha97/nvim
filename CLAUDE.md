@@ -36,7 +36,7 @@ Things a new session must know before touching `oil.lua`, `snacks.lua`, or the
 two retired browsers:
 
 - **The theme is OPAQUE now (2026-09-04), which is the precondition for
-  everything below.** `transparent = false` and `bg = #030e12` in
+  everything below.** `transparent = false` and `bg = #000f13` in
   `lua/colorschemes/solarized-osaka/init.lua`. That hex is the colour Ghostty was
   already emitting (its `background = #031219` blended at `background-opacity =
   0.9` over a dark desktop), measured off a screenshot, so the editor looks the
@@ -101,45 +101,26 @@ Full reasoning, measurements and the rejected alternatives:
 [`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md)
 and [`todos/snacks-explorer-as-file-browser.md`](todos/snacks-explorer-as-file-browser.md).
 
-## Syntax palette: CLOSED 2026-09-06 — do not reopen to "try something"
+## Syntax palette: CLOSED 2026-09-07
 
-The colours are finished. Every role was checked **twice**: by hand on real files
-in all four daily languages (JSX/TSX, JS/TS, Go, Lua), and programmatically by
-measuring the rendered pixels of screenshots of those same files. There is no
-known improvement left on the table. Further tweaking is a time sink, not a gain.
+The final update fixes dense JS/TS object literals where cyan keys and values
+mixed together. `custom-latest` now keeps brackets bright, delimiters quiet, and
+Type below the old brightness peak. No more colour tweaking is planned.
 
-What is live, and the one number that matters for each:
+| role | value | contrast |
+| --- | --- | --- |
+| body / `@variable` | `#b1bebf` | 10.19:1 |
+| bracket / object structure | `#9eabac` | 8.23:1 |
+| type | `#2ac3de` | 9.24:1 |
+| names: params, tags, `${}` | `#aea134` | 7.37:1 |
+| delimiter / operator | `#7f9195` | 5.93:1 |
+| keyword | `#a17bcc` | 5.77:1 |
+| comment | `#576d74` | 3.57:1 |
 
-| role | value | contrast | why it is there |
-| --- | --- | --- | --- |
-| body / `@variable` | `#b1bebf` | 10.19:1 | the top of the ladder |
-| names — params, tags, `${}` | `#aea134` | 7.37:1 | the ONE warm accent |
-| **punctuation** — delimiters *and* brackets | **`#7f9195`** | **5.93:1** | the maximin rung |
-| keyword | `#a17bcc` | 5.77:1 | inside the band its neighbours occupy |
-| comment | `#576d74` | 3.57:1 | deliberately sub-AA |
-
-Three things a new session will be tempted to change, all already tried and
-rejected **with measurements** in
-[`notes/syntax-palette-decisions.md`](notes/syntax-palette-decisions.md),
-"2026-09-06: punctuation settles":
-
-- **"The punctuation is a bit grey, give it some colour."** Tried with olive
-  `#849900` and four other candidates. The delimiter role is 10.5% of code ink in
-  TS/TSX and 14.6% in Go, the highest dose of anything in the palette, and a sweep
-  of the entire hue wheel tops out at worst-case dE 23.3 against the twelve live
-  colours. The wheel is full.
-- **"Delimiters should sit a rung above brackets."** They did, for one day. The
-  gap measured dE 3.5, below the dE 4.7 this palette already treats as invisible,
-  and it cost the delimiter its best body separation (13.8 → 10.4).
-- **"`mid_high` will hide `+ - * < > & == !=`."** Measured off live Go at native
-  resolution: every one of those peaks at exactly `#7f9195`, 5.93:1, including
-  6px-wide `*` and `.` at 26 lit pixels. Antialiasing dims a glyph's edges, never
-  its core.
-
-**If you measure rendered colour from a screenshot, check its pixel dimensions
-first.** A 1920×1080 capture of a retina panel is downscaled and really does cost
-a thin stroke ~4.3 L\* of peak; this session briefly reasoned from that artifact
-before catching it. Native captures show every glyph at its exact authored hex.
+The 2026-09-06 measurements remain useful history, but their former live values
+are superseded by the `custom-latest` overrides in
+`lua/colorschemes/solarized-osaka/variants.lua`. See
+[`notes/syntax-palette-decisions.md`](notes/syntax-palette-decisions.md).
 
 ## Silent-failure surfaces — read before debugging "my change did nothing"
 

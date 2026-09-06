@@ -9,8 +9,7 @@ measured, and rejected for a recorded reason.
 
 ## Method
 
-- Measure against **Ghostty's `#031219`**, not nvim's `#001419`. `transparent =
-  true` leaves `Normal` bg = `NONE`, so the terminal's colour is what shows.
+- Measure against Nvim's opaque **`#000f13`** background.
 - Score candidates with **dE2000 against the whole palette**, never by eye alone.
   Under 10 is confusable on small glyphs, 10–20 is distinguishable but tiring,
   over 20 is unambiguous.
@@ -868,8 +867,8 @@ now fixed or accepted:
   exactly as `foo(bar)` is, so the wrapper belongs on the bracket rung. Routed as
   `palette.bracket or delimiter`, **not** through the `bracket` local in
   `init.lua`, because that one falls back to `palette.punctuation` and would drag
-  `custom-v1`/`v2`/`v3` tag delimiters onto copper. Verified: `#7f9195` on the
-  live build, `#9eabac` on `custom-v1`, unchanged.
+  `custom-v1`/`v2`/`v3` tag delimiters onto copper. Verified on the then-live
+  build as `#7f9195`; custom-latest now overrides it to `#9eabac`.
 - **TS with dense cyan** (a `yup` schema, a `faker` mock builder) is the one place
   punctuation recedes noticeably, because a C\* 7 grey next to C\* 38–52 cyan is
   suppressed by chromatic induction. This is a chroma effect, so no rung on the
@@ -884,3 +883,19 @@ programmatically against rendered pixels. There is no known improvement left on
 the table — the remaining moves are all lateral, and the wheel is full. Further
 tweaking is a time sink, not a gain. If a future session feels the urge, read
 this section and `neovim-config-change-gate.md` first.
+
+## 2026-09-07: final custom-latest override (CLOSED)
+
+Dense JS/TS object literals exposed one final practical issue: cyan keys and
+values mixed together, making object structure hard to scan. `custom-latest`
+now overrides three base roles:
+
+| role | current value | reason |
+| --- | --- | --- |
+| type | `#2ac3de` (`nvim_type`) | lower the former `#7dcfff` brightness peak |
+| bracket | `#9eabac` (`body.base0`) | make object and call structure clearly visible |
+| delimiter | `#7f9195` (`delimiter.mid_high`) | keep frequent operators and separators quiet |
+
+The yellow warm side, violet keyword, raised body, and comment remain unchanged.
+This supersedes the live-state claims in the 2026-09-06 section but preserves
+that section as the measurement record. The palette is closed after this update.

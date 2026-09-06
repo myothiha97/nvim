@@ -61,13 +61,8 @@ from pathlib import Path
 
 # -------------------------------------------------------------------------- colour maths
 
-BACKGROUND = "#031219"
-"""Ghostty's background, NOT nvim's #001419.
-
-`transparent = true` leaves Normal bg = NONE, so the terminal's colour is what
-shows through. Measuring against #001419 gives contrast figures the eye never
-sees.
-"""
+BACKGROUND = "#000f13"
+"""Nvim's opaque background from lua/config/ui.lua."""
 
 ERROR_RED = "#ff3b30"
 """Set in solarized-osaka.lua as DiagnosticVirtualTextError.
@@ -283,9 +278,8 @@ ROLES = [
     ("keyword", "Keyword"),
     ("punctuation", "Special"),
     # Split off `punctuation` on 2026-09-05 so a build could move parameters
-    # without moving brackets and tags. No SHIPPING build separates them today,
-    # so this row is expected to duplicate the one above -- that is the point: if
-    # the two ever drift apart unintentionally, this row is what shows it.
+    # without moving brackets and tags. `custom-latest` separates them; numbered
+    # builds retain their historical pairings.
     ("parameter", "@variable.parameter"),
     # Split off `punctuation` on 2026-09-05 along with `parameter`. `bracket` and
     # `delimiter` are NEUTRAL by design in the default build, so they are
@@ -343,7 +337,7 @@ def live_colours(build):
 
 def cmd_scorecard(args):
     c = live_colours(args.build)
-    print(f"\n{args.build}   against Ghostty's {BACKGROUND}\n")
+    print(f"\n{args.build}   against Nvim's {BACKGROUND}\n")
 
     print("ROLES                              authored              emitted (P3)")
     print(f"  {'role':<12} {'hex':<9} {'L*':>5} {'C*':>5} {'hue':>4}   {'L*':>5} {'C*':>5}   {'contrast':>9}")

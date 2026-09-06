@@ -9,15 +9,13 @@
 > It is kept as the historical record of *why* things were tried, not as a
 > statement of what is set today.
 >
-> **NOTHING LIVE. The palette is CLOSED as of 2026-09-06** — see
-> `notes/syntax-palette-decisions.md`, "2026-09-06: punctuation settles". Every
-> role has been checked both by hand on real files and programmatically against
+> **NOTHING LIVE. The palette is CLOSED as of 2026-09-07**. See
+> `notes/syntax-palette-decisions.md`, "2026-09-07: final custom-latest override".
+> Every role has been checked both by hand on real files and programmatically against
 > rendered pixels, across JSX/TSX, JS/TS, Go and Lua. There is no known
 > improvement left; further tweaking is a time sink.
 >
-> Item 8 (`Type` brightness) is closed with it: `#7dcfff` measures 11.36:1 on a
-> live Go screen and is cleanly separated from every neighbour. It was the last
-> unoptimised role and it needs no change.
+> Item 8 (`Type` brightness) is closed with `#2ac3de` in `custom-latest`.
 >
 > Closed on 2026-08-11: item 7 (symbolic logical operators off `base0`) and the
 > punctuation rework (terracotta `#b55f4a` → copper `#be6421`, recorded in
@@ -31,9 +29,8 @@
 > Both are built on `-custom-v1`, the copper build that `-custom-latest` replaced on
 > 2026-09-05.
 >
-> Closed 2026-09-06: the punctuation rung (`delimiter` and `bracket` collapsed onto
-> `#7f9195`), a coloured-delimiter experiment (rejected on dose and hue collision),
-> and the JSX/HTML tag delimiters (`<` `>` `/` moved to the bracket rung).
+> Final 2026-09-07 state: `delimiter` is `#7f9195`, `bracket` is `#9eabac`, and
+> Type is `#2ac3de`. The palette is closed with no further tweaking planned.
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.
@@ -510,7 +507,10 @@ Reverting is `rm -r after/`, or deleting one file to drop one language.
 Largest move is +0.88 points against the 7% stop rule on the violet. Bash was
 expected to be the risk and moved least; see the note file for why.
 
-### 8. `Type` is the brightest thing on screen — OPEN, the only role left
+### 8. `Type` brightness: CLOSED 2026-09-07
+
+`custom-latest` now uses `nvim_type` `#2ac3de`. This closes the brightness issue.
+The analysis below is retained as the record of the former `#7dcfff` selection.
 
 **The one genuinely unoptimised colour**, filed 2026-08-11 after the punctuation
 rework closed. Not blocking: it is doing its job, which was to separate types from
