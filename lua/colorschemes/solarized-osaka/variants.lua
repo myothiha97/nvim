@@ -117,7 +117,20 @@ local builds = {
   -- CLOSED 2026-09-06. Every value above was verified against rendered pixels of
   -- real Go, TSX, TS and Lua screens, not judged by eye. Do not reopen this to
   -- "try something"; see the change gate in neovim-config-change-gate.md.
-  ["custom-latest"] = {},
+  -- issue: currently there is one color issue
+  -- since both dictionary keys and values are painted as cyan green, in some area the colors are very mixed up
+  -- especially in js,ts files where there are a lot of objects are declared
+  -- the current solution - set both delimiters and brackets to the same color, which is a bit of a compromise but it works
+  ["custom-latest"] = {
+    palette = {
+      type = palette.variants.type.nvim_type,
+      -- punctuation = palette.variants.punctuation.copper_mid,
+      punctuation = palette.variants.punctuation.terracotta, -- very close and competetive to subdued yellow but for some reason my eye favor terracotta
+      delimiter = palette.variants.body.base0,
+      bracket = palette.variants.body.base0,
+      parameter = palette.variants.punctuation.terracotta,
+    },
+  },
 
   -- The build that ran from 2026-08-11 to 2026-09-05: copper punctuation, body
   -- and punctuation both on the theme's base0. Kept because it is a full month
