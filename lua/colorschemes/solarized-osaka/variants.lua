@@ -1,8 +1,8 @@
 -- The solarized-osaka builds, one `:colorscheme` away from each other.
 --
 --   solarized-osaka-custom-latest  the selection we run  <- default
---                                  yellow warm side, grey punctuation on two
---                                  rungs, raised body text (2026-09-05)
+--                                  cyan type, bright brackets, neutral
+--                                  delimiters (2026-09-07)
 --   solarized-osaka-custom-v1      the copper build custom-latest replaced
 --   solarized-osaka-custom-v2      custom-v1 on the warm keyword (yellow)
 --   solarized-osaka-custom-v3      custom-v1 on the softer terracotta punctuation
@@ -74,61 +74,19 @@ local builds = {
   -- you saw could be ours or could be a side effect of the reset.
   original = { config = { on_highlights = function() end } },
 
-  -- The live selection, exactly as solarized-osaka/palette.lua has it. Empty on
-  -- purpose: it exists so the name can be typed and so `config.lua` can name the
-  -- build it wants rather than relying on the bare plugin name meaning "ours".
+  -- The active selection. Dense JS/TS object literals exposed the final issue:
+  -- cyan keys and values mixed together and made object structure hard to scan.
+  -- These overrides keep brackets bright, delimiters quiet, and Type below the
+  -- old `#7dcfff` peak. Body text is now slightly brighter than Type by design.
+  -- All other roles retain the palette defaults.
   --
-  -- IT IS EMPTY FOR A SECOND REASON, and this is why `custom-latest` rather than
-  -- a numbered build holds the palette's own values. `vim.g.colors_name` stays "solarized-osaka" whatever
-  -- you load (see the note at the bottom of M.load), so anything that reloads
-  -- the theme with `:colorscheme <g:colors_name>` gets the palette defaults. If
-  -- the default build carried overrides instead, every such reload would
-  -- silently drop the editor back to a different colour scheme. Keeping the live
-  -- values in the palette makes that reload a no-op.
-  --
-  -- WHAT IT IS, in one line each. Full argument and measurements:
-  -- notes/syntax-palette-decisions.md, "The 2026-09-05 rebuild".
-  --
-  --   punctuation + parameter  yellow `#aea134`, replacing copper. Copper was
-  --     the palette's only sub-AA colour and its tightest pair against the error
-  --     red; removing it also drops the chroma outlier from the accent set, so
-  --     hue spacing holds a 60 degree minimum and emitted spread falls 31.2 to
-  --     24.0. That evenness is what reads as "it mixes with the cyan and violet".
-  --   bracket  grey `#7f9195`, NOT an accent. Brackets are the most scattered
-  --     glyph on screen -- 3.21% of ink in 17210 marks, 1.20 chars each -- so
-  --     colouring them turns the accent into confetti. Measured across 237 real
-  --     files: with brackets on the accent it made 21518 marks at 2.25 chars;
-  --     with them grey, 5887 marks at 4.72 chars. Same hex, 73% fewer marks.
-  --     This is also what gives a yellow parameter an edge against its own
-  --     brackets, which no other build has.
-  --   delimiter  grey `#7f9195`, the SAME value as bracket since 2026-09-06.
-  --     It spent one day a rung above, on the argument that operators carry more
-  --     than brackets do; the gap measured dE 3.5 and was dropped. Colour was
-  --     tried here too, and lost -- see `variants.delimiter` in palette.lua.
-  --   body  `#b1bebf`, +7.0 L*. Fixes "variables look faded": upstream framed
-  --     every name in olive punctuation, and moving punctuation to base0 in
-  --     2026-08 had put it on the SAME value as `@variable`. Raising the body
-  --     and lowering the punctuation restores the edge from both sides.
-  --
-  -- The shape to preserve if any of this is retuned: THREE LIGHTNESS STEPS
-  -- ordered by meaning -- body 76.0, names 65.5, punctuation 58.9, comments 44.6
-  -- -- and ONE warm accent hue, not two.
-  --
-  -- CLOSED 2026-09-06. Every value above was verified against rendered pixels of
-  -- real Go, TSX, TS and Lua screens, not judged by eye. Do not reopen this to
-  -- "try something"; see the change gate in neovim-config-change-gate.md.
-  -- issue: currently there is one color issue
-  -- since both dictionary keys and values are painted as cyan green, in some area the colors are very mixed up
-  -- especially in js,ts files where there are a lot of objects are declared
-  -- the current solution - set both delimiters and brackets to the same color, which is a bit of a compromise but it works
+  -- CLOSED 2026-09-07. This is the final colour state. Do not retune it without
+  -- a new workflow-blocking defect and the config change gate.
   ["custom-latest"] = {
     palette = {
       type = palette.variants.type.nvim_type,
-      -- punctuation = palette.variants.punctuation.copper_mid,
-      punctuation = palette.variants.punctuation.terracotta, -- very close and competetive to subdued yellow but for some reason my eye favor terracotta
-      delimiter = palette.variants.body.base0,
+      delimiter = palette.variants.delimiter.mid_high,
       bracket = palette.variants.body.base0,
-      parameter = palette.variants.punctuation.terracotta,
     },
   },
 

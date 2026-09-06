@@ -37,9 +37,9 @@ justifies taking that risk during the freeze.
    - `solarized-osaka-custom-v2`
    - `solarized-osaka-custom-v3`
    - `solarized-osaka-original`
-6. Confirm custom-latest still has the violet keyword, the yellow warm side, brackets
-   one grey rung below delimiters, the raised body text and the intended Type
-   color; and that custom-v1 still renders the copper build unchanged.
+6. Confirm custom-latest still has the violet keyword, yellow warm side,
+   `#9eabac` brackets, `#7f9195` delimiters, raised body text and `#2ac3de` Type;
+   and that custom-v1 still renders the copper build unchanged.
 7. Confirm diagnostics, git signs, lualine, CodeCompanion, LSP doc floats, and Trouble
    colors did not inherit syntax-palette changes.
 8. Inspect real TSX, Go, and Lua files in Ghostty. Compare against the pinned build.
