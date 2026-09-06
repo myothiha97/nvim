@@ -125,10 +125,8 @@ local builds = {
     palette = {
       type = palette.variants.type.nvim_type,
       -- punctuation = palette.variants.punctuation.copper_mid,
-      punctuation = palette.variants.punctuation.terracotta, -- very close and competetive to subdued yellow but for some reason my eye favor terracotta
       delimiter = palette.variants.body.base0,
       bracket = palette.variants.body.base0,
-      parameter = palette.variants.punctuation.terracotta,
     },
   },
 
