@@ -182,30 +182,46 @@ local variants = {
     -- The theme's ramp jumps 19.6 L* from base00 to base0 with nothing between,
     -- so these are synthesised on the SAME grey axis (hue 206, C* interpolated)
     -- to land the rung the ramp does not have. They exist because base00 is
-    -- sub-AA and `=` `==` `>` `<` `&&` carry logic -- measured at 1.5% of glyphs
-    -- across the real TS/TSX/Lua stack, 78% of which is `=` alone.
-    -- SELECTED 2026-09-05, and it is the MAXIMIN rung:
-    -- this colour has to stay clear of body text ABOVE it and Comment BELOW it,
-    -- and those two pull in opposite directions, so the best value is the
-    -- crossover where they balance. Measured against body `#b1bebf`, Comment
-    -- `#576d74` and the yellow accent:
+    -- sub-AA and `=` `==` `>` `<` `&&` carry logic.
+    --
+    -- `mid_high` IS THE MAXIMIN RUNG, and since 2026-09-06 it is the value of
+    -- BOTH punctuation roles (`delimiter` and `bracket`). Punctuation has to stay
+    -- clear of body text ABOVE it and Comment BELOW it, and those two pull in
+    -- opposite directions, so the best value is the crossover where they balance:
     --
     --   hex       L*     AA     dE body  dE comment   worst
     --   #798c91  56.9  5.54:1     15.7       12.4      12.4   (`mid`)
     --   #7f9195  58.9  5.93:1     13.8       14.4      13.8   <- SELECTED
     --   #859699  60.9  6.33:1     12.1       16.2      12.1
-    --   #8b9b9e  62.8  6.75:1     10.4       17.9      10.4
+    --   #8b9b9e  62.8  6.75:1     10.4       17.9      10.4   (`brightest`)
     --   #91a0a2  64.8  7.19:1      8.7       19.5       8.7
     --
     -- So "make it brighter to distinguish it better" is FALSE above this rung:
     -- past 58.9 every step buys comment separation by giving up more body
     -- separation, and the worst pair gets worse. Do not rebuild this ladder.
-    mid_high = "#7f9195", -- L* 58.9, 5.93:1, worst separation 13.8
+    --
+    -- THE TWO-RUNG SPLIT WAS TRIED AND DROPPED. From 2026-09-05 to 09-06
+    -- `delimiter` sat one rung above `bracket` (`brightest` over `mid_high`) on
+    -- the argument that operators carry more meaning than brackets. Dropped
+    -- because the gap it bought was dE 3.5, and this palette's own precedent
+    -- (see `base00` above) treats dE 4.7 as the point where two colours already
+    -- read as one. It was paying the delimiter's best body separation (13.8 down
+    -- to 10.4) for a difference nobody can see. The two roles still exist
+    -- separately so a future build can move them apart; they just hold one value.
+    --
+    -- COLOUR WAS TRIED HERE TOO, on 2026-09-06, and lost. Full argument in
+    -- notes/syntax-palette-decisions.md, "2026-09-06: punctuation settles". The
+    -- one-line version: the delimiter role is 10.5% of code ink in TS/TSX and
+    -- 14.6% in Go, the highest dose of anything in this palette, and a sweep of
+    -- every hue at 5-degree steps and chroma 6-45 across L* 50-68 tops out at
+    -- worst-case dE 23.3 against the twelve live colours. The wheel is full.
+    -- Do not reopen this without a new colour to make room with.
+    mid_high = "#7f9195", -- L* 58.9, 5.93:1, worst separation 13.8 -- SELECTED
     mid = "#798c91", -- L* 56.9, 5.54:1 -- one rung down, worst 12.4
     mid_low = "#73878d", -- L* 55.0, 5.18:1 -- most body edge, closest to Comment
     -- Above the maximin, kept only so the table shows the curve turning over.
     brighter = "#859699", -- L* 60.9, worst 12.1
-    brightest = "#8b9b9e", -- L* 62.8, worst 10.4
+    brightest = "#8b9b9e", -- L* 62.8, worst 10.4 -- held `delimiter` for one day
   },
 
   -- Special, Debug, @punctuation.bracket, @variable.builtin, JSX tags and
@@ -463,7 +479,20 @@ return {
   -- `:colorscheme` because `pairs` skipped a nil while restoring -- is closed
   -- for this role only because the default below is a real value rather than
   -- `nil`. Keep it that way.)
-  delimiter = variants.delimiter.brightest,
+  --
+  -- WARN: SILENT FAILURE. This block is a Lua table literal, so writing a role
+  -- key TWICE is not an error -- the last assignment simply wins and the earlier
+  -- line becomes a lie that reordering would activate. It happened here on
+  -- 2026-09-06 with this exact key. After editing a role, check it appears once:
+  --   grep -c "^  delimiter = " lua/colorschemes/solarized-osaka/palette.lua
+  --
+  -- SETTLED 2026-09-06 at `mid_high`, the maximin rung, which `bracket` below
+  -- also holds -- see the ladder in `variants.delimiter` for why one value beat
+  -- two. Verified by measuring the rendered pixels of real Go, TSX, TS and Lua
+  -- screens, not by eye: every operator glyph peaks at exactly this hex, 5.93:1,
+  -- including the thinnest ones (`*` and `.` at 26 lit pixels) and the `==`/`!=`
+  -- ligatures. Nothing here needs retuning.
+  delimiter = variants.delimiter.mid_high,
   -- Body text, raised +7.0 L* on 2026-09-05. The theme's own next rung (base1)
   -- is only +4.6 and measured under the perceptual floor, i.e. invisible. Same
   -- `false`-not-`nil` rule as `delimiter`.
@@ -474,8 +503,12 @@ return {
   -- `Operator` and `@punctuation.delimiter` and were simply never moved with
   -- them. This is what lets a yellow name sit inside neutral punctuation.
   --
-  -- One rung DIMMER than `delimiter` on purpose: a bracket is the most scattered
-  -- glyph on screen (1.20 chars per mark, measured), so it recedes furthest.
+  -- The SAME value as `delimiter` since 2026-09-06. It was one rung dimmer for a
+  -- day, on the argument that a bracket is the most scattered glyph on screen
+  -- (1.20 chars per mark, measured) and should recede furthest. That held right
+  -- up until the gap was measured at dE 3.5, below the threshold this palette
+  -- already treats as invisible. The role stays separate so a build can split
+  -- them again; it just is not worth a rung today.
   --
   -- WARN: SILENT FAILURE. `false`, never `nil` -- see `delimiter` above: a `nil`
   -- here is an absent key, so the override silently never happens.

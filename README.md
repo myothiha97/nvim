@@ -49,7 +49,7 @@ What makes this feel less like vanilla Neovim:
 | 📋 **AI prompt-copy system** | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent — or `<leader>aci` to pick a template / ask freeform interactively. |
 | 📌 **Persistent quickfix curation** | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project. |
 | 🗂️ **Symbols outline** | `<leader>cs` opens an IDE-style structure pane that follows your cursor. |
-| 📂 **One-directory file browser** | `<leader>e` opens a flat, single-directory browser in a dropdown (`nvim <dir>` opens it edge-to-edge): path in the prompt, `h`/`l` to walk, permissions/size/date on `gs`, full CRUD on marked rows. Built on the snacks picker, so it costs nothing until pressed. |
+| 📂 **Edit-the-filesystem file browser** | `<leader>e` opens **oil.nvim** as a centred popup — including on `nvim <dir>` — with the path rendered in the border and a dimmed backdrop behind it. Rename, create and delete by editing the buffer and `:w`. Oil also owns netrw, so `:e <dir>` lands in the same place. |
 | 🔍 **In-buffer git blame** | `<leader>gw` / `<leader>gb` show compact and full blame as floats, without leaving the file. |
 | 📝 **Rendered markdown in-buffer** | `.md` files render inline (headings, code blocks, inline code) with flat no-highlight styling; `<leader>uh` flips the buffer back to raw for editing. Same renderer polishes LSP hover popups and Avante windows. |
 
@@ -61,7 +61,7 @@ What makes this feel less like vanilla Neovim:
 |----------|--------|
 | **Completion** | blink.cmp — LSP · local snippets · path · buffer |
 | **AI** | copilot.lua (inline) + copilot-lsp (NES) + CodeCompanion (inline/agentic/chat) + prompt-copy system |
-| **File nav** | Snacks — picker · explorer (sidebar + browser modes) · dashboard · terminal · oil.nvim (fullscreen) |
+| **File nav** | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar) · dashboard · terminal |
 | **Code nav** | Trouble (symbols outline + quickfix views) · treesitter textobjects |
 | **Git** | gitsigns (hunks) + diffview.nvim + custom blame floats |
 | **Search** | grug-far — project/file search-replace & rename |
@@ -71,7 +71,7 @@ What makes this feel less like vanilla Neovim:
 | **Languages** | TypeScript/React daily driver, Go + Python enabled, DevOps filetypes (YAML · Docker · Terraform · Helm) enabled, Rust lazy/deferred |
 | **Markdown** | render-markdown.nvim — `.md` files · LSP hover popups · Avante (flat, no-highlight) |
 | **UI** | lualine · noice (cmdline only) · fidget · which-key |
-| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-latest` (default: yellow warm side, two-rung grey punctuation, raised body text) · `-custom-v1` (the copper build it replaced, 2026-08-11 to 2026-09-05) · `-custom-v2` (v1 + warm/yellow keyword) · `-custom-v3` (v1 + softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against). `custom-latest` is a moving name; the numbered builds are frozen snapshots. |
+| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-latest` (default: violet keyword, one warm accent, neutral punctuation on a single grey rung, raised body text) · `-custom-v1` (the copper build it replaced, 2026-08-11 to 2026-09-05) · `-custom-v2` (v1 + warm/yellow keyword) · `-custom-v3` (v1 + softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against). `custom-latest` is a moving name; the numbered builds are frozen snapshots. See [Theme](#theme) below. |
 
 ---
 
@@ -110,8 +110,8 @@ language server scan the whole home directory.
 | `<leader>ff` · `<leader>fi` | Find files — root · current dir |
 | `<leader>fp` | Switch project |
 | `<leader>r` | Toggle Snacks explorer (tree sidebar) |
-| `<leader>e` | File browser (one directory at a time, dropdown) |
-| `<leader>E` | Oil file manager (fullscreen) |
+| `<leader>e` | Oil file manager (centred popup; edit the buffer to rename/create/delete) |
+| `<leader>E` | Same as `<leader>e`, kept for muscle memory |
 | `<leader>sl` | Grep within current file |
 | `<leader>sf` · `<leader>sF` | Search & replace — project · current file |
 | `<leader>sr` · `<leader>sR` | Rename word under cursor — file · project |
@@ -243,6 +243,48 @@ rationale, cadence, and escape hatch.
 
 ---
 
+## Theme
+
+`solarized-osaka`, opaque, with one file of `on_highlights` over it. Upstream is
+one command away (`:colorscheme solarized-osaka-original`) so the difference this
+repo makes is always a precise thing rather than a vague one.
+
+The syntax colours are **closed as of 2026-09-06**. Every role was checked twice:
+by hand on real files in all four daily languages — **JSX/TSX, JS/TS, Go and
+Lua** — and programmatically, by measuring the rendered pixels of screenshots of
+those same files rather than judging by eye.
+
+| role | value | L\* | contrast |
+|---|---|---|---|
+| type | `#7dcfff` | 79.7 | 11.36:1 |
+| body / `@variable` | `#b1bebf` | 76.0 | 10.19:1 |
+| names — params, `new X()`, JSX tags, `${}` | `#aea134` | 65.5 | 7.37:1 |
+| string | `#29a298` | 60.4 | 6.23:1 |
+| function | `#1d98cd` | 59.1 | 5.96:1 |
+| punctuation — delimiters and brackets | `#7f9195` | 58.9 | 5.93:1 |
+| keyword | `#a17bcc` | 58.1 | 5.77:1 |
+| comment | `#576d74` | 44.6 | 3.57:1 |
+
+The shape, and the thing to preserve if any single value is ever retuned:
+**three lightness steps ordered by how much the thing means, and one warm accent
+hue rather than two.** Punctuation carries no hue at all — it is the maximin rung
+on the theme's own grey ramp, the crossover where separation from body text above
+and comments below is balanced. Brackets and delimiters share it: a two-rung split
+was tried for a day and measured at dE 3.5, below the threshold this palette
+already treats as invisible.
+
+**No further tweaking is planned or needed.** Three tempting changes — colouring
+the punctuation, splitting brackets from delimiters, and brightening operators so
+`+ - * < > & == !=` "don't disappear" — were each tried and rejected with
+measurements. The reasoning, the rejected candidates and the numbers are in
+[`notes/syntax-palette-decisions.md`](notes/syntax-palette-decisions.md).
+
+Background and panel colours live in `lua/config/ui.lua`, which holds the whole
+ladder of values that were tried along with why each was rejected, so an
+experiment there is one word and nothing gets re-measured.
+
+---
+
 ## Snippets
 
 VSCode JSON format in `snippets/`, served through blink.cmp's built-in snippet
@@ -264,7 +306,8 @@ Current local snippet packs:
 init.lua            bootstrap
 lua/config/         options · keymaps · autocmds · lazy · mouse-hover · ai-prompts
 lua/plugins/        one file per plugin (disabled specs kept for reference)
-lua/colorschemes/   active theme (config.lua) + reference-only alternates
+lua/colorschemes/   active theme (palette.lua = roles, init.lua = groups, variants.lua = builds)
+colors/             one line each — the `:colorscheme` entry points for the builds
 scripts/palette/    measuring tools for the syntax colours (see its README)
 snippets/           VSCode-format snippets
 rules.md            the discipline rules I follow when changing the config

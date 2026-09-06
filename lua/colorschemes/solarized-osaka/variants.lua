@@ -101,16 +101,22 @@ local builds = {
   --     with them grey, 5887 marks at 4.72 chars. Same hex, 73% fewer marks.
   --     This is also what gives a yellow parameter an edge against its own
   --     brackets, which no other build has.
-  --   delimiter  grey `#8b9b9e`, one rung ABOVE bracket. Operators and
-  --     separators carry more than brackets do, so they sit higher.
+  --   delimiter  grey `#7f9195`, the SAME value as bracket since 2026-09-06.
+  --     It spent one day a rung above, on the argument that operators carry more
+  --     than brackets do; the gap measured dE 3.5 and was dropped. Colour was
+  --     tried here too, and lost -- see `variants.delimiter` in palette.lua.
   --   body  `#b1bebf`, +7.0 L*. Fixes "variables look faded": upstream framed
   --     every name in olive punctuation, and moving punctuation to base0 in
   --     2026-08 had put it on the SAME value as `@variable`. Raising the body
   --     and lowering the punctuation restores the edge from both sides.
   --
-  -- The shape to preserve if any of this is retuned: FOUR LIGHTNESS STEPS
-  -- ordered by meaning -- body 76.0, names 65.5, delimiters 62.8, brackets 58.9,
-  -- comments 44.6 -- and ONE warm accent hue, not two.
+  -- The shape to preserve if any of this is retuned: THREE LIGHTNESS STEPS
+  -- ordered by meaning -- body 76.0, names 65.5, punctuation 58.9, comments 44.6
+  -- -- and ONE warm accent hue, not two.
+  --
+  -- CLOSED 2026-09-06. Every value above was verified against rendered pixels of
+  -- real Go, TSX, TS and Lua screens, not judged by eye. Do not reopen this to
+  -- "try something"; see the change gate in neovim-config-change-gate.md.
   ["custom-latest"] = {},
 
   -- The build that ran from 2026-08-11 to 2026-09-05: copper punctuation, body

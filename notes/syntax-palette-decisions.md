@@ -711,6 +711,10 @@ is an accent now. Kept — optionality is information, not structure, and it is
 | brackets — `(` `[` `{` | `#7f9195` | 58.9 | 5.93:1 |
 | comments | `#576d74` | 44.6 | 3.57:1 |
 
+> The delimiter row above was superseded the next day — see
+> [2026-09-06: punctuation settles](#2026-09-06-punctuation-settles-closed) for
+> the value that is actually live.
+
 **Four lightness steps ordered by how much the thing means, and one warm accent
 hue rather than two.** That is the shape to preserve if any single value is
 retuned. Even on markup-heavy TSX the accent makes 1,994 marks at 5.37 chars
@@ -719,3 +723,164 @@ for the previous month.
 
 The known cost: brackets are no longer an accent, so bracket *matching* is by
 shape and indent. `MatchParen` still colours the pair under the cursor.
+
+---
+
+## 2026-09-06: punctuation settles (CLOSED)
+
+**Outcome: `delimiter` and `bracket` both hold `#7f9195` (L\* 58.9, 5.93:1), the
+maximin rung. The palette is finished.** This section is the record of how three
+separate proposals were tested and rejected in one session, so none of them gets
+re-proposed.
+
+### What changed
+
+| role | was (2026-09-05) | is (2026-09-06) |
+| --- | --- | --- |
+| `delimiter` — `= == != > < + - * & . , ; :` | `#8b9b9e` (62.8) | **`#7f9195` (58.9)** |
+| `bracket` — `( ) [ ] { }` | `#7f9195` (58.9) | `#7f9195` (58.9), unchanged |
+| `@tag.delimiter.*` — JSX/HTML `<` `>` `/` | followed `delimiter` | **follows `bracket`** |
+
+Everything else is untouched.
+
+### Proposal 1: colour the delimiters (REJECTED)
+
+The grey read as "faded and dark", so `delimiter` was set to the original
+solarized olive `#849900`. It was live for about an hour and lost on three
+independent measurements.
+
+- **It collides with the yellow punctuation.** dE2000 **9.9** from `#aea134`.
+  Below ~15 two colours read as the same family, which is exactly the "if it's
+  too close with yellow the color can get mixed" report that came back from real
+  use. Confirmed by eye before it was confirmed by number.
+- **It re-couples git-added green.** dE2000 **0.2** from `#859900`, undoing what
+  commit `bdb87f0` decoupled on purpose.
+- **It is the wrong dose for any accent.** Measured on the real repos with
+  comments and string bodies stripped: the delimiter role (`Operator` +
+  `@punctuation.delimiter`) is **10.54% of code ink in 482,879 marks at 1.18
+  chars/mark** across `business-portal-js`, and **14.6% in Go**. That is the
+  highest dose of anything in the palette — higher than the brackets that were
+  sent to grey the day before *for being too scattered to colour* (6.24%).
+- **On this display it is the most saturated thing on screen.** Ghostty tags
+  content display-p3, so authored chroma is not emitted chroma. Olive emits
+  C\* **87.3** where every other accent arrives at 38–52 and the yellow
+  punctuation at 68.4. That is the same rule-3 failure that moved the *keyword*
+  off olive on 2026-08-10, now applied to a role with twice the dose.
+
+**The wheel is full.** A sweep of every hue at 5-degree steps, chroma 6–45, over
+L\* 50–68, scored on worst-case dE2000 against all twelve live colours, tops out
+at **dE 23.3** (a warm tan around hue 50). There is no unoccupied band. Five
+candidates were built as throwaway `delim-*` colorschemes and compared in real
+files before the whole idea was dropped:
+
+| candidate | hex | C\* | hue | dE yellow | dE git green | emits C\* |
+| --- | --- | --- | --- | --- | --- | --- |
+| olive | `#849900` | 67.0 | 111 | 9.9 | 0.2 | 87.3 |
+| sage | `#989b73` | 22.1 | 111 | 13.7 | 15.2 | 24.9 |
+| leaf | `#77a372` | 32.3 | 140 | 19.6 | 16.6 | 38.5 |
+| taupe | `#b29183` | 15.9 | 50 | 24.5 | 30.4 | 19.2 |
+| taupe_warm | `#b98f79` | 21.9 | 54 | 23.4 | 30.3 | 26.3 |
+
+Lowering olive's chroma does not help: hue 111 and hue 98 stay 13 degrees apart
+whatever the chroma, so `sage` is the *worst* of the four on the collision that
+started this.
+
+### Proposal 2: keep the two-rung split (REJECTED)
+
+`delimiter` one rung above `bracket` cost the delimiter its best body separation
+(worst pair **13.8 → 10.4**) and bought a gap of **dE 3.5**. This palette's own
+precedent — the `base00` note in `variants.delimiter` — treats **dE 4.7** as the
+point where two colours already read as one. It was paying a real property for an
+invisible difference.
+
+Collapsing both roles onto `mid_high` is the best score in the whole table:
+
+| delimiter | bracket | gap | worst pair overall |
+| --- | --- | --- | --- |
+| `brightest` | `mid_high` (the split) | 3.5 | **3.5** |
+| `brightest` | `mid_low` | 7.3 | 7.3 |
+| **`mid_high`** | **`mid_high`** | 0.0 | **13.8** |
+| `mid_high` | `mid_low` | 3.8 | 3.8 |
+
+The two roles still exist separately in the palette, so a future build can split
+them again. They just hold one value today.
+
+### Proposal 3: "`mid_high` will hide the math symbols" (DISPROVEN)
+
+The worry was that `+ - / * < >` are thin strokes and would wash out at 5.93:1.
+Measured directly off screenshots of live Go, at native retina resolution:
+
+| token | context | width | lit px | rendered | contrast |
+| --- | --- | --- | --- | --- | --- |
+| `==` | `if port == "" {` | 32px ligature | 222 | `#7f9195` | 5.93:1 |
+| `:=` | `i := 1 + 2` | 6 + 14px | 56 + 96 | `#7f9195` | 5.93:1 |
+| `>` | `if i > 3 {` | 14px | 105 | `#7f9195` | 5.93:1 |
+| `*` | `func(c *gin.Context)` | 6px | **26** | `#7f9195` | 5.93:1 |
+| `&` | `fmt.Println(&s)` | 17px | 208 | `#7f9195` | 5.93:1 |
+| `!=` | `err != nil` | 32px ligature | 284 | `#7f9195` | 5.93:1 |
+| `+` | `":" + port` | 14px | 96 | `#7f9195` | 5.93:1 |
+| `.` | `r.Run` | 6px | 26 | `#7f9195` | 5.93:1 |
+
+Zero variance. **The mechanism, so this is never re-tested:** antialiasing dims a
+glyph's *edges*, never its core. Any stroke at least one device pixel wide keeps a
+fully covered pixel at full colour, and at this font size on retina even a `-` is
+several device pixels thick. Thin glyphs look fainter than letters because fewer
+pixels are lit, not because those pixels are dimmer — and that is equally true at
+every rung, so it is not an argument for or against any particular one.
+
+**A measurement trap this session fell into and climbed back out of:** a
+1920×1080 screenshot of a retina panel is *downscaled*, and downscaling really
+does cost a thin stroke ~4.3 L\* of peak. An early pass measured those captures,
+concluded antialiasing eats 4 L\*, and briefly reasoned from it. Native 3024×1964
+captures show every glyph hitting its exact authored hex. **If you measure
+rendered colour from a screenshot, check the pixel dimensions first.**
+
+### Where the palette actually landed
+
+Rendered contrast on a live Go screen, measured, not authored:
+
+| role | value | L\* | contrast |
+| --- | --- | --- | --- |
+| type | `#7dcfff` | 79.7 | 11.36:1 |
+| body / `@variable` | `#b1bebf` | 76.0 | 10.19:1 |
+| names — params, `new X()`, tags, `${}` | `#aea134` | 65.5 | 7.37:1 |
+| string | `#29a298` | 60.4 | 6.23:1 |
+| function | `#1d98cd` | 59.1 | 5.96:1 |
+| **punctuation — delimiters and brackets** | **`#7f9195`** | **58.9** | **5.93:1** |
+| keyword | `#a17bcc` | 58.1 | 5.77:1 |
+| comment | `#576d74` | 44.6 | 3.57:1 |
+
+Punctuation sits sixth of eight: above the `if`/`for`/`var` violet you read all
+day, well clear of comments. Its worst pair is dE 13.8, against body text.
+
+**Three lightness steps ordered by how much the thing means — body 76.0, names
+65.5, punctuation 58.9, comments 44.6 — and one warm accent hue, not two.** That
+is the shape to preserve if any single value is ever retuned.
+
+### Verified across the whole daily stack
+
+Checked both by eye on real files and by measuring rendered pixels, in
+**JSX/TSX**, **JS/TS**, **Go** and **Lua**. Two language-specific findings, both
+now fixed or accepted:
+
+- **JSX/TSX tag delimiters.** `<`, `>` and `/` around a tag name now follow
+  `bracket` rather than `delimiter`. `<div>` is a name wrapped in punctuation
+  exactly as `foo(bar)` is, so the wrapper belongs on the bracket rung. Routed as
+  `palette.bracket or delimiter`, **not** through the `bracket` local in
+  `init.lua`, because that one falls back to `palette.punctuation` and would drag
+  `custom-v1`/`v2`/`v3` tag delimiters onto copper. Verified: `#7f9195` on the
+  live build, `#9eabac` on `custom-v1`, unchanged.
+- **TS with dense cyan** (a `yup` schema, a `faker` mock builder) is the one place
+  punctuation recedes noticeably, because a C\* 7 grey next to C\* 38–52 cyan is
+  suppressed by chromatic induction. This is a chroma effect, so no rung on the
+  grey ladder fixes it and only colour would — which Proposal 1 above rules out.
+  **Accepted, not a defect.** Go, the primary language, has sparse cyan and does
+  not show it.
+
+### Status: CLOSED. Do not reopen without a new constraint.
+
+Every role in this palette has now been checked both by hand on real files and
+programmatically against rendered pixels. There is no known improvement left on
+the table — the remaining moves are all lateral, and the wheel is full. Further
+tweaking is a time sink, not a gain. If a future session feels the urge, read
+this section and `neovim-config-change-gate.md` first.

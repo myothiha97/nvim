@@ -9,9 +9,15 @@
 > It is kept as the historical record of *why* things were tried, not as a
 > statement of what is set today.
 >
-> **One live item: 8 (`Type` brightness).** It is the only role in the palette
-> not yet optimised, it is not blocking, and it needs a real `.ts` file with a
-> large `import type` block to judge. Review at the 2026-10-20 checkpoint.
+> **NOTHING LIVE. The palette is CLOSED as of 2026-09-06** — see
+> `notes/syntax-palette-decisions.md`, "2026-09-06: punctuation settles". Every
+> role has been checked both by hand on real files and programmatically against
+> rendered pixels, across JSX/TSX, JS/TS, Go and Lua. There is no known
+> improvement left; further tweaking is a time sink.
+>
+> Item 8 (`Type` brightness) is closed with it: `#7dcfff` measures 11.36:1 on a
+> live Go screen and is cleanly separated from every neighbour. It was the last
+> unoptimised role and it needs no change.
 >
 > Closed on 2026-08-11: item 7 (symbolic logical operators off `base0`) and the
 > punctuation rework (terracotta `#b55f4a` → copper `#be6421`, recorded in
@@ -24,6 +30,10 @@
 > for the warm keyword and `-custom-v3` for the softer terracotta punctuation.
 > Both are built on `-custom-v1`, the copper build that `-custom-latest` replaced on
 > 2026-09-05.
+>
+> Closed 2026-09-06: the punctuation rung (`delimiter` and `bracket` collapsed onto
+> `#7f9195`), a coloured-delimiter experiment (rejected on dose and hue collision),
+> and the JSX/HTML tag delimiters (`<` `>` `/` moved to the bracket rung).
 
 **Closed 2026-07-22 as WONTFIX.** A real green/yellow collision was found,
 measured, and a working fix was built and tested on real files — then reverted.

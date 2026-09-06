@@ -256,12 +256,24 @@ return {
       -- The tag DELIMITERS (`<`, `>`, `/`) go neutral, for the same reason
       -- `Operator` does further down: they are punctuation carrying no meaning
       -- worth a hue, and they were 13.0% of the punctuation colour for that.
+      --
+      -- They follow the BRACKET rung rather than the delimiter one: `<div>` is a
+      -- name wrapped in punctuation exactly as `foo(bar)` is, so the wrapper
+      -- recedes one step further than an operator does. Same reasoning that put
+      -- `@punctuation.bracket` a rung below `@punctuation.delimiter`.
+      --
+      -- NOT the `bracket` local above, deliberately. That one falls back to
+      -- `palette.punctuation`, so builds with `bracket = false` (custom-v1/v2/v3,
+      -- where brackets ARE the punctuation accent) would have their tag
+      -- delimiters pulled onto copper, which is not what they rendered. Falling
+      -- back to `delimiter` instead keeps every numbered build byte-identical and
+      -- only moves the builds that set `bracket` to a real value.
       paint({
         "@tag.delimiter.tsx",
         "@tag.delimiter.vue",
         "@tag.delimiter.html",
         "@tag.delimiter.javascript",
-      }, delimiter)
+      }, palette.bracket or delimiter)
 
       -- Generic delimiters go neutral too, 2026-08-10. This closes item 6 of
       -- todos/syntax-palette-followups.md, which had been the live one.

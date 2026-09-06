@@ -114,6 +114,19 @@ The theme writes `Pmenu = { bg = c.base02 }` directly, so overriding `bg_popup` 
 own `on_highlights`. Likewise `bg_statusline` is not the StatusLine/WinBar key.
 *File:* `lua/colorschemes/solarized-osaka/init.lua`
 
+### 15. A DUPLICATE key in a Lua table literal silently keeps the LAST one
+Found live on 2026-09-06 in the palette's return block: an edit meant to change
+`delimiter` left the old line in place *and* added a new one, so the table had two
+`delimiter` keys. Lua does not error on this — the later assignment simply wins.
+The theme rendered the intended colour, so nothing looked wrong, but the file
+claimed two different values and reordering or deleting either line would have
+silently switched the palette.
+
+`luacheck` flags it; `stylua` does not, and neither does loading the file. When a
+role assignment is edited, grep that the key appears **once**:
+`grep -c "^  delimiter = " lua/colorschemes/solarized-osaka/palette.lua`
+*File:* `lua/colorschemes/solarized-osaka/palette.lua`
+
 ## Related
 
 - Structural traps and the parked-plugin rule: repo-root `CLAUDE.md`
