@@ -435,6 +435,10 @@ return {
       -- Re-enable with a custom color (e.g. "#073642") to restore the band.
       hl.CursorLine = { bg = "NONE" }
 
+      -- if u want to change the current line number indicator color , can change here
+      hl.CursorLineNr = {
+        fg = palette.variants.punctuation.explored.copper,
+      }
       -- Dedicated current-row band for Oil only (CursorLine is disabled
       -- globally above). Oil windows remap CursorLine -> OilCursorLine via
       -- winhighlight, so the band returns in Oil without touching buffers.
