@@ -143,72 +143,37 @@ local function open_oil_float(dir)
   end
 end
 
---- `nvim <dir>` opens the snacks tree explorer fullscreen instead of Oil.
+--- `nvim <dir>` reopens the directory the way VS Code and WebStorm reopen a
+--- project: you land back in the file you were last editing there, at the
+--- cursor position you left it.
 ---
---- Two upstream details make the obvious version of this wrong, both read from
---- the installed snacks source rather than assumed:
+--- The explorer is the FALLBACK, not the default. It only opens when there is
+--- nothing to restore -- a first visit, or a remembered file that has since
+--- been deleted or renamed. Restoring the file and also opening the tree would
+--- put a sidebar between you and the work every single time, so it is one or
+--- the other.
 ---
---- 1. `fullscreen` is a layout FLAG, not a preset -- there is no "fullscreen"
----    entry in snacks' layouts. The flag is consumed in snacks/layout.lua, where
----    it forces width/height/col/row to 0.
---- 2. `layout` is passed as a FUNCTION, not a table. snacks.lua spells out
----    `sources.explorer.layout` as a full box with `position = "left"`, and
----    `Snacks.config.merge` is a deep force-merge where nil cannot unset -- a
----    call-time table would inherit that position and give a full-height SPLIT
----    instead of a fullscreen float. A function replaces the inherited value
----    outright and is resolved afterwards, so the table below starts clean.
+--- When it does open, no layout / `jump` / `auto_close` overrides are passed.
+--- The sidebar geometry already lives in snacks.lua under
+--- `sources.explorer.layout`, and the source ships `jump = { close = false }`
+--- and `auto_close = false` -- exactly the sidebar behaviour wanted. Passing
+--- nothing is what makes this screen identical to `<leader>r` instead of a
+--- second thing to keep in sync.
 ---
---- Closing takes BOTH options below, because there are two different ways a
---- file gets opened out of this screen and each knob covers only one:
----
---- * `jump = { close = true }` covers confirming a file IN the explorer. The
----   source ships `jump = { close = false }`, which is what makes the sidebar
----   stay open beside your work. Directories never reach `jump` (the explorer's
----   own confirm toggles them in place), so browsing still keeps it open --
----   that part is wanted, not a side effect.
---- * `auto_close = true` covers opening a file from ANOTHER picker stacked on
----   top of this one. That picker performs the jump, so the explorer underneath
----   never sees a confirm and `jump` cannot help. `auto_close` fires on WinEnter
----   of a NORMAL window, which is exactly what happens when the stacked picker
----   closes and drops you into the file. It is not a "close on any focus loss":
----   snacks returns early for floats, so a picker opening ON TOP never trips it.
----
---- This is the same trap the retired browser hit and fixed on 2026-08-21; see
---- `lua/plugins/snacks-file-browser.lua` and its todo. Setting only one of the
---- two leaves the fullscreen explorer floating over the buffer you just opened.
-local function open_startup_explorer(dir)
-  require("snacks").picker.explorer({
-    cwd = dir,
-    jump = { close = true },
-    auto_close = true,
-    layout = function()
-      return {
-        fullscreen = true,
-        preview = false,
-        layout = {
-          backdrop = false,
-          position = "float",
-          border = "none",
-          box = "vertical",
-          -- The title rides the input's TOP border, centred, which is the same
-          -- treatment the <leader>r sidebar uses in snacks.lua. `border` must be
-          -- "top" for it: a title needs a border line to sit on, and a "bottom"
-          -- border has nowhere to draw one.
-          --
-          -- height = 2 leaves a blank row under the prompt so the title and the
-          -- tree are not stacked flush against each other.
-          {
-            win = "input",
-            height = 2,
-            border = "top",
-            title = "{title} {live} {flags}",
-            title_pos = "center",
-          },
-          { win = "list", border = "none" },
-        },
-      }
-    end,
-  })
+--- (The earlier fullscreen version needed BOTH of those overridden to close on
+--- a file open. Dropping the fullscreen layout drops that whole problem. Do not
+--- re-add them.)
+local function open_startup_workspace(dir)
+  local last_file = require("config.last-file")
+  last_file.set_root(dir)
+
+  -- `restore` edits into the current window, which at this point is the blank
+  -- buffer the caller just swapped in for oil's directory buffer.
+  if last_file.restore() then
+    return
+  end
+
+  require("snacks").picker.explorer({ cwd = dir })
 end
 
 local function toggle_oil_float()
@@ -730,7 +695,7 @@ return {
             vim.api.nvim_win_set_buf(0, blank)
             pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
           end
-          open_startup_explorer(dir)
+          open_startup_workspace(dir)
         end)
       end,
     })

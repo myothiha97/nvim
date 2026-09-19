@@ -21,52 +21,66 @@ works. Oil still owns netrw, so it handles `:e <dir>`.
 Oil opens as a **centred popup** on `<leader>e`. `USE_FLOAT` at the top of the
 file is the one-word switch back to fullscreen-in-the-window.
 
-**`nvim <dir>` is the snacks explorer, not oil (2026-09-19).** The `VimEnter`
-hook still lives in oil's `config` — oil owns netrw, so it is oil that has to
-swap its own directory buffer for a blank `[No Name]` one first — but it then
-opens the **snacks tree explorer fullscreen** instead of the oil popup, so
-closing it lands you on an empty buffer rather than fullscreen oil. The hook is
-no longer gated on `USE_FLOAT`: that switch decides how `<leader>e` presents
-oil, and startup is no longer oil's to present.
+**`nvim <dir>` restores your last file there, not oil (2026-09-19).** It
+reopens a directory the way VS Code and WebStorm reopen a project: you land back
+in the file you were last editing in it, at the cursor position you left.
 
-The hook is in `oil.lua` deliberately. snacks.nvim already has exactly one
-`init` (`lua/plugins/snacks.lua`), and a second snacks fragment defining one
-would silently kill it — see the one-`init`-per-plugin rule below.
+**The explorer is the FALLBACK, not the default.** The `<leader>r` tree sidebar
+opens only when there is nothing to restore — a first visit, or a remembered
+file since deleted or renamed. Restoring the file *and* opening the tree would
+wedge a sidebar between you and the work on every start, so it is one or the
+other.
 
-Three upstream details that the obvious implementation gets wrong, all read from
-the installed snacks source rather than assumed:
+The `VimEnter` hook still lives in oil's `config` — oil owns netrw, so it is oil
+that has to swap its own directory buffer for a blank `[No Name]` one first. It
+is in `oil.lua` deliberately: snacks.nvim already has exactly one `init`
+(`lua/plugins/snacks.lua`), and a second snacks fragment defining one would
+silently kill it — see the one-`init`-per-plugin rule below. The hook is no
+longer gated on `USE_FLOAT`: that switch decides how `<leader>e` presents oil,
+and startup is no longer oil's to present.
 
-- **`fullscreen` is a layout flag, not a preset.** There is no `fullscreen`
-  entry in snacks' layouts; the flag is consumed in `snacks/layout.lua`, which
-  forces `width`/`height`/`col`/`row` to 0.
-- **Closing needs BOTH `jump = { close = true }` and `auto_close = true`.**
-  They cover different routes and neither is sufficient alone:
-  - `jump.close` covers confirming a file **in** the explorer. The source ships
-    `jump = { close = false }`, which is what keeps the `<leader>r` sidebar open
-    beside your work. Directories never reach `jump` (the explorer's own
-    `confirm` toggles them in place), so browsing keeps it open — wanted, not a
-    compromise.
-  - `auto_close` covers a file opened from **another picker stacked on top**.
-    That picker performs the jump, so the explorer never sees a confirm and
-    `jump` cannot help. `auto_close` fires on `WinEnter` of a **normal** window,
-    which is what happens when the stacked picker closes into the file. It is
-    not "close on any focus loss": snacks returns early for floats, so a picker
-    opening on top never trips it.
+**Nothing about `<leader>r` is overridden for this.** The call passes only
+`cwd`; no layout, no `jump`, no `auto_close`. Geometry comes from
+`sources.explorer.layout` in `snacks.lua`, and the source's own
+`jump = { close = false }` / `auto_close = false` are exactly the wanted sidebar
+behaviour. Passing nothing is what keeps this screen identical to `<leader>r`
+rather than a second thing to keep in sync. `cwd` is needed only because
+`nvim <dir>` does not chdir into `<dir>`.
 
-  Shipping only `jump.close` left the fullscreen explorer floating over the file
-  (reported 2026-09-19). This is the same trap the retired browser hit and fixed
-  on 2026-08-21 — see `snacks-file-browser.lua` and its todo. Oil cannot be
-  opened over the startup explorer at all: the picker owns its keymaps there, so
-  `<leader>e` is inert and that route does not exist.
-- **The layout is passed as a FUNCTION, not a table.** `snacks.lua` spells out
-  `sources.explorer.layout` with `position = "left"`, and `Snacks.config.merge`
-  is a deep force-merge where `nil` cannot unset — a call-time table inherits
-  that position and gives a full-height split instead of a fullscreen float. A
-  function replaces the inherited value outright.
+Persistence is `lua/config/last-file.lua`, saved from a `VimLeavePre` autocmd in
+`config/autocmds.lua`. It stores one JSON file per project root under
+`stdpath("state")`, keyed by the root's sha256 — the same scheme as
+`config/quickfix-persistence.lua`. Measured: `read()` 0.13 ms, `save()` 4.7 ms
+once on exit. Neither is on an interactive path. It is **not** a session
+manager: one file, no window layout, so persistence.nvim stays disabled and
+there is no session state to go stale.
 
-The fullscreen title rides the input's **top** border (`title_pos = "center"`),
-matching the `<leader>r` sidebar. It must be `border = "top"`: a title needs a
-border line to sit on, and a `"bottom"` border has nowhere to draw one.
+Two traps it already guards:
+
+- The root cannot be the cwd. `nvim <dir>` does not chdir, so two projects
+  opened from the same shell would collide on one record. The hook calls
+  `set_root(dir)`; everything else falls back to cwd.
+- Only ordinary named on-disk buffers are recorded. Quitting from the explorer,
+  the dashboard or a terminal must leave the previous record alone rather than
+  overwrite it with something unopenable.
+
+### Earlier shape, reverted the same day
+
+`nvim <dir>` first opened the explorer **fullscreen**, which needed two
+overrides to close itself on a file open, and both were needed:
+
+- `jump = { close = true }` for confirming a file in the explorer.
+- `auto_close = true` for a file opened from another picker stacked on top —
+  that picker performs the jump, so the explorer never sees a confirm.
+
+All of that is gone with the fullscreen layout. **Do not re-add either option to
+the startup call**; they would break the sidebar's stay-open behaviour, which is
+the whole point of the `<leader>r` version. Two upstream facts worth keeping,
+both read from the snacks source rather than assumed: `fullscreen` is a layout
+*flag*, not a preset (consumed in `snacks/layout.lua`), and a call-time `layout`
+table deep-merges over `sources.explorer.layout`, inheriting its
+`position = "left"` — `Snacks.config.merge` cannot unset with `nil`, so only a
+`layout` **function** replaces it outright.
 
 The snacks browser that held `<leader>e` from 2026-08-21 is **retired, not
 deleted**: `lua/plugins/snacks-file-browser.lua` with `ENABLED = false`. It was

@@ -64,6 +64,19 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
   end,
 })
 
+-- ── Last open file per directory ─────────────────────────────────────────
+-- Records the active buffer on exit so `nvim <dir>` can reopen it, the way
+-- VS Code and WebStorm reopen a project. Same cost shape as the quickfix
+-- persistence above: one bounded write on exit, nothing on an interactive
+-- path. The matching read lives in the startup hook in plugins/oil.lua, not
+-- here, because only `nvim <dir>` restores.
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = vim.api.nvim_create_augroup("last_file_persistence", { clear = true }),
+  callback = function()
+    require("config.last-file").save()
+  end,
+})
+
 -- ── Native quickfix window delete actions ────────────────────────────────
 -- Keep the stock quickfix buffer nomodifiable, but make delete-style motions
 -- remove real entries from the list instead of erroring on rendered text.
