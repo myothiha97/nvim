@@ -40,7 +40,12 @@ installed snacks source rather than assumed:
 - `auto_close` does not close a picker on confirm. It only fires on `WinEnter` of
   another window (`picker/core/picker.lua:285-312`). The explorer stays open on
   file open because its source sets `jump = { close = false }`
-  (`picker/config/sources.lua:64`).
+  (`picker/config/sources.lua:64`). **Correction, same day:** shipping only
+  `jump = { close = true }` was not enough. A file opened from a picker stacked
+  on top is jumped by THAT picker, so the explorer never sees a confirm and kept
+  floating over the buffer. `auto_close = true` is the second half, and the
+  retired browser had already found and fixed exactly this on 2026-08-21 -- its
+  note was read during this session and still under-weighted.
 - `fullscreen` is a layout *flag*, not a preset (`snacks/layout.lua:243-248`).
   And because `snacks.lua:327-376` spells out the explorer layout box with
   `position = "left"`, a call-time table merge inherits that position and yields

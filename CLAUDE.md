@@ -39,12 +39,25 @@ the installed snacks source rather than assumed:
 - **`fullscreen` is a layout flag, not a preset.** There is no `fullscreen`
   entry in snacks' layouts; the flag is consumed in `snacks/layout.lua`, which
   forces `width`/`height`/`col`/`row` to 0.
-- **`auto_close` does NOT close a picker on confirm.** It only fires on
-  `WinEnter` of another window. The explorer survives a file open because its
-  source sets `jump = { close = false }`; `jump = { close = true }` is the one
-  line that makes a file close it. Directories never reach `jump` (the
-  explorer's own `confirm` toggles them in place), so browsing keeps it open —
-  which is the wanted behaviour, not a compromise.
+- **Closing needs BOTH `jump = { close = true }` and `auto_close = true`.**
+  They cover different routes and neither is sufficient alone:
+  - `jump.close` covers confirming a file **in** the explorer. The source ships
+    `jump = { close = false }`, which is what keeps the `<leader>r` sidebar open
+    beside your work. Directories never reach `jump` (the explorer's own
+    `confirm` toggles them in place), so browsing keeps it open — wanted, not a
+    compromise.
+  - `auto_close` covers a file opened from **another picker stacked on top**.
+    That picker performs the jump, so the explorer never sees a confirm and
+    `jump` cannot help. `auto_close` fires on `WinEnter` of a **normal** window,
+    which is what happens when the stacked picker closes into the file. It is
+    not "close on any focus loss": snacks returns early for floats, so a picker
+    opening on top never trips it.
+
+  Shipping only `jump.close` left the fullscreen explorer floating over the file
+  (reported 2026-09-19). This is the same trap the retired browser hit and fixed
+  on 2026-08-21 — see `snacks-file-browser.lua` and its todo. Oil cannot be
+  opened over the startup explorer at all: the picker owns its keymaps there, so
+  `<leader>e` is inert and that route does not exist.
 - **The layout is passed as a FUNCTION, not a table.** `snacks.lua` spells out
   `sources.explorer.layout` with `position = "left"`, and `Snacks.config.merge`
   is a deep force-merge where `nil` cannot unset — a call-time table inherits
