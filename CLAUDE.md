@@ -153,7 +153,7 @@ and [`todos/snacks-explorer-as-file-browser.md`](todos/snacks-explorer-as-file-b
 ## Dashboard (2026-09-19)
 
 Bare `nvim` shows the snacks dashboard; only `nvim <dir>` opens the explorer.
-`preset.header` is plain text (`Welcome, Myothiha!`), overriding LazyVim's
+`preset.header` is plain text (`Welcome, Myo Thiha!`), overriding LazyVim's
 six-line LAZYVIM ASCII block — this config is only *based* on LazyVim, so the
 generic banner was wrong, and the art was the widest thing on screen while
 saying nothing.

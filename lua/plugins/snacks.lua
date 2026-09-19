@@ -198,7 +198,7 @@ return {
         -- and plain text is deliberate: the ASCII art was the widest thing on
         -- the screen and said nothing. Still the one place to edit the wording:
         -- the greeting section below reads it off `self.opts`.
-        header = "Welcome, Myothiha!",
+        header = "Welcome, Myo Thiha!",
       },
       -- Both lines are emitted as FUNCTION sections rather than the built-in
       -- `{ section = "header" }`, for two reasons:
