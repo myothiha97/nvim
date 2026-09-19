@@ -183,10 +183,12 @@ for two reasons:
 `preset.header` is still the single place to edit the wording; the greeting
 section reads it off `self.opts`.
 
-**The spacing is deliberate.** No blank line between the greeting and the path —
-they are one unit (who you are, where you are) — and a single blank before the
-keys. Under the built-in `padding = 2` the path sat closer to the action list
-than to the greeting and read as a heading for the menu.
+**The spacing ratio is the point**: 1 blank line inside the greeting/path pair,
+2 before the keys. They are one unit (who you are, where you are), so the gap
+separating them must be smaller than the gap to the action list. The built-in
+`sections.header` ships the inverse (`padding = 2` above a 1-blank gap), which
+made the path read as a heading for the menu. Running them flush (`0` / `1`) was
+tried on 2026-09-19 and was too tight.
 
 ## Syntax palette: yellow warm side, retuned 2026-09-09
 

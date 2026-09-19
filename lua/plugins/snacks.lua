@@ -211,10 +211,13 @@ return {
       --    later `:lua Snacks.dashboard()`. A `%s`-formatted `preset` string is
       --    frozen at whatever the spec file held at load time.
       --
-      -- Spacing is deliberate: the greeting and the path are ONE unit (who you
-      -- are, where you are), so no blank line between them, and a single blank
-      -- before the keys. With the old `padding = 2` the path sat closer to the
-      -- action list than to the greeting and read as a heading for the menu.
+      -- Spacing is deliberate and the RATIO is the point: 1 blank line inside
+      -- the greeting/path pair, 2 before the keys. They are one unit (who you
+      -- are, where you are), so the gap that separates them must be smaller
+      -- than the gap to the action list. The built-in `sections.header` ships
+      -- the inverse (`padding = 2` above a 1-blank gap), which made the path
+      -- read as a heading for the menu instead. Running them flush (`0` / `1`)
+      -- was tried on 2026-09-19 and was too tight.
       --
       -- `indent = 2` is what makes both start at the same column as "Find File".
       -- The keys section reserves a 2-cell icon column on every row, and neither
@@ -225,7 +228,7 @@ return {
           return {
             align = "left",
             indent = 2,
-            padding = 0,
+            padding = 1,
             text = { { self.opts.preset.header, hl = "header" } },
           }
         end,
@@ -236,7 +239,7 @@ return {
           return {
             align = "left",
             indent = 2,
-            padding = 1,
+            padding = 2,
             text = { { vim.fn.fnamemodify(vim.fn.getcwd(), ":~"), hl = "dir" } },
           }
         end,
