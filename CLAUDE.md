@@ -145,11 +145,19 @@ six-line LAZYVIM ASCII block — this config is only *based* on LazyVim, so the
 generic banner was wrong, and the art was the widest thing on screen while
 saying nothing.
 
-The block is anchored left by `col = 6` (0-indexed). Leaving `col` nil makes
-snacks centre the panes in the window, which on a wide Neovide window parks the
-key list in the middle of the screen. `formats.header` and `formats.footer` are
-restated as `align = "left"` for the same reason — both ship centred, and would
-otherwise float off the left edge the keys establish.
+The block stays **centred**: `col` is deliberately unset, because nil is what
+tells snacks to centre the panes in the window. Anchoring the whole pane left
+with `col = 6` was tried on 2026-09-19 and reverted — only the greeting and the
+cwd line were meant to move, not the pane. Do not reintroduce `col` to align
+those two lines.
+
+What aligns them is `align = "left"` plus `indent = 2`, on the header section
+spec and on the cwd item. The `indent` is the non-obvious half: the keys section
+reserves a 2-cell icon column on every row, and neither of these lines has an
+icon, so left-aligning alone leaves them two cells left of every label beneath
+them. `D:resolve` passes `indent` down from a section spec to the items it
+generates, which is why it can sit on the `{ section = "header" }` entry instead
+of inside the preset. `formats.footer` keeps its centred default.
 
 `sections` restates snacks' own default list (header, keys, startup) to slot a
 cwd line in after the header. That line has to be a **function** section
