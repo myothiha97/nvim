@@ -112,15 +112,18 @@ two retired browsers:
 - **The theme is OPAQUE now (2026-09-04), which is the precondition for
   everything below.** `transparent = false` lives in
   `lua/colorschemes/solarized-osaka/init.lua`; the background itself is
-  `bg = #031219` in `lua/config/ui.lua`, which `on_colors` reads. That hex is
-  Ghostty's own `background` setting, so the editor and the terminal are the same
-  colour by construction, not by a matching pick. (At `background-opacity = 0.9`
-  Ghostty composites it to `#031116` over a dark desktop, which is what the
-  pre-opaque screenshots measured. `#031116` is a `candidates` entry named
-  `greyed_light`, NOT the live value.) The editor no longer depends on the
-  terminal, and Ghostty's opacity and blur now reach only the window padding.
-  The `candidates` ladder in `ui.lua` was explored and then abandoned in favour
-  of the Ghostty value, so `bg` points outside that list on purpose. **`transparent` must be an explicit `false` —
+  `bg = candidates.teal_light` (**#001014**) at `lua/config/ui.lua:76`, which
+  `on_colors` reads. **That is the background, confirmed 2026-09-19.** Read it
+  at runtime from `Normal`'s bg, never by quoting a hex here.
+
+  `reference.ghostty_background` (#031219) is Ghostty's own `background`
+  setting. It *was* live for a while, and both this file and `ui.lua`'s own
+  header went on claiming so after `bg` moved to the `candidates` ladder — so
+  **treat any note quoting #031219 as the background as stale**, including the
+  measurement annotations in `palette.lua`, which were taken against it.
+
+  The editor no longer depends on the terminal, and Ghostty's opacity and blur
+  reach only the window padding. **`transparent` must be an explicit `false` —
   the plugin's own default is `true`, so commenting the line out re-enables it.**
 - **The oil popup backdrop is ON, and with an opaque background it is a real
   dim.** `USE_BACKDROP = true` in `oil.lua`, strength in `BACKDROP_BLEND`. The old

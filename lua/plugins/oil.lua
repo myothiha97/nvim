@@ -607,7 +607,7 @@ local function set_oil_highlights()
   --
   -- The whole group, foreground AND background. Taking only the fg was tried on
   -- 2026-09-19 and the ring vanished: SnacksPickerBorder's fg is #063540, which
-  -- against this float's NormalFloat (#031219) is too dark to see. What makes
+  -- against this float's NormalFloat (#001014) is too dark to see. What makes
   -- the picker's frame legible is its BACKGROUND (#001014) sitting darker than
   -- the surround -- the coloured line alone is not the effect. Do not "fix" the
   -- background difference; it is the separation.
