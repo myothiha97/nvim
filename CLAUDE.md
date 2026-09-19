@@ -151,19 +151,29 @@ with `col = 6` was tried on 2026-09-19 and reverted — only the greeting and th
 cwd line were meant to move, not the pane. Do not reintroduce `col` to align
 those two lines.
 
-What aligns them is `align = "left"` plus `indent = 2`, on the header section
-spec and on the cwd item. The `indent` is the non-obvious half: the keys section
-reserves a 2-cell icon column on every row, and neither of these lines has an
-icon, so left-aligning alone leaves them two cells left of every label beneath
-them. `D:resolve` passes `indent` down from a section spec to the items it
-generates, which is why it can sit on the `{ section = "header" }` entry instead
-of inside the preset. `formats.footer` keeps its centred default.
+What aligns them is `align = "left"` plus `indent = 2`. The `indent` is the
+non-obvious half: the keys section reserves a 2-cell icon column on every row,
+and neither of these lines has an icon, so left-aligning alone leaves them two
+cells left of every label beneath them.
 
-`sections` restates snacks' own default list (header, keys, startup) to slot a
-cwd line in after the header. That line has to be a **function** section
-(`snacks.dashboard.Gen`, re-run per render); `preset.header` cannot carry it,
-because `sections.header` renders that string through a `%s` format and so
-freezes whatever the spec file held at load time.
+Both lines are **function sections**, not the built-in `{ section = "header" }`,
+for two reasons:
+
+- `sections.header` hardcodes `padding = 2`, and a `padding` on the section spec
+  does **not** override it — `D:resolve` only passes `indent`, `align` and
+  `pane` down to generated items. Owning the item is the only way to control the
+  gap.
+- The cwd must re-read per render so it follows a `:cd` on a later
+  `:lua Snacks.dashboard()`. A `%s`-formatted `preset` string is frozen at
+  whatever the spec file held at load time.
+
+`preset.header` is still the single place to edit the wording; the greeting
+section reads it off `self.opts`.
+
+**The spacing is deliberate.** No blank line between the greeting and the path —
+they are one unit (who you are, where you are) — and a single blank before the
+keys. Under the built-in `padding = 2` the path sat closer to the action list
+than to the greeting and read as a heading for the menu.
 
 ## Syntax palette: yellow warm side, retuned 2026-09-09
 
