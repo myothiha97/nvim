@@ -187,18 +187,17 @@ return {
     explorer = { enabled = true, replace_netrw = false },
     dashboard = {
       enabled = true,
-      -- Anchor the whole block near the left edge. `col` is 0-indexed and
-      -- defaults to nil, which snacks reads as "centre the panes in the
-      -- window" -- on a wide Neovide window that parked the key list in the
-      -- middle of the screen, far from where the eye starts.
-      col = 6,
-      -- `header` and `footer` ship as `align = "center"`, which would centre
-      -- them inside the 60-column pane and leave them hanging off the left
-      -- edge the keys establish. Only these two are restated; every other
-      -- format keeps its default.
+      -- `col` is deliberately NOT set: nil leaves snacks centring the block in
+      -- the window, which is where it belongs. Anchoring the whole thing to the
+      -- left edge was tried on 2026-09-19 and reverted -- only the greeting and
+      -- the cwd line were meant to move, not the pane.
+      --
+      -- `header` ships as `align = "center"`, which centres it inside the
+      -- 60-column pane and leaves it floating above the key list rather than
+      -- starting where the keys do. Left-aligning it is half the fix; the
+      -- `indent` below is the other half. `footer` keeps its centred default.
       formats = {
         header = { "%s", align = "left" },
-        footer = { "%s", align = "left" },
       },
       preset = {
         -- Overrides LazyVim's six-line LAZYVIM block (lazyvim/plugins/ui.lua).
@@ -215,14 +214,22 @@ return {
       -- section written as a FUNCTION is a `snacks.dashboard.Gen` and re-runs
       -- per render -- so the path still follows a `:cd` on a later `:lua
       -- Snacks.dashboard()`.
+      -- `indent = 2` on both lines is what makes them start at the same column
+      -- as "Find File" rather than at the pane edge. The keys section reserves
+      -- a 2-cell icon column on the left of every row, and neither of these
+      -- lines has an icon, so without the indent they sit two cells further
+      -- left than every label under them. `D:resolve` passes `indent` down from
+      -- a section spec to the items it generates, which is why it can be set on
+      -- the `header` entry rather than inside the preset.
       sections = {
-        { section = "header" },
+        { section = "header", indent = 2 },
         function()
           -- `:~` keeps $HOME as `~`; `hl = "dir"` resolves to SnacksDashboardDir,
           -- which snacks links to NonText, so the path reads dimmer than the
           -- greeting instead of competing with it.
           return {
             align = "left",
+            indent = 2,
             padding = 1,
             text = { { vim.fn.fnamemodify(vim.fn.getcwd(), ":~"), hl = "dir" } },
           }
