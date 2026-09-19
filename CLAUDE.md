@@ -16,13 +16,57 @@
 
 `<leader>e` is **oil.nvim**, in `lua/plugins/oil.lua`. `<leader>E` is the same
 command, kept so the muscle memory from the months oil spent on that key still
-works. Oil also owns netrw, so it handles `:e <dir>` and `nvim <dir>`.
+works. Oil still owns netrw, so it handles `:e <dir>`.
 
-Oil opens as a **centred popup** in every case, including startup. `USE_FLOAT`
-at the top of the file is the one-word switch back to fullscreen-in-the-window.
-On `nvim <dir>` a `VimEnter` hook swaps oil's directory buffer for a blank
-`[No Name]` one and opens the popup over it, so closing the popup lands you on an
-empty buffer instead of fullscreen oil.
+Oil opens as a **centred popup** on `<leader>e`. `USE_FLOAT` at the top of the
+file is the one-word switch back to fullscreen-in-the-window.
+
+**`nvim <dir>` is the snacks explorer, not oil (2026-09-19).** The `VimEnter`
+hook still lives in oil's `config` — oil owns netrw, so it is oil that has to
+swap its own directory buffer for a blank `[No Name]` one first — but it then
+opens the **snacks tree explorer fullscreen** instead of the oil popup, so
+closing it lands you on an empty buffer rather than fullscreen oil. The hook is
+no longer gated on `USE_FLOAT`: that switch decides how `<leader>e` presents
+oil, and startup is no longer oil's to present.
+
+The hook is in `oil.lua` deliberately. snacks.nvim already has exactly one
+`init` (`lua/plugins/snacks.lua`), and a second snacks fragment defining one
+would silently kill it — see the one-`init`-per-plugin rule below.
+
+Three upstream details that the obvious implementation gets wrong, all read from
+the installed snacks source rather than assumed:
+
+- **`fullscreen` is a layout flag, not a preset.** There is no `fullscreen`
+  entry in snacks' layouts; the flag is consumed in `snacks/layout.lua`, which
+  forces `width`/`height`/`col`/`row` to 0.
+- **`auto_close` does NOT close a picker on confirm.** It only fires on
+  `WinEnter` of another window. The explorer survives a file open because its
+  source sets `jump = { close = false }`; `jump = { close = true }` is the one
+  line that makes a file close it. Directories never reach `jump` (the
+  explorer's own `confirm` toggles them in place), so browsing keeps it open —
+  which is the wanted behaviour, not a compromise.
+- **The layout is passed as a FUNCTION, not a table.** `snacks.lua` spells out
+  `sources.explorer.layout` with `position = "left"`, and `Snacks.config.merge`
+  is a deep force-merge where `nil` cannot unset — a call-time table inherits
+  that position and gives a full-height split instead of a fullscreen float. A
+  function replaces the inherited value outright.
+
+The fullscreen title rides the input's **top** border (`title_pos = "center"`),
+matching the `<leader>r` sidebar. It must be `border = "top"`: a title needs a
+border line to sit on, and a `"bottom"` border has nowhere to draw one.
+
+## Dashboard (2026-09-19)
+
+Bare `nvim` shows the snacks dashboard; only `nvim <dir>` opens the explorer.
+`preset.header` is plain text (`Welcome`), overriding LazyVim's six-line LAZYVIM
+ASCII block — this config is only *based* on LazyVim, so the generic banner was
+wrong, and the art was the widest thing on screen while saying nothing.
+
+`sections` restates snacks' own default list (header, keys, startup) to slot a
+cwd line in after the header. That line has to be a **function** section
+(`snacks.dashboard.Gen`, re-run per render); `preset.header` cannot carry it,
+because `sections.header` renders that string through a `%s` format and so
+freezes whatever the spec file held at load time.
 
 The snacks browser that held `<leader>e` from 2026-08-21 is **retired, not
 deleted**: `lua/plugins/snacks-file-browser.lua` with `ENABLED = false`. It was

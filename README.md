@@ -49,7 +49,8 @@ What makes this feel less like vanilla Neovim:
 | 📋 **AI prompt-copy system** | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent — or `<leader>aci` to pick a template / ask freeform interactively. |
 | 📌 **Persistent quickfix curation** | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project. |
 | 🗂️ **Symbols outline** | `<leader>cs` opens an IDE-style structure pane that follows your cursor. |
-| 📂 **Edit-the-filesystem file browser** | `<leader>e` opens **oil.nvim** as a centred popup — including on `nvim <dir>` — with the path rendered in the border and a dimmed backdrop behind it. Rename, create and delete by editing the buffer and `:w`. Oil also owns netrw, so `:e <dir>` lands in the same place. |
+| 📂 **Edit-the-filesystem file browser** | `<leader>e` opens **oil.nvim** as a centred popup, with the path rendered in the border and a dimmed backdrop behind it. Rename, create and delete by editing the buffer and `:w`. Oil owns netrw, so `:e <dir>` lands in the same place. |
+| 🚀 **Startup screen** | Bare `nvim` shows the dashboard (plain `Welcome` header plus the current folder). `nvim <dir>` opens the **Snacks tree explorer fullscreen**, which closes as soon as you open a file; entering a directory keeps it open. |
 | 🔍 **In-buffer git blame** | `<leader>gw` / `<leader>gb` show compact and full blame as floats, without leaving the file. |
 | 📝 **Rendered markdown in-buffer** | `.md` files render inline (headings, code blocks, inline code) with flat no-highlight styling; `<leader>uh` flips the buffer back to raw for editing. Tables render in body text, spell check is off, and `<leader>ui` opens a browser preview. Same renderer polishes LSP hover popups. |
 
@@ -61,7 +62,7 @@ What makes this feel less like vanilla Neovim:
 |----------|--------|
 | **Completion** | blink.cmp — LSP · local snippets · path · buffer |
 | **AI** | CodeCompanion (inline/agentic/chat, chat on `codex`) + prompt-copy system · copilot.lua + copilot-lsp `enabled = false` |
-| **File nav** | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar) · dashboard · terminal |
+| **File nav** | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar, fullscreen on `nvim <dir>`) · dashboard · terminal |
 | **Code nav** | Trouble (symbols outline + quickfix views) · treesitter textobjects |
 | **Git** | gitsigns (hunks) + diffview.nvim + custom blame floats |
 | **Search** | grug-far — project/file search-replace & rename |
