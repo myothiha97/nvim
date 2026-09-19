@@ -192,37 +192,43 @@ return {
       -- left edge was tried on 2026-09-19 and reverted -- only the greeting and
       -- the cwd line were meant to move, not the pane.
       --
-      -- `header` ships as `align = "center"`, which centres it inside the
-      -- 60-column pane and leaves it floating above the key list rather than
-      -- starting where the keys do. Left-aligning it is half the fix; the
-      -- `indent` below is the other half. `footer` keeps its centred default.
-      formats = {
-        header = { "%s", align = "left" },
-      },
       preset = {
         -- Overrides LazyVim's six-line LAZYVIM block (lazyvim/plugins/ui.lua).
         -- This config is only based on LazyVim, so the generic banner is wrong,
         -- and plain text is deliberate: the ASCII art was the widest thing on
-        -- the screen and said nothing. Leading newline keeps the gap the art
-        -- used to provide above the key list.
-        header = "\nWelcome, Myothiha!",
+        -- the screen and said nothing. Still the one place to edit the wording:
+        -- the greeting section below reads it off `self.opts`.
+        header = "Welcome, Myothiha!",
       },
-      -- Restates snacks' own default section list (header, keys, startup) to
-      -- slot the cwd line in after the header. A plain `preset.header` cannot
-      -- carry it: `sections.header` renders that string through a `%s` format,
-      -- so it is fixed at whatever the spec file held at load time, while a
-      -- section written as a FUNCTION is a `snacks.dashboard.Gen` and re-runs
-      -- per render -- so the path still follows a `:cd` on a later `:lua
-      -- Snacks.dashboard()`.
-      -- `indent = 2` on both lines is what makes them start at the same column
-      -- as "Find File" rather than at the pane edge. The keys section reserves
-      -- a 2-cell icon column on the left of every row, and neither of these
-      -- lines has an icon, so without the indent they sit two cells further
-      -- left than every label under them. `D:resolve` passes `indent` down from
-      -- a section spec to the items it generates, which is why it can be set on
-      -- the `header` entry rather than inside the preset.
+      -- Both lines are emitted as FUNCTION sections rather than the built-in
+      -- `{ section = "header" }`, for two reasons:
+      --
+      -- 1. `sections.header` hardcodes `padding = 2`, and a `padding` on the
+      --    section spec does NOT override it -- `D:resolve` only passes
+      --    `indent`, `align` and `pane` down to generated items. Owning the
+      --    item is the only way to control the gap.
+      -- 2. The cwd has to re-read on every render so it follows a `:cd` on a
+      --    later `:lua Snacks.dashboard()`. A `%s`-formatted `preset` string is
+      --    frozen at whatever the spec file held at load time.
+      --
+      -- Spacing is deliberate: the greeting and the path are ONE unit (who you
+      -- are, where you are), so no blank line between them, and a single blank
+      -- before the keys. With the old `padding = 2` the path sat closer to the
+      -- action list than to the greeting and read as a heading for the menu.
+      --
+      -- `indent = 2` is what makes both start at the same column as "Find File".
+      -- The keys section reserves a 2-cell icon column on every row, and neither
+      -- of these lines has an icon, so left alignment alone leaves them two
+      -- cells further left than every label beneath them.
       sections = {
-        { section = "header", indent = 2 },
+        function(self)
+          return {
+            align = "left",
+            indent = 2,
+            padding = 0,
+            text = { { self.opts.preset.header, hl = "header" } },
+          }
+        end,
         function()
           -- `:~` keeps $HOME as `~`; `hl = "dir"` resolves to SnacksDashboardDir,
           -- which snacks links to NonText, so the path reads dimmer than the
