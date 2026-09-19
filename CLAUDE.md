@@ -21,53 +21,79 @@ works. Oil still owns netrw, so it handles `:e <dir>`.
 Oil opens as a **centred popup** on `<leader>e`. `USE_FLOAT` at the top of the
 file is the one-word switch back to fullscreen-in-the-window.
 
-**`nvim <dir>` opens the `<leader>r` tree sidebar over a blank buffer, not oil
-(2026-09-19).** That is the whole behaviour: sidebar left, empty buffer right.
+**`nvim <dir>` opens the same box as `<leader>e`, in the same position
+(2026-09-19).** It is `open_float` with the config's own `max_width` /
+`max_height`, so geometry, path label, indent and the blank winbar row all come
+from one place and the two modes cannot drift. Verified identical: both land on
+the same screen rows and columns in a 100x26 pane.
 
-The `VimEnter` hook still lives in oil's `config` — oil owns netrw, so it is oil
-that has to swap its own directory buffer for a blank `[No Name]` one first.
-Without that swap, closing the sidebar would drop you into fullscreen oil rather
-than an empty editor. It is in `oil.lua` deliberately: snacks.nvim already has
-exactly one `init` (`lua/plugins/snacks.lua`), and a second snacks fragment
-defining one would silently kill it — see the one-`init`-per-plugin rule below.
-The hook is no longer gated on `USE_FLOAT`: that switch decides how `<leader>e`
-presents oil, and startup is no longer oil's to present.
+The `VimEnter` hook lives in oil's `config` — oil owns netrw, so it is oil that
+swaps its own directory buffer for a blank `[No Name]` one first. It is in
+`oil.lua` deliberately: snacks.nvim already has exactly one `init`
+(`lua/plugins/snacks.lua`), and a second snacks fragment defining one would
+silently kill it. The hook is no longer gated on `USE_FLOAT`.
 
-**Nothing about `<leader>r` is overridden.** The call passes only `cwd`; no
-layout, no `jump`, no `auto_close`. Geometry comes from
-`sources.explorer.layout` in `snacks.lua`, and the source's own
-`jump = { close = false }` / `auto_close = false` are exactly the wanted sidebar
-behaviour. Passing nothing is what keeps this screen the same object as
-`<leader>r` rather than a second thing to keep in sync. `cwd` is needed only
-because `nvim <dir>` does not chdir into `<dir>`.
+Three things differ from `<leader>e`, all because this is the screen you land on
+rather than a panel over your work:
 
-The blank buffer is `nvim_create_buf(true, false)` — listed, unnamed, ordinary
-`buftype`. Neovim reuses an empty unnamed unmodified buffer on the first
-`:edit`, so it does not accumulate: after opening one file, `:ls` shows that
-file alone. Measured, not assumed.
+- **No backdrop.** Only a blank buffer sits behind it, so a dim would darken
+  nothing.
+- **A visible ring** (`OilStartupBorder`), a LINK to `SnacksPickerBorder` so
+  every framed panel wears the same border and it tracks the picker rather than
+  freezing a hex. `<leader>e` keeps its invisible border, because there the
+  backdrop does the separating.
 
-### Two shapes tried and dropped the same day
+  **Link the WHOLE group, fg and bg.** Taking only the foreground was tried on
+  2026-09-19 and the ring vanished: `SnacksPickerBorder`'s fg is `#063540`,
+  which against this float's `NormalFloat` (`#031219`) is too dark to see. What
+  makes the picker's frame legible is its *background* (`#001014`) sitting
+  darker than the surround. That background difference is the separation — do
+  not "fix" it.
 
-Both are recorded because each looks like an obvious improvement and neither is:
+  **WARN: SILENT FAILURE — the ring must be re-painted, not set once.** Oil
+  applies its own `win_options` (including the invisible border) from a
+  `BufEnter` autocmd *and* from `nvim_buf_call(bufnr, set_win_options)` during
+  its render, so a set right after `open_float` is overwritten with nothing
+  logged. It is painted from `FileType oil`, scheduled onto the next tick so it
+  lands after oil's render, and re-fires on every directory change. `BufEnter`
+  was tried first and never even captured the window: oil sets `filetype`
+  *during* render, so at the first `BufEnter` the buffer is still untyped.
+  Verified by reading `winhighlight` back out of the live window.
+- **The window behind is blanked** (`number`, `relativenumber`, `signcolumn`)
+  while the box is up. Without it the empty buffer's gutter prints a `1` beside
+  the box, and that one digit is what made the screen read as "a popup over an
+  empty page". Restored on `WinClosed` — these are WINDOW options and outlive
+  the blank buffer, so leaving them off would give the first file opened there
+  no line numbers.
 
-1. **Fullscreen explorer.** Needed `jump = { close = true }` *and*
+**WARN: SILENT FAILURE — blank the window AFTER the float exists, never before.**
+A new window inherits window-local options from the current one, so blanking
+first hands `number = false` / `signcolumn = "no"` to the box as well. Measured
+2026-09-19: the box rendered as `╭probedir` with the icons flush to the border,
+losing the entry numbers *and* the left indent the path label aligns against.
+Nothing errors.
+
+### Four shapes tried and dropped the same day
+
+Each looks like an obvious improvement and none survived contact:
+
+1. **Snacks explorer fullscreen.** Needed `jump = { close = true }` *and*
    `auto_close = true` to get out of its own way — the first for confirming a
-   file in the explorer, the second for a file opened from another picker
-   stacked on top, which performs the jump itself so the explorer never sees a
-   confirm. **Do not re-add either option to the startup call**: with the
-   sidebar they would break its stay-open behaviour, which is the point.
-2. **Restoring the last file edited in the directory** (VS Code / WebStorm
+   file in the explorer, the second for a file opened from a picker stacked on
+   top, which performs the jump itself so the explorer never sees a confirm.
+2. **Snacks explorer as a left sidebar.** It takes a fixed 25% with a
+   `min_width = 40` floor, and in a split tmux pane that floor stops scaling and
+   squeezes the editor to nothing. Fullscreen has no split to divide.
+3. **Restoring the last file edited in the directory** (VS Code / WebStorm
    style), via a per-root JSON record under `stdpath("state")`. Built, measured
-   (`read()` 0.13 ms, `save()` 4.7 ms on exit — neither on an interactive path)
-   and removed by preference, not because of cost. The startup screen is the
-   sidebar and an empty buffer.
-
-Two upstream facts worth keeping from that work, both read from the snacks
-source rather than assumed: `fullscreen` is a layout *flag*, not a preset
-(consumed in `snacks/layout.lua`), and a call-time `layout` table deep-merges
-over `sources.explorer.layout` and inherits its `position = "left"` —
-`Snacks.config.merge` cannot unset with `nil`, so only a `layout` **function**
-replaces it outright.
+   (`read()` 0.13 ms, `save()` 4.7 ms on exit) and removed by preference, not
+   cost.
+4. **Drawing the box by hand into a fullscreen Oil buffer.** Rejected on
+   analysis: oil maps buffer LINES to directory entries and diffs them on `:w`
+   to perform renames and deletes, so border characters cannot be real text. The
+   extmark substitute also hits a documented wall — Nvim does not draw
+   `virt_lines_above` on line 1 — and the side edges are per-line, so they
+   cannot reach below the last entry. A float already is a box.
 
 The snacks browser that held `<leader>e` from 2026-08-21 is **retired, not
 deleted**: `lua/plugins/snacks-file-browser.lua` with `ENABLED = false`. It was

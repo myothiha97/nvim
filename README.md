@@ -50,7 +50,7 @@ What makes this feel less like vanilla Neovim:
 | 📌 **Persistent quickfix curation** | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project. |
 | 🗂️ **Symbols outline** | `<leader>cs` opens an IDE-style structure pane that follows your cursor. |
 | 📂 **Edit-the-filesystem file browser** | `<leader>e` opens **oil.nvim** as a centred popup, with the path rendered in the border and a dimmed backdrop behind it. Rename, create and delete by editing the buffer and `:w`. Oil owns netrw, so `:e <dir>` lands in the same place. |
-| 🚀 **Startup screen** | Bare `nvim` shows the dashboard (plain `Welcome, Myo Thiha!` header plus the current folder, both aligned with the action list). `nvim <dir>` opens the **Snacks tree sidebar** (`<leader>r`, unchanged) over an empty buffer. |
+| 🚀 **Startup screen** | Bare `nvim` shows the dashboard (plain `Welcome, Myo Thiha!` header plus the current folder, both aligned with the action list). `nvim <dir>` opens **oil.nvim** in the same box and position as `<leader>e`, with a visible border matched to the Snacks picker and the gutter behind it blanked so it reads as a screen rather than a popup. |
 | 🔍 **In-buffer git blame** | `<leader>gw` / `<leader>gb` show compact and full blame as floats, without leaving the file. |
 | 📝 **Rendered markdown in-buffer** | `.md` files render inline (headings, code blocks, inline code) with flat no-highlight styling; `<leader>uh` flips the buffer back to raw for editing. Tables render in body text, spell check is off, and `<leader>ui` opens a browser preview. Same renderer polishes LSP hover popups. |
 

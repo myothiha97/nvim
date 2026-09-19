@@ -95,3 +95,28 @@ back.
 `nvim <dir>` now does exactly one thing: open the `<leader>r` tree sidebar over
 a blank buffer. Three startup shapes were built and two discarded in one
 evening, which is the clearest measure of what this override actually cost.
+
+## Third scope change: the startup box
+
+Final-final shape: `nvim <dir>` opens the SAME oil float as `<leader>e`, same
+position, with a visible ring linked to `SnacksPickerBorder` and the gutter of
+the window behind it blanked while it is up.
+
+Four startup shapes were built and discarded before this one (snacks fullscreen,
+snacks sidebar, last-file restore, fullscreen oil float), and a fifth —
+hand-drawing the box into a real oil buffer — was rejected on analysis. That is
+five designs in one evening, inside a freeze, for a screen that was never
+broken. The gate fired once, at the very start.
+
+Two silent failures were found only because the result was read back out of the
+live session rather than trusted:
+
+1. Blanking the backing window BEFORE opening the float leaked
+   `number = false` / `signcolumn = "no"` into the box by window-option
+   inheritance, dropping the entry numbers and the path label's indent.
+2. Setting the border `winhighlight` once after `open_float` never stuck; oil
+   rewrites it during render. `BufEnter` could not even capture the window,
+   because oil sets `filetype` during that same render.
+
+Both are the class the config's own notes warn about: a change that looks
+applied and renders nothing.
