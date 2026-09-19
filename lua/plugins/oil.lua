@@ -29,6 +29,30 @@ local USE_FLOAT = true
 -- first, and the failure has since been designed out.
 local USE_BACKDROP = true
 
+-- Give the `<leader>e` popup the SAME visible ring as the startup box.
+--
+-- OFF. Trialled 2026-09-19 against the invisible border and turned back off by
+-- preference after comparing both on screen. The code stays because the trial
+-- was real and the reasoning is worth keeping, not because it is expected back.
+--
+-- What the ring buys, if it is ever reconsidered: `on_colors` points
+-- `NormalFloat` at `config.ui.bg`, so the popup's background is IDENTICAL to the
+-- editor's -- with no ring the panel has no edge of its own and its boundary is
+-- carried entirely by where the backdrop dim stops. That carrier has failed
+-- before (the dim rendered as a solid black sheet for months under
+-- transparency), so a ring is a second, independent cue.
+--
+-- It costs nothing at the edge: `SnacksPickerBorder`'s background (#001014) is
+-- the SAME as `NormalFloat`, so the link paints only the fg line, no band. (An
+-- earlier note here claimed the two backgrounds differed; they do not --
+-- measured 2026-09-19, `Normal`, `NormalFloat` and `config.ui.bg` are all
+-- #001014.)
+--
+-- The startup box is UNAFFECTED by this switch. It has no backdrop, so the ring
+-- is the only thing framing it and is always on, via its own
+-- `OilStartupBorder` group.
+local POPUP_VISIBLE_BORDER = false
+
 -- The dim, in one place. `BACKDROP_BLEND` is the strength: 0 hides the editor
 -- completely, 100 shows no dim at all.
 local BACKDROP_COLOR = "#000000"
@@ -560,8 +584,17 @@ local function set_oil_highlights()
   end
   vim.api.nvim_set_hl(0, "OilPathSeparator", { link = "NonText", default = true })
 
-  local bg = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false }).bg
-  vim.api.nvim_set_hl(0, "OilFloatBorder", bg and { fg = bg, bg = bg } or { link = "FloatBorder" })
+  -- THE POPUP'S BORDER IS INVISIBLE: same fg as bg, so the ring disappears while
+  -- the border still exists. It has to still exist, because Nvim renders a window
+  -- title on the border and there is nowhere else to put the path label. What
+  -- separates the popup from the buffer underneath is the backdrop dim, not a
+  -- ring. See POPUP_VISIBLE_BORDER above for the trial that did not stick.
+  if POPUP_VISIBLE_BORDER and vim.api.nvim_get_hl(0, { name = "SnacksPickerBorder", link = false }).fg then
+    vim.api.nvim_set_hl(0, "OilFloatBorder", { link = "SnacksPickerBorder" })
+  else
+    local bg = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false }).bg
+    vim.api.nvim_set_hl(0, "OilFloatBorder", bg and { fg = bg, bg = bg } or { link = "FloatBorder" })
+  end
 
   -- The STARTUP float's ring, and the one place the two modes look different.
   -- <leader>e hides its border (above) because the backdrop dim is what separates

@@ -43,12 +43,15 @@ rather than a panel over your work:
   freezing a hex. `<leader>e` keeps its invisible border, because there the
   backdrop does the separating.
 
-  **Link the WHOLE group, fg and bg.** Taking only the foreground was tried on
-  2026-09-19 and the ring vanished: `SnacksPickerBorder`'s fg is `#063540`,
-  which against this float's `NormalFloat` (`#031219`) is too dark to see. What
-  makes the picker's frame legible is its *background* (`#001014`) sitting
-  darker than the surround. That background difference is the separation — do
-  not "fix" it.
+  Linked as a whole group rather than copying the fg. It makes no visual
+  difference — `SnacksPickerBorder`'s background is `#001014`, the same as
+  `NormalFloat`, so only the fg line is painted either way — but a link tracks
+  the picker for free.
+
+  A fg-only version was briefly blamed for the ring not appearing on
+  2026-09-19. That was wrong: the ring was missing because the `winhighlight`
+  never applied (see below), not because of any colour. `Normal`,
+  `NormalFloat` and `config.ui.bg` all measure `#001014`.
 
   **WARN: SILENT FAILURE — the ring must be re-painted, not set once.** Oil
   applies its own `win_options` (including the invisible border) from a
