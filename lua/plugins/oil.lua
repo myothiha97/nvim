@@ -143,6 +143,60 @@ local function open_oil_float(dir)
   end
 end
 
+--- `nvim <dir>` opens the snacks tree explorer fullscreen instead of Oil.
+---
+--- Two upstream details make the obvious version of this wrong, both read from
+--- the installed snacks source rather than assumed:
+---
+--- 1. `fullscreen` is a layout FLAG, not a preset -- there is no "fullscreen"
+---    entry in snacks' layouts. The flag is consumed in snacks/layout.lua, where
+---    it forces width/height/col/row to 0.
+--- 2. `layout` is passed as a FUNCTION, not a table. snacks.lua spells out
+---    `sources.explorer.layout` as a full box with `position = "left"`, and
+---    `Snacks.config.merge` is a deep force-merge where nil cannot unset -- a
+---    call-time table would inherit that position and give a full-height SPLIT
+---    instead of a fullscreen float. A function replaces the inherited value
+---    outright and is resolved afterwards, so the table below starts clean.
+---
+--- `jump = { close = true }` is what closes it when a file is opened. NOT
+--- `auto_close`, which only fires on WinEnter of another window: the explorer
+--- survives a file open because its source sets `jump = { close = false }`.
+--- Directories never reach `jump` (the explorer's own confirm toggles them
+--- in place), so browsing still keeps it open, which is the behaviour wanted.
+local function open_startup_explorer(dir)
+  require("snacks").picker.explorer({
+    cwd = dir,
+    jump = { close = true },
+    layout = function()
+      return {
+        fullscreen = true,
+        preview = false,
+        layout = {
+          backdrop = false,
+          position = "float",
+          border = "none",
+          box = "vertical",
+          -- The title rides the input's TOP border, centred, which is the same
+          -- treatment the <leader>r sidebar uses in snacks.lua. `border` must be
+          -- "top" for it: a title needs a border line to sit on, and a "bottom"
+          -- border has nowhere to draw one.
+          --
+          -- height = 2 leaves a blank row under the prompt so the title and the
+          -- tree are not stacked flush against each other.
+          {
+            win = "input",
+            height = 2,
+            border = "top",
+            title = "{title} {live} {flags}",
+            title_pos = "center",
+          },
+          { win = "list", border = "none" },
+        },
+      }
+    end,
+  })
+end
+
 local function toggle_oil_float()
   local open, win = is_oil_float_open()
   if open then
@@ -617,47 +671,55 @@ return {
     set_oil_highlights()
     vim.api.nvim_create_autocmd("ColorScheme", { callback = set_oil_highlights })
 
-    -- `nvim <dir>` opens the popup over a blank buffer.
+    -- `nvim <dir>` opens the SNACKS tree explorer fullscreen over a blank buffer.
+    --
+    -- The hook lives here, in oil's own `config`, on purpose. snacks.nvim already
+    -- has exactly one `init` (lua/plugins/snacks.lua) and CLAUDE.md allows only
+    -- one `init`/`config`/`opts` per plugin across all spec files -- a second
+    -- snacks fragment defining `init` for this would silently kill that one and
+    -- take every custom highlight group with it. Oil still owns netrw, so it is
+    -- oil that has to clean up after itself here regardless of who opens.
     --
     -- Oil owns netrw, so by VimEnter it has already claimed the directory
     -- buffer and put itself in the window fullscreen. Left alone that sits
-    -- behind the popup, and closing the popup would drop you into fullscreen
-    -- Oil instead of an empty editor -- so the directory buffer is swapped for
-    -- a blank listed one first.
+    -- behind the explorer, and closing the explorer would drop you into
+    -- fullscreen Oil instead of an empty editor -- so the directory buffer is
+    -- swapped for a blank listed one first.
+    --
+    -- NOT gated on USE_FLOAT any more: that switch decides how `<leader>e`
+    -- presents Oil, and startup is no longer Oil's to present.
     --
     -- Only the plain single-directory start is claimed. File arguments, stdin
     -- and `:restart`'s session restore are left alone (init.lua already clears
     -- the arglist for the restart case, so argc is 0 there and this never runs).
-    if USE_FLOAT then
-      vim.api.nvim_create_autocmd("VimEnter", {
-        once = true,
-        callback = function()
-          if vim.fn.argc() ~= 1 then
-            return
+    vim.api.nvim_create_autocmd("VimEnter", {
+      once = true,
+      callback = function()
+        if vim.fn.argc() ~= 1 then
+          return
+        end
+        local target = vim.fn.argv(0)
+        if type(target) ~= "string" then
+          return
+        end
+        -- Oil has already rewritten the arglist entry to `oil:///path/`;
+        -- without stripping the scheme the directory check below fails.
+        target = (target:gsub("^oil://", ""))
+        if vim.fn.isdirectory(target) ~= 1 then
+          return
+        end
+        local dir = vim.fn.fnamemodify(target, ":p")
+        vim.schedule(function()
+          local dir_buf = vim.api.nvim_get_current_buf()
+          if vim.bo[dir_buf].filetype == "oil" then
+            local blank = vim.api.nvim_create_buf(true, false)
+            vim.api.nvim_win_set_buf(0, blank)
+            pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
           end
-          local target = vim.fn.argv(0)
-          if type(target) ~= "string" then
-            return
-          end
-          -- Oil has already rewritten the arglist entry to `oil:///path/`;
-          -- without stripping the scheme the directory check below fails.
-          target = (target:gsub("^oil://", ""))
-          if vim.fn.isdirectory(target) ~= 1 then
-            return
-          end
-          local dir = vim.fn.fnamemodify(target, ":p")
-          vim.schedule(function()
-            local dir_buf = vim.api.nvim_get_current_buf()
-            if vim.bo[dir_buf].filetype == "oil" then
-              local blank = vim.api.nvim_create_buf(true, false)
-              vim.api.nvim_win_set_buf(0, blank)
-              pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
-            end
-            open_oil_float(dir)
-          end)
-        end,
-      })
-    end
+          open_startup_explorer(dir)
+        end)
+      end,
+    })
 
     vim.api.nvim_create_autocmd("FileType", {
       pattern = "oil",
