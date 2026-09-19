@@ -187,13 +187,26 @@ return {
     explorer = { enabled = true, replace_netrw = false },
     dashboard = {
       enabled = true,
+      -- Anchor the whole block near the left edge. `col` is 0-indexed and
+      -- defaults to nil, which snacks reads as "centre the panes in the
+      -- window" -- on a wide Neovide window that parked the key list in the
+      -- middle of the screen, far from where the eye starts.
+      col = 6,
+      -- `header` and `footer` ship as `align = "center"`, which would centre
+      -- them inside the 60-column pane and leave them hanging off the left
+      -- edge the keys establish. Only these two are restated; every other
+      -- format keeps its default.
+      formats = {
+        header = { "%s", align = "left" },
+        footer = { "%s", align = "left" },
+      },
       preset = {
         -- Overrides LazyVim's six-line LAZYVIM block (lazyvim/plugins/ui.lua).
         -- This config is only based on LazyVim, so the generic banner is wrong,
         -- and plain text is deliberate: the ASCII art was the widest thing on
         -- the screen and said nothing. Leading newline keeps the gap the art
         -- used to provide above the key list.
-        header = "\nWelcome",
+        header = "\nWelcome, Myothiha!",
       },
       -- Restates snacks' own default section list (header, keys, startup) to
       -- slot the cwd line in after the header. A plain `preset.header` cannot
@@ -209,7 +222,7 @@ return {
           -- which snacks links to NonText, so the path reads dimmer than the
           -- greeting instead of competing with it.
           return {
-            align = "center",
+            align = "left",
             padding = 1,
             text = { { vim.fn.fnamemodify(vim.fn.getcwd(), ":~"), hl = "dir" } },
           }
