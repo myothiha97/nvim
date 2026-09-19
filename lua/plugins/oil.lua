@@ -158,15 +158,29 @@ end
 ---    instead of a fullscreen float. A function replaces the inherited value
 ---    outright and is resolved afterwards, so the table below starts clean.
 ---
---- `jump = { close = true }` is what closes it when a file is opened. NOT
---- `auto_close`, which only fires on WinEnter of another window: the explorer
---- survives a file open because its source sets `jump = { close = false }`.
---- Directories never reach `jump` (the explorer's own confirm toggles them
---- in place), so browsing still keeps it open, which is the behaviour wanted.
+--- Closing takes BOTH options below, because there are two different ways a
+--- file gets opened out of this screen and each knob covers only one:
+---
+--- * `jump = { close = true }` covers confirming a file IN the explorer. The
+---   source ships `jump = { close = false }`, which is what makes the sidebar
+---   stay open beside your work. Directories never reach `jump` (the explorer's
+---   own confirm toggles them in place), so browsing still keeps it open --
+---   that part is wanted, not a side effect.
+--- * `auto_close = true` covers opening a file from ANOTHER picker stacked on
+---   top of this one. That picker performs the jump, so the explorer underneath
+---   never sees a confirm and `jump` cannot help. `auto_close` fires on WinEnter
+---   of a NORMAL window, which is exactly what happens when the stacked picker
+---   closes and drops you into the file. It is not a "close on any focus loss":
+---   snacks returns early for floats, so a picker opening ON TOP never trips it.
+---
+--- This is the same trap the retired browser hit and fixed on 2026-08-21; see
+--- `lua/plugins/snacks-file-browser.lua` and its todo. Setting only one of the
+--- two leaves the fullscreen explorer floating over the buffer you just opened.
 local function open_startup_explorer(dir)
   require("snacks").picker.explorer({
     cwd = dir,
     jump = { close = true },
+    auto_close = true,
     layout = function()
       return {
         fullscreen = true,
