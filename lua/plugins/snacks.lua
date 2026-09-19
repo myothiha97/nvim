@@ -182,10 +182,42 @@ return {
   end,
   opts = {
     -- Enabled for the <leader>r tree sidebar, but it must not claim directory
-    -- buffers: oil.nvim owns netrw and is the file explorer, on <leader>e and
-    -- on `nvim <dir>` (lua/plugins/oil.lua).
+    -- buffers: oil.nvim owns netrw and is the file explorer on <leader>e, and
+    -- the snacks explorer itself takes `nvim <dir>` (lua/plugins/oil.lua).
     explorer = { enabled = true, replace_netrw = false },
-    dashboard = { enabled = true },
+    dashboard = {
+      enabled = true,
+      preset = {
+        -- Overrides LazyVim's six-line LAZYVIM block (lazyvim/plugins/ui.lua).
+        -- This config is only based on LazyVim, so the generic banner is wrong,
+        -- and plain text is deliberate: the ASCII art was the widest thing on
+        -- the screen and said nothing. Leading newline keeps the gap the art
+        -- used to provide above the key list.
+        header = "\nWelcome",
+      },
+      -- Restates snacks' own default section list (header, keys, startup) to
+      -- slot the cwd line in after the header. A plain `preset.header` cannot
+      -- carry it: `sections.header` renders that string through a `%s` format,
+      -- so it is fixed at whatever the spec file held at load time, while a
+      -- section written as a FUNCTION is a `snacks.dashboard.Gen` and re-runs
+      -- per render -- so the path still follows a `:cd` on a later `:lua
+      -- Snacks.dashboard()`.
+      sections = {
+        { section = "header" },
+        function()
+          -- `:~` keeps $HOME as `~`; `hl = "dir"` resolves to SnacksDashboardDir,
+          -- which snacks links to NonText, so the path reads dimmer than the
+          -- greeting instead of competing with it.
+          return {
+            align = "center",
+            padding = 1,
+            text = { { vim.fn.fnamemodify(vim.fn.getcwd(), ":~"), hl = "dir" } },
+          }
+        end,
+        { section = "keys", gap = 1, padding = 1 },
+        { section = "startup" },
+      },
+    },
     scroll = { enabled = false },
     animate = { enabled = false },
     words = { enabled = false }, -- CursorMoved buffer-wide search on every j/k
