@@ -55,6 +55,7 @@ is what requires an override to leave a trace here.
 | --- | --- | --- |
 | [`syntax-palette-followups.md`](theme/syntax-palette-followups.md) | the numbered palette items and their verdicts. Items 2, 6, 7 done; 3 dropped; 4, 5, 8 closed. Item 8 is the one `custom-latest` acts on | mostly closed |
 | [`solarized-osaka-upstream-update.md`](theme/solarized-osaka-upstream-update.md) | upstream advertised a large refactor ending at `0df74ef`; our lock is `f675d9a`. Deferred to the checkpoint — do not update during the freeze unless the theme is broken | open |
+| [`lazy-border-match-snacks-picker.md`](theme/lazy-border-match-snacks-picker.md) | the `:Lazy` float is the one framed panel not wearing the snacks picker ring. lazy.nvim never remaps `FloatBorder`. Link the whole group, fg alone is invisible | open |
 
 Live colour values and the reasoning behind them are **not** here. See
 [`../notes/palette-reference.md`](../notes/palette-reference.md) (lean) and
