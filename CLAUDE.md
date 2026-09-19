@@ -16,13 +16,87 @@
 
 `<leader>e` is **oil.nvim**, in `lua/plugins/oil.lua`. `<leader>E` is the same
 command, kept so the muscle memory from the months oil spent on that key still
-works. Oil also owns netrw, so it handles `:e <dir>` and `nvim <dir>`.
+works. Oil still owns netrw, so it handles `:e <dir>`.
 
-Oil opens as a **centred popup** in every case, including startup. `USE_FLOAT`
-at the top of the file is the one-word switch back to fullscreen-in-the-window.
-On `nvim <dir>` a `VimEnter` hook swaps oil's directory buffer for a blank
-`[No Name]` one and opens the popup over it, so closing the popup lands you on an
-empty buffer instead of fullscreen oil.
+Oil opens as a **centred popup** on `<leader>e`. `USE_FLOAT` at the top of the
+file is the one-word switch back to fullscreen-in-the-window.
+
+**`nvim <dir>` opens the same box as `<leader>e`, in the same position
+(2026-09-19).** It is `open_float` with the config's own `max_width` /
+`max_height`, so geometry, path label, indent and the blank winbar row all come
+from one place and the two modes cannot drift. Verified identical: both land on
+the same screen rows and columns in a 100x26 pane.
+
+The `VimEnter` hook lives in oil's `config` — oil owns netrw, so it is oil that
+swaps its own directory buffer for a blank `[No Name]` one first. It is in
+`oil.lua` deliberately: snacks.nvim already has exactly one `init`
+(`lua/plugins/snacks.lua`), and a second snacks fragment defining one would
+silently kill it. The hook is no longer gated on `USE_FLOAT`.
+
+Three things differ from `<leader>e`, all because this is the screen you land on
+rather than a panel over your work:
+
+- **No backdrop.** Only a blank buffer sits behind it, so a dim would darken
+  nothing.
+- **A visible ring** (`OilStartupBorder`), a LINK to `SnacksPickerBorder` so
+  every framed panel wears the same border and it tracks the picker rather than
+  freezing a hex. `<leader>e` keeps its invisible border, because there the
+  backdrop does the separating.
+
+  Linked as a whole group rather than copying the fg. It makes no visual
+  difference — `SnacksPickerBorder`'s background is `#001014`, the same as
+  `NormalFloat`, so only the fg line is painted either way — but a link tracks
+  the picker for free.
+
+  A fg-only version was briefly blamed for the ring not appearing on
+  2026-09-19. That was wrong: the ring was missing because the `winhighlight`
+  never applied (see below), not because of any colour. `Normal`,
+  `NormalFloat` and `config.ui.bg` all measure `#001014`.
+
+  **WARN: SILENT FAILURE — the ring must be re-painted, not set once.** Oil
+  applies its own `win_options` (including the invisible border) from a
+  `BufEnter` autocmd *and* from `nvim_buf_call(bufnr, set_win_options)` during
+  its render, so a set right after `open_float` is overwritten with nothing
+  logged. It is painted from `FileType oil`, scheduled onto the next tick so it
+  lands after oil's render, and re-fires on every directory change. `BufEnter`
+  was tried first and never even captured the window: oil sets `filetype`
+  *during* render, so at the first `BufEnter` the buffer is still untyped.
+  Verified by reading `winhighlight` back out of the live window.
+- **The window behind is blanked** (`number`, `relativenumber`, `signcolumn`)
+  while the box is up. Without it the empty buffer's gutter prints a `1` beside
+  the box, and that one digit is what made the screen read as "a popup over an
+  empty page". Restored on `WinClosed` — these are WINDOW options and outlive
+  the blank buffer, so leaving them off would give the first file opened there
+  no line numbers.
+
+**WARN: SILENT FAILURE — blank the window AFTER the float exists, never before.**
+A new window inherits window-local options from the current one, so blanking
+first hands `number = false` / `signcolumn = "no"` to the box as well. Measured
+2026-09-19: the box rendered as `╭probedir` with the icons flush to the border,
+losing the entry numbers *and* the left indent the path label aligns against.
+Nothing errors.
+
+### Four shapes tried and dropped the same day
+
+Each looks like an obvious improvement and none survived contact:
+
+1. **Snacks explorer fullscreen.** Needed `jump = { close = true }` *and*
+   `auto_close = true` to get out of its own way — the first for confirming a
+   file in the explorer, the second for a file opened from a picker stacked on
+   top, which performs the jump itself so the explorer never sees a confirm.
+2. **Snacks explorer as a left sidebar.** It takes a fixed 25% with a
+   `min_width = 40` floor, and in a split tmux pane that floor stops scaling and
+   squeezes the editor to nothing. Fullscreen has no split to divide.
+3. **Restoring the last file edited in the directory** (VS Code / WebStorm
+   style), via a per-root JSON record under `stdpath("state")`. Built, measured
+   (`read()` 0.13 ms, `save()` 4.7 ms on exit) and removed by preference, not
+   cost.
+4. **Drawing the box by hand into a fullscreen Oil buffer.** Rejected on
+   analysis: oil maps buffer LINES to directory entries and diffs them on `:w`
+   to perform renames and deletes, so border characters cannot be real text. The
+   extmark substitute also hits a documented wall — Nvim does not draw
+   `virt_lines_above` on line 1 — and the side edges are per-line, so they
+   cannot reach below the last entry. A float already is a box.
 
 The snacks browser that held `<leader>e` from 2026-08-21 is **retired, not
 deleted**: `lua/plugins/snacks-file-browser.lua` with `ENABLED = false`. It was
@@ -38,15 +112,18 @@ two retired browsers:
 - **The theme is OPAQUE now (2026-09-04), which is the precondition for
   everything below.** `transparent = false` lives in
   `lua/colorschemes/solarized-osaka/init.lua`; the background itself is
-  `bg = #031219` in `lua/config/ui.lua`, which `on_colors` reads. That hex is
-  Ghostty's own `background` setting, so the editor and the terminal are the same
-  colour by construction, not by a matching pick. (At `background-opacity = 0.9`
-  Ghostty composites it to `#031116` over a dark desktop, which is what the
-  pre-opaque screenshots measured. `#031116` is a `candidates` entry named
-  `greyed_light`, NOT the live value.) The editor no longer depends on the
-  terminal, and Ghostty's opacity and blur now reach only the window padding.
-  The `candidates` ladder in `ui.lua` was explored and then abandoned in favour
-  of the Ghostty value, so `bg` points outside that list on purpose. **`transparent` must be an explicit `false` —
+  `bg = candidates.teal_light` (**#001014**) at `lua/config/ui.lua:76`, which
+  `on_colors` reads. **That is the background, confirmed 2026-09-19.** Read it
+  at runtime from `Normal`'s bg, never by quoting a hex here.
+
+  `reference.ghostty_background` (#031219) is Ghostty's own `background`
+  setting. It *was* live for a while, and both this file and `ui.lua`'s own
+  header went on claiming so after `bg` moved to the `candidates` ladder — so
+  **treat any note quoting #031219 as the background as stale**, including the
+  measurement annotations in `palette.lua`, which were taken against it.
+
+  The editor no longer depends on the terminal, and Ghostty's opacity and blur
+  reach only the window padding. **`transparent` must be an explicit `false` —
   the plugin's own default is `true`, so commenting the line out re-enables it.**
 - **The oil popup backdrop is ON, and with an opaque background it is a real
   dim.** `USE_BACKDROP = true` in `oil.lua`, strength in `BACKDROP_BLEND`. The old
@@ -105,6 +182,46 @@ two retired browsers:
 Full reasoning, measurements and the rejected alternatives:
 [`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md)
 and [`todos/snacks-explorer-as-file-browser.md`](todos/snacks-explorer-as-file-browser.md).
+
+## Dashboard (2026-09-19)
+
+Bare `nvim` shows the snacks dashboard; only `nvim <dir>` opens the explorer.
+`preset.header` is plain text (`Welcome, Myo Thiha!`), overriding LazyVim's
+six-line LAZYVIM ASCII block — this config is only *based* on LazyVim, so the
+generic banner was wrong, and the art was the widest thing on screen while
+saying nothing.
+
+The block stays **centred**: `col` is deliberately unset, because nil is what
+tells snacks to centre the panes in the window. Anchoring the whole pane left
+with `col = 6` was tried on 2026-09-19 and reverted — only the greeting and the
+cwd line were meant to move, not the pane. Do not reintroduce `col` to align
+those two lines.
+
+What aligns them is `align = "left"` plus `indent = 2`. The `indent` is the
+non-obvious half: the keys section reserves a 2-cell icon column on every row,
+and neither of these lines has an icon, so left-aligning alone leaves them two
+cells left of every label beneath them.
+
+Both lines are **function sections**, not the built-in `{ section = "header" }`,
+for two reasons:
+
+- `sections.header` hardcodes `padding = 2`, and a `padding` on the section spec
+  does **not** override it — `D:resolve` only passes `indent`, `align` and
+  `pane` down to generated items. Owning the item is the only way to control the
+  gap.
+- The cwd must re-read per render so it follows a `:cd` on a later
+  `:lua Snacks.dashboard()`. A `%s`-formatted `preset` string is frozen at
+  whatever the spec file held at load time.
+
+`preset.header` is still the single place to edit the wording; the greeting
+section reads it off `self.opts`.
+
+**The spacing ratio is the point**: 1 blank line inside the greeting/path pair,
+2 before the keys. They are one unit (who you are, where you are), so the gap
+separating them must be smaller than the gap to the action list. The built-in
+`sections.header` ships the inverse (`padding = 2` above a 1-blank gap), which
+made the path read as a heading for the menu. Running them flush (`0` / `1`) was
+tried on 2026-09-19 and was too tight.
 
 ## Syntax palette: yellow warm side, retuned 2026-09-09
 

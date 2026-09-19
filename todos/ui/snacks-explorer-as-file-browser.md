@@ -16,6 +16,16 @@ bug-hunting could not settle. `ENABLED = false` in
 code is untouched and the flag is the only thing to flip to bring it back (with a
 key other than `<leader>e`).
 
+**PARTLY SUPERSEDED 2026-09-19: the startup case is the snacks explorer again,
+by a different route.** `nvim <dir>` now opens the `<leader>r` TREE explorer
+fullscreen (`jump = { close = true }`, so a file closes it and a directory does
+not), called from oil's existing `VimEnter` hook in `lua/plugins/oil.lua`. This
+file's flat, telescope-shaped browser stays retired at `ENABLED = false` — the
+request was for the tree, not for this UI, so nothing here was revived and the
+`init`-collision trap below was never touched. **Decision 1 no longer holds:**
+oil keeps `:e <dir>` but no longer keeps startup. See
+`todos/freeze/freeze-override-2026-09-19.md`.
+
 Note for whoever flips it: `enabled = ENABLED` was REMOVED from the spec at the
 same time, and must not come back. lazy.nvim chains every fragment of the same
 plugin through `__index`, and `plugins.snacks-file-browser` sorts after

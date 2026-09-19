@@ -5,11 +5,14 @@
 -- bg_sidebar, and the runtime-derived groups (oil's invisible border, the
 -- explorer's blank/border groups) follow.
 --
--- WHAT IS LIVE RIGHT NOW: `reference.ghostty_background` (#031219), NOT a
--- `candidates` key -- the ladder below was explored and then the Ghostty value
--- was kept. That is deliberate: matching the terminal exactly is what made going
--- opaque invisible. So `bg` legitimately points outside `candidates`; do not
--- "fix" it back into the list. Verify with `nvim_get_hl(0, {name = "Normal"}).bg`.
+-- WHAT IS LIVE RIGHT NOW: `candidates.teal_light` (#001014). Confirmed
+-- 2026-09-19 as the value to keep. Verify with
+-- `nvim_get_hl(0, {name = "Normal"}).bg`.
+--
+-- This block previously said `reference.ghostty_background` (#031219) was live,
+-- and stayed that way after `bg` moved to the ladder -- so anything quoting
+-- #031219 as the background is stale by definition. `ghostty_background` is
+-- kept below as the reference value it is named for, not as the live one.
 --
 -- Need the background AT RUNTIME? Read `Normal`'s bg, not this module: that
 -- follows what the colorscheme actually applied, and is correctly nil under
@@ -61,8 +64,8 @@ local reference = {
   -- over a dark desktop (measured: flat #031116 across 600/600 px). The first
   -- opaque value matched that, confirmed by transparent rendering #031116 against
   -- opaque #031216 -- one unit apart, so going opaque changed nothing visible.
-  -- LIVE: this is what `bg` points at, so the editor and the terminal are the
-  -- same colour by construction rather than by a matching pick.
+  -- NOT LIVE since the move to `candidates.teal_light`. Kept as the reference
+  -- for what the terminal itself uses, which is what this key is named for.
   ghostty_background = "#031219",
 
   -- The completion menu's panel (`bg_popup`/base04), deliberately NOT the shared
