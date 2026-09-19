@@ -55,19 +55,6 @@ The fullscreen title rides the input's **top** border (`title_pos = "center"`),
 matching the `<leader>r` sidebar. It must be `border = "top"`: a title needs a
 border line to sit on, and a `"bottom"` border has nowhere to draw one.
 
-## Dashboard (2026-09-19)
-
-Bare `nvim` shows the snacks dashboard; only `nvim <dir>` opens the explorer.
-`preset.header` is plain text (`Welcome`), overriding LazyVim's six-line LAZYVIM
-ASCII block — this config is only *based* on LazyVim, so the generic banner was
-wrong, and the art was the widest thing on screen while saying nothing.
-
-`sections` restates snacks' own default list (header, keys, startup) to slot a
-cwd line in after the header. That line has to be a **function** section
-(`snacks.dashboard.Gen`, re-run per render); `preset.header` cannot carry it,
-because `sections.header` renders that string through a `%s` format and so
-freezes whatever the spec file held at load time.
-
 The snacks browser that held `<leader>e` from 2026-08-21 is **retired, not
 deleted**: `lua/plugins/snacks-file-browser.lua` with `ENABLED = false`. It was
 kept for a week of real use and worked, but never felt as smooth as oil. Flip
@@ -149,6 +136,26 @@ two retired browsers:
 Full reasoning, measurements and the rejected alternatives:
 [`notes/popup-backdrop-darkening-investigation.md`](notes/popup-backdrop-darkening-investigation.md)
 and [`todos/snacks-explorer-as-file-browser.md`](todos/snacks-explorer-as-file-browser.md).
+
+## Dashboard (2026-09-19)
+
+Bare `nvim` shows the snacks dashboard; only `nvim <dir>` opens the explorer.
+`preset.header` is plain text (`Welcome, Myothiha!`), overriding LazyVim's
+six-line LAZYVIM ASCII block — this config is only *based* on LazyVim, so the
+generic banner was wrong, and the art was the widest thing on screen while
+saying nothing.
+
+The block is anchored left by `col = 6` (0-indexed). Leaving `col` nil makes
+snacks centre the panes in the window, which on a wide Neovide window parks the
+key list in the middle of the screen. `formats.header` and `formats.footer` are
+restated as `align = "left"` for the same reason — both ship centred, and would
+otherwise float off the left edge the keys establish.
+
+`sections` restates snacks' own default list (header, keys, startup) to slot a
+cwd line in after the header. That line has to be a **function** section
+(`snacks.dashboard.Gen`, re-run per render); `preset.header` cannot carry it,
+because `sections.header` renders that string through a `%s` format and so
+freezes whatever the spec file held at load time.
 
 ## Syntax palette: yellow warm side, retuned 2026-09-09
 
