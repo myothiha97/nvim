@@ -143,36 +143,25 @@ local function open_oil_float(dir)
   end
 end
 
---- `nvim <dir>` reopens the directory the way VS Code and WebStorm reopen a
---- project: you land back in the file you were last editing there, at the
---- cursor position you left it.
+--- `nvim <dir>` opens the `<leader>r` tree sidebar over the blank buffer the
+--- caller swapped in for oil's directory buffer.
 ---
---- The explorer is the FALLBACK, not the default. It only opens when there is
---- nothing to restore -- a first visit, or a remembered file that has since
---- been deleted or renamed. Restoring the file and also opening the tree would
---- put a sidebar between you and the work every single time, so it is one or
---- the other.
+--- Nothing about `<leader>r` is overridden here: no layout, no `jump`, no
+--- `auto_close`. The geometry lives in snacks.lua under
+--- `sources.explorer.layout`, and the source's own `jump = { close = false }`
+--- and `auto_close = false` are exactly the sidebar behaviour wanted -- it
+--- stays open beside your work. Passing nothing is what keeps this screen the
+--- same object as `<leader>r` rather than a second thing to keep in sync.
 ---
---- When it does open, no layout / `jump` / `auto_close` overrides are passed.
---- The sidebar geometry already lives in snacks.lua under
---- `sources.explorer.layout`, and the source ships `jump = { close = false }`
---- and `auto_close = false` -- exactly the sidebar behaviour wanted. Passing
---- nothing is what makes this screen identical to `<leader>r` instead of a
---- second thing to keep in sync.
+--- `cwd` is the one argument, and only because `nvim <dir>` does NOT chdir into
+--- <dir>: without it the tree would list the shell's directory instead.
 ---
---- (The earlier fullscreen version needed BOTH of those overridden to close on
---- a file open. Dropping the fullscreen layout drops that whole problem. Do not
---- re-add them.)
-local function open_startup_workspace(dir)
-  local last_file = require("config.last-file")
-  last_file.set_root(dir)
-
-  -- `restore` edits into the current window, which at this point is the blank
-  -- buffer the caller just swapped in for oil's directory buffer.
-  if last_file.restore() then
-    return
-  end
-
+--- Two shapes were tried and dropped on 2026-09-19, both recorded in CLAUDE.md:
+--- a FULLSCREEN explorer (needed `jump = { close = true }` AND
+--- `auto_close = true` to get out of its own way), and restoring the last file
+--- edited in the directory. Do not re-add those options here -- they would
+--- break the sidebar's stay-open behaviour, which is the point of this version.
+local function open_startup_explorer(dir)
   require("snacks").picker.explorer({ cwd = dir })
 end
 
@@ -695,7 +684,7 @@ return {
             vim.api.nvim_win_set_buf(0, blank)
             pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
           end
-          open_startup_workspace(dir)
+          open_startup_explorer(dir)
         end)
       end,
     })

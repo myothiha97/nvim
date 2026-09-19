@@ -83,3 +83,15 @@ confirmation.
 
 Measured before keeping the persistence: `read()` 0.13 ms at startup, `save()`
 4.7 ms once on exit. Neither touches an interactive path.
+
+## Final shape
+
+The last-file restore was **removed by preference** after being built and
+measured — not because of cost (`read()` 0.13 ms, `save()` 4.7 ms on exit,
+neither on an interactive path). `lua/config/last-file.lua` and its
+`VimLeavePre` autocmd are deleted; `git log` has them if they are ever wanted
+back.
+
+`nvim <dir>` now does exactly one thing: open the `<leader>r` tree sidebar over
+a blank buffer. Three startup shapes were built and two discarded in one
+evening, which is the clearest measure of what this override actually cost.
