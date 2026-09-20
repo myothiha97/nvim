@@ -1,3 +1,13 @@
+-- The three numbers that decide the Explorer sidebar's width, in COLUMNS.
+-- Edit these; `explorer_width` below is only the arithmetic.
+local EXPLORER_WIDTH_RATIO = 0.25 -- share of the window it asks for
+local EXPLORER_MIN_WIDTH = 30 -- never narrower than this, but see EXPLORER_MAX_SHARE
+local EXPLORER_MAX_WIDTH = 40 -- never wider than this, however wide the window gets
+
+-- The escape hatch on the floor: the sidebar may never take more than this share
+-- of the window, so EXPLORER_MIN_WIDTH gives way on a genuinely narrow one.
+local EXPLORER_MAX_SHARE = 0.4
+
 local function clear_smart_picker_history()
   local history = require("snacks.picker.util.history").new("picker_smart")
   history.kv.data = {}
@@ -31,6 +41,33 @@ local function explorer_track_active(picker, file)
   if picker and not picker.closed then
     picker.list:update({ force = true })
   end
+end
+
+-- Explorer sidebar width, in COLUMNS: the ratio above, clamped at both ends.
+--
+-- WARN: SILENT FAILURE. This has to be ONE expression on `width`; the obvious
+-- `min_width` / `max_width` pair is accepted and then half-ignored. A layout whose
+-- `position` is not "float" gets wrapped by snacks in an outer split box
+-- (snacks/layout.lua, `M.new`), and that wrapper copies only `width`, `height`,
+-- `position`, `backdrop` and `zindex` off the inner box. The two clamp keys stay
+-- behind on the inner box, so they resize the list and the input while the SPLIT
+-- keeps the raw ratio: measured at 200 columns, a 40-column tree sitting inside a
+-- 50-column pane, the difference showing as dead space beside the tree.
+--
+-- EXPLORER_MAX_WIDTH stops the tree growing on a wide screen, where the ratio asks
+-- for more width than any path here prints. The ratio read 36 on the 146-column
+-- window this was tuned against, so at the shipped values the cap only engages
+-- past 160 columns.
+--
+-- EXPLORER_MIN_WIDTH keeps a typical nested filename readable: 2 columns per indent
+-- level, 2 for the icon, then the name (`snacks-file-browser.lua` at depth 2 needs
+-- 29). It YIELDS rather than holding on a genuinely narrow window, which is what
+-- EXPLORER_MAX_SHARE is for. A hard floor is what made the old `min_width = 40` a
+-- trap in a split tmux pane: it stops scaling and squeezes the editor to nothing.
+local function explorer_width()
+  local cols = vim.o.columns
+  local width = math.min(math.floor(cols * EXPLORER_WIDTH_RATIO), EXPLORER_MAX_WIDTH)
+  return math.max(width, math.min(EXPLORER_MIN_WIDTH, math.floor(cols * EXPLORER_MAX_SHARE)))
 end
 
 local snacks_keymaps = {
@@ -406,8 +443,9 @@ return {
             preview = false,
             layout = {
               backdrop = false,
-              width = 0.25,
-              min_width = 40,
+              -- Ratio with a ceiling AND a floor; see `explorer_width` above for
+              -- why neither clamp can be `max_width` / `min_width` on this table.
+              width = explorer_width,
               height = 0,
               position = "left",
               border = "none",
