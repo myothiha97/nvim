@@ -320,9 +320,16 @@ return {
             -- that removes it. Fixed here rather than in oil, because making
             -- that pad a scratch buffer stops `:w <name>` from associating it
             -- with the file, which breaks writing a new file from a fresh start.
-            { source = "buffers", hidden = true, current = false, filter = { filter = function(item)
-              return item.name ~= ""
-            end } },
+            {
+              source = "buffers",
+              hidden = true,
+              current = false,
+              filter = {
+                filter = function(item)
+                  return item.name ~= ""
+                end,
+              },
+            },
             { source = "recent", filter = { cwd = true } },
             { source = "files" },
           },
