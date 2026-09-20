@@ -71,6 +71,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`paste-without-losing-clipboard.md`](ui/paste-without-losing-clipboard.md) | `"_dP` so pasting over a selection does not clobber the clipboard. Smallest item here | open |
 | [`snacks-explorer-as-file-browser.md`](ui/snacks-explorer-as-file-browser.md) | built, kept for a week, then **REVERSED 2026-09-04** — `<leader>e` is oil.nvim again. Nothing in it was wrong, it just did not feel as smooth. `ENABLED = false` | parked |
 | [`snacks-file-tree-icon-legibility.md`](ui/snacks-file-tree-icon-legibility.md) | built, rejected on sight, reverted the same session. Kept for the measurements. The complaint still stands: `<leader>r` icons read too small to scan | parked |
+| [`treesitter-outline-locals.md`](ui/treesitter-outline-locals.md) | LOW. The outline cannot show symbols inside a Go func because gopls never reports them (measured). Needs a treesitter source. Answer "is it worth it" before starting | open |
 | [`unstable-static-tabline.md`](ui/unstable-static-tabline.md) | HIGH, parked 2026-07-20. `lua/config/_unstable_tabline.lua` retained but not required. Blank strip at the top, design too basic | parked |
 
 ## languages
