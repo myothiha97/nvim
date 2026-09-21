@@ -105,8 +105,8 @@ local variants = {
     -- 3.4 L* on a near-grey is at the JND and returned no signal. REJECTED: at
     -- C*8 the value reads as bright as `brighter`, because chroma on the
     -- highest-dose role in the file lifts the whole page, not one mark.
+    tinted_high_chroma = "#96b8bb", -- L*72.5 C*12.0  the far end before body reads teal
     tinted = "#a0b6b8", -- L*72.5 C*8.0   8.94:1  read as too close to brighter
-    tinted_high = "#96b8bb", -- L*72.5 C*12.0  the far end before body reads teal
     base1 = "#adb7b7", -- L*73.7  9.27:1  off-axis: loses a chroma stop, C*3.7 h199
     brighter = "#b1bebf", -- L*76.0  9.95:1  ran until 2026-09-09, read as too bright
     brightest = "#bcc9ca",
