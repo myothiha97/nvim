@@ -342,8 +342,10 @@ vim.keymap.set({ "n", "v" }, "<C-u>", "<C-u>zz", { desc = "Scroll Up and Recente
 -- diagnostic float) in place without moving focus into it. Semantically a
 -- match: <C-e>/<C-y> are vim's "scroll viewport by N lines without moving
 -- cursor" keys — ideal for smooth doc reading. POPUP_SCROLL_LINES tunes the
--- per-press step. When no popup is visible, fall back to native <C-e>/<C-y>
--- (no recenter — these are fine viewport nudges, not jumps). nvim_win_call
+-- per-press step. When no popup is visible — or the cursor is in a panel
+-- rather than a file window, see the gate below — fall back to native
+-- <C-e>/<C-y> (no recenter — these are fine viewport nudges, not jumps),
+-- which scrolls whatever window has focus. nvim_win_call
 -- runs `normal!` with the float temporarily current and restores focus; the
 -- buffer never changes, so the mouse-hover BufLeave-close path
 -- (mouse-hover.lua) won't fire. No collision with the existing scroll-wheel
@@ -352,16 +354,34 @@ local POPUP_SCROLL_LINES = 1
 local popup_scroll_down = POPUP_SCROLL_LINES .. vim.api.nvim_replace_termcodes("<C-e>", true, true, true)
 local popup_scroll_up = POPUP_SCROLL_LINES .. vim.api.nvim_replace_termcodes("<C-y>", true, true, true)
 
+-- A normal, non-floating file window: where a doc popup can appear over your
+-- code. Also the gate for the arrow-key scrolling further down, so sidebars,
+-- panels, terminals, help, Oil, Snacks and floats keep native arrow movement.
+local function is_editor_window()
+  return vim.bo.buftype == "" and vim.api.nvim_win_get_config(0).relative == ""
+end
+
+-- WARN: SILENT FAILURE — the popup hunt below must be gated on the CURRENT
+-- window being an editor window, or it hijacks <C-e>/<C-y> inside panels.
+-- Trouble's outline is the case that exposed it: with `preview.type = "main"`
+-- the preview is still a FLOAT (measured 2026-09-21: `relative = "win"`,
+-- focusable, zindex 50) drawn over the main window and opened as soon as the
+-- cursor moves inside the panel. So pressing <C-e> in the focused outline
+-- found that preview and scrolled the CODE under it while the outline itself
+-- stood still, with nothing logged. Same class as the picker-over-Oil case
+-- the snacks_picker skip below was added for.
 local function scroll_popup_or(popup_scroll_cmd, fallback_keys)
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    local cfg = vim.api.nvim_win_get_config(win)
-    if cfg.relative ~= "" and cfg.focusable ~= false then
-      local buf = vim.api.nvim_win_get_buf(win)
-      if not vim.bo[buf].filetype:match("^snacks_picker") then
-        vim.api.nvim_win_call(win, function()
-          vim.cmd("normal! " .. popup_scroll_cmd)
-        end)
-        return
+  if is_editor_window() then
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      local cfg = vim.api.nvim_win_get_config(win)
+      if cfg.relative ~= "" and cfg.focusable ~= false then
+        local buf = vim.api.nvim_win_get_buf(win)
+        if not vim.bo[buf].filetype:match("^snacks_picker") then
+          vim.api.nvim_win_call(win, function()
+            vim.cmd("normal! " .. popup_scroll_cmd)
+          end)
+          return
+        end
       end
     end
   end
@@ -376,12 +396,7 @@ vim.keymap.set("n", "<C-y>", function()
 end, { desc = "Scroll Popup Up / Viewport Up" })
 
 -- Arrow keys are the ergonomic, fine-grained reading controls in normal,
--- non-floating file windows. Sidebars, panels, terminals, help, Oil, Snacks,
--- and floats retain native arrow-key cursor movement.
-local function is_editor_window()
-  return vim.bo.buftype == "" and vim.api.nvim_win_get_config(0).relative == ""
-end
-
+-- non-floating file windows (see is_editor_window above).
 local function editor_scroll_or_arrow(scroll_key, arrow_key)
   return function()
     return is_editor_window() and scroll_key or arrow_key
