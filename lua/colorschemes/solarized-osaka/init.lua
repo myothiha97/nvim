@@ -457,11 +457,26 @@ return {
       -- LSP doc surface (hover, signature, diagnostic floats, blink docs).
       -- Deliberately NOT applied to NormalFloat, which would repaint the snacks
       -- picker; reached only via winhighlight in config/keymaps.lua.
-      -- DO NOT dim `fg` further -- the next ramp step is sub-AA and sits 5 L* off
-      -- Comment, so there is exactly one usable value. Border is chrome (2.33:1)
-      -- and the title is text, so they deliberately differ.
+      -- DO NOT dim `fg` further -- the next ramp step DOWN is sub-AA and sits
+      -- 5 L* off Comment, so there is exactly one usable value below. Border is
+      -- chrome (2.33:1) and the title is text, so they deliberately differ.
       -- Full reasoning: notes/palette-reference.md, "LSP documentation surface".
-      hl.LspDocFloat = { fg = c.fg, bg = c.bg_float }
+      --
+      -- RAISED 2026-09-22, from the theme's own `c.fg` (#839395) to
+      -- `body.faded`. Hover prose read as faded grey against the code beside it,
+      -- because `c.fg` is the theme's upstream body value while THIS config
+      -- paints `Normal` from `palette.body` (#a0b6b8) -- so the doc surface had
+      -- silently drifted 12.7 L* below the editor's own text.
+      --
+      --   #839395 -> #919e9f   +4.3 L*, 6.06:1 -> 7.01:1 (clears AAA)
+      --   dE00 7.3 from editor body, so a doc still reads as secondary text
+      --   worst neighbour INSIDE the popup is the inline-code blue #8ab4d8 at
+      --   dE00 14.4; Comment clears at 15.5, String at 18.6, the title at 19.7
+      --
+      -- Not `palette.body` itself: prose matching code exactly removes the cue
+      -- that the float is a different surface. Not `base0` either -- that is the
+      -- file-list value, and 8.19:1 read brighter than a doc needs to be.
+      hl.LspDocFloat = { fg = palette.variants.body.faded or c.fg, bg = c.bg_float }
       hl.LspDocBorder = { fg = c.yellow700, bg = c.bg_float }
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 

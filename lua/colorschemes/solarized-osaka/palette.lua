@@ -92,6 +92,27 @@ local variants = {
 
   -- Body text: `Normal`, `NormalFloat`, `@variable`, one value by design.
   body = {
+    -- ONE RUNG BELOW base0, and the only rung here that is NOT a body-text
+    -- candidate. L* 64.0 C* 4.8 h 205.7 -- base0's own axis, 5 L* down. Both
+    -- axes move, because a lightness-only step on a near-grey is at the JND and
+    -- returns no signal (see the rejected chroma rungs below).
+    --
+    -- LIVE, as `LspDocFloat` in init.lua: the LSP doc surface (hover, signature,
+    -- diagnostic floats, blink docs). It RAISED that surface, which had drifted
+    -- to the theme's upstream `c.fg` (#839395, 6.06:1) while the editor moved up
+    -- to `tinted`. Prose there now clears AAA and still reads as secondary text.
+    --
+    --   7.01:1 vs #001014     above AAA
+    --   dE00 7.3 vs `tinted`  the editor body value: a clear step
+    --   dE00 3.9 vs `base0`   the file-list value
+    --   dE00 14.4 vs #8ab4d8  inline code, the worst neighbour in a doc float
+    --
+    -- ALSO TRIED, and reverted the same day: file/folder names in the snacks
+    -- explorer and oil. It read as too faded for a name you scan; those lists
+    -- run `base0` below. The gap that constrains a file list is dE00 14.2 to
+    -- `NonText` #637981, which dims HIDDEN entries in the same list -- floor
+    -- about #8c9899 (dE00 12.6), below which hidden files stop looking hidden.
+    faded = "#919e9f",
     base0 = "#9eabac", -- the theme's own; also the pre-2026-09-05 @variable value
     -- SELECTED 2026-09-09. LCh midpoint of base0 and brighter, same axis as both
     -- (C*4.8 h206). Picked on measurement, not just as a compromise: base0's
