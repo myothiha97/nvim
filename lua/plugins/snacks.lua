@@ -180,6 +180,44 @@ return {
     local INDENT_GUIDE_FG = "#586e75"
     local function set_snacks_hl()
       vim.api.nvim_set_hl(0, "SnacksPickerMatch", { link = "DiffText" })
+      -- File and folder NAMES in the picker lists: ONE neutral grey, a step below
+      -- the editor's body text.
+      --
+      -- Two defects, fixed together. Folders took `SnacksPickerDirectory` ->
+      -- `Directory` (#268bd3 in this theme), the same blue family as the folder
+      -- ICON beside them, so the two ran together and the name was the harder
+      -- half to read. Files took `SnacksPickerFile`, which snacks defines as the
+      -- EMPTY STRING, so they fell through to `Normal` and matched editor body
+      -- text exactly (measured identical at the pixel).
+      --
+      -- Both now read `body.base0` (#9eabac) -- the theme's own body value, one
+      -- chroma step under the `tinted` white the editor runs. dE00 4.2 from editor
+      -- body text, so the panel reads softer without reading as dimmed, and 18.8
+      -- from `NonText`, the gap that keeps HIDDEN entries looking hidden.
+      --
+      -- `body.faded` (#919e9f) was tried first, one rung lower again. It read as
+      -- too faded for a name you scan and was reverted the same day; that rung and
+      -- its measurements stay in palette.lua, and it is now the LSP doc value.
+      --
+      -- Structure copied from the VS Code Material Icon theme: the ICON carries
+      -- the file/folder distinction in colour, every NAME stays one grey. Hidden
+      -- and ignored rows are untouched -- they take
+      -- `SnacksPickerPathHidden`/`PathIgnored` and stay dimmer still.
+      --
+      -- BLAST RADIUS: both groups are shared by EVERY snacks picker, not just the
+      -- `<leader>r` tree, so filenames read the same everywhere. That is
+      -- deliberate. Fading the tree alone would need the explorer `format`
+      -- wrapper below instead, because a global group cannot tell them apart.
+      --
+      -- WARN: fg ONLY, never `link = "Normal"`. A link brings Normal's BACKGROUND
+      -- with it, which would paint over the cursor row and the active-file band
+      -- below.
+      local ok_palette, palette = pcall(require, "colorschemes.solarized-osaka.palette")
+      local list_fg = ok_palette and palette.variants.body.base0 or nil
+      if list_fg then
+        vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { fg = list_fg })
+        vim.api.nvim_set_hl(0, "SnacksPickerFile", { fg = list_fg })
+      end
       vim.api.nvim_set_hl(0, "SnacksIndent", { fg = INDENT_GUIDE_FG, nocombine = true })
       -- Full-width band on the active file's row in the Explorer. Only used by
       -- the explorer format wrapper, so no other picker or window is affected.

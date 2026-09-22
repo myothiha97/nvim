@@ -584,6 +584,38 @@ local function set_oil_highlights()
   end
   vim.api.nvim_set_hl(0, "OilPathSeparator", { link = "NonText", default = true })
 
+  -- File and folder NAMES: ONE neutral grey, a step below the editor's body
+  -- text. Same two defects and the same value as `SnacksPickerDirectory` /
+  -- `SnacksPickerFile` in lua/plugins/snacks.lua, so the two browsers read alike.
+  -- Oil linked `OilDir` -> `Directory` (#268bd3 here), the same blue family as
+  -- the folder ICON beside it; `OilFile` has no link at all, so files fell
+  -- through to `Normal` and matched editor body text exactly.
+  --
+  -- The value is `body.base0` (#9eabac), the theme's own body value, one chroma
+  -- step under the `tinted` white the editor runs -- read by ROLE, never copied
+  -- as a hex, so both browsers follow one edit. `body.faded` was tried first and
+  -- read as too faded; that rung keeps its measurements in palette.lua.
+  --
+  -- Hidden entries are untouched: `OilDirHidden`/`OilFileHidden` link to
+  -- `OilHidden` -> `Comment`, so they stay dimmer and italic.
+  --
+  -- ORDER MATTERS, and this is the trap: oil links `OilDirIcon` -> `OilDir`, so
+  -- greying `OilDir` alone greys the folder icon with it and the listing loses the
+  -- one cue that still separates a directory from a file. The icon is pinned to
+  -- the blue FIRST, as its own definition, so it no longer follows the name.
+  --
+  -- WARN: fg ONLY, never `link = "Normal"`. A link brings Normal's BACKGROUND
+  -- with it, which would paint over `OilCursorLine` on the cursor row.
+  local dir_fg = vim.api.nvim_get_hl(0, { name = "Directory", link = false }).fg
+  if dir_fg then
+    vim.api.nvim_set_hl(0, "OilDirIcon", { fg = dir_fg })
+  end
+  local list_fg = ok and palette.variants.body.base0 or nil
+  if list_fg then
+    vim.api.nvim_set_hl(0, "OilDir", { fg = list_fg })
+    vim.api.nvim_set_hl(0, "OilFile", { fg = list_fg })
+  end
+
   -- THE POPUP'S BORDER IS INVISIBLE: same fg as bg, so the ring disappears while
   -- the border still exists. It has to still exist, because Nvim renders a window
   -- title on the border and there is nowhere else to put the path label. What
