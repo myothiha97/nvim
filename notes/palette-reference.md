@@ -851,9 +851,39 @@ text. VSCode runs that hierarchy the other way round, and the inversion is what
 made hover docs read as a wall of text. `c.fg` (`#839395`, L\* 59.8, 5.90:1) drops
 the prose 13.9 L\* below the signature's identifiers and still clears AA.
 
+**RAISED 2026-09-22 to `body.faded` (`#919e9f`, L\* 64.1, 7.01:1).** `c.fg` is the
+theme's UPSTREAM body value, and this config repaints `Normal` from `palette.body`
+(`#a0b6b8`), so the doc surface had silently drifted 12.7 L\* below the editor's
+own text. Two measurements decided it:
+
+- `c.fg` sat **dE00 1.3** from the operator grey `#7f9195`, which appears in the
+  same popup (2.1% of the ink, inside the fenced signature). That is below the
+  just-noticeable threshold: prose and operators were not similar, they were the
+  same colour. `faded` clears it at 5.0.
+- Separation from `Comment` went 11.6 -> 15.5, out of the band where prose starts
+  reading as a comment.
+
+Scored against a measured glyph census of a live vtsls/lua_ls hover (1015 inked
+glyphs inside the float, prose 71.0%, inline code 12.7%, String 5.4%), weighting
+each neighbour by its dose:
+
+| prose | contrast | worst neighbour | composite |
+| --- | --- | --- | --- |
+| `#839395` (was) | 6.06:1 | Operator, dE00 1.3 | 49.9 |
+| `#919e9f` (now) | 7.01:1 | Operator, dE00 5.0 | 74.9 |
+| `#93a3a6` | 7.41:1 | `@variable`, dE00 5.7 | 78.3 |
+| `#9eabac` base0 | 8.19:1 | `@variable`, dE00 4.1 | 70.5 |
+
+Composite is contrast scored against AAA 7:1 plus worst-neighbour dE00 scored
+against 10, 50/50 — a ranking aid, not a standard. Note `base0` scores WORSE
+despite the best contrast, because it closes on `@variable` in the code block:
+**more contrast is not automatically more readable on this surface.** `#93a3a6`
+is the best of the four and holds the old chroma rather than trading it for
+lightness; it was left on the table because `faded` already existed as a rung.
+
 **Do not go dimmer.** The next ramp step, `base00` (`#637981`), is 4.11:1 (under
 AA) and sits only 5 L\* off the comment colour. There is exactly one usable value
-here, so this is not a knob to tune.
+below, so dimming is not a knob to tune.
 
 Border and title need **different weights**, which is the whole point:
 

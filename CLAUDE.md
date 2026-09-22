@@ -236,13 +236,13 @@ comments in `palette.lua`.** That build is the authority; anything written down
 elsewhere is a snapshot and drifts. To read the truth from a running editor:
 `:lua =vim.api.nvim_get_hl(0,{name='@boolean',link=false})`
 
-Verified live 2026-09-09:
+Verified live 2026-09-09; the body row re-verified and corrected 2026-09-22:
 
 | role | value | note |
 | --- | --- | --- |
-| body / `@variable` | `#a7b4b5` | `body.midpoint`; was `#b1bebf` until 2026-09-09 |
+| body / `@variable` | `#a0b6b8` | `body.tinted`; was `body.midpoint` `#a7b4b5`, and `#b1bebf` until 2026-09-09 |
 | brackets / delimiters / operators | `#7f9195` | the maximin grey rung; was `#96abd3` until 2026-09-09 |
-| HTML/JSX/TSX/Vue tag wrappers | `#a7b4b5` | TRACKS body since 2026-09-09; was pinned to `base0` `#9eabac` |
+| HTML/JSX/TSX/Vue tag wrappers | `#a0b6b8` | TRACKS body since 2026-09-09; was pinned to `base0` `#9eabac` |
 | function / `@property` / `@function.builtin` | `#359ee9` | `@property` is unstyled and duplicates this |
 | type | `#2ac3de` | |
 | punctuation / parameter | `#baac0d` | the accent yellow; also `@attribute`, `@keyword.import`, `@string.escape` |
@@ -252,6 +252,44 @@ Verified live 2026-09-09:
 | keyword | `#a17bcc` | violet |
 | comment | `#5f767d` | two stops below the AA value, by preference; upstream is `#576d74` |
 | `@string` | `#29a298` | `@number` no longer shares it |
+
+### Panel and doc greys sit BELOW body text (2026-09-22)
+
+Body text is the EDITOR's value and nothing else should reach it. The two
+surfaces you read *around* the code each take their own rung of the same grey
+axis, so a panel never reads as loud as the code:
+
+| surface | value | rung | where |
+| --- | --- | --- | --- |
+| editor body | `#a0b6b8` | `body.tinted` | `Normal` |
+| file/folder names | `#9eabac` | `body.base0` | `SnacksPickerDirectory`/`File`, `OilDir`/`OilFile` |
+| LSP doc prose | `#919e9f` | `body.faded` | `LspDocFloat` |
+
+All three read the rung by ROLE from `palette.variants.body`, never as a copied
+hex, so one edit moves a surface. **The tree no longer tracks `body`** — retuning
+`variants.lua` moves the editor only.
+
+FILE AND FOLDER NAMES ARE ONE GREY, files and folders alike: the ICON carries the
+type distinction in colour, the way the VS Code Material Icon theme does it.
+Folder names took `Directory` blue (`#268bd3`) until 2026-09-22, the same blue
+family as the folder icon beside them, so the two ran together.
+
+**WARN: two traps here, both silent.** `fg` ONLY, never `link = "Normal"` — a
+link drags Normal's BACKGROUND with it and paints over the cursor row and the
+active-file band. And oil links `OilDirIcon` -> `OilDir`, so greying the name
+greys the ICON with it; the icon is pinned to the blue FIRST, as its own
+definition.
+
+`body.faded` was tried for the file lists too and read as too faded for a name
+you scan; the rung keeps that verdict and its numbers in `palette.lua`.
+
+The LSP doc surface was RAISED the same day, from the theme's upstream `c.fg`
+(`#839395`). That value had drifted **dE00 1.3** from the operator grey `#7f9195`
+appearing in the same popup, which is below the just-noticeable threshold — hover
+prose and operators were not similar, they were the same colour. Scored against a
+measured glyph census of a real hover, the surface goes from 6.06:1 to 7.01:1 and
+its worst-neighbour separation from dE00 1.3 to 5.0. **Do not go dimmer than
+`faded`**: the next rung down is sub-AA and sits 5 L* off the comment colour.
 
 **ONE ACCENT HUE ON THE WARM SIDE.** This is the rule that keeps being broken.
 The warm side is now one dominant hue (the yellow) plus one low-dose accent

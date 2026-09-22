@@ -260,7 +260,7 @@ Live values, measured against the current background `#001014`:
 | role | value | L\* | contrast |
 |---|---|---|---|
 | type | `#2ac3de` | 72.8 | 9.19:1 |
-| body / `@variable` | `#a7b4b5` | 72.4 | 9.07:1 |
+| body / `@variable` | `#a0b6b8` | 72.5 | 9.11:1 |
 | names — params, `${}`, punctuation | `#baac0d` | 69.5 | 8.30:1 |
 | boolean / constant / number | `#ed8e55` | 68.0 | 7.93:1 |
 | function | `#359ee9` | 62.6 | 6.66:1 |
@@ -284,6 +284,29 @@ punctuation, splitting brackets from delimiters, and brightening operators so
 measurements. The reasoning, the rejected candidates and the numbers are in
 [`notes/palette-reference.md`](notes/palette-reference.md) and
 [`notes/syntax-palette-decisions.md`](notes/syntax-palette-decisions.md).
+
+**Panel and doc text sit BELOW body text, on purpose.** Body text is the editor's
+value and nothing else should reach it, so the two surfaces you read *around* the
+code each take their own rung of the same grey axis:
+
+| surface | value | L\* | contrast | group |
+|---|---|---|---|---|
+| editor body | `#a0b6b8` | 72.5 | 9.11:1 | `Normal` (`body.tinted`) |
+| file/folder names | `#9eabac` | 69.0 | 8.19:1 | `SnacksPickerDirectory`/`File`, `OilDir`/`OilFile` (`body.base0`) |
+| LSP doc prose | `#919e9f` | 64.1 | 7.01:1 | `LspDocFloat` (`body.faded`) |
+
+File and folder names are ONE grey in both browsers, files and folders alike —
+the ICON carries the type distinction in colour, the way the VS Code Material
+Icon theme does it. Before 2026-09-22 folder names took `Directory` blue
+(`#268bd3`), the same blue family as the folder icon beside them, so the two ran
+together.
+
+LSP doc prose was raised the same day, from the theme's upstream `c.fg`
+(`#839395`) which had drifted **dE00 1.3** from the operator grey `#7f9195`
+appearing in the same popup — below the just-noticeable threshold, so hover prose
+and operators were the same colour. Scored against a measured glyph census of a
+real hover popup, that change takes the surface from 6.06:1 to 7.01:1 and its
+worst-neighbour separation from dE00 1.3 to 5.0.
 
 Background and panel colours live in `lua/config/ui.lua`, which holds the whole
 ladder of values that were tried along with why each was rejected, so an

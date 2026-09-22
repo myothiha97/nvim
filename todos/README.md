@@ -67,6 +67,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | file | hook | status |
 | --- | --- | --- |
 | [`keymap-native-conflicts.md`](ui/keymap-native-conflicts.md) | MEDIUM. High-impact conflicts resolved; remaining insert-mode cases deferred | open |
+| [`material-icon-theme-parity.md`](ui/material-icon-theme-parity.md) | the folder-name **text colour** half shipped 2026-09-22. VS Code Material icon/colour parity deferred — exact parity is impossible (VS Code ships SVGs, a terminal draws one font glyph). Also holds the cursor-row brightening finding | open |
 | [`nvim-smooth-scrolling.md`](ui/nvim-smooth-scrolling.md) | still short of GUI editors across mouse, trackpad and keyboard. Must not regress large files | open |
 | [`paste-without-losing-clipboard.md`](ui/paste-without-losing-clipboard.md) | `"_dP` so pasting over a selection does not clobber the clipboard. Smallest item here | open |
 | [`snacks-explorer-as-file-browser.md`](ui/snacks-explorer-as-file-browser.md) | built, kept for a week, then **REVERSED 2026-09-04** — `<leader>e` is oil.nvim again. Nothing in it was wrong, it just did not feel as smooth. `ENABLED = false` | parked |
