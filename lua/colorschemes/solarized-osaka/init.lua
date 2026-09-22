@@ -489,21 +489,31 @@ return {
       -- was the only other group carrying #664c00, which is what made hover
       -- docs and everything else share the olive ring in the first place.
       --
-      -- THE TARGET IS THE PICKER'S WEIGHT, NOT ITS HUE. `SnacksPickerBorder`
-      -- (`base02`, #063540) is the reference for how loud a ring should be;
-      -- `cyan900` matches that and stays on the green side of it:
+      -- THE PICKER SET THE DIRECTION, NOT THE FINAL VALUE. `SnacksPickerBorder`
+      -- (`base02`, #063540) is what "a ring that does not shout" looks like
+      -- here, so the search ran down the cyan ramp towards it. The ramp, all
+      -- measured against the #001014 background:
       --
       --              L*     C*    hue     vs bg     dE00 vs picker
-      --   cyan500   60.4   34.7   187    6.19:1          38.8   (too loud)
-      --   cyan700   37.7   21.8   202    2.75:1          15.7
-      --   cyan900   21.8   14.5   202    1.56:1           5.4   <- live
+      --   cyan500   60.4   34.7   187    6.19:1          38.8
+      --   cyan700   37.7   21.8   202    2.75:1          15.7   <- live
+      --   cyan900   21.8   14.5   202    1.56:1           5.4
       --   base02    19.9   15.4   227    1.47:1           0.0   (the picker)
       --
-      -- STOP RULE: `cyan500` was tried first and rejected -- at 6.19:1 the ring
-      -- read as a drawn line competing with the text instead of as chrome. If
-      -- `cyan900` now proves too faint to find, the ONE step up is `cyan700`;
-      -- `cyan950` (1.15:1) is below the point the ring resolves at all, and the
-      -- yellow is not coming back.
+      -- Two rungs were tried in the editor and rejected BY EYE, in this order:
+      -- `cyan500` at 6.19:1 read as a drawn line competing with the text rather
+      -- than as chrome, and `cyan900` -- which does match the picker's weight,
+      -- dE00 5.4 -- came out too faint to find on a float that, unlike the
+      -- picker, has no backdrop dim behind it. `cyan700` settled it.
+      --
+      -- So the ring deliberately sits ABOVE the picker now (2.75:1 vs 1.47:1).
+      -- That is not drift: the picker is a full panel the eye is already aimed
+      -- at, a hover popup is not.
+      --
+      -- STOP RULE: the ramp is exhausted in both directions. `cyan950`
+      -- (1.15:1) is below the point the ring resolves at all, `cyan500` is the
+      -- rejected loud end, and the yellow is not coming back. Anything further
+      -- needs a NEW measured value, not another guess off this ladder.
       --
       -- NOT every border follows, on purpose: `SnacksPickerBorder` is its own
       -- definition and oil links both of its rings to that, so the picker, the
@@ -514,8 +524,8 @@ return {
       -- snacks picker's `border = true` resolves to `rounded` because
       -- `winborder` is unset, and the hover float asks for `rounded` directly
       -- in `config/options.lua` and `plugins/lsp.lua`.
-      hl.LspDocBorder = { fg = c.cyan900, bg = c.bg_float }
-      hl.FloatBorder = { fg = c.cyan900, bg = c.bg_float }
+      hl.LspDocBorder = { fg = c.cyan700, bg = c.bg_float }
+      hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float }
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 
       -- Inline code chips in a hover doc. The theme's yellow-on-dark-green fill
