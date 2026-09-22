@@ -458,8 +458,9 @@ return {
       -- Deliberately NOT applied to NormalFloat, which would repaint the snacks
       -- picker; reached only via winhighlight in config/keymaps.lua.
       -- DO NOT dim `fg` further -- the next ramp step DOWN is sub-AA and sits
-      -- 5 L* off Comment, so there is exactly one usable value below. Border is
-      -- chrome (2.33:1) and the title is text, so they deliberately differ.
+      -- 5 L* off Comment, so there is exactly one usable value below. The
+      -- border is no longer chrome (see its own note below) and the title is
+      -- text, so the three values deliberately differ.
       -- Full reasoning: notes/palette-reference.md, "LSP documentation surface".
       --
       -- RAISED 2026-09-22, from the theme's own `c.fg` (#839395) to
@@ -477,7 +478,54 @@ return {
       -- that the float is a different surface. Not `base0` either -- that is the
       -- file-list value, and 8.19:1 read brighter than a doc needs to be.
       hl.LspDocFloat = { fg = palette.variants.body.faded or c.fg, bg = c.bg_float }
-      hl.LspDocBorder = { fg = c.yellow700, bg = c.bg_float }
+      -- FLOAT BORDERS, 2026-09-22, by preference. Both surfaces moved off the
+      -- theme's `yellow700` (#664c00) to `c.cyan900` (#103a3c) -- the faded end
+      -- of the same cyan ramp the string green `cyan500` sits on, read by theme
+      -- key rather than as a copied hex.
+      --
+      -- `FloatBorder` is the FALLBACK ring for every popup that does not define
+      -- one of its own (lazy.nvim, mason, diagnostic floats, gitsigns blame,
+      -- `:Lazy`), so it is painted here beside `LspDocBorder`. Before this it
+      -- was the only other group carrying #664c00, which is what made hover
+      -- docs and everything else share the olive ring in the first place.
+      --
+      -- THE PICKER SET THE DIRECTION, NOT THE FINAL VALUE. `SnacksPickerBorder`
+      -- (`base02`, #063540) is what "a ring that does not shout" looks like
+      -- here, so the search ran down the cyan ramp towards it. The ramp, all
+      -- measured against the #001014 background:
+      --
+      --              L*     C*    hue     vs bg     dE00 vs picker
+      --   cyan500   60.4   34.7   187    6.19:1          38.8
+      --   cyan700   37.7   21.8   202    2.75:1          15.7   <- live
+      --   cyan900   21.8   14.5   202    1.56:1           5.4
+      --   base02    19.9   15.4   227    1.47:1           0.0   (the picker)
+      --
+      -- Two rungs were tried in the editor and rejected BY EYE, in this order:
+      -- `cyan500` at 6.19:1 read as a drawn line competing with the text rather
+      -- than as chrome, and `cyan900` -- which does match the picker's weight,
+      -- dE00 5.4 -- came out too faint to find on a float that, unlike the
+      -- picker, has no backdrop dim behind it. `cyan700` settled it.
+      --
+      -- So the ring deliberately sits ABOVE the picker now (2.75:1 vs 1.47:1).
+      -- That is not drift: the picker is a full panel the eye is already aimed
+      -- at, a hover popup is not.
+      --
+      -- STOP RULE: the ramp is exhausted in both directions. `cyan950`
+      -- (1.15:1) is below the point the ring resolves at all, `cyan500` is the
+      -- rejected loud end, and the yellow is not coming back. Anything further
+      -- needs a NEW measured value, not another guess off this ladder.
+      --
+      -- NOT every border follows, on purpose: `SnacksPickerBorder` is its own
+      -- definition and oil links both of its rings to that, so the picker, the
+      -- oil popup and the oil startup box are untouched.
+      -- `BlinkCmpDocBorder`/`BlinkCmpMenuBorder` are also self-defined.
+      --
+      -- Border STYLE needed no change -- `rounded` on both sides already. The
+      -- snacks picker's `border = true` resolves to `rounded` because
+      -- `winborder` is unset, and the hover float asks for `rounded` directly
+      -- in `config/options.lua` and `plugins/lsp.lua`.
+      hl.LspDocBorder = { fg = c.cyan700, bg = c.bg_float }
+      hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float }
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 
       -- Inline code chips in a hover doc. The theme's yellow-on-dark-green fill
