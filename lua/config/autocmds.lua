@@ -23,11 +23,14 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 --   * the symbol RANGE, `TroublePreview`, priority 160 -- cleared here.
 --   * the whole LINE, hl_group hardcoded to `CursorLine`, hl_eol, priority 150.
 --
--- The line one is NOT cleared and is NOT a bug to fix. It painted nothing while
--- `CursorLine` was `bg = NONE`; it became visible on 2026-09-23 when the cursor
--- line band was turned back on, and it was reviewed and KEPT on purpose -- it
--- marks which line the outline points at when you move inside the panel. It
--- cannot be recoloured or scoped: the group is hardcoded in the plugin, so any
+-- The line one is NOT cleared, and is NOT a bug to fix if you ever see it. It
+-- paints nothing while `CursorLine` is `bg = NONE`, which is how the theme ships
+-- (colorschemes/solarized-osaka/init.lua) -- so today it is invisible. It became
+-- visible for a few hours on 2026-09-23 while the cursor line band was on, was
+-- reviewed, and was KEPT: it marks which line the outline points at when you move
+-- inside the panel. So if the band is ever switched back on, expect this back too.
+--
+-- It cannot be recoloured or scoped: the group is hardcoded in the plugin, so any
 -- change to it also changes the editor's own cursor row. Removing just the band
 -- would mean clearing trouble's extmarks after every preview, or patching the
 -- plugin. Do neither.

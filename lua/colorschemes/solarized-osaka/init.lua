@@ -442,20 +442,25 @@ return {
       hl.LineNrAbove = { fg = "#3d555b" }
       hl.LineNrBelow = { fg = "#3d555b" }
 
-      -- Current-line band, ON since 2026-09-23 (it was parked at `bg = "NONE"`
-      -- from 2026-09-08). The `cursorline` OPTION is already on, so this line is
-      -- the whole switch. Bounds, the tested ladder, and why chroma is not an
-      -- axis here: notes/palette-reference.md, "Cursor line".
+      -- Current-line band, OFF. Turned on 2026-09-23 and turned back off the same
+      -- day -- not on the numbers, which were fine, but because months of reading
+      -- without a band had set the expectation and the band read as wrong. Taste,
+      -- and it is the deciding vote here. The `cursorline` OPTION stays on, so
+      -- these two lines are the whole switch: swap them to bring it back.
       --
-      -- NOT the theme's own default. Upstream sets `CursorLine = { bg = c.base03 }`
-      -- (#002c38, groups/editor.lua) and that value is a hair TOO LIGHT for this
-      -- palette: re-measured 2026-09-23 against the retuned syntax colours and the
-      -- background's real value (#001014), it puts the violet keyword at 4.39:1 and
-      -- the operator grey at 4.51:1 -- i.e. keywords fall under AA on the one line
-      -- you are reading. #032732 is 2.1 L* darker, keeps every accent at 4.64:1 or
-      -- better, and is still a clearly visible band (1.236:1 over the background,
-      -- the same band/bg relationship tokyonight ships).
-      hl.CursorLine = { bg = "#032732" }
+      -- IF IT COMES BACK, USE `#032732`, NOT THE THEME'S DEFAULT. Upstream sets
+      -- `CursorLine = { bg = c.base03 }` (#002c38, groups/editor.lua), and measured
+      -- against the retuned syntax colours and the real background (#001014) that
+      -- value puts the violet keyword at 4.39:1 and the operator grey at 4.51:1 --
+      -- keywords fall under AA on the one line you are reading. #032732 is 2.1 L*
+      -- darker, holds every accent at 4.64:1 or better, and is still a clearly
+      -- visible band (1.236:1 over the background, the relationship tokyonight
+      -- ships). The full ladder is in notes/palette-reference.md, "Cursor line".
+      --
+      -- Turning it back on also makes Trouble's preview band reappear in the code
+      -- window -- expected, not a bug; see lua/config/autocmds.lua.
+      -- hl.CursorLine = { bg = "#032732" }
+      hl.CursorLine = { bg = "NONE" }
 
       -- The current-line number indicator. Change the value here.
       hl.CursorLineNr = {
