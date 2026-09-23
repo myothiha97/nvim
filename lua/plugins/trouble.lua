@@ -4,8 +4,9 @@
 -- nothing runs on the scroll/keypress hot path — the panel only works while it's open and
 -- Trouble throttles its own updates. Safe for big files.
 --
--- Toggle with <leader>cs. The ONLY display override is making the followed-symbol highlight
--- visible (your themes set the global CursorLine bg to NONE, which hides Trouble's marker).
+-- Toggle with <leader>cs. Two display overrides: the followed-symbol row gets a STRONGER
+-- band than the editor's own (CursorLine -> Visual, window-locally), and JS/TS rows that
+-- vtsls mislabels as `Variable` get the icon their real role deserves (see ROLE_KIND).
 --
 -- Shape: the panel opens as a flat list of the file's TOP-LEVEL declarations, like an IDE
 -- structure pane. Everything a symbol contains is still in the tree, just folded: `za`
@@ -145,6 +146,20 @@ local function js_variable_role(item)
   return nil
 end
 
+-- The kind a rescued role should RENDER as. vtsls sends every one of these as `Variable`,
+-- so without this the outline paints a component, an arrow handler and a type alias with
+-- the same glyph as `const LIMIT = 10`.
+--
+-- `hook` is deliberately absent: `const checkout = useCheckout()` really is a variable
+-- holding a value, and its row is already labelled with the hook name. Same for the
+-- component patterns the initializer cannot see (`memo(…)`, `styled.div`) -- they keep the
+-- Variable icon rather than risk a wrong one.
+local ROLE_KIND = {
+  ["function"] = "Function",
+  -- To a reader, a `type` alias and an `interface` are the same declaration.
+  type = "Interface",
+}
+
 -- PascalCase, and NOT SCREAMING_CASE: `^%u` alone also matched `ROUTE_PREFIX` and `API_URL`,
 -- which are plain constants, not components.
 local function is_component_name(name)
@@ -161,6 +176,25 @@ local JS_FILETYPES = {
   typescript = true,
   typescriptreact = true,
 }
+
+-- `vim.bo[buf].filetype` is an option lookup through a metatable, and the panel asks for it
+-- ONCE PER ROW in three places (the filter, the icon, the label). Measured 2026-09-23: on a
+-- 400-row panel it was 5.9 ms of the icon formatter's 6.4 ms -- 92% of the cost, for a value
+-- that is identical on every row. The outline follows ONE buffer, so a one-entry cache keyed
+-- on the buffer removes it.
+--
+-- Keyed on the buffer only, NOT on changedtick: a filetype does not change when you type. The
+-- gap is `:set ft=` on the buffer being outlined with no edit and no buffer switch, which
+-- would keep the previous verdict until either happens. Cosmetic, and not worth an always-on
+-- FileType autocmd for a panel that is usually closed.
+local ft_cache = {}
+local function filetype_of(buf)
+  buf = (buf == nil or buf == 0) and vim.api.nvim_get_current_buf() or buf
+  if ft_cache.buf ~= buf then
+    ft_cache = { buf = buf, ft = vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].filetype or nil }
+  end
+  return ft_cache.ft
+end
 
 -- The PascalCase rule is for component patterns the initializer test cannot see: `styled.div`,
 -- `memo(…)`, `forwardRef(…)`. Plain arrow components already match as "function". Restricted
@@ -334,7 +368,7 @@ return {
             -- Functions, types, hooks and React components all arrive as Variable/Constant
             -- from vtsls (arrow functions, type aliases, call results), so rescue those and
             -- let plain values fall through. JS/TS only, see JS_FILETYPES.
-            local filetype = vim.bo[item.buf or 0].filetype
+            local filetype = filetype_of(item.buf)
             if JS_FILETYPES[filetype] and (item.kind == "Variable" or item.kind == "Constant") then
               if js_variable_role(item) ~= nil or has_callable_child(item) then
                 return true
@@ -384,16 +418,32 @@ return {
         -- overflow a narrow panel). Empty-named symbols fall back to their signature text.
         format = "{kind_icon} {symbol.name}",
         formatters = {
+          -- The default `kind_icon` reads `item.kind`, which vtsls sets to Variable for
+          -- arrow functions, components and `type` aliases alike. `js_variable_role` has
+          -- already classified the row for the filter above, so reuse that verdict here and
+          -- the icon says what the filter decided. Non-JS rows and unclassified variables
+          -- fall through to exactly the built-in behaviour (format.lua: kind_icon).
+          ["kind_icon"] = function(ctx)
+            local item = ctx.item
+            local kind = item.kind
+            if not kind then
+              return
+            end
+            if JS_FILETYPES[filetype_of(item.buf)] and (kind == "Variable" or kind == "Constant") then
+              kind = ROLE_KIND[js_variable_role(item)] or kind
+            end
+            local icon = ctx.opts.icons.kinds[kind]
+            if icon then
+              return { text = icon, hl = "TroubleIcon" .. kind }
+            end
+          end,
           ["symbol.name"] = function(ctx)
             local name = ctx.value
             local item = ctx.item
             -- Label a hook row with the hook, then the variable it binds (dimmed): the useful
             -- identity of `const checkout = useRecurringCheckout()` is the hook, but the name
             -- is what you search the file for, so show both.
-            if
-              JS_FILETYPES[vim.bo[item.buf or 0].filetype]
-              and (item.kind == "Variable" or item.kind == "Constant")
-            then
+            if JS_FILETYPES[filetype_of(item.buf)] and (item.kind == "Variable" or item.kind == "Constant") then
               local role, hook = js_variable_role(item)
               if role == "hook" and hook ~= name then
                 return { { text = hook }, { text = "  " .. tostring(name), hl = "Comment" } }
