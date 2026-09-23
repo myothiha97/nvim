@@ -14,13 +14,30 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
--- ── Trouble outline: scroll the code, don't highlight it ───────────────────
+-- ── Trouble outline: scroll the code, don't highlight the symbol ───────────
 -- When you move (or navigate the symbols panel), Trouble previews the symbol in
--- the code window: it scrolls there (wanted) AND paints the range with the
--- `TroublePreview` group (unwanted cue). Clearing that group removes the paint
--- while keeping the auto-scroll. Re-applied on every ColorScheme so it survives
--- theme switches; Trouble links its own groups with `default = true`, so this
--- user-set (non-default) definition always wins.
+-- the code window: it scrolls there (wanted) AND paints it (unwanted cue).
+-- `preview.type` defaults to "main", so the preview buffer IS your real file.
+--
+-- It paints TWO extmarks (trouble/view/preview.lua), and this only kills one:
+--   * the symbol RANGE, `TroublePreview`, priority 160 -- cleared here.
+--   * the whole LINE, hl_group hardcoded to `CursorLine`, hl_eol, priority 150.
+--
+-- The line one is NOT cleared, and is NOT a bug to fix if you ever see it. It
+-- paints nothing while `CursorLine` is `bg = NONE`, which is how the theme ships
+-- (colorschemes/solarized-osaka/init.lua) -- so today it is invisible. It became
+-- visible for a few hours on 2026-09-23 while the cursor line band was on, was
+-- reviewed, and was KEPT: it marks which line the outline points at when you move
+-- inside the panel. So if the band is ever switched back on, expect this back too.
+--
+-- It cannot be recoloured or scoped: the group is hardcoded in the plugin, so any
+-- change to it also changes the editor's own cursor row. Removing just the band
+-- would mean clearing trouble's extmarks after every preview, or patching the
+-- plugin. Do neither.
+--
+-- Re-applied on every ColorScheme so it survives theme switches; Trouble links
+-- its own groups with `default = true`, so this user-set (non-default)
+-- definition always wins.
 local function clear_trouble_preview_hl()
   pcall(vim.api.nvim_set_hl, 0, "TroublePreview", {})
 end

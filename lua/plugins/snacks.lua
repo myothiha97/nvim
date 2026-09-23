@@ -22,10 +22,9 @@ local function clear_smart_picker_history()
 end
 
 -- Active-file band for the Explorer list (same color as OilCursorLine).
--- The themes disable CursorLine globally (bg NONE — see
--- colorschemes/solarized-osaka/init.lua), so the row that snacks' `follow_file`
--- parks on the active file renders invisible. A winhighlight remap (the
--- oil.nvim approach) doesn't work here: snacks rewrites the list window's
+-- The explorer needs its OWN band: the active file is not the cursor row, so the
+-- editor's CursorLine never marks it. A winhighlight remap (the oil.nvim
+-- approach) doesn't work here either: snacks rewrites the list window's
 -- CursorLine winhighlight entry on every render, which also replaces the
 -- window's highlight namespace. Instead, the explorer `format` wrapper below
 -- appends a full-width line_hl_group extmark to the active file's row —
@@ -223,8 +222,14 @@ return {
       -- the explorer format wrapper, so no other picker or window is affected.
       --
       -- Raised from #073642 (solarized base02) on 2026-09-04. Both axes moved a
-      -- little, and the CEILING is what decided how far: the cursor-row band is
-      -- `Visual` (#3b4261, L* 28.6), and these two must stay tellable apart.
+      -- little, and the CEILING is what decided how far: the cursor-row band, which
+      -- must stay tellable apart from this one, is #3b4261 / L* 28.6.
+      --
+      -- That band is `ListCursorLine` since 2026-09-23, NOT `Visual`. It carries
+      -- the same value, so the numbers below still hold -- but the reason it is
+      -- now its own group is that `Visual` moved (to violet900, for readability on
+      -- selected code) and would otherwise have dragged this relationship with it.
+      -- Retune against `ListCursorLine` in colorschemes/solarized-osaka/init.lua.
       --
       --   #073642  L* 20.3  C* 15.6   was: 8.3 L* below the cursor row
       --   #003f52  L* 24.2  C* 19.4   now: 4.4 L* below it, +3.9 L*, +3.8 chroma

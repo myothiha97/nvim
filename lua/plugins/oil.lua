@@ -709,9 +709,10 @@ return {
     default_file_explorer = true,
     skip_confirm_for_simple_edits = true,
     view_options = { show_hidden = true },
-    -- CursorLine is disabled globally (see colorschemes/solarized-osaka/init.lua),
-    -- so remap it to OilCursorLine for Oil windows only. Applied once per
-    -- window by Oil itself — no CursorMoved autocmd, zero hot-path cost.
+    -- Oil is a LIST, so its current row needs a stronger band than the editor's
+    -- quiet one (see colorschemes/solarized-osaka/init.lua): remap CursorLine to
+    -- OilCursorLine for Oil windows only. Applied once per window by Oil itself —
+    -- no CursorMoved autocmd, zero hot-path cost.
     win_options = {
       cursorline = true,
       winhighlight = OIL_WINHIGHLIGHT,
