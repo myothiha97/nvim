@@ -627,8 +627,9 @@ return {
       -- snacks picker's `border = true` resolves to `rounded` because
       -- `winborder` is unset, and the hover float asks for `rounded` directly
       -- in `config/options.lua` and `plugins/lsp.lua`.
-      hl.LspDocBorder = { fg = c.cyan700, bg = c.bg_float }
       hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float }
+      -- A link, so the hover ring can never drift from every other popup's.
+      hl.LspDocBorder = "FloatBorder"
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 
       -- Inline code chips in a hover doc. The theme's yellow-on-dark-green fill
