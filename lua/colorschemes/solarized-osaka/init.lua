@@ -356,8 +356,52 @@ return {
       -- so imports read as diagnostics in every language except Go.
       hl["@module"] = { fg = c.base2 }
 
-      hl.Visual = { bg = "#3b4261" }
-      hl.VisualNOS = { bg = "#3b4261" }
+      -- Selection band. Was tokyonight's `#3b4261`, an import that ended up being
+      -- the LIGHTEST surface in the editor (L* 28.6, above even oil's list band)
+      -- while carrying almost no hue (C* 20) -- so it identified itself by
+      -- BRIGHTNESS, read as a grey-white sheet, and washed out the code under it.
+      -- Measured 2026-09-23: comments sat at 2.05:1 and keywords at 2.91:1 on it,
+      -- i.e. selecting a block made it harder to read exactly while you checked
+      -- what you had selected.
+      --
+      -- The replacement sits on the theme's OWN violet (`violet900` = #24275a,
+      -- hue 297, C* 35): 7 L* darker, 74% more chroma, so it identifies by HUE
+      -- instead of by being the brightest thing on screen. Every role improves --
+      -- body 4.62 -> 6.53:1, keyword 2.91 -> 4.11:1, comment 2.05 -> 2.89:1 -- and
+      -- it pulls further from every other band (dE to CursorLine 21.8 -> 31.5, to
+      -- oil's 20.2 -> 33.0, to the explorer's active file 16.8 -> 30.3).
+      --
+      -- TRIED TWICE AND REJECTED BOTH TIMES, same day: a brighter rung at the same
+      -- hue and chroma, `#2b2d61` (violet900 lifted L* 18.2 -> 21.0, dC* 0.04, dh
+      -- 0.07 deg). dE2000 between the two is only **1.95**, just over the
+      -- just-noticeable difference, so it is a real but marginal change -- viewed
+      -- side by side on the real panel, violet900 won.
+      --
+      -- The lift was for SMALL selections: a `viw` on one word is located by the
+      -- band popping, not by its shape, and violet900 lifts 1.40:1 off the
+      -- background where the old #3b4261 lifted 1.97:1 (a tiny mark reads
+      -- LIGHTNESS first; chroma needs area to register). `#2b2d61` gets that to
+      -- 1.52:1 -- and it was not worth what it cost.
+      --
+      -- WHAT IT COSTS, and THE CEILING if anyone reopens this: every role loses
+      -- ~8% of contrast on the band, and the function blue `#359ee9` -- the
+      -- dimmest thing that lands on a selection often in TS/JS -- goes 4.77 ->
+      -- 4.37:1. Blue is the binding constraint and falls away fast: 4.11:1 at
+      -- #303166 (L* 22.9), 3.82:1 at #35366b (L* 25.1). DO NOT GO PAST #303166.
+      -- Only LIGHTNESS moves on this ladder; hue 297 and C* 35 are what keep the
+      -- band theme-native.
+      --
+      -- And note what AA does NOT settle here: no usable band reaches 4.5:1 on the
+      -- dim roles. violet900 gets 5 of 9 roles there, `#2b2d61` 4 of 9, the old
+      -- #3b4261 only 2 of 9. Compare bands against each other, not the threshold.
+      --
+      -- WARN: THIS PAINTS THREE SURFACES, not one. `Visual` is also the outline
+      -- panel's followed row (trouble.lua remaps CursorLine -> Visual) and the
+      -- snacks picker's focused row (snacks links it `default = true`). Both are
+      -- LISTS, where a band is the only marker -- if either feels weak after this,
+      -- pin that one back to the old lighter value rather than raising this.
+      hl.Visual = { bg = c.violet900 }
+      hl.VisualNOS = { bg = c.violet900 }
 
       -- The theme's `yellow700` gutter is a CHROMA problem, not a lightness one:
       -- it read as content competing with code. #2d3f43 is a low-chroma cool grey
@@ -368,33 +412,57 @@ return {
       hl.LineNrAbove = { fg = "#2d3f43" }
       hl.LineNrBelow = { fg = "#2d3f43" }
 
-      -- Current-line band, OFF. Tried 2026-09-08 at `#032732` and parked, not
-      -- rejected -- swap the two lines below to re-enable. The `cursorline`
-      -- OPTION is already on, so this line is the whole switch. Bounds, the
-      -- tested ladder, and why chroma is not an axis here:
-      -- notes/palette-reference.md, "Cursor line".
-      hl.CursorLine = { bg = "NONE" }
-      -- hl.CursorLine = { bg = "#032732" }
+      -- Current-line band, ON since 2026-09-23 (it was parked at `bg = "NONE"`
+      -- from 2026-09-08). The `cursorline` OPTION is already on, so this line is
+      -- the whole switch. Bounds, the tested ladder, and why chroma is not an
+      -- axis here: notes/palette-reference.md, "Cursor line".
+      --
+      -- NOT the theme's own default. Upstream sets `CursorLine = { bg = c.base03 }`
+      -- (#002c38, groups/editor.lua) and that value is a hair TOO LIGHT for this
+      -- palette: re-measured 2026-09-23 against the retuned syntax colours and the
+      -- background's real value (#001014), it puts the violet keyword at 4.39:1 and
+      -- the operator grey at 4.51:1 -- i.e. keywords fall under AA on the one line
+      -- you are reading. #032732 is 2.1 L* darker, keeps every accent at 4.64:1 or
+      -- better, and is still a clearly visible band (1.236:1 over the background,
+      -- the same band/bg relationship tokyonight ships).
+      hl.CursorLine = { bg = "#032732" }
 
       -- The current-line number indicator. Change the value here.
       hl.CursorLineNr = {
         fg = palette.variants.punctuation.explored.copper,
       }
-      -- Oil-only current-row band, since CursorLine is off globally. Oil remaps
-      -- CursorLine -> OilCursorLine via winhighlight.
+      -- Oil-only current-row band: a file list wants a heavier row marker than
+      -- the editor's quiet CursorLine. Oil remaps CursorLine -> OilCursorLine via
+      -- winhighlight.
       hl.OilCursorLine = { bg = c.base02 }
 
-      -- `SnacksPickerListCursorLine` is deliberately NOT defined here. Leaving it
-      -- alone is what restores the pre-2026-09-09 picker cursor row: snacks
-      -- creates it as a `default = true` link to `Visual` (picker/core/list.lua:86
-      -- via util/highlight.lua `winhl`), so the focused list row lands on
-      -- `Visual` -- #3b4261, violet, hue 287 -- which is what every month up to
-      -- then looked like.
+      -- The focused row of a LIST panel -- picker, picker preview, and the outline
+      -- panel, which remaps its CursorLine here (lua/plugins/trouble.lua).
       --
-      -- It was pinned to base02 on 2026-09-09 to share oil's band, and reverted
-      -- 2026-09-11: base02 is a dark TEAL, the same hue family as the explorer's
-      -- active-file band (#003f52), so the focused row and the open file read as
-      -- one thing. Violet against that teal is the separation.
+      -- It used to BE `Visual`: snacks links its groups to `Visual` with
+      -- `default = true` (picker/core/list.lua:86 and picker/core/preview.lua:58,
+      -- via util/highlight.lua `winhl`), so every one of these inherited the
+      -- selection colour. That is why moving `Visual` to violet900 on 2026-09-23
+      -- repainted the picker and the explorer too. `default = true` means an
+      -- explicit definition here WINS and snacks will not overwrite it, so pinning
+      -- the group is the whole fix -- and it keeps `Visual` meaning visual mode.
+      --
+      -- The value is the OLD `Visual` (tokyonight `#3b4261`), kept on purpose: a
+      -- one-column list has no code under the band to wash out, and its only
+      -- marker is the band, so here BRIGHTNESS is the right signal -- the opposite
+      -- of the editor, where it cost 40% of the contrast on every syntax role.
+      --
+      -- It is also what the explorer's active-file band was tuned against: that
+      -- band (#003f52, L* 24.2) was set 4.4 L* BELOW this one on 2026-09-04, and
+      -- pinning restores that relationship (see lua/plugins/snacks.lua).
+      --
+      -- Do NOT give this the teal `base02`: tried 2026-09-09, reverted 2026-09-11,
+      -- because it is the same hue family as the active-file band and the focused
+      -- row then reads as one thing with the open file. Violet against that teal
+      -- is the separation.
+      hl.ListCursorLine = { bg = "#3b4261" }
+      hl.SnacksPickerListCursorLine = "ListCursorLine"
+      hl.SnacksPickerPreviewCursorLine = "ListCursorLine"
       --
       -- WARN: SILENT FAILURE -- this CANNOT be scoped to the explorer alone, and
       -- both ways of trying look like they work until you look at the window:

@@ -931,17 +931,30 @@ to treesitter (`foregrounds = {}`), so this is what paints them.
 
 ### Cursor line
 
-`CursorLine` is disabled globally (`bg = NONE`); re-enable with a custom colour
-such as `#073642` to restore the band. `OilCursorLine` is a dedicated current-row
-band for oil only: oil windows remap `CursorLine` → `OilCursorLine` via
-`winhighlight`, so the band returns in oil without touching buffers.
+**LIVE at `#032732` since 2026-09-23.** It was tried on 2026-09-08, judged "not
+bad", parked at `bg = NONE`, and turned back on. The `cursorline` **option** is
+always on, so the highlight is the whole switch.
 
-### Cursor line (parked, off)
+`OilCursorLine` (`#063540`) and the outline panel's `CursorLine → Visual` remap
+stay: a LIST wants a heavier row marker than a text buffer, where the band has to
+sit under code without dimming it.
 
-Tried 2026-09-08 at `#032732`, judged "not bad", switched back off. Parked, not
-rejected — `init.lua` keeps the value as a commented one-line swap. The
-`cursorline` **option** is already on; only the highlight is blank, so that one
-line is the whole switch.
+**The theme's own default is NOT used, and that is the finding.** Upstream ships
+`CursorLine = { bg = c.base03 }` = `#002c38`. Re-measured 2026-09-23 against the
+**retuned** palette and the real background `#001014` (the table below was taken
+on the dead salmon build, against a different bg), it is one rung too light:
+
+| band | L\* | dL\* over bg | band/bg | worst accent | verdict |
+| --- | --- | --- | --- | --- | --- |
+| `#032732` | 13.8 | +10.0 | 1.236:1 | violet `#a17bcc` 4.64:1 | **live**, AA-safe |
+| `#002839` | 14.5 | +10.7 | 1.257:1 | violet 4.57:1 | last AA-safe rung |
+| `#002c38` | 15.9 | +12.1 | 1.307:1 | violet 4.39:1 | theme default — **sub-AA** |
+| `#063540` | 19.9 | +16.1 | 1.467:1 | violet 3.91:1 | oil's list band |
+
+At the theme default the violet keyword lands at 4.39:1 and the operator grey at
+4.51:1 — keywords fall under AA on the one line you are reading. The worst accent
+is now the **violet keyword**, not salmon: salmon is gone from the build.
+Comments unavoidably dip (4.03:1 → 3.26:1); every cursorline does that.
 
 Synthesised on the background's own hue rather than taken from the theme's ramp,
 and bounded from both sides:
@@ -951,6 +964,11 @@ and bounded from both sides:
   Same "match the relationship, not the hex" invariant as `LineNr`.
 - **Ceiling** — it must not push text under AA on the cursor row. The dimmest
   accents bind: at this value salmon is 4.63:1 and violet 4.66:1.
+
+**The table below is the ORIGINAL 2026-09-08 measurement**, kept for the method,
+not for its numbers: it was taken on the salmon build against the older
+background, so its ratios are ~0.01–0.02 off the live ones above. Where the two
+disagree, the table above wins.
 
 | band | L\* | band/bg | worst accent | note |
 | --- | --- | --- | --- | --- |

@@ -273,12 +273,17 @@ return {
           position = "right",
           size = 0.28, -- dock right, ~28% of editor width
           wo = {
-            -- `follow` marks the current symbol via cursorline. Your themes set the global
-            -- CursorLine bg to NONE, so re-enable a VISIBLE current-line ONLY in this panel
-            -- (winhighlight remaps CursorLine -> Visual here), leaving code buffers untouched.
+            -- `follow` marks the current symbol via cursorline. The editor's own band is a
+            -- dim teal tuned to stay under text (colorschemes/solarized-osaka/init.lua); in a
+            -- one-column list the followed row has to POP, so remap CursorLine to the shared
+            -- list band for this panel only, leaving code buffers on the quiet band.
+            --
+            -- `ListCursorLine`, NOT `Visual`: this pointed at `Visual` until 2026-09-23, which
+            -- meant retuning the selection colour silently repainted the outline and every
+            -- snacks picker with it. The panels now share one group of their own.
             cursorline = true,
             cursorlineopt = "line",
-            winhighlight = "CursorLine:Visual",
+            winhighlight = "CursorLine:ListCursorLine",
             -- Hybrid line numbers for count-jumps (7j / 8k) after focusing the panel (<C-w>l).
             number = true,
             relativenumber = true,
