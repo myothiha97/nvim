@@ -44,13 +44,17 @@ local builds = {
       -- worst chromatic pair 14.2 -> 16.5, tightest colour-blind pair 2.3 -> 4.8.
       delimiter = palette.variants.delimiter.mid_high,
       bracket = palette.variants.delimiter.mid_high,
+      -- Body text: `tinted` since 2026-09-21, replacing `midpoint`, which read a
+      -- little faded after some use. The 2026-09-09 notes below are why midpoint
+      -- was chosen over base0/brighter; they still describe the ladder.
+      --
       -- Body text, 2026-09-09. `brighter` (#b1bebf) read as too bright and
       -- base0 (#9eabac) sat only dE00 8.7 from the delimiter grey above, inside
       -- the band where two values read as one colour. This midpoint clears it at
       -- 11.2. The JSX/TSX/HTML/Vue tag wrappers TRACK THIS VALUE in init.lua --
       -- they used to be pinned to base0 separately, which this change would have
       -- left a bare JND away from body. Ladder and rejects in palette.lua.
-      body = palette.variants.body.tinted, -- the previous value is midpoint but i feel a bit fade after some use so replace it with tinted white
+      body = palette.variants.body.tinted,
 
       func = palette.variants.func.vivid,
 

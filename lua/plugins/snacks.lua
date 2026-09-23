@@ -262,8 +262,8 @@ return {
   end,
   opts = {
     -- Enabled for the <leader>r tree sidebar, but it must not claim directory
-    -- buffers: oil.nvim owns netrw and is the file explorer on <leader>e, and
-    -- the snacks explorer itself takes `nvim <dir>` (lua/plugins/oil.lua).
+    -- buffers: oil.nvim owns netrw, is the file explorer on <leader>e, and also
+    -- opens `nvim <dir>` as its popup box (lua/plugins/oil.lua).
     explorer = { enabled = true, replace_netrw = false },
     dashboard = {
       enabled = true,

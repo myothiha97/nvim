@@ -36,7 +36,7 @@
 --   darker MUST mean less teal. Geometry, not taste -- don't go hunting.
 -- * NOT THE READABILITY LEVER. Every text contrast ratio scales by the same ~2%
 --   across the whole ladder, so the theme's dimmest-to-brightest spread stays
---   8.5x on every rung. Five groups sit under 4.5:1 (LineNr worst, 1.78:1) and
+--   8.5x on every rung. Five groups sit under 4.5:1 (LineNr worst: 1.78:1 then, 2.44:1 since its 2026-09-23 raise) and
 --   Delimiter over 12:1 where it can glow on near-black; no rung moves any of them
 --   across a threshold. Fix those groups instead.
 
@@ -45,7 +45,7 @@
 local candidates = {
   -- R=0 family -- teal preserved. Green and blue move together, red stays out.
   teal_lightest = "#001116", -- L* 4.14  C* 6.01  113% teal  untried; more teal than the "too teal" mark
-  teal_light = "#001014", ----- L* 3.80  C* 5.28   99% teal  untried; the full original teal, one rung lighter
+  teal_light = "#001014", ----- L* 3.80  C* 5.28   99% teal  LIVE (bg below); the full original teal, one rung lighter
   teal = "#000f13", ---------- L* 3.51  C* 4.91   92% teal  tried; 0.81 L* below the start, just under a JND
   teal_dark = "#000e12", ----- L* 3.23  C* 4.55   85% teal  tried; 1.09 L* below the start, read as "very dark"
   teal_darker = "#000d11", --- L* 2.97  C* 4.21   79% teal  untried; below the floor, so teal starts dropping

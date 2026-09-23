@@ -12,7 +12,7 @@ vim.g.loaded_matchparen = 1
 -- up from `config/autocmds.lua` would be registered too late to see it.
 if vim.v.startreason == "restart" then
   -- `nvim <dir>` comes back with the directory still in the arglist and already
-  -- open in a buffer, so the snacks explorer opens over the restore, and oil
+  -- open in a buffer, so the oil startup box opens over the restore, and oil
   -- claims that buffer and finishes its async load in the window the session has
   -- meanwhile moved to the restored file, tagging that file `filetype=oil`. The
   -- session carries the layout, so leave startup nothing to act on. Only the
