@@ -413,22 +413,38 @@ local function editor_scroll_or_arrow(scroll_key, arrow_key)
   end
 end
 
-vim.keymap.set("n", "<Up>", editor_scroll_or_arrow("<C-e>", "<Down>"), {
-  expr = true,
-  desc = "Scroll Viewport Down",
-})
-vim.keymap.set("n", "<Down>", editor_scroll_or_arrow("<C-y>", "<Up>"), {
-  expr = true,
-  desc = "Scroll Viewport Up",
-})
-vim.keymap.set("n", "<Right>", editor_scroll_or_arrow("2zl", "<Right>"), {
-  expr = true,
-  desc = "Scroll Viewport Right",
-})
-vim.keymap.set("n", "<Left>", editor_scroll_or_arrow("2zh", "<Left>"), {
-  expr = true,
-  desc = "Scroll Viewport Left",
-})
+local arrow_scroll_maps = {
+  { "<Up>", "<C-e>", "<Down>", "Scroll Viewport Down" },
+  { "<Down>", "<C-y>", "<Up>", "Scroll Viewport Up" },
+  { "<Right>", "2zl", "<Right>", "Scroll Viewport Right" },
+  { "<Left>", "2zh", "<Left>", "Scroll Viewport Left" },
+}
+local arrow_scroll_enabled = false
+
+local function set_arrow_scroll(enable)
+  for _, m in ipairs(arrow_scroll_maps) do
+    if enable then
+      vim.keymap.set("n", m[1], editor_scroll_or_arrow(m[2], m[3]), { expr = true, desc = m[4] })
+    else
+      -- Deleting (not remapping to itself) restores native cursor movement.
+      pcall(vim.keymap.del, "n", m[1])
+    end
+  end
+  arrow_scroll_enabled = enable
+end
+
+set_arrow_scroll(true)
+
+-- On by default. Toggled per session; the check runs once per toggle, not per keypress.
+Snacks.toggle
+  .new({
+    name = "Arrow Keys Scroll",
+    get = function()
+      return arrow_scroll_enabled
+    end,
+    set = set_arrow_scroll,
+  })
+  :map("<leader>uv")
 
 vim.keymap.set({ "n", "v" }, "<C-f>", "<C-f>zz", { desc = "Scroll Down Page and Recenter" })
 vim.keymap.set({ "n", "v" }, "<C-b>", "<C-b>zz", { desc = "Scroll Up Page and Recenter" })
