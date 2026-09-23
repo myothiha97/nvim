@@ -326,7 +326,7 @@ reconciled snapshot, and a running editor is the only authority.
 
 ## Silent-failure surfaces — read before debugging "my change did nothing"
 
-Fifteen places in this config accept a wrong value and **do nothing** rather than
+Eighteen places in this config accept a wrong value and **do nothing** rather than
 erroring: unresolved picker action names get typed as keystrokes, an action name
 matching a snacks built-in replaces it everywhere, spelling out a layout `box`
 drops the preset's overrides, `virt_lines_above` on line 1 renders nothing while

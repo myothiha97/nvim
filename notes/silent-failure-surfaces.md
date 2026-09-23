@@ -127,6 +127,40 @@ role assignment is edited, grep that the key appears **once**:
 `grep -c "^  delimiter = " lua/colorschemes/solarized-osaka/palette.lua`
 *File:* `lua/colorschemes/solarized-osaka/palette.lua`
 
+### 16. An autocmd never fires from inside another autocmd's callback
+Found on 2026-09-23 with the `n`/`N` hunk-stepping keys of the `ghp` preview. They
+were cleaned up from a `WinClosed` autocmd. gitsigns closes its preview on cursor
+move from inside its own (non-`nested`) `CursorMoved` autocmd, and Neovim does not
+trigger autocmds from inside an autocmd callback unless the outer one is `nested`.
+So `WinClosed` never ran on that path: the keys stayed taken and one dead autocmd
+per preview piled up, with nothing logged. `q` and `:close` fire it normally, which
+is why a quick test passes.
+
+The fix listens on our own buffer-local `CursorMoved` and checks the popup
+*scheduled*, so it runs after gitsigns' callback whatever the order. The rule: when
+cleanup hangs off an event, ask whether the thing you are watching is closed by a
+plugin from inside an autocmd; if so, that event will not reach you.
+*File:* `lua/plugins/git.lua`
+
+### 17. Folding the Trouble outline while the PREVIOUS file's tree is on screen
+Found on 2026-09-24. The outline folds itself to declarations from its `filter`,
+but the filter runs before Trouble builds and renders the new tree, and both steps
+are scheduled. The old check (`max_depth > 0`) passed on the previous file's tree,
+so the fold landed on the old buffer's nodes and the new file rendered fully open.
+It also skipped the fold on every reopen and after an empty first open, because it
+remembered one global "last folded buffer". Fixed by folding only when the rendered
+tree is the one the section built last and it belongs to the buffer, with marks
+kept per (view, buffer).
+*File:* `lua/plugins/trouble.lua` (`shows_latest_tree_of`)
+
+### 18. Trouble outline node ids built from POSITIONS unfold everything after an edit
+Found on 2026-09-24. Trouble keeps fold state per node id, and the LSP source builds
+the id from the symbol's range. Adding one import line gave every symbol below it a
+new id, and a node Trouble has never seen renders open: the whole outline unfolded,
+and anything you had opened was forgotten. Fixed by replacing the id with the
+symbol's path (buffer, ancestor `kind:name` chain, duplicate counter).
+*File:* `lua/plugins/trouble.lua` (`assign_path_ids`)
+
 ## Related
 
 - Structural traps and the parked-plugin rule: repo-root `CLAUDE.md`
