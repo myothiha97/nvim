@@ -312,15 +312,24 @@ return {
             text = { { self.opts.preset.header, hl = "header" } },
           }
         end,
-        function()
+        function(self)
           -- `:~` keeps $HOME as `~`; `hl = "dir"` resolves to SnacksDashboardDir,
           -- which snacks links to NonText, so the path reads dimmer than the
           -- greeting instead of competing with it.
+          --
+          -- A path wider than the pane (minus the 2-cell indent) is not clipped by
+          -- snacks: it re-centres and starts LEFT of the greeting. Keep the tail,
+          -- which names the project, behind a leading `…`.
+          local cwd = vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+          local max = (self.opts.width or 60) - 2
+          if vim.fn.strdisplaywidth(cwd) > max then
+            cwd = "…" .. vim.fn.strcharpart(cwd, vim.fn.strchars(cwd) - (max - 1))
+          end
           return {
             align = "left",
             indent = 2,
             padding = 2,
-            text = { { vim.fn.fnamemodify(vim.fn.getcwd(), ":~"), hl = "dir" } },
+            text = { { cwd, hl = "dir" } },
           }
         end,
         { section = "keys", gap = 1, padding = 1 },
