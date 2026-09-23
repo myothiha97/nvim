@@ -2,9 +2,9 @@ local backdrop_buf = nil
 local backdrop_win = nil
 local saved_winhl = {}
 
--- `true` opens Oil as a centred popup, both on <leader>e and on `nvim <dir>`.
--- `false` opens it fullscreen in the current window instead (the fullscreen
--- implementation is fully preserved below).
+-- `true` opens Oil as a centred popup on <leader>e. `false` opens it fullscreen
+-- in the current window instead (the fullscreen implementation is fully
+-- preserved below). `nvim <dir>` always uses the popup box, whatever this says.
 local USE_FLOAT = true
 
 -- Backdrop behind the popup: ON, deliberately, 2026-09-04. And it works now.
@@ -153,19 +153,28 @@ local function is_oil_float_open()
   return false, nil
 end
 
--- The startup box's winhighlight. Same as OIL_WINHIGHLIGHT further down except
--- for the border group, and declared HERE rather than beside it because Lua
--- locals are only visible below their declaration and the startup opener above
--- needs it.
-local STARTUP_WINHIGHLIGHT = "FloatBorder:OilStartupBorder,CursorLine:OilCursorLine"
+-- WARN: SILENT FAILURE. Must be set in BOTH `win_options` and
+-- `float.win_options`. Oil applies the top-level table AFTER the float one, so
+-- a float-only value is silently overwritten.
+-- Oil windows only, so every other float keeps its visible border. Set in BOTH
+-- `win_options` and `float.win_options` -- see the note at the second one.
+-- `FloatBorder` is simply unused in a real (non-float) Oil window.
+-- Declared up here, not beside the opts, because Lua locals are only visible
+-- below their declaration and the startup opener needs it.
+local OIL_WINHIGHLIGHT = "FloatBorder:OilFloatBorder,CursorLine:OilCursorLine"
 
---- The one way the popup is opened, so `<leader>e` and the `nvim <dir>` hook at
---- the bottom of this file both get the backdrop and neither can drift.
-local function open_oil_float(dir)
+-- The startup box differs only in its border group, so derive it rather than
+-- hand-copy the rest.
+local STARTUP_WINHIGHLIGHT = (OIL_WINHIGHLIGHT:gsub("OilFloatBorder", "OilStartupBorder"))
+
+--- How `<leader>e` opens the popup, so the backdrop and the search-highlight
+--- hiding always come with it. The `nvim <dir>` box has its own opener
+--- (open_startup_oil) because it deliberately has no backdrop.
+local function open_oil_float()
   if USE_BACKDROP then
     create_backdrop()
   end
-  require("oil").open_float(dir)
+  require("oil").open_float()
   if USE_BACKDROP then
     -- Search highlights in the windows underneath would otherwise glow through
     -- the backdrop; restored by close_backdrop.
@@ -230,6 +239,14 @@ local function open_startup_oil(dir)
   local group = vim.api.nvim_create_augroup("oil_startup_border", { clear = true })
   local target_win = nil
 
+  local function paint(win)
+    vim.schedule(function()
+      if vim.api.nvim_win_is_valid(win) then
+        vim.wo[win].winhighlight = STARTUP_WINHIGHLIGHT
+      end
+    end)
+  end
+
   vim.api.nvim_create_autocmd("FileType", {
     group = group,
     pattern = "oil",
@@ -242,11 +259,21 @@ local function open_startup_oil(dir)
         target_win = win
       end
       if target_win and win == target_win then
-        vim.schedule(function()
-          if vim.api.nvim_win_is_valid(win) then
-            vim.wo[win].winhighlight = STARTUP_WINHIGHLIGHT
-          end
-        end)
+        paint(win)
+      end
+    end,
+  })
+
+  -- Re-ENTERING the box (back from the `g?` help float or oil's delete-confirm popup)
+  -- fires no FileType, but oil's global BufEnter handler re-applies its win_options
+  -- and wipes the ring again. Repaint on that path too; scheduled for the same reason.
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group = group,
+    pattern = "oil://*",
+    callback = function()
+      local win = vim.api.nvim_get_current_win()
+      if target_win and win == target_win then
+        paint(win)
       end
     end,
   })
@@ -541,14 +568,6 @@ local function set_oil_winbar(win)
   vim.wo[win].winbar = string.rep(" ", indent) .. table.concat(parts) .. " %#WinSeparator#" .. divider .. "%*"
 end
 
--- WARN: SILENT FAILURE. Must be set in BOTH `win_options` and
--- `float.win_options`. Oil applies the top-level table AFTER the float one, so
--- a float-only value is silently overwritten.
--- Oil windows only, so every other float keeps its visible border. Set in BOTH
--- `win_options` and `float.win_options` -- see the note at the second one.
--- `FloatBorder` is simply unused in a real (non-float) Oil window.
-local OIL_WINHIGHLIGHT = "FloatBorder:OilFloatBorder,CursorLine:OilCursorLine"
-
 -- Oil's own highlight groups.
 --
 -- The label is the theme's azure blue, read from the syntax palette by ROLE
@@ -637,12 +656,11 @@ local function set_oil_highlights()
   -- Matched to the SNACKS PICKER's border, so every framed panel in this config
   -- wears the same ring. A LINK, not a copied hex, so it tracks the picker.
   --
-  -- The whole group, foreground AND background. Taking only the fg was tried on
-  -- 2026-09-19 and the ring vanished: SnacksPickerBorder's fg is #063540, which
-  -- against this float's NormalFloat (#001014) is too dark to see. What makes
-  -- the picker's frame legible is its BACKGROUND (#001014) sitting darker than
-  -- the surround -- the coloured line alone is not the effect. Do not "fix" the
-  -- background difference; it is the separation.
+  -- The whole group is linked, not just the fg. That makes no visual difference
+  -- (SnacksPickerBorder's background equals NormalFloat's, so only the fg line
+  -- is painted either way), but a link tracks the picker for free. A fg-only
+  -- version was blamed for the ring not appearing on 2026-09-19; the real cause
+  -- was the winhighlight never applying (see open_startup_oil), not the colour.
   --
   -- Falls back to `delimiter` by ROLE, not a hex, the way OilPathSegment reads
   -- `func` -- the theme's neutral "structure carrying no meaning" grey. That
@@ -709,8 +727,8 @@ return {
     default_file_explorer = true,
     skip_confirm_for_simple_edits = true,
     view_options = { show_hidden = true },
-    -- Oil is a LIST, so its current row needs a stronger band than the editor's
-    -- quiet one (see colorschemes/solarized-osaka/init.lua): remap CursorLine to
+    -- Oil is a LIST, so its current row needs a band even though the editor's
+    -- own CursorLine is off (see colorschemes/solarized-osaka/init.lua): remap CursorLine to
     -- OilCursorLine for Oil windows only. Applied once per window by Oil itself —
     -- no CursorMoved autocmd, zero hot-path cost.
     win_options = {
@@ -821,7 +839,7 @@ return {
     set_oil_highlights()
     vim.api.nvim_create_autocmd("ColorScheme", { callback = set_oil_highlights })
 
-    -- `nvim <dir>` opens the SNACKS tree explorer fullscreen over a blank buffer.
+    -- `nvim <dir>` opens the oil popup box (open_startup_oil) over a blank buffer.
     --
     -- The hook lives here, in oil's own `config`, on purpose. snacks.nvim already
     -- has exactly one `init` (lua/plugins/snacks.lua) and CLAUDE.md allows only
@@ -832,12 +850,12 @@ return {
     --
     -- Oil owns netrw, so by VimEnter it has already claimed the directory
     -- buffer and put itself in the window fullscreen. Left alone that sits
-    -- behind the explorer, and closing the explorer would drop you into
-    -- fullscreen Oil instead of an empty editor -- so the directory buffer is
-    -- swapped for a blank listed one first.
+    -- behind the box, and closing the box would drop you into fullscreen Oil
+    -- instead of an empty editor -- so the directory buffer is swapped for a
+    -- blank listed one first.
     --
-    -- NOT gated on USE_FLOAT any more: that switch decides how `<leader>e`
-    -- presents Oil, and startup is no longer Oil's to present.
+    -- NOT gated on USE_FLOAT: that switch decides how `<leader>e` presents Oil;
+    -- the startup screen is always the popup box.
     --
     -- Only the plain single-directory start is claimed. File arguments, stdin
     -- and `:restart`'s session restore are left alone (init.lua already clears

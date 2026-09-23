@@ -114,7 +114,8 @@ local variants = {
     -- about #8c9899 (dE00 12.6), below which hidden files stop looking hidden.
     faded = "#919e9f",
     base0 = "#9eabac", -- the theme's own; also the pre-2026-09-05 @variable value
-    -- SELECTED 2026-09-09. LCh midpoint of base0 and brighter, same axis as both
+    -- SELECTED 2026-09-09, replaced by `tinted` on 2026-09-21 (variants.lua).
+    -- LCh midpoint of base0 and brighter, same axis as both
     -- (C*4.8 h206). Picked on measurement, not just as a compromise: base0's
     -- nearest neighbour is the delimiter grey at dE00 8.7, which is INSIDE the
     -- <10 band where two values read as one colour on small glyphs. This clears
@@ -127,7 +128,7 @@ local variants = {
     -- C*8 the value reads as bright as `brighter`, because chroma on the
     -- highest-dose role in the file lifts the whole page, not one mark.
     tinted_high_chroma = "#96b8bb", -- L*72.5 C*12.0  the far end before body reads teal
-    tinted = "#a0b6b8", -- L*72.5 C*8.0   8.94:1  read as too close to brighter
+    tinted = "#a0b6b8", -- L*72.5 C*8.0   8.94:1  first read as too close to brighter; LIVE body since 2026-09-21
     base1 = "#adb7b7", -- L*73.7  9.27:1  off-axis: loses a chroma stop, C*3.7 h199
     brighter = "#b1bebf", -- L*76.0  9.95:1  ran until 2026-09-09, read as too bright
     brightest = "#bcc9ca",

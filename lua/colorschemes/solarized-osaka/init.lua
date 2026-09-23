@@ -395,11 +395,9 @@ return {
       -- dim roles. violet900 gets 5 of 9 roles there, `#2b2d61` 4 of 9, the old
       -- #3b4261 only 2 of 9. Compare bands against each other, not the threshold.
       --
-      -- WARN: THIS PAINTS THREE SURFACES, not one. `Visual` is also the outline
-      -- panel's followed row (trouble.lua remaps CursorLine -> Visual) and the
-      -- snacks picker's focused row (snacks links it `default = true`). Both are
-      -- LISTS, where a band is the only marker -- if either feels weak after this,
-      -- pin that one back to the old lighter value rather than raising this.
+      -- `Visual` now paints visual mode only. The outline's followed row and the
+      -- snacks picker rows used to inherit it; since 2026-09-23 they are pinned to
+      -- `ListCursorLine` (below), so retuning this no longer repaints any panel.
       hl.Visual = { bg = c.violet900 }
       hl.VisualNOS = { bg = c.violet900 }
 
@@ -466,9 +464,9 @@ return {
       hl.CursorLineNr = {
         fg = palette.variants.punctuation.explored.copper,
       }
-      -- Oil-only current-row band: a file list wants a heavier row marker than
-      -- the editor's quiet CursorLine. Oil remaps CursorLine -> OilCursorLine via
-      -- winhighlight.
+      -- Oil-only current-row band: a file list needs a row marker even though the
+      -- editor's own CursorLine band is off. Oil remaps CursorLine -> OilCursorLine
+      -- via winhighlight.
       hl.OilCursorLine = { bg = c.base02 }
 
       -- The focused row of a LIST panel -- picker, picker preview, and the outline
@@ -482,10 +480,11 @@ return {
       -- explicit definition here WINS and snacks will not overwrite it, so pinning
       -- the group is the whole fix -- and it keeps `Visual` meaning visual mode.
       --
-      -- The value is the OLD `Visual` (tokyonight `#3b4261`), kept on purpose: a
-      -- one-column list has no code under the band to wash out, and its only
-      -- marker is the band, so here BRIGHTNESS is the right signal -- the opposite
-      -- of the editor, where it cost 40% of the contrast on every syntax role.
+      -- The value is the OLD `Visual` (tokyonight `#3b4261`), kept on purpose: in
+      -- a list the band is the only marker, so here BRIGHTNESS is the right signal
+      -- -- the opposite of the editor, where it cost 40% of the contrast on every
+      -- syntax role. The picker PREVIEW shares it and does show code, but only one
+      -- line under the band, and it wore this same value before 2026-09-23.
       --
       -- It is also what the explorer's active-file band was tuned against: that
       -- band (#003f52, L* 24.2) was set 4.4 L* BELOW this one on 2026-09-04, and
@@ -582,9 +581,10 @@ return {
       -- file-list value, and 8.19:1 read brighter than a doc needs to be.
       hl.LspDocFloat = { fg = palette.variants.body.faded or c.fg, bg = c.bg_float }
       -- FLOAT BORDERS, 2026-09-22, by preference. Both surfaces moved off the
-      -- theme's `yellow700` (#664c00) to `c.cyan900` (#103a3c) -- the faded end
-      -- of the same cyan ramp the string green `cyan500` sits on, read by theme
-      -- key rather than as a copied hex.
+      -- theme's `yellow700` (#664c00) to `c.cyan700` -- the faded end of the same
+      -- cyan ramp the string green `cyan500` sits on, read by theme key rather
+      -- than as a copied hex. First tried at `cyan900`, raised the same day
+      -- because it was too faint. Read the live value from `FloatBorder`.
       --
       -- `FloatBorder` is the FALLBACK ring for every popup that does not define
       -- one of its own (lazy.nvim, mason, diagnostic floats, gitsigns blame,
@@ -627,8 +627,9 @@ return {
       -- snacks picker's `border = true` resolves to `rounded` because
       -- `winborder` is unset, and the hover float asks for `rounded` directly
       -- in `config/options.lua` and `plugins/lsp.lua`.
-      hl.LspDocBorder = { fg = c.cyan700, bg = c.bg_float }
       hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float }
+      -- A link, so the hover ring can never drift from every other popup's.
+      hl.LspDocBorder = "FloatBorder"
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 
       -- Inline code chips in a hover doc. The theme's yellow-on-dark-green fill

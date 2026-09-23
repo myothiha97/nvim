@@ -17,16 +17,18 @@
 -- one case it still gets wrong: a linewise paste DELETES the input's line,
 -- collapsing two fences onto one row, and the pasted text is lost. So a
 -- single-line V is rewritten to its charwise equivalent, which replaces the
--- text without ever removing the line. Multi-line V and the results area keep
--- vim's own behaviour.
+-- text without ever removing the line. Multi-line V keeps vim's own behaviour.
+-- The map covers the whole grug-far buffer, results rows included: a single-line
+-- V p on a result row is rewritten the same way, which keeps the row and its
+-- extmark intact.
 local function reclaim_visual_paste(buf)
   for _, key in ipairs({ "p", "P" }) do
     vim.keymap.set("x", key, function()
-      -- An expr mapping starts a fresh command, so the count and register the
-      -- user already typed have to be put back or they are silently dropped.
-      local prefix = (vim.v.count > 0 and vim.v.count or "") .. '"' .. vim.v.register
+      -- The count and register typed before `p` are still pending when an expr
+      -- mapping returns, so return the bare key. Prefixing them again applied
+      -- the count twice (`viw2"rp` pasted 4 times, `viw3p` 99 times).
       if vim.fn.mode() ~= "V" or vim.fn.line("v") ~= vim.fn.line(".") then
-        return prefix .. key
+        return key
       end
       -- Clear the line's TEXT with "_D and type the register's in, so the line
       -- itself is never removed and no fence can move. Three traps, all
@@ -38,8 +40,10 @@ local function reclaim_visual_paste(buf)
       --   * pasting a LINEWISE register over a charwise selection still splits
       --     the line in three, so the text is inserted with its trailing
       --     newline cut rather than pasted.
-      -- "_D keeps the cleared text out of the registers.
-      return ('<Esc>0"_Di<C-r>=trim(getreg(\'%s\'), "\\n", 2)<CR><Esc>'):format(vim.v.register)
+      -- "_D keeps the cleared text out of the registers. <C-r><C-o> inserts the
+      -- text literally: plain <C-r> inserts it as if typed, so 'expandtab' turned
+      -- a yanked tab-indented line into spaces that no longer match the code.
+      return ('<Esc>0"_Di<C-r><C-o>=trim(getreg(\'%s\'), "\\n", 2)<CR><Esc>'):format(vim.v.register)
     end, {
       buffer = buf,
       expr = true,
