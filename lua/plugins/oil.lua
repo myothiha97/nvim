@@ -153,19 +153,28 @@ local function is_oil_float_open()
   return false, nil
 end
 
--- The startup box's winhighlight. Same as OIL_WINHIGHLIGHT further down except
--- for the border group, and declared HERE rather than beside it because Lua
--- locals are only visible below their declaration and the startup opener above
--- needs it.
-local STARTUP_WINHIGHLIGHT = "FloatBorder:OilStartupBorder,CursorLine:OilCursorLine"
+-- WARN: SILENT FAILURE. Must be set in BOTH `win_options` and
+-- `float.win_options`. Oil applies the top-level table AFTER the float one, so
+-- a float-only value is silently overwritten.
+-- Oil windows only, so every other float keeps its visible border. Set in BOTH
+-- `win_options` and `float.win_options` -- see the note at the second one.
+-- `FloatBorder` is simply unused in a real (non-float) Oil window.
+-- Declared up here, not beside the opts, because Lua locals are only visible
+-- below their declaration and the startup opener needs it.
+local OIL_WINHIGHLIGHT = "FloatBorder:OilFloatBorder,CursorLine:OilCursorLine"
 
---- The one way the popup is opened, so `<leader>e` and the `nvim <dir>` hook at
---- the bottom of this file both get the backdrop and neither can drift.
-local function open_oil_float(dir)
+-- The startup box differs only in its border group, so derive it rather than
+-- hand-copy the rest.
+local STARTUP_WINHIGHLIGHT = (OIL_WINHIGHLIGHT:gsub("OilFloatBorder", "OilStartupBorder"))
+
+--- How `<leader>e` opens the popup, so the backdrop and the search-highlight
+--- hiding always come with it. The `nvim <dir>` box has its own opener
+--- (open_startup_oil) because it deliberately has no backdrop.
+local function open_oil_float()
   if USE_BACKDROP then
     create_backdrop()
   end
-  require("oil").open_float(dir)
+  require("oil").open_float()
   if USE_BACKDROP then
     -- Search highlights in the windows underneath would otherwise glow through
     -- the backdrop; restored by close_backdrop.
@@ -230,6 +239,14 @@ local function open_startup_oil(dir)
   local group = vim.api.nvim_create_augroup("oil_startup_border", { clear = true })
   local target_win = nil
 
+  local function paint(win)
+    vim.schedule(function()
+      if vim.api.nvim_win_is_valid(win) then
+        vim.wo[win].winhighlight = STARTUP_WINHIGHLIGHT
+      end
+    end)
+  end
+
   vim.api.nvim_create_autocmd("FileType", {
     group = group,
     pattern = "oil",
@@ -242,11 +259,21 @@ local function open_startup_oil(dir)
         target_win = win
       end
       if target_win and win == target_win then
-        vim.schedule(function()
-          if vim.api.nvim_win_is_valid(win) then
-            vim.wo[win].winhighlight = STARTUP_WINHIGHLIGHT
-          end
-        end)
+        paint(win)
+      end
+    end,
+  })
+
+  -- Re-ENTERING the box (back from the `g?` help float or oil's delete-confirm popup)
+  -- fires no FileType, but oil's global BufEnter handler re-applies its win_options
+  -- and wipes the ring again. Repaint on that path too; scheduled for the same reason.
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group = group,
+    pattern = "oil://*",
+    callback = function()
+      local win = vim.api.nvim_get_current_win()
+      if target_win and win == target_win then
+        paint(win)
       end
     end,
   })
@@ -540,14 +567,6 @@ local function set_oil_winbar(win)
   local divider = string.rep(RULE, math.max(0, total - used))
   vim.wo[win].winbar = string.rep(" ", indent) .. table.concat(parts) .. " %#WinSeparator#" .. divider .. "%*"
 end
-
--- WARN: SILENT FAILURE. Must be set in BOTH `win_options` and
--- `float.win_options`. Oil applies the top-level table AFTER the float one, so
--- a float-only value is silently overwritten.
--- Oil windows only, so every other float keeps its visible border. Set in BOTH
--- `win_options` and `float.win_options` -- see the note at the second one.
--- `FloatBorder` is simply unused in a real (non-float) Oil window.
-local OIL_WINHIGHLIGHT = "FloatBorder:OilFloatBorder,CursorLine:OilCursorLine"
 
 -- Oil's own highlight groups.
 --
