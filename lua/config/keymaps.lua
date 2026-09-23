@@ -351,8 +351,6 @@ vim.keymap.set({ "n", "v" }, "<C-u>", "<C-u>zz", { desc = "Scroll Up and Recente
 -- (mouse-hover.lua) won't fire. No collision with the existing scroll-wheel
 -- mappings — those use <C-e>/<C-y> on the RHS with noremap, hitting native.
 local POPUP_SCROLL_LINES = 1
-local popup_scroll_down = POPUP_SCROLL_LINES .. vim.api.nvim_replace_termcodes("<C-e>", true, true, true)
-local popup_scroll_up = POPUP_SCROLL_LINES .. vim.api.nvim_replace_termcodes("<C-y>", true, true, true)
 
 -- A normal, non-floating file window: where a doc popup can appear over your
 -- code. Also the gate for the arrow-key scrolling further down, so sidebars,
@@ -370,29 +368,41 @@ end
 -- found that preview and scrolled the CODE under it while the outline itself
 -- stood still, with nothing logged. Same class as the picker-over-Oil case
 -- the snacks_picker skip below was added for.
-local function scroll_popup_or(popup_scroll_cmd, fallback_keys)
+--
+-- Only the CURRENT tab is searched (a hover left open in another tab is not
+-- visible here), and with several floats the topmost (highest zindex) wins.
+-- A count is honoured on both paths (`5<C-e>`), and the fallback runs with
+-- `normal!` rather than feedkeys, so it happens now, not after whatever input
+-- is still queued (a macro).
+local function scroll_popup_or(key)
+  local count = vim.v.count1
+  local keys = vim.api.nvim_replace_termcodes(key, true, true, true)
   if is_editor_window() then
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local popup, top_z = nil, -1
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
       local cfg = vim.api.nvim_win_get_config(win)
-      if cfg.relative ~= "" and cfg.focusable ~= false then
+      if cfg.relative ~= "" and cfg.focusable ~= false and (cfg.zindex or 50) >= top_z then
         local buf = vim.api.nvim_win_get_buf(win)
         if not vim.bo[buf].filetype:match("^snacks_picker") then
-          vim.api.nvim_win_call(win, function()
-            vim.cmd("normal! " .. popup_scroll_cmd)
-          end)
-          return
+          popup, top_z = win, cfg.zindex or 50
         end
       end
     end
+    if popup then
+      vim.api.nvim_win_call(popup, function()
+        vim.cmd("normal! " .. count * POPUP_SCROLL_LINES .. keys)
+      end)
+      return
+    end
   end
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(fallback_keys, true, true, true), "n", false)
+  vim.cmd("normal! " .. count .. keys)
 end
 
 vim.keymap.set("n", "<C-e>", function()
-  scroll_popup_or(popup_scroll_down, "<C-e>")
+  scroll_popup_or("<C-e>")
 end, { desc = "Scroll Popup Down / Viewport Down" })
 vim.keymap.set("n", "<C-y>", function()
-  scroll_popup_or(popup_scroll_up, "<C-y>")
+  scroll_popup_or("<C-y>")
 end, { desc = "Scroll Popup Up / Viewport Up" })
 
 -- Arrow keys are the ergonomic, fine-grained reading controls in normal,
