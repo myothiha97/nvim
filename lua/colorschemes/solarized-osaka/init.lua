@@ -404,13 +404,43 @@ return {
       hl.VisualNOS = { bg = c.violet900 }
 
       -- The theme's `yellow700` gutter is a CHROMA problem, not a lightness one:
-      -- it read as content competing with code. #2d3f43 is a low-chroma cool grey
-      -- on the background's own hue. If too dim, #33474b is the one step up --
-      -- DO NOT go back toward a saturated hue, raise lightness and keep C* < 10.
+      -- it read as content competing with code. This is a low-chroma cool grey on
+      -- the background's own hue. DO NOT go back toward a saturated hue: raise
+      -- LIGHTNESS and keep C* < 10.
+      --
+      -- Raised 2026-09-23 from #2d3f43 (L* 25.3, 1.76:1), which was unreadable at
+      -- a glance -- ui.lua already named it the theme's worst group. The ladder,
+      -- all measured against the #001014 background:
+      --
+      --   #2d3f43  L* 25.3  1.76:1  the old value, too faint
+      --   #33474b  L* 28.7  1.98:1  read as readable in a real pane
+      --   #384e53  L* 31.6  2.20:1  the midpoint, also tried
+      --   #3d555b  L* 34.5  2.44:1  SELECTED, all three rungs viewed in a real pane
+      --
+      -- The selected value is +9.2 L* over the old one (1.39x contrast), which is
+      -- a large RELATIVE move but still an objectively dim element: 2.44:1 is far
+      -- under the 4.5:1 text threshold, and the gutter remains the dimmest thing
+      -- on screen by a wide margin.
+      --
+      -- THE STOP RULE IS THE GAP TO `comment` (#5f767d, L* 48.1), the dimmest
+      -- value that carries meaning. The gutter must stay under it or the numbers
+      -- start reading as content. This holds 13.6 L*, and the comment still
+      -- carries 1.65x its contrast. That is the last rung with a real gap: do NOT
+      -- go past it, the next step lands inside a JND-scale margin of `comment`.
+      --
+      -- Dose is not the risk here. The gutter is about 5.7% of visible glyphs (73
+      -- of ~1290 in a 45-row viewport) and sits in its own column rather than
+      -- interleaved with code, so the eye can drop it. What to watch for instead
+      -- is MOTION: `relativenumber` redraws the whole column on every cursor move,
+      -- so if this value ever pulls the eye it will be while navigating, not while
+      -- reading. #384e53 and #33474b are the fallbacks, in that order.
+      --
       -- All three carry explicit values in the theme, so all three must be set.
-      hl.LineNr = { fg = "#2d3f43" }
-      hl.LineNrAbove = { fg = "#2d3f43" }
-      hl.LineNrBelow = { fg = "#2d3f43" }
+      -- With `number` + `relativenumber` both on, LineNrAbove/Below carry almost
+      -- the whole gutter and the cursor's own row is `CursorLineNr` below.
+      hl.LineNr = { fg = "#3d555b" }
+      hl.LineNrAbove = { fg = "#3d555b" }
+      hl.LineNrBelow = { fg = "#3d555b" }
 
       -- Current-line band, ON since 2026-09-23 (it was parked at `bg = "NONE"`
       -- from 2026-09-08). The `cursorline` OPTION is already on, so this line is
