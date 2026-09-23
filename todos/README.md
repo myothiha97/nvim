@@ -38,6 +38,8 @@ Status column meanings:
 | [`freeze-override-2026-08-09-jsx-tag-dose.md`](freeze/freeze-override-2026-08-09-jsx-tag-dose.md) | `@tag.delimiter.*` to neutral; the `@tag`/`@tag.builtin` split rejected here                                                         | record |
 | [`freeze-override-2026-08-11.md`](freeze/freeze-override-2026-08-11.md)                           | the largest session inside the freeze, five parts: logical operators, copper, four named builds, `scripts/palette/`, comment cleanup | record |
 | [`freeze-override-2026-08-20.md`](freeze/freeze-override-2026-08-20.md)                           | telescope-file-browser session; the reason the freeze clock was reset                                                                | record |
+| [`freeze-override-2026-09-19.md`](freeze/freeze-override-2026-09-19.md)                           | startup explorer, then the oil box and dashboard; scope grew past the one gate                                                       | record |
+| [`freeze-override-2026-09-23.md`](freeze/freeze-override-2026-09-23.md)                           | git hunk keys, arrow toggle, outline rows; plus the week's safety review                                                             | record |
 
 Rule 10 in [`process/discipline-stop-rules.md`](process/discipline-stop-rules.md)
 is what requires an override to leave a trace here.
