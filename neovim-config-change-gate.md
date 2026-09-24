@@ -43,6 +43,19 @@ Before making any Neovim config change, briefly explain:
 3. Whether it supports my current priorities.
 4. Whether you will proceed, reject, or defer it.
 
+## ROI test (every request, added 2026-09-24)
+
+Before any other step, answer in one line each:
+
+- **What functional problem does this solve?** A bug, a blocked task, or a
+  friction hit at least weekly in real Go/Node work. "Looks better" is not one.
+- **Cost vs payback:** estimated time to build and test it, and whether it pays
+  that back within about a month of normal work.
+- If either answer fails, defer it to `todos/` and stop. UI adjustments
+  (colours, positions, spacing, borders, icons, layout) fail by default.
+- A feature that JetBrains already covers well (DB inspection, schemas, heavy
+  debugging, large refactors) is not a reason to add a plugin.
+
 ## Colour and theme requests: CLOSED until 2026-12-31
 
 This section overrides everything below it, including the Override. See
