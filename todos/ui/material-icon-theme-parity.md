@@ -108,4 +108,4 @@ listing loses its only file/folder cue.
 Part 1 shipped as a legibility fix in a daily-use panel. Parts 2 and 3 are
 aesthetic polish inside the freeze window, deferred by the change-gate at the
 user's own instruction. Do not reopen before the next freeze checkpoint
-(~2026-10-20).
+(2026-12-31; was ~2026-10-20 before the 2026-09-24 extension).

@@ -2,7 +2,7 @@
 
 ## Status
 
-Deferred to the 2026-10-20 config checkpoint. Do not update during the freeze unless
+Deferred to the 2026-12-31 config checkpoint (moved from 2026-10-20). Do not update during the freeze unless
 the current theme is broken.
 
 Recorded 2026-08-11 after upstream advertised a large update ending at `0df74ef`.

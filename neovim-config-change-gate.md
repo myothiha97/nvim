@@ -43,6 +43,22 @@ Before making any Neovim config change, briefly explain:
 3. Whether it supports my current priorities.
 4. Whether you will proceed, reject, or defer it.
 
+## Colour and theme requests: CLOSED until 2026-12-31
+
+This section overrides everything below it, including the Override. See
+`rules.md`, "The palette is CLOSED".
+
+For any request to change, compare, measure, analyse or test colours, themes or
+highlight groups:
+
+- **Do not override**, even if I confirm.
+- **Do not analyse either.** No measurements, no screenshot reviews, no census
+  runs, no candidate sweeps, no A/B builds. The analysis is the time sink.
+- Reply with exactly: "The palette is closed until 2026-12-31 (rules.md). I've
+  added it to `todos/theme/` as one line." Add that one line, then stop.
+- Only exception: something genuinely broken (unreadable text, a normal token in
+  the error colour, a regression after a plugin update). Fix only that, minimally.
+
 ## Override
 
 The gate is a speed bump, not a wall. If I acknowledge the reminder and still

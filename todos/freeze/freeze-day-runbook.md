@@ -3,7 +3,7 @@
 ## Status
 
 The 2026-06-20 build-out is complete. Do not execute the old installation batch
-again. The config is in maintenance mode and frozen until about 2026-10-20.
+again. The config is in maintenance mode and frozen until 2026-12-31.
 
 Completed work:
 

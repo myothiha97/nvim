@@ -31,9 +31,9 @@ From here on:
   current workflow** — a real bug or broken flow (rule #2 / the 30-minute rule).
   "Nicer", "cleaner", "more beautiful", or "slightly better" is never a reason.
 
-### ❄️ Freeze window: 2026-06-20 → 2026-10-20 (~4 months)
+### ❄️ Freeze window: 2026-06-20 → 2026-12-31 (~6 months)
 
-The config is **frozen until ~2026-10-20**. This is a *review checkpoint*, not a
+The config is **frozen until 2026-12-31**. This is a *review checkpoint*, not a
 hard ban: workflow-blocking fixes are still allowed throughout (rule #2), but no
 features, polish, or preference changes until the freeze lifts. At the checkpoint,
 batch-review the ideas collected in `todos/` and decide what — if anything — is
@@ -52,6 +52,32 @@ worth doing, then set the next freeze window.
 >
 > The relevant check at the next checkpoint is not "what else could be improved"
 > but "how many overrides did I sign, and were they worth it".
+
+> **Extended 2026-09-24, from 2026-10-20 to 2026-12-31.** Same reason as above.
+> Three overrides landed in one week (2026-09-19, 09-23 and 09-24), and the last
+> one reopened the syntax palette: strings, keys, escapes and import keywords
+> were all recoloured inside the freeze. The traces are in `todos/freeze/`.
+
+### 🎨 The palette is CLOSED until 2026-12-31 (set 2026-09-24)
+
+The colours are **good enough and finished**. Flaws will always be visible; seeing
+one is not a reason to act. The work is done with the palette as it is.
+
+- **No colour, theme or highlight work of any kind** until the checkpoint. That
+  includes "just measuring", screenshot comparisons, A/B builds, and "one quick
+  check". Analysis is not a safe middle ground: it is where the hours went.
+- **The change-gate override does not apply to colours.** A colour idea gets one
+  line in `todos/theme/` and nothing else.
+- **Only exception: something actually broken** — unreadable text, a normal
+  token painted in the error colour, a regression after a plugin update. Fix
+  that one thing, minimally, and stop.
+- **At the checkpoint:** at most ONE session, time-boxed to 60 minutes, starting
+  from `notes/string-and-member-colours.md` (the parked work is `custom-v4`).
+  It ends with a decision either way, including "keep what we have".
+
+Why: 2026-09-24 alone took most of a day (screenshots from 13:57 to 20:22) and
+ended where it started, back on the morning's colours. Roughly three months had
+already gone mostly into this config. Good enough is the goal, not a compromise.
 
 > **Enforcement (AI agents / Claude Code):** apply the change-gate in
 > [`neovim-config-change-gate.md`](neovim-config-change-gate.md) to **every**

@@ -17,7 +17,7 @@ components and `type` aliases as `Variable`, and effects as
 ## When
 
 At the **first real need** for a second language's rules, or at the
-2026-10-20 checkpoint. Not before: on its own it is a move with no behaviour
+2026-12-31 checkpoint (moved from 2026-10-20). Not before: on its own it is a move with no behaviour
 change.
 
 ## Layout
