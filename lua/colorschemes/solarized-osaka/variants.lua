@@ -4,7 +4,12 @@
 --   solarized-osaka-custom-v1      the copper build custom-latest replaced
 --   solarized-osaka-custom-v2      custom-v1 on the warm keyword (yellow)
 --   solarized-osaka-custom-v3      custom-v1 on the softer terracotta punctuation
+--   solarized-osaka-custom-v4      2026-09-24 WIP: green strings, vivid yellow, violet imports
 --   solarized-osaka-original       upstream craftzdog, nothing of ours applied
+--
+-- The 2026-09-24 A/B builds (custom-swap, -2 .. -6) have NO `colors/` entry, so
+-- they stay out of the colorscheme picker. Load one by hand:
+--   :lua require("colorschemes.solarized-osaka.variants").load("custom-swap-2")
 --
 -- `custom-latest` IS A MOVING NAME -- always "whatever we run today" -- and the
 -- numbered ones are frozen snapshots. WHEN custom-latest IS SUPERSEDED: number
@@ -44,6 +49,11 @@ local builds = {
       -- worst chromatic pair 14.2 -> 16.5, tightest colour-blind pair 2.3 -> 4.8.
       delimiter = palette.variants.delimiter.mid_high,
       bracket = palette.variants.delimiter.mid_high,
+      -- Body text: `brighter` since 2026-09-24, replacing `tinted`. The 09-09
+      -- "too bright" verdict below was made while strings sat 12 L* under body;
+      -- the green strings rose to body level, and `tinted` then read dimmer than
+      -- strings and types. Numbers: notes/string-and-member-colours.md, "Body".
+      --
       -- Body text: `tinted` since 2026-09-21, replacing `midpoint`, which read a
       -- little faded after some use. The 2026-09-09 notes below are why midpoint
       -- was chosen over base0/brighter; they still describe the ladder.
@@ -54,7 +64,7 @@ local builds = {
       -- 11.2. The JSX/TSX/HTML/Vue tag wrappers TRACK THIS VALUE in init.lua --
       -- they used to be pinned to base0 separately, which this change would have
       -- left a bare JND away from body. Ladder and rejects in palette.lua.
-      body = palette.variants.body.tinted,
+      body = palette.variants.body.brighter,
 
       func = palette.variants.func.vivid,
 
@@ -65,6 +75,15 @@ local builds = {
       -- `boolean.tokyonight_muted` is the safer swap if either starts to bite.
       boolean = palette.variants.boolean.tokyonight_dim,
 
+      -- Back to the theme cyan (`false`) the evening of 2026-09-24: the green
+      -- string work is parked as WIP in custom-v4. The history below stays.
+      --
+      -- Green strings, 2026-09-24, so object keys and member access (both on the
+      -- theme cyan) read apart from string values. Every language. `false` is
+      -- the one-word revert. `vivid` replaced `tokyodark` the same day.
+      -- Measurements in palette.lua, `string`.
+      string = false,
+
       -- UNUSED since 2026-09-08, and `false` rather than nil on purpose (`M.load`
       -- iterates with `pairs`, so an absent key is a silent no-op). Go fields are
       -- painted straight from `palette.punctuation` in init.lua, and every other
@@ -74,12 +93,28 @@ local builds = {
       -- `palette.member`.
       member = false,
 
+      -- `vivid` (#c7b903) since 2026-09-24, chosen by eye after side-by-side
+      -- screenshots against the new green strings and `brighter` body. dE 3.7
+      -- from `brighter` on screen; every neighbour stays >= 17.0. Accepted cost:
+      -- it reads +3.3 brighter than body text (perceived), the 2026-09-08
+      -- rejection reason. Revert: both lines to `keyword.brighter`.
+      --
+      -- Back on `brighter` the evening of 2026-09-24; `vivid` is parked in
+      -- custom-v4 with the rest of that day's work.
+      --
       -- Punctuation and parameter share the yellow, final call 2026-09-08. A
       -- terracotta red stayed close and suits my taste better, but the census
       -- gave yellow the wider separation and it has held up in daily use. No red
       -- variant beat it. Candidates live in palette.lua, not parked here.
       parameter = palette.variants.keyword.brighter,
       punctuation = palette.variants.keyword.brighter,
+
+      -- `import`/`export`/`from`/`package`/`use` on the keyword violet, live since
+      -- the evening of 2026-09-24 (the one piece of that day's parked work kept).
+      -- With cyan strings it ties the yellow beside import paths (37.3 vs 35.7),
+      -- but joins keyword runs (`export function`, `import type`: 9 two-colour
+      -- splits -> 0) and calms the import block (C*52 vs C*93 in Ghostty).
+      import = palette.variants.keyword.warm_violet,
 
       -- Two stops below `readable`, 2026-09-09: 4.56:1 read as too bright and
       -- `subtle` (dE 2.8) was not enough of a drop. Gives up AA at 3.96:1,
@@ -136,12 +171,119 @@ local builds = {
       delimiter = false,
     },
   },
+
+  -- 2026-09-24, PARKED WORK IN PROGRESS: custom-latest exactly as it stood at the
+  -- end of that day's session, before custom-latest went back to cyan strings
+  -- and the `brighter` yellow. Green strings, vivid yellow, orange escapes and
+  -- interpolation, violet imports, `brighter` body. The reasoning and every
+  -- measurement: notes/string-and-member-colours.md. The custom-swap builds are
+  -- built FROM this one, so they keep that day's values too.
+  ["custom-v4"] = {
+    palette = {
+      type = palette.variants.type.nvim_type,
+      delimiter = palette.variants.delimiter.mid_high,
+      bracket = palette.variants.delimiter.mid_high,
+      body = palette.variants.body.brighter,
+      func = palette.variants.func.vivid,
+      boolean = palette.variants.boolean.tokyonight_dim,
+      string = palette.variants.string.vivid,
+      member = false,
+      parameter = palette.variants.keyword.vivid,
+      punctuation = palette.variants.keyword.vivid,
+      comment = palette.variants.comment.dimmer,
+      escape = palette.variants.boolean.tokyonight_dim,
+      import = palette.variants.keyword.warm_violet,
+    },
+  },
+}
+
+-- A/B build, 2026-09-24: the two warm accents swapped. The yellow's roles
+-- (punctuation, parameters, Go fields, JSX tags, builtins) take the orange, and
+-- the literals (booleans, numbers, constants) take the yellow. Escapes and
+-- interpolation stay on the orange through their own `escape` role. Built FROM
+-- custom-v4 (was custom-latest until the evening of 2026-09-24, when that went
+-- back to cyan strings; custom-v4 froze the values this build was made on).
+--
+-- WARN: SILENT FAILURE. `parameter` must be named alongside `punctuation`, for
+-- the reason given on custom-v3 above.
+builds["custom-swap"] = {
+  palette = vim.tbl_extend("force", {}, builds["custom-v4"].palette, {
+    punctuation = palette.variants.boolean.tokyonight_dim,
+    parameter = palette.variants.boolean.tokyonight_dim,
+    boolean = palette.variants.keyword.vivid,
+    escape = palette.variants.boolean.tokyonight_dim,
+  }),
+}
+
+-- A/B build, 2026-09-24: custom-swap with the literals (booleans, numbers,
+-- constants) on `member.rose_soft` (#e197a3) instead of the yellow. Measured as
+-- the best non-yellow literal colour next to the orange: every neighbour >= 22.7,
+-- zero weak contacts in real files. Pink was turned down twice before on
+-- high-dose roles; this tests it on a low-dose one. Built FROM custom-swap.
+builds["custom-swap-2"] = {
+  palette = vim.tbl_extend("force", {}, builds["custom-swap"].palette, {
+    -- boolean = palette.variants.member.rose_soft,
+    -- boolean = palette.variants.member.iris,
+    -- boolean = palette.variants.keyword.gold,
+    -- boolean = palette.variants.keyword.vivid,
+    boolean = palette.variants.boolean.tokyonight_dim,
+    field = palette.variants.boolean.tokyonight_dim,
+    -- Go fields on the old yellow so `Width: 3` stays two colours (fields 29.5
+    -- from the orange literals). Go score 65.1 -> 81.5 against all-orange.
+    -- field = palette.variants.keyword.brighter,
+  }),
+}
+
+-- A/B build, 2026-09-24: custom-swap-2 with Go fields on the member cyan, the
+-- colour fields/keys use in every other language. The yellow fields read badly
+-- beside the orange literals (two warm hues side by side). Cyan fields sit 46.5
+-- from the orange, so `Width: 3` stays two things; the cost is field vs type at
+-- 16.4 in struct definitions, the same pair TS type literals already show.
+builds["custom-swap-3"] = {
+  palette = vim.tbl_extend("force", {}, builds["custom-swap-2"].palette, {
+    field = palette.variants.member.theme_cyan,
+  }),
+}
+
+builds["custom-swap-4"] = {
+  palette = vim.tbl_extend("force", {}, builds["custom-swap-2"].palette, {
+    field = palette.variants.keyword.brighter,
+    parameter = palette.variants.keyword.brighter,
+    string = palette.variants.member.theme_cyan,
+  }),
+}
+
+builds["custom-swap-5"] = {
+  palette = vim.tbl_extend("force", {}, builds["custom-swap-2"].palette, {
+    field = palette.variants.boolean.tokyonight_dim,
+    -- field = palette.variants.member.theme_cyan,
+    parameter = palette.variants.boolean.tokyonight_dim,
+    string = palette.variants.member.theme_cyan,
+    -- keyword = palette.variants.keyword.brighter,
+    -- string = palette.variants.string.vivid,
+    -- member = palette.variants.boolean.tokyonight_dim,
+    -- member = palette.variants.member.theme_cyan,
+    -- func = palette.variants.keyword.brighter,
+  }),
+}
+-- A/B build, 2026-09-24: custom-swap-2 (all orange) for every language, with Go
+-- given its own values: cyan strings, and the old `brighter` yellow on
+-- parameters, fields and escapes. Chosen by eye on real Go files.
+builds["custom-swap-6"] = {
+  palette = vim.tbl_extend("force", {}, builds["custom-swap-2"].palette, {
+    field = palette.variants.keyword.brighter,
+    go = {
+      string = palette.variants.member.theme_cyan,
+      parameter = palette.variants.keyword.brighter,
+      escape = palette.variants.keyword.brighter,
+    },
+  }),
 }
 
 local M = {}
 
 ---Load one of the builds as a colorscheme.
----@param name string build key: "custom-latest", "custom-v1" .. "custom-v3", "original"
+---@param name string build key: "custom-latest", "custom-v1" .. "custom-v4", "custom-swap", "custom-swap-2", "custom-swap-3", "custom-swap-6", "original"
 function M.load(name)
   local build = builds[name]
   if not build then

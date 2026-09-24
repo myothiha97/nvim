@@ -189,6 +189,11 @@ return {
       -- EMPTY STRING, so they fell through to `Normal` and matched editor body
       -- text exactly (measured identical at the pixel).
       --
+      -- `body.tinted` (#a0b6b8) since 2026-09-24, when the editor body moved up
+      -- to `brighter`: names moved with it, keeping the same dE 4.1 step below
+      -- body that the paragraph below approved. That paragraph describes the
+      -- 2026-09-22 choice. Numbers: notes/string-and-member-colours.md.
+      --
       -- Both now read `body.base0` (#9eabac) -- the theme's own body value, one
       -- chroma step under the `tinted` white the editor runs. dE00 4.2 from editor
       -- body text, so the panel reads softer without reading as dimmed, and 18.8
@@ -212,7 +217,7 @@ return {
       -- with it, which would paint over the cursor row and the active-file band
       -- below.
       local ok_palette, palette = pcall(require, "colorschemes.solarized-osaka.palette")
-      local list_fg = ok_palette and palette.variants.body.base0 or nil
+      local list_fg = ok_palette and palette.variants.body.tinted or nil
       if list_fg then
         vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { fg = list_fg })
         vim.api.nvim_set_hl(0, "SnacksPickerFile", { fg = list_fg })

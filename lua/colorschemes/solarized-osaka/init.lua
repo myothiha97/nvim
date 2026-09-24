@@ -118,16 +118,28 @@ return {
 
       -- `${}` is a MODE SWITCH, not structure, so it keeps the accent -- and it
       -- has to stay readable INSIDE the string colour, which the neutral grey
-      -- does not (17.7 separation against this accent's 32.9).
-      paint({ "@punctuation.special" }, palette.punctuation)
+      -- does not (17.7 separation against this accent's 32.9). Those were against
+      -- the old cyan strings; against the green since 2026-09-24 it is 16.4.
+      --
+      -- PARKED (evening, 2026-09-24): the moves below live in custom-v4 and the
+      -- custom-swap builds through `palette.escape`; `false` keeps the accent.
+      --
+      -- So it moved to the literal orange with the escapes below, by choice, the
+      -- same day: TS `${}` and Python f-string `{}` were the last places yellow
+      -- sat inside green (103 contacts in palette.py alone). Known cost: bash
+      -- `${HOME}` reads orange `${`, yellow `HOME` (`@variable.builtin`), orange `}`.
+      paint({ "@punctuation.special" }, palette.escape or palette.punctuation)
 
-      -- `\n`, `\t`, `\"` inside a string. SAME REASONING as `${}` above, and the
-      -- same colour: an escape is not string content, it is a switch out of it.
-      -- The theme leaves it on an alarm dark red at 2.87:1, the lowest contrast
-      -- in the palette, on characters that matter most in `fmt.Printf`-style code
-      -- and regex. Every readable red either collided with a warm role or stayed
-      -- under 5:1; the candidate sweep is in notes/palette-reference.md.
-      hl["@string.escape"] = { fg = palette.punctuation }
+      -- `\n`, `\t`, `\"` inside a string. SAME REASONING as `${}` above: an
+      -- escape is not string content, it is a switch out of it. The theme leaves
+      -- it on an alarm dark red at 2.87:1, the lowest contrast in the palette, on
+      -- characters that matter most in `fmt.Printf`-style code and regex.
+      --
+      -- On the literal orange since 2026-09-24, when strings went green: the
+      -- accent yellow sat only 16.4 from the green, the orange 39.6. An escape is
+      -- a literal, so no hue is added. `${}` joined it (see above). Rejected
+      -- candidates: notes/string-and-member-colours.md.
+      hl["@string.escape"] = { fg = palette.escape or palette.punctuation }
 
       paint({
         "@variable.parameter",
@@ -179,7 +191,14 @@ return {
       -- link OUTSIDE the lists above, so skipping would leave them resolving
       -- wrong: @keyword.import -> PreProc -> an alarm red that reads as a
       -- diagnostic, and @keyword.operator -> Operator, which goes neutral below.
-      hl["@keyword.import"] = { fg = palette.punctuation }
+      --
+      -- PARKED (evening, 2026-09-24): violet lives in custom-v4 and the
+      -- custom-swap builds through `palette.import`; `false` keeps the accent.
+      --
+      -- `import`/`package`/`from` are keywords, so the keyword violet since
+      -- 2026-09-24 (was the accent yellow, 16.4 from the green import paths under
+      -- them; violet is 63.6). Dose: notes/string-and-member-colours.md.
+      hl["@keyword.import"] = { fg = palette.import or palette.punctuation }
 
       -- Decorators (Python `@dataclass`, TS/NestJS `@Injectable()`). SAME DEFECT
       -- as `@keyword.import`: `@attribute` -> PreProc -> #db302d, byte-identical
@@ -268,8 +287,8 @@ return {
       -- Numbers, on the same value as booleans and named constants -- the
       -- Tokyo Night grouping, where one colour carries every literal constant.
       -- Set on `Number` rather than `Constant`: `Float` links to `Number`, so
-      -- this covers `@number` AND `@number.float`, while `Constant`, `@string`
-      -- and `@character` keep the theme's cyan. Before this, `@number` was
+      -- this covers `@number` AND `@number.float`, while `Constant` keeps the
+      -- theme's cyan. Before this, `@number` was
       -- dE2000 0.0 from `@string` -- a numeric literal and a string literal
       -- were the same colour.
       hl.Number = { fg = palette.boolean }
@@ -298,20 +317,22 @@ return {
       -- `@variable.member.go` resolves before `@variable.member`, so no other
       -- language needs excluding. The same captures in TS/JS also cover object
       -- members, where a warm colour flooded whole files, so every other language
-      -- keeps the theme's own cyan500. `@variable.member.key` links to `@string`
-      -- below regardless, so keys always sit with their values.
+      -- keeps the theme's own cyan500. `@variable.member.key` links to
+      -- `@variable.member` below, so keys sit with member access, not strings.
       --
-      -- KNOWN COST: the accent now carries imports, parameters, builtin
-      -- constants, string escapes AND every field position, making it by far the
-      -- densest colour in a struct-heavy Go file. It clears the Go literals by
-      -- dE 27.7, so `Width: 3` still reads as two things.
+      -- KNOWN COST: the accent now carries parameters, builtin constants AND
+      -- every field position, making it by far the densest colour in a
+      -- struct-heavy Go file (imports and escapes left it on 2026-09-24). It
+      -- clears the Go literals by dE 27.7, so `Width: 3` still reads as two things.
       --
       -- Rejected on the way here, both 2026-09-08: `@variable.member` on the
       -- keyword violet for all non-Go languages (a field and a keyword read as
       -- one class), and a dedicated salmon for Go (one warm hue too many). See
       -- notes/palette-reference.md.
+      -- `palette.field` lets a build hold fields on their own value (2026-09-24,
+      -- all-orange builds, so `Width: 3` does not read as one orange run).
       for _, group in ipairs({ "@variable.member.go", "@variable.member.key.go", "@property.go" }) do
-        hl[group] = { fg = palette.punctuation }
+        hl[group] = { fg = palette.field or palette.punctuation }
       end
 
       -- Object-literal and type-literal KEYS, normalised. The base ecma queries
@@ -321,17 +342,52 @@ return {
       -- re-capture the key position as @variable.member.key; member ACCESS
       -- (`obj.attr`) keeps @variable.member and stays on the member colour.
       --
-      -- Linked to @string so keys sit with the values they introduce. The
-      -- alternative is `{ link = "@variable.member" }`, which puts keys on the
-      -- member colour instead and keeps key and value distinct -- one-line swap.
-      -- MUST stay painted whenever `member` is. `@variable.member.key` has no
-      -- colour of its own otherwise, so it FALLS BACK to `@variable.member` --
-      -- which is what made a distinct member colour flood every object-literal
-      -- file. The capture split in after/queries/ is necessary but not
-      -- sufficient; this line is the other half.
-      hl["@variable.member.key"] = { link = "@string" }
+      -- Linked to @variable.member since 2026-09-24, so a key and the string
+      -- value it introduces read as two things (`url: 'x'`). Until then it
+      -- linked to @string, and key, member and string were all one cyan.
+      --
+      -- WARN: keys now FOLLOW the member colour. Giving `member` a colour of its
+      -- own moves every object key with it, which is what flooded object-literal
+      -- files with salmon on 2026-09-08. Re-measure dose before doing that.
+      hl["@variable.member.key"] = { link = "@variable.member" }
 
-      -- HCL/Terraform attribute names. The `@string` link above is an ecma
+      -- Strings, green in EVERY language since 2026-09-24 (`palette.string`).
+      -- `false` keeps the theme cyan. `Character` is a bare link to `Constant` in
+      -- the theme, which `paint` skips, so it is assigned directly; a rune or char
+      -- literal is a string literal and moves with it.
+      --
+      -- A per-language version (green only where members are cyan) was tried and
+      -- dropped the same day: cyan lost on legibility everywhere. Numbers:
+      -- notes/string-and-member-colours.md.
+      if palette.string then
+        paint({ "String", "@string.documentation" }, palette.string)
+        hl.Character = { fg = palette.string }
+        -- WARN: SILENT FAILURE. The theme links `@markup.raw` to `String`, and
+        -- markdown code blocks (`@markup.raw.block.markdown`) and :help examples
+        -- fall back to it, so moving `String` repainted every doc code block in
+        -- the string colour (Lua hovers: the indented blocks from Vim's docs).
+        -- Code is not a string literal: pinned to the cyan it had before.
+        hl["@markup.raw"] = { fg = c.cyan500 }
+      end
+
+      -- Go-only overrides (`palette.go`, a table of role -> value), so a build
+      -- can give Go its own strings, parameters and escapes while every other
+      -- language keeps the shared roles. `false` means none.
+      local go = palette.go
+      if go then
+        if go.string then
+          hl["@string.go"] = { fg = go.string }
+          hl["@character.go"] = { fg = go.string }
+        end
+        if go.parameter then
+          hl["@variable.parameter.go"] = { fg = go.parameter }
+        end
+        if go.escape then
+          hl["@string.escape.go"] = { fg = go.escape }
+        end
+      end
+
+      -- HCL/Terraform attribute names. The member link above is an ecma
       -- decision -- an object literal is a small part of a TS file -- but the HCL
       -- queries file EVERY `key = value` name as `@variable.member.key`, so a
       -- whole `.tf` file rendered its keys and its values in one colour
