@@ -217,7 +217,7 @@ return {
       -- with it, which would paint over the cursor row and the active-file band
       -- below.
       local ok_palette, palette = pcall(require, "colorschemes.solarized-osaka.palette")
-      local list_fg = ok_palette and palette.variants.body.tinted or nil
+      local list_fg = ok_palette and palette.variants.body.brighter or nil
       if list_fg then
         vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { fg = list_fg })
         vim.api.nvim_set_hl(0, "SnacksPickerFile", { fg = list_fg })

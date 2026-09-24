@@ -633,7 +633,7 @@ local function set_oil_highlights()
   if dir_fg then
     vim.api.nvim_set_hl(0, "OilDirIcon", { fg = dir_fg })
   end
-  local list_fg = ok and palette.variants.body.tinted or nil
+  local list_fg = ok and palette.variants.body.brighter or nil
   if list_fg then
     vim.api.nvim_set_hl(0, "OilDir", { fg = list_fg })
     vim.api.nvim_set_hl(0, "OilFile", { fg = list_fg })
