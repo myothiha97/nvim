@@ -33,7 +33,7 @@ The freeze mechanisms are active:
 
 - `lua/config/lazy-freeze.lua` blocks accidental update, sync, and restore operations.
 - `lazy-lock.json` pins plugin revisions.
-- `rules.md` freezes non-essential config work until about 2026-10-20.
+- `rules.md` freezes non-essential config work until 2026-12-31 (extended from 2026-10-20 on 2026-09-24).
 
 ## Remaining Work
 

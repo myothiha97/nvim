@@ -279,7 +279,7 @@ strings and function names respectively.
 ## Remaining Work
 
 Item 8 is the only live one. Items 1 and 3 are "slightly better" changes, which
-rule 1 says is never a reason on its own. Review all three at the 2026-10-20
+rule 1 says is never a reason on its own. Review all three at the 2026-12-31
 checkpoint and most likely drop 1 and 3. Items 2, 4, 5, 6 and 7 are closed.
 
 ### 1. Neutral brackets in dense JSX
@@ -649,7 +649,7 @@ collapses the pair. The blue band cannot produce a dimmer Type.
    be scoped to "not inside an import block" by highlight group, and an
    `after/queries` split would need a capture the grammar does not provide.
 
-Review at the 2026-10-20 checkpoint. Judge on a real `.ts` file with a large
+Review at the 2026-12-31 checkpoint. Judge on a real `.ts` file with a large
 `import type` block, not on Go.
 
 ## Notes

@@ -11,6 +11,10 @@
 (field
   name: (identifier) @variable.member.key)
 
+; WARN: SILENT FAILURE (notes/silent-failure-surfaces.md, surface 19).
+; `name:` is load-bearing. Without it this matched EVERY string in a field,
+; values included, so `desc = "Open file"` and positional `{ "folke/x" }` were
+; painted as keys. Invisible while keys linked to @string; exposed on 2026-09-24
+; when keys moved to the member colour.
 (field
-  (string) @variable.member.key
-  (#has-ancestor? @variable.member.key field))
+  name: (string) @variable.member.key)

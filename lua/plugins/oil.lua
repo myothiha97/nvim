@@ -610,6 +610,10 @@ local function set_oil_highlights()
   -- the folder ICON beside it; `OilFile` has no link at all, so files fell
   -- through to `Normal` and matched editor body text exactly.
   --
+  -- `body.tinted` (#a0b6b8) since 2026-09-24, moved up with the editor body
+  -- (now `brighter`) so the step below it stays dE 4.1. The paragraph below is
+  -- the 2026-09-22 choice. Numbers: notes/string-and-member-colours.md.
+  --
   -- The value is `body.base0` (#9eabac), the theme's own body value, one chroma
   -- step under the `tinted` white the editor runs -- read by ROLE, never copied
   -- as a hex, so both browsers follow one edit. `body.faded` was tried first and
@@ -629,7 +633,7 @@ local function set_oil_highlights()
   if dir_fg then
     vim.api.nvim_set_hl(0, "OilDirIcon", { fg = dir_fg })
   end
-  local list_fg = ok and palette.variants.body.base0 or nil
+  local list_fg = ok and palette.variants.body.tinted or nil
   if list_fg then
     vim.api.nvim_set_hl(0, "OilDir", { fg = list_fg })
     vim.api.nvim_set_hl(0, "OilFile", { fg = list_fg })

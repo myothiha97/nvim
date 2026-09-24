@@ -161,6 +161,25 @@ and anything you had opened was forgotten. Fixed by replacing the id with the
 symbol's path (buffer, ancestor `kind:name` chain, duplicate counter).
 *File:* `lua/plugins/trouble.lua` (`assign_path_ids`)
 
+### 19. A Lua key query without `name:` also captures table VALUES
+Found on 2026-09-24. `(field (string) @variable.member.key)` matches every string
+child of a field, so `desc = "Open file"` and positional `{ "folke/x" }` were tagged
+as keys. Nothing looked wrong while keys linked to `@string`, because both painted
+the same colour; the bug surfaced only when keys moved to the member colour. Fixed
+by matching `name: (string)`. A probe on a value position is the check that can
+see the broken state.
+*File:* `after/queries/lua/highlights.scm`
+
+### 20. Recolouring `String` also recolours every doc code block
+Found on 2026-09-24. The theme links `@markup.raw` to `String`, and markdown code
+blocks (`@markup.raw.block.markdown`) and :help examples have no group of their
+own, so they fall back to it. Moving strings to green turned the indented code
+blocks in Lua hovers green. A snapshot diff showed only `@markup.raw` moving and
+it was misread as harmless: the fallback groups are never defined, so they never
+appear in a snapshot. Fixed by pinning `@markup.raw` to the theme cyan. The check
+that sees it is a real hover float probed with `vim.inspect_pos`.
+*File:* `lua/colorschemes/solarized-osaka/init.lua` (string block)
+
 ## Related
 
 - Structural traps and the parked-plugin rule: repo-root `CLAUDE.md`

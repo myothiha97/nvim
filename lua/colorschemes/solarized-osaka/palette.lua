@@ -271,6 +271,40 @@ local variants = {
     tokyonight = "#ff9e64", -- L*74.0 C*54.6 h55.6 9.35:1 | TN as shipped; dE 23.7 / 16deg, same hue problem and -2.1 L* vs body
   },
 
+  -- Strings (`String`, `@string.documentation`, `Character`), every language.
+  -- Added 2026-09-24 so strings stop sharing the theme cyan with object keys and
+  -- member access, which stay on that cyan. The layout is TokyoDark Islands'
+  -- (green strings, teal members); our cyan sits dE 9.3 from its member teal.
+  --
+  -- Swept over the whole gamut on our background. Stop rule: dE >= 15 from the
+  -- member cyan, >= 10 from every other role, not above body lightness.
+  --
+  -- Its own exact `#9ece6a` does NOT transfer: L*77.6 is above body text, and
+  -- Ghostty's P3 lifts it to C*65. Match what WebStorm SHOWS, not its hex.
+  --
+  -- Why not a darker/calmer green: measured 2026-09-24 on real screens, the
+  -- green is 9.7% of the coloured ink in a TSX file but 49.1% in Go, where it
+  -- becomes the page's main colour. At C*44 it was the least colourful accent
+  -- (the others average C*54 there), so Go read dull while TSX read fine.
+  string = {
+    -- L*71.8 C*47.4 h125.0 8.93:1 | Ghostty draws it at L*71.4 C*55.3 h126.8:
+    -- WebStorm's `#9ece6a` hue and chroma, 6 L* darker so it stays under body.
+    -- vs member cyan 25.2, worst neighbour 16.4 vs the accent yellow (`\n`
+    -- escapes sit inside strings). SELECTED 2026-09-24.
+    --
+    -- THE CEILING: anything brighter crosses body lightness or rotates into the
+    -- kelly greens (h > 130) already rejected. Do not look for a next step up.
+    -- Tailwind-heavy TSX gets louder with it; if that bites, scope `tokyodark`
+    -- to tsx/typescript rather than dimming this for every language.
+    vivid = "#96bc67",
+    -- L*66.1 C*38.0 h124.2 7.47:1 | Ghostty C*44.0 h126.0. Ran a few hours on
+    -- 2026-09-24: good in TSX, dull in Go (see above). dE 5.5 below `vivid`.
+    tokyodark = "#8eaa67",
+    -- L*64.0 C*33.1 h123.6 6.97:1 | the calmer finalist, worst 17.5. Only dE 2.6
+    -- from `tokyodark`, below what can be seen: do not compare the two.
+    soft = "#8ca369",
+  },
+
   -- Member fields (`@variable.member`). NOT APPLIED as of 2026-09-08: the build
   -- leaves `member = false` and init.lua paints Go fields from `punctuation`
   -- instead, so nothing reads these values. They are kept as the candidate set
@@ -294,8 +328,10 @@ local variants = {
     -- worse than the pink below, but better than pairs this palette already
     -- lives with (type vs string cyan is dE 16.4), and pink was not wanted.
     --
-    -- WARN: this DEPENDS on string staying cyan. If `string` ever goes back to
-    -- the green #5aad8b (h164) these two collide -- re-measure before doing that.
+    -- WARN: this DEPENDS on string staying cyan, and it no longer does:
+    -- custom-latest has strings on the green `string.tokyodark` (h124) since
+    -- 2026-09-24, and object keys now follow this role. Re-measure all of these
+    -- against that green before using any of them.
     sage = "#8bcb8a", -- L*76 C*42 h142 9.97:1 | SELECTED: worst 20.6 vs the git-add green
     sage_dim = "#88be87", -- L*72 C*36 h142 8.84:1 | dimmer, worst 19.0 vs string cyan
     rose_soft = "#e197a3", -- L*70 C*30 h10 8.29:1 | best measured (23.5) but pink, not wanted
@@ -307,6 +343,10 @@ local variants = {
     mauve = "#c49ac6",
     violet = "#9b9fec",
     tokyonight = "#73daca",
+    -- The theme's own cyan500: what `@variable.member` and object keys show in
+    -- every non-Go language. Named here so a build can put Go fields on it
+    -- (`field` role, custom-swap-3). Keep equal to the theme's cyan500.
+    theme_cyan = "#29a298",
   },
 }
 
@@ -357,6 +397,21 @@ return {
   type = variants.type.tokyonight,
   -- Booleans. Painted by `hl.Boolean` in init.lua, which `@boolean` links to.
   boolean = variants.boolean.amber,
+  -- `false` keeps the theme's own cyan500, so the numbered builds are unchanged.
+  string = false,
+  -- Escapes and interpolation (`@string.escape`, `@punctuation.special`).
+  -- `false` follows `punctuation`, the behaviour before 2026-09-24; custom-v4
+  -- and the custom-swap builds pin the orange.
+  escape = false,
+  -- `@keyword.import`. `false` follows `punctuation`, the behaviour before
+  -- 2026-09-24; custom-v4 and the custom-swap builds pin the keyword violet.
+  import = false,
+  -- Go struct fields (`@variable.member.go`, `@property.go`, keys). `false`
+  -- follows `punctuation`; a build pins it to keep fields apart from literals.
+  field = false,
+  -- Go-only role overrides, `{ string = , parameter = , escape = }`. `false`
+  -- means Go uses the shared roles like every other language.
+  go = false,
   -- UNREAD: see `member` above.
   -- member = false,
 }

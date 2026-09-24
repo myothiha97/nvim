@@ -236,22 +236,23 @@ comments in `palette.lua`.** That build is the authority; anything written down
 elsewhere is a snapshot and drifts. To read the truth from a running editor:
 `:lua =vim.api.nvim_get_hl(0,{name='@boolean',link=false})`
 
-Verified live 2026-09-09; the body row re-verified and corrected 2026-09-22:
+Verified live 2026-09-09; the body row re-verified and corrected 2026-09-22; the
+string, member and body rows 2026-09-24:
 
 | role | value | note |
 | --- | --- | --- |
-| body / `@variable` | `#a0b6b8` | `body.tinted`; was `body.midpoint` `#a7b4b5`, and `#b1bebf` until 2026-09-09 |
+| body / `@variable` | `#b1bebf` | `body.brighter` again since 2026-09-24; was `body.tinted` `#a0b6b8` (09-21), `body.midpoint` `#a7b4b5`, and `#b1bebf` until 2026-09-09 |
 | brackets / delimiters / operators | `#7f9195` | the maximin grey rung; was `#96abd3` until 2026-09-09 |
-| HTML/JSX/TSX/Vue tag wrappers | `#a0b6b8` | TRACKS body since 2026-09-09; was pinned to `base0` `#9eabac` |
+| HTML/JSX/TSX/Vue tag wrappers | `#b1bebf` | TRACKS body since 2026-09-09; was pinned to `base0` `#9eabac` |
 | function / `@property` / `@function.builtin` | `#359ee9` | `@property` is unstyled and duplicates this |
 | type | `#2ac3de` | |
-| punctuation / parameter | `#baac0d` | the accent yellow; also `@attribute`, `@keyword.import`, `@string.escape` |
-| **Go** `@variable.member` / `@property` | `#baac0d` | Go fields only, language-scoped in `init.lua` |
-| every other `@variable.member` | `#29a298` | theme default, same as `@string`; the `member` role is `false` |
+| punctuation / parameter / `@string.escape` / `@punctuation.special` | `#baac0d` | `keyword.brighter`, the accent yellow; also `@attribute`. The 2026-09-24 moves (vivid, orange escapes) are PARKED in `custom-v4` |
+| **Go** `@variable.member` / `@property` | `#baac0d` | Go fields only, language-scoped in `init.lua`; follows punctuation |
+| every other `@variable.member` | `#29a298` | theme default; object keys follow it since 2026-09-24; the `member` role is `false` |
 | boolean / `@constant` / `@number` | `#ed8e55` | `tokyonight_dim`; was amber `#d19c59` |
-| keyword | `#a17bcc` | violet |
+| keyword / `@keyword.import` | `#a17bcc` | violet; `import`/`export`/`from`/`package`/`use` live on it since the evening of 2026-09-24 |
 | comment | `#5f767d` | two stops below the AA value, by preference; upstream is `#576d74` |
-| `@string` | `#29a298` | `@number` no longer shares it |
+| `@string` / `Character` | `#29a298` | theme cyan. The green `#96bc67` string work is PARKED as WIP in `custom-v4`; see the note below |
 
 ### Panel and doc greys sit BELOW body text (2026-09-22)
 
@@ -261,8 +262,8 @@ axis, so a panel never reads as loud as the code:
 
 | surface | value | rung | where |
 | --- | --- | --- | --- |
-| editor body | `#a0b6b8` | `body.tinted` | `Normal` |
-| file/folder names | `#9eabac` | `body.base0` | `SnacksPickerDirectory`/`File`, `OilDir`/`OilFile` |
+| editor body | `#b1bebf` | `body.brighter` | `Normal` |
+| file/folder names | `#a0b6b8` | `body.tinted` (was `body.base0` `#9eabac` until 2026-09-24; moved up with body) | `SnacksPickerDirectory`/`File`, `OilDir`/`OilFile` |
 | LSP doc prose | `#919e9f` | `body.faded` | `LspDocFloat` |
 
 All three read the rung by ROLE from `palette.variants.body`, never as a copied
@@ -324,9 +325,15 @@ a banner saying so. Their reasoning and measurements still hold and are worth
 reading; their "which value is live" claims do not. The table above is the only
 reconciled snapshot, and a running editor is the only authority.
 
+**The 2026-09-24 string, key, escape and import work is PARKED, not live.** It is
+saved as `custom-v4` plus the A/B builds `custom-swap` .. `custom-swap-6`; live
+`custom-latest` is back on cyan strings and the `brighter` yellow, with only the
+`brighter` body and `tinted` file names kept. Record and every measurement:
+[`notes/string-and-member-colours.md`](notes/string-and-member-colours.md).
+
 ## Silent-failure surfaces — read before debugging "my change did nothing"
 
-Eighteen places in this config accept a wrong value and **do nothing** rather than
+Twenty places in this config accept a wrong value and **do nothing** rather than
 erroring: unresolved picker action names get typed as keystrokes, an action name
 matching a snacks built-in replaces it everywhere, spelling out a layout `box`
 drops the preset's overrides, `virt_lines_above` on line 1 renders nothing while
@@ -398,7 +405,7 @@ at the end of the sweep todo (four dead theme hexes, palette described as closed
 LSP debounce `300` vs the real `200`, `<C-k>` vs `<M-k>`, Copilot presented as
 active and its subscription listed as a requirement).
 
-## One loose end from the freeze session (review by ~2026-10-20)
+## One loose end from the freeze session (review by ~2026-12-31)
 
 LOW priority, non-blocking. The pre-freeze build-out is committed + pushed; this is the
 only thing not yet eyeballed. Do it casually next time you open one of these files — it is

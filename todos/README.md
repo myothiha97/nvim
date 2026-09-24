@@ -40,6 +40,7 @@ Status column meanings:
 | [`freeze-override-2026-08-20.md`](freeze/freeze-override-2026-08-20.md)                           | telescope-file-browser session; the reason the freeze clock was reset                                                                | record |
 | [`freeze-override-2026-09-19.md`](freeze/freeze-override-2026-09-19.md)                           | startup explorer, then the oil box and dashboard; scope grew past the one gate                                                       | record |
 | [`freeze-override-2026-09-23.md`](freeze/freeze-override-2026-09-23.md)                           | git hunk keys, arrow toggle, outline rows; plus the week's safety review                                                             | record |
+| [`freeze-override-2026-09-24.md`](freeze/freeze-override-2026-09-24.md)                           | green strings, keys follow members; one hex and one link, scope held to the todo                                                     | record |
 
 Rule 10 in [`process/discipline-stop-rules.md`](process/discipline-stop-rules.md)
 is what requires an override to leave a trace here.
@@ -58,6 +59,7 @@ is what requires an override to leave a trace here.
 | [`syntax-palette-followups.md`](theme/syntax-palette-followups.md)               | the numbered palette items and their verdicts. Items 2, 6, 7 done; 3 dropped; 4, 5, 8 closed. Item 8 is the one `custom-latest` acts on                                  | mostly closed |
 | [`solarized-osaka-upstream-update.md`](theme/solarized-osaka-upstream-update.md) | upstream advertised a large refactor ending at `0df74ef`; our lock is `f675d9a`. Deferred to the checkpoint — do not update during the freeze unless the theme is broken | open          |
 | [`lazy-border-match-snacks-picker.md`](theme/lazy-border-match-snacks-picker.md) | the `:Lazy` float is the one framed panel not wearing the snacks picker ring. lazy.nvim never remaps `FloatBorder`. Link the whole group, fg alone is invisible          | open          |
+| [`string-member-separation.md`](theme/string-member-separation.md)               | the LAST theme item: string/member colours: PARKED WIP in `custom-v4` + `custom-swap*`; live is back on cyan strings. Resume from the notes file                   | open          |
 
 Live colour values and the reasoning behind them are **not** here. See
 [`../notes/palette-reference.md`](../notes/palette-reference.md) (lean) and

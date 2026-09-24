@@ -2,7 +2,7 @@
 
 ## Status
 
-Open. Filed 2026-09-19, inside the freeze window that runs to 2026-10-20. Nothing
+Open. Filed 2026-09-19, inside the freeze window (now running to 2026-12-31). Nothing
 was applied to the config. Deferred by the change gate as aesthetic polish, which
 is the category `rules.md` names first.
 
