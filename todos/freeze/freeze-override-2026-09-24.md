@@ -1,4 +1,4 @@
-# Freeze-override trace — 2026-09-24 string green
+# Freeze-override trace: 2026-09-24 string green
 
 Required by rule 10 in [`discipline-stop-rules.md`](../process/discipline-stop-rules.md).
 
