@@ -849,8 +849,9 @@ return {
     { "<leader>sc", false },
     { "<leader>sC", false },
     { "<leader>so", false },
-    -- Keep the finished colorscheme fixed during normal work.
-    -- { "<leader>uC", false },
+    -- Keep the finished colorscheme fixed during normal work. Re-disabled
+    -- 2026-09-24 after the palette A/B session; builds load via `:colorscheme`.
+    { "<leader>uC", false },
     -- Disable LazyVim default so diffview.nvim owns <leader>gd
     { "<leader>gd", false },
     { "<leader>gD", false },
