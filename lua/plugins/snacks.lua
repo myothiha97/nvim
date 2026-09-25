@@ -851,9 +851,15 @@ return {
     { "<leader>so", false },
     -- Keep the finished colorscheme fixed during normal work. Re-disabled
     -- 2026-09-24 after the palette A/B session; builds load via `:colorscheme`.
-    { "<leader>uC", false },
-    -- Disable LazyVim default so diffview.nvim owns <leader>gd
-    { "<leader>gd", false },
+    {
+      "<leader>uC",
+      function()
+        vim.notify(
+          "Remeber, the colorscheme config is closed until 01 Jan 2027 \nBefore then don't even think about changing colorscheme or worst tweaking it",
+          vim.log.levels.ERROR
+        )
+      end,
+    },
     { "<leader>gD", false },
     {
       "<leader>xd",
