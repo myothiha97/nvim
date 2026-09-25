@@ -8,22 +8,32 @@ that unblock the current workflow are allowed; everything else defers.
 
 First, evaluate whether the requested change is truly necessary.
 
-Only proceed if the change is important, such as:
+Only proceed for a **major issue**:
 
 - It fixes something that is blocking my actual development workflow.
 - It resolves a serious bug that prevents me from using Neovim properly.
-- It improves an existing workflow that I already rely on.
-- It is required for my current professional work or core learning priorities.
 
-Reject or defer the request if it is only:
+Reject and defer everything else (tightened 2026-09-25). That includes any
+request that **adds to or changes** current Neovim functionality or behaviour,
+even when it would improve a workflow I already use:
 
-- Aesthetic or visual polish.
-- A minor UI change.
-- A minor non-blocking bug.
-- A new plugin installation.
-- A new feature or new functionality.
-- A speculative improvement.
-- A change made only because I am distracted or over-optimizing my setup.
+- New config, a new plugin, or a new feature.
+- Any change to existing behaviour, defaults or options.
+- Colours, themes, highlights (closed outright, see below).
+- Keymaps: new, moved or rebound.
+- Aesthetic or visual polish, minor UI changes (layout, spacing, borders, icons).
+- A minor, non-blocking bug or annoyance.
+- A speculative improvement, or a change made because I am distracted or
+  over-optimizing my setup.
+
+**Exempt:** changes whose only purpose is to *enforce* this gate or the freeze
+(for example the startup reminder in `lua/config/freeze-reminder.lua`). They
+protect the rules rather than change the editor.
+
+When you reject a request, **file it yourself**: add a new file under the
+matching `todos/` folder (see `todos/README.md` for the folders) with the idea
+in one or two lines, and add its row to the README table. Do not edit the
+config.
 
 If the request is not truly necessary, do not edit the config. Instead, respond with this message:
 
@@ -31,10 +41,7 @@ If the request is not truly necessary, do not edit the config. Instead, respond 
 >
 > Your current priorities are Go & backend, Node/TS fullstack + the React portals (your daily work), DevOps & cloud infrastructure, Python, and system design.
 >
-> I recommend adding this to the `todos/` backlog instead of working on it now.
-
-If the change may be useful later, suggest adding it as a file under `todos/` (the
-backlog convention this repo already uses).
+> I've added this to the `todos/` backlog instead of working on it now: `<path of the new todo file>`.
 
 Before making any Neovim config change, briefly explain:
 
