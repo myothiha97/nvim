@@ -45,5 +45,9 @@ if vim.v.startreason == "restart" then
   })
 end
 
+-- Blocking rules.md summary when starting inside this config during the freeze.
+-- Registered before lazy so its UIEnter hook exists however plugins load.
+require("config.freeze-reminder").setup()
+
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
