@@ -36,50 +36,33 @@ local function opens_comment(line, col)
   return false
 end
 
--- `TodoLocList keywords=x` filters at the ripgrep level only, then todo-comments re-reads
--- each matched line with a greedy pattern (`.*<(KEYWORDS)\s*:`) built from every keyword.
--- That has two consequences worth working around:
---   1. Any line *containing* the tag is listed, so a doc line such as
---        - Comment tags: `todo:` (not TODO), ...; `NOTE:` for temporary toggles.
---      shows up even though it is prose, not a todo.
---   2. The greedy `.*` labels a multi-tag line with the LAST tag on it, so the line above
---      is matched on `todo:` but listed as NOTE.
--- ripgrep reports the column of the tag it actually matched, so anchor on that: require a
--- comment opener in front of it, and rebuild the displayed text from it. Keypress only,
--- so this costs nothing on a hot path.
-local function loclist(keyword)
+-- The search is a ripgrep regex built from the keywords, so any line *containing* a tag
+-- is listed, including prose that only mentions one, e.g. a doc line such as
+--   - Comment tags: `todo:` (not TODO), ...; `NOTE:` for temporary toggles.
+-- ripgrep reports the column of the tag it matched, so the transform below keeps a result
+-- only when a comment opener sits in front of it. Keypress only, so this costs nothing on
+-- a hot path.
+-- Popup size shared with the diagnostics pickers in lua/plugins/snacks.lua.
+local picker_size = require("config.picker-size")
+
+local function picker(keyword)
   return function()
-    require("todo-comments.search").search(function(results)
-      local items = {}
-      for _, item in ipairs(results) do
-        if opens_comment(item.line, item.col) then
-          item.tag = keyword
-          item.text = vim.trim(item.line:sub(item.col))
-          table.insert(items, item)
-        end
-      end
-
-      if #items == 0 then
-        vim.notify("no " .. keyword .. ": comments found", vim.log.levels.INFO)
-        return
-      end
-
-      vim.fn.setloclist(0, {}, " ", { title = "Todo", id = "$", items = items })
-      vim.cmd("lopen")
-
-      local win = vim.fn.getloclist(0, { winid = true }).winid
-      require("todo-comments.highlight").attach(win, true)
-
-      -- Same selection key as the Snacks pickers and Oil: <C-l> confirms the entry under
-      -- the cursor. `remap` so it inherits whatever <CR> already does in this buffer rather
-      -- than hardcoding the jump. <CR> keeps working. Buffer-local, so this only gives up
-      -- <C-l> right-pane focus inside this list — use <C-w>l there.
-      vim.keymap.set("n", "<C-l>", "<CR>", {
-        buffer = vim.api.nvim_win_get_buf(win),
-        remap = true,
-        desc = "Select item",
-      })
-    end, { keywords = keyword, disable_not_found_warnings = true })
+    Snacks.picker.todo_comments({
+      keywords = { keyword },
+      -- The grep finder runs rg with --smart-case, which turns an all-lowercase pattern
+      -- like `todo` case-insensitive and would list TODO too. The later flag wins.
+      args = { "--case-sensitive" },
+      ---@param item snacks.picker.Item
+      transform = function(item)
+        -- item.text is "file:line:col:text"; strip the prefix to get the source line.
+        local line = item.text:sub(#item.file + 2):match("^%d+:%d+:(.*)$")
+        return line ~= nil and opens_comment(line, item.pos[2] + 1)
+      end,
+      layout = {
+        preview = true,
+        layout = { width = picker_size.preview.width, height = picker_size.preview.height },
+      },
+    })
   end
 end
 
@@ -104,27 +87,24 @@ return {
         end,
         desc = "Prev Todo",
       },
-      -- Use a location list instead of a floating picker. The list opens in a bottom split
-      -- and stays open after <cr>, so multiple items can be visited without reopening it. A
-      -- location list keeps these results separate from the normal quickfix list on
-      -- <leader>cc. Keyword filters are case-sensitive. See `loclist` above for why these
-      -- call the search API directly rather than `:TodoLocList`.
+      -- Snacks picker popup with preview. Keyword filters are case-sensitive. See `picker`
+      -- above for why these add a transform instead of calling the picker plainly.
       -- Disable LazyVim's picker defaults first.
       { "<leader>st", false },
       { "<leader>sT", false },
       {
         "<leader>st",
-        loclist("todo"),
+        picker("todo"),
         desc = "Personal todos",
       },
       {
         "<leader>se",
-        loclist("issue"),
+        picker("issue"),
         desc = "Personal issues",
       },
       {
         "<leader>sT",
-        loclist("TODO"),
+        picker("TODO"),
         desc = "Team todos",
       },
     },
