@@ -9,9 +9,17 @@ return {
     -- style = "warmer", -- simialr to warm, but with higher contrast colors
     transparent = false,
     term_colors = true,
-    -- highlights = {
-    --   Visual = { bg = "#264f78" },
-    --   VisualNOS = { bg = "#264f78" },
-    -- },
+    colors = {
+      red = "#d0707a",
+      purple = "#b57bc9",
+    },
+    highlights = {
+      -- Visual = { bg = "#264f78" },
+      -- VisualNOS = { bg = "#264f78" },
+      Comment = {
+        fg = "#7f848e",
+        ["@comment"] = { fg = "#7f848e" },
+      },
+    },
   },
 }
