@@ -6,9 +6,20 @@
 -- function) was dropped on 2026-09-30 in favour of the stock behaviour. It is
 -- in git history if it is ever wanted back. Do NOT add a `config` function here:
 -- lazy.nvim keeps only the last fragment's, and it would replace LazyVim's.
+--
+-- ENABLED = false (2026-09-30): measured at ~0.12 ms per open buffer per render,
+-- and the tabline re-renders about twice per typed character, so ~1.4 ms per
+-- keystroke at 5 buffers and ~2.6 ms at 10. Off means Neovim's native tabline
+-- (shown only with 2+ tab pages). Flip to true to bring the buffer tabs back;
+-- config/keymaps.lua follows the flag on its own. Also restore commit ba8ebbb
+-- (explorer top gap): with a tab bar, the global 1-row winbar gap stacks under
+-- it and leaves an extra blank row above "Explorer".
+local ENABLED = false
+
 return {
   {
     "akinsho/bufferline.nvim",
+    enabled = ENABLED,
     -- Close-to-a-side keys follow vim's h/l directions: <leader>bh closes the
     -- buffers to the left, <leader>bl the ones to the right. LazyVim puts
     -- "left" on <leader>bl and "right" on <leader>br, so both are replaced.

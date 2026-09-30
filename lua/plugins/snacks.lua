@@ -220,7 +220,7 @@ return {
       -- with it, which would paint over the cursor row and the active-file band
       -- below.
       local ok_palette, palette = pcall(require, "colorschemes.solarized-osaka.palette")
-      local list_fg = ok_palette and palette.variants.body.brighter or nil
+      local list_fg = ok_palette and palette.variants.body.tinted or nil
       if list_fg then
         vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { fg = list_fg })
         vim.api.nvim_set_hl(0, "SnacksPickerFile", { fg = list_fg })
@@ -579,20 +579,6 @@ return {
           -- when the edited buffer changes. Runs only while the explorer is
           -- open, and only re-renders when the active file actually changed.
           on_show = function(picker)
-            -- No top gap in the sidebar. The 1-row `winbar = " "` gap
-            -- (config/options.lua) is copied into the sidebar's root split when
-            -- it is created, so "Explorer" sat one row below the tab bar.
-            -- Clearing works only because that gap is a LOCAL value; see the
-            -- WARN in options.lua. Set on
-            -- the window's own `opts.wo` too, so a later layout update re-applies
-            -- the empty value instead of leaving whatever the window inherited.
-            local root = picker.layout.root
-            root.opts.wo = vim.tbl_extend("force", root.opts.wo or {}, { winbar = "" })
-            if root:valid() then
-              vim.wo[root.win].winbar = ""
-              picker.layout:update()
-            end
-
             -- Seed the band for the FIRST render, whatever opened the explorer.
             -- `picker.main` is the window the picker attached to, so its buffer is
             -- the file being edited -- `nvim_get_current_buf()` is unreliable here,
