@@ -5,7 +5,7 @@ return {
     -- nes/api.lua delegates to require("copilot-lsp.nes"), so NES needs this
     -- plugin on the runtimepath before copilot.lua's setup runs.
     dependencies = { "copilotlsp-nvim/copilot-lsp" },
-    enabled = false,
+    enabled = true,
     cmd = "Copilot",
     event = { "InsertEnter" },
     opts = {
