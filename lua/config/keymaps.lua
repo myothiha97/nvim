@@ -278,10 +278,8 @@ vim.keymap.set({ "n", "v" }, "<S-ScrollWheelRight>", "3zl", { noremap = true, si
 vim.keymap.set("i", "<S-ScrollWheelLeft>", "<C-o>3zh", { noremap = true, silent = true })
 vim.keymap.set("i", "<S-ScrollWheelRight>", "<C-o>3zl", { noremap = true, silent = true })
 
--- Disable buffer navigation with Shift+H/L (LazyVim defaults). Will be
--- reclaimed by bufferline.nvim when that plugin is re-enabled — see journal.md.
-vim.keymap.del("n", "<S-h>")
-vim.keymap.del("n", "<S-l>")
+-- <S-h>/<S-l> belong to bufferline.nvim (LazyVim's spec). Do not delete them
+-- here: this file loads at VeryLazy, after bufferline has mapped them.
 
 -- paste and yanking
 -- Paste over selected text without overwriting the yank register
