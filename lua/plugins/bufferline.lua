@@ -1,120 +1,87 @@
--- bufferline.nvim configured as a "pinned-only" favorites bar.
--- Default behavior of bufferline shows every visited buffer; we override that
--- via custom_filter so only buffers the user explicitly pins appear. Pin set
--- is path-keyed so it survives :bd + reopen within a session (not persisted
--- across nvim restarts).
+-- bufferline.nvim comes from LazyVim's own spec (lazyvim/plugins/ui.lua), which
+-- shows every open buffer and owns the keys: <S-h>/<S-l> cycle, <leader>bp pin,
+-- <leader>bj pick, [B/]B move. This file only adds overrides on top of it.
+--
+-- The earlier "pinned-only favorites bar" build (custom_filter + its own config
+-- function) was dropped on 2026-09-30 in favour of the stock behaviour. It is
+-- in git history if it is ever wanted back. Do NOT add a `config` function here:
+-- lazy.nvim keeps only the last fragment's, and it would replace LazyVim's.
+--
+-- ENABLED = false (2026-09-30): measured at ~0.12 ms per open buffer per render,
+-- and the tabline re-renders about twice per typed character, so ~1.4 ms per
+-- keystroke at 5 buffers and ~2.6 ms at 10. Off means Neovim's native tabline
+-- (shown only with 2+ tab pages). Flip to true to bring the buffer tabs back;
+-- config/keymaps.lua follows the flag on its own. Also restore commit ba8ebbb
+-- (explorer top gap): with a tab bar, the global 1-row winbar gap stacks under
+-- it and leaves an extra blank row above "Explorer".
+local ENABLED = false
+
 return {
   {
     "akinsho/bufferline.nvim",
-    enabled = false,
-    lazy = false,
-    priority = 900, -- after colorscheme (which is usually 1000)
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function()
-      -- Force the tabline slot to always be reserved, even before bufferline
-      -- finishes setup. Otherwise a failed setup leaves no top line at all.
-      vim.opt.showtabline = 2
+    enabled = ENABLED,
+    -- Close-to-a-side keys follow vim's h/l directions: <leader>bh closes the
+    -- buffers to the left, <leader>bl the ones to the right. LazyVim puts
+    -- "left" on <leader>bl and "right" on <leader>br, so both are replaced.
+    keys = {
+      { "<leader>br", false },
 
-      local pinned = {}
+      { "<leader>bh", "<Cmd>BufferLineCloseLeft<CR>", desc = "Delete Buffers to the Left" },
+      { "<leader>bl", "<Cmd>BufferLineCloseRight<CR>", desc = "Delete Buffers to the Right" },
+    },
+    opts = function(_, opts)
+      opts.options = opts.options or {}
+      -- Keep the bar visible with a single buffer too, so the current file name
+      -- is always on screen.
+      opts.options.always_show_bufferline = true
+      -- No indicator bar: the active tab is marked by its bold italic name alone.
+      opts.options.indicator = { style = "none" }
+      -- Full file names, like VS Code. bufferline cuts names at 18 cells by
+      -- default; when the tabs no longer fit, it scrolls the bar instead.
+      opts.options.truncate_names = false
 
-      local function current_path()
-        return vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+      -- ERRORS ONLY. The indicator drops LazyVim's warning count, and the
+      -- warning/info/hint name colours are pointed back at the plain ones
+      -- below: bufferline colours a tab's name by its WORST diagnostic, so a
+      -- file with only warnings would otherwise still turn yellow.
+      local error_icon = LazyVim.config.icons.diagnostics.Error
+      opts.options.diagnostics_indicator = function(_, _, diag)
+        return diag.error and error_icon .. diag.error or ""
       end
 
-      -- Soft threshold: above this we nudge the user that they're accumulating
-      -- tabs. Not a hard cap — pinning still succeeds, just with a warning.
-      local soft_limit = 5
-
-      local function count_pinned()
-        local n = 0
-        for _ in pairs(pinned) do
-          n = n + 1
+      local text = { attribute = "fg", highlight = "Normal" }
+      local dim = { attribute = "fg", highlight = "Comment" }
+      opts.highlights = opts.highlights or {}
+      for _, level in ipairs({ "warning", "info", "hint" }) do
+        for _, suffix in ipairs({ "", "_diagnostic" }) do
+          opts.highlights[level .. suffix] = { fg = dim }
+          opts.highlights[level .. suffix .. "_visible"] = { fg = dim }
+          opts.highlights[level .. suffix .. "_selected"] = { fg = text, bold = true, italic = true }
         end
-        return n
+      end
+      -- bufferline paints errors red only on the ACTIVE tab and greys them out
+      -- elsewhere, which hides the one status this bar is meant to show.
+      local error_fg = { attribute = "fg", highlight = "DiagnosticError" }
+      for _, suffix in ipairs({ "", "_diagnostic" }) do
+        opts.highlights["error" .. suffix] = { fg = error_fg }
+        opts.highlights["error" .. suffix .. "_visible"] = { fg = error_fg }
       end
 
-      local function toggle_pin()
-        local path = current_path()
-        if path == "" then
-          vim.notify("Cannot pin unnamed buffer", vim.log.levels.WARN, { title = "Bufferline" })
-          return
-        end
-        if pinned[path] then
-          pinned[path] = nil
-          vim.notify("Unpinned: " .. vim.fn.fnamemodify(path, ":t"), vim.log.levels.INFO, { title = "Bufferline" })
-        else
-          pinned[path] = true
-          local n = count_pinned()
-          local name = vim.fn.fnamemodify(path, ":t")
-          if n > soft_limit then
-            vim.notify(
-              ("Pinned: %s  (%d pinned — getting busy, consider unpinning)"):format(name, n),
-              vim.log.levels.WARN,
-              { title = "Bufferline" }
-            )
-          else
-            vim.notify(
-              ("Pinned: %s  (%d/%d)"):format(name, n, soft_limit),
-              vim.log.levels.INFO,
-              { title = "Bufferline" }
-            )
-          end
-        end
-        vim.cmd("redrawtabline")
-      end
-
-      require("bufferline").setup({
-        options = {
-          mode = "buffers",
-          -- Ordinal numbers (1, 2, 3) on each tab so <leader>1..9 maps to
-          -- what you see on screen.
-          numbers = "ordinal",
-          close_command = "bdelete! %d",
-          right_mouse_command = "bdelete! %d",
-          -- "icon" = vertical bar at the start of the active tab. More robust
-          -- across fonts than "underline" (which can bleed into separators).
-          indicator = { style = "icon", icon = "▎" },
-          diagnostics = false,
-          show_buffer_close_icons = false,
-          show_close_icon = false,
-          -- Always render the tabline so the current file name is visible
-          -- (VSCode-like). The bar shows: current buffer + every pinned buffer.
-          -- Unpinned buffers disappear from the bar as soon as you switch away.
-          always_show_bufferline = true,
-          custom_filter = function(buf_number)
-            if buf_number == vim.api.nvim_get_current_buf() then
-              return true
-            end
-            return pinned[vim.api.nvim_buf_get_name(buf_number)] == true
-          end,
-        },
-      })
-
-      local function close_buffer()
-        pinned[current_path()] = nil
-        vim.cmd("bdelete")
-      end
-
-      local map = vim.keymap.set
-      map("n", "<leader>bb", toggle_pin, { desc = "Bufferline: Toggle pin" })
-      map("n", "<leader>bj", "<cmd>BufferLinePick<cr>", { desc = "Bufferline: Pick (letter)" })
-      map("n", "<leader>bx", close_buffer, { desc = "Bufferline: Unpin + close buffer" })
-
-      -- Cycle pinned buffers only (custom_filter scopes BufferLineCycle* to
-      -- the visible/pinned set, NOT all loaded buffers like :bnext does).
-      map("n", "<S-l>", "<cmd>BufferLineCycleNext<cr>", { desc = "Bufferline: Next pinned" })
-      map("n", "<S-h>", "<cmd>BufferLineCyclePrev<cr>", { desc = "Bufferline: Prev pinned" })
-
-      -- Fast close: <C-q> reserved (free in vim default), <C-w> stays as the
-      -- vim window-management prefix (splits, navigation, etc.).
-      map("n", "<C-q>", close_buffer, { desc = "Close current buffer" })
-
-      -- Direct jumps: <leader>1..9 -> Nth pinned buffer in the bar.
-      for i = 1, 9 do
-        map("n", "<leader>" .. i, "<cmd>BufferLineGoToBuffer " .. i .. "<cr>", {
-          desc = "Bufferline: Go to #" .. i,
-        })
-      end
+      -- `style = "none"` still draws a one-cell blank in this group. A theme
+      -- that defines it fg-only (solarized-osaka does) leaves that cell with no
+      -- bg, so it falls through to TabLineFill and shows as a block beside the
+      -- active tab. Normal's bg is what bufferline gives the selected tab, so
+      -- this matches in every theme. Not gated on the theme at load time: the
+      -- table is re-applied on every ColorScheme, and a gate read once at
+      -- startup missed a later `:colorscheme` switch.
+      --
+      -- WARN: SILENT FAILURE: without `default = false` this is ignored.
+      -- bufferline sets its groups with `default = themable` (true), so a group
+      -- the theme already defined wins over this table.
+      opts.highlights.indicator_selected = {
+        default = false,
+        bg = { attribute = "bg", highlight = "Normal" },
+      }
     end,
   },
 }

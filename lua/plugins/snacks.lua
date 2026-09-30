@@ -8,6 +8,9 @@ local EXPLORER_MAX_WIDTH = 40 -- never wider than this, however wide the window 
 -- of the window, so EXPLORER_MIN_WIDTH gives way on a genuinely narrow one.
 local EXPLORER_MAX_SHARE = 0.4
 
+-- Picker popup sizes, shared with lua/plugins/todo-comments.lua.
+local picker_size = require("config.picker-size")
+
 local function clear_smart_picker_history()
   local history = require("snacks.picker.util.history").new("picker_smart")
   history.kv.data = {}
@@ -217,7 +220,7 @@ return {
       -- with it, which would paint over the cursor row and the active-file band
       -- below.
       local ok_palette, palette = pcall(require, "colorschemes.solarized-osaka.palette")
-      local list_fg = ok_palette and palette.variants.body.brighter or nil
+      local list_fg = ok_palette and palette.variants.body.tinted or nil
       if list_fg then
         vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { fg = list_fg })
         vim.api.nvim_set_hl(0, "SnacksPickerFile", { fg = list_fg })
@@ -440,8 +443,8 @@ return {
             preview = false,
             layout = {
               box = "horizontal",
-              width = 0.8,
-              height = 0.5,
+              width = picker_size.compact.width,
+              height = picker_size.compact.height,
               -- Repeated from the picker-wide layout below, and it has to be:
               -- a source layout that spells out its own `box` REPLACES the
               -- picker-wide one instead of merging with it
@@ -515,6 +518,8 @@ return {
                 -- edge is kept, because that is where Nvim draws the title, and
                 -- that edge is then made invisible via the winhighlight below. Net
                 -- result above the tree: the "Explorer" row, then one blank row.
+                -- Moving the label into the tab-bar row (bufferline offset) was
+                -- tried 2026-09-30 and reverted: the tree sat too close to the top.
                 border = "top",
                 title = "{title} {live} {flags}",
                 title_pos = "center",
@@ -810,8 +815,12 @@ return {
       layout = {
         preview = false,
         layout = {
-          width = 0.3,
-          height = 0.4,
+          width = picker_size.compact.width,
+          height = picker_size.compact.height,
+          -- WARN: SILENT FAILURE: the `default` preset carries `min_width = 120`,
+          -- which overrides `width` whenever 0.4 of the screen is under 120
+          -- columns, i.e. on most screens. 0 removes the floor.
+          min_width = 0,
           -- No dim behind a picker. The theme runs `transparent = true`, so the
           -- editor background is Ghostty's, while snacks' backdrop is a
           -- full-editor float of pure black at winblend 60 — with nothing else
@@ -868,7 +877,7 @@ return {
           filter = { buf = true },
           layout = {
             preview = true,
-            layout = { width = 0.85, height = 0.75 },
+            layout = { width = picker_size.preview.width, height = picker_size.preview.height },
           },
         })
       end,
@@ -880,7 +889,7 @@ return {
         Snacks.picker.diagnostics({
           layout = {
             preview = true,
-            layout = { width = 0.85, height = 0.75 },
+            layout = { width = picker_size.preview.width, height = picker_size.preview.height },
           },
         })
       end,

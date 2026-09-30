@@ -40,7 +40,9 @@ local builds = {
   -- The daily selection. Only the roles that differ from the base palette.
   ["custom-latest"] = {
     palette = {
-      type = palette.variants.type.nvim_type,
+      -- type = palette.variants.type.nvim_type, -- the type color feel a bit higher in contrast
+
+      type = palette.variants.type.sky_dim, -- more calmer type color
 
       -- Brackets and delimiters share the MAXIMIN grey rung, moved off
       -- `kanagawa_mid` (#96abd3) 2026-09-09. The periwinkle was a fourth hue in
@@ -64,7 +66,7 @@ local builds = {
       -- 11.2. The JSX/TSX/HTML/Vue tag wrappers TRACK THIS VALUE in init.lua --
       -- they used to be pinned to base0 separately, which this change would have
       -- left a bare JND away from body. Ladder and rejects in palette.lua.
-      body = palette.variants.body.brighter,
+      body = palette.variants.body.tinted,
 
       func = palette.variants.func.vivid,
 
