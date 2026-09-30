@@ -40,15 +40,17 @@ local builds = {
   -- The daily selection. Only the roles that differ from the base palette.
   ["custom-latest"] = {
     palette = {
-      type = palette.variants.type.nvim_type,
+      -- type = palette.variants.type.nvim_type, -- the type color feel a bit higher in contrast
+
+      type = palette.variants.type.sky_dim, -- more calmer type color
 
       -- Brackets and delimiters share the MAXIMIN grey rung, moved off
       -- `kanagawa_mid` (#96abd3) 2026-09-09. The periwinkle was a fourth hue in
       -- the blue band, carrying the third-highest contrast in the palette on its
       -- least meaningful ink. Measured over Go/bash/devops/js-ts/jsx-tsx/python:
       -- worst chromatic pair 14.2 -> 16.5, tightest colour-blind pair 2.3 -> 4.8.
-      delimiter = palette.variants.delimiter.brighter,
-      bracket = palette.variants.delimiter.brighter,
+      delimiter = palette.variants.delimiter.mid_high,
+      bracket = palette.variants.delimiter.mid_high,
       -- Body text: `brighter` since 2026-09-24, replacing `tinted`. The 09-09
       -- "too bright" verdict below was made while strings sat 12 L* under body;
       -- the green strings rose to body level, and `tinted` then read dimmer than
@@ -64,7 +66,7 @@ local builds = {
       -- 11.2. The JSX/TSX/HTML/Vue tag wrappers TRACK THIS VALUE in init.lua --
       -- they used to be pinned to base0 separately, which this change would have
       -- left a bare JND away from body. Ladder and rejects in palette.lua.
-      body = palette.variants.body.brighter,
+      body = palette.variants.body.tinted,
 
       func = palette.variants.func.vivid,
 
