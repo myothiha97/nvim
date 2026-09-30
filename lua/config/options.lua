@@ -92,7 +92,15 @@ end
 -- static, so it is never re-evaluated on redraw (zero hot-path cost). WinBar is
 -- made transparent in autocmds.lua on every ColorScheme — setting the highlight
 -- here doesn't stick because the theme loads after options.lua and repaints it.
-vim.opt.winbar = " "
+--
+-- Set as the first window's LOCAL value, not the global one. Every split copies
+-- its parent's local options, so every window still gets the gap, and the
+-- global stays empty so a window can opt out. That is what the explorer sidebar
+-- does (on_show in plugins/snacks.lua).
+-- WARN: SILENT FAILURE: with a global `" "`, clearing a window's local value
+-- does nothing. `winbar` is global-local, and an empty local value means "use
+-- the global", so the gap comes straight back.
+vim.opt_local.winbar = " "
 
 vim.diagnostic.config({
   float = {
