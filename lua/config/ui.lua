@@ -72,11 +72,33 @@ local reference = {
   -- background so the menu keeps its own. L* 5.15, C* 7.30 -- the "too teal" value
   -- that caps the list above.
   completion_menu = "#001419",
+  black_matte_color = {
+
+    -- #191918  L* 8.7  Claude desktop editor bg (sampled)
+    -- #171716  L* 7.7  -1 step
+    -- #151514  L* 6.7  -2 steps
+    -- #131312  L* 5.7  -3 steps
+    -- #10100f  L* 4.7  -4 steps
+    -- #0e0e0d  L* 3.8  approx, same lightness as current nvim bg
+
+    claude_desktop = "#191918",
+    medium_dark = "#171716",
+    darker = "#151514",
+    second_darkest = "#131312",
+    darkest = "#10100f",
+  },
+}
+local status_line = {
+  light_matte = "#222221",
+  dark_matte = "#1e1e1d",
+  darker_matte = "#171716",
 }
 
 return {
-  -- bg = reference.ghostty_background,
-  bg = candidates.teal,
+  -- bg = reference.black_matte_color.darkest,
+  bg = reference.black_matte_color.second_darkest, -- start trialling from 1st Oct 2026
+  -- bg = reference.teal, -- current live color,
+  status_line = status_line,
   candidates = candidates,
   reference = reference,
 }

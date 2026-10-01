@@ -228,6 +228,8 @@ local variants = {
     periwinkle = "#a7b1fe",
     nvim_type = "#2ac3de", -- LIVE in custom-latest
     vscode_support = "#0db9d7",
+    claude_desktop_number = "#72E5E7",
+    claude_desktop_boolean = "#71E1E3",
   },
 
   -- Booleans and `@constant`, painted via `Boolean` / `@constant` in init.lua.
@@ -343,6 +345,8 @@ local variants = {
     mauve = "#c49ac6",
     violet = "#9b9fec",
     tokyonight = "#73daca",
+    light_seagreen = "#20B2AA",
+    ghostty_cyan = "#7bb6ae",
     -- The theme's own cyan500: what `@variable.member` and object keys show in
     -- every non-Go language. Named here so a build can put Go fields on it
     -- (`field` role, custom-swap-3). Keep equal to the theme's cyan500.

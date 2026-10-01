@@ -23,6 +23,7 @@
 -- the `vim.g.colors_name` trap: notes/palette-reference.md, section "Builds".
 
 local palette = require("colorschemes.solarized-osaka.palette")
+local ui = require("config.ui")
 
 ---@class SolarizedOsakaBuild
 ---@field palette table<string, string>|nil role overrides, keys from the palette's return block
@@ -38,6 +39,9 @@ local builds = {
   original = { config = { on_highlights = function() end } },
 
   -- The daily selection. Only the roles that differ from the base palette.
+  -- todo:
+  -- In Oct 1 2026, the main editor background is now set to ui.reference.black_matte_color.second_darkest.
+  -- While the current colors in lua/colorschemes/solarized-osaka/palette.lua function acceptably for now, we must thoroughly analyze and sync the active palette with this new background after the freeze date.
   ["custom-latest"] = {
     palette = {
       -- type = palette.variants.type.nvim_type, -- the type color feel a bit higher in contrast
@@ -94,6 +98,8 @@ local builds = {
       -- separates marginally better) and point init.lua's Go block back at
       -- `palette.member`.
       member = false,
+      -- member = palette.variants.member.light_seagreen,
+      -- member = palette.variants.member.ghostty_cyan,
 
       -- `vivid` (#c7b903) since 2026-09-24, chosen by eye after side-by-side
       -- screenshots against the new green strings and `brighter` body. dE 3.7
@@ -117,6 +123,7 @@ local builds = {
       -- but joins keyword runs (`export function`, `import type`: 9 two-colour
       -- splits -> 0) and calms the import block (C*52 vs C*93 in Ghostty).
       import = palette.variants.keyword.warm_violet,
+      -- escape = palette.variants.boolean.tokyonight_dim,
 
       -- Two stops below `readable`, 2026-09-09: 4.56:1 read as too bright and
       -- `subtle` (dE 2.8) was not enough of a drop. Gives up AA at 3.96:1,
