@@ -252,7 +252,8 @@ end, { desc = "Dismiss hover docs / Clear highlights" })
 -- Save file (Ctrl+S, works in normal and insert mode)
 vim.keymap.set({ "n", "i" }, "<C-s>", "<cmd>w<cr>", { desc = "Save File" })
 
-local scroll_depth = 3
+-- local scroll_depth = 3 -- current live setting
+local scroll_depth = 2 -- temporarily set to 2
 
 -- Mouse/trackpad: scroll viewport without moving cursor (VSCode/WebStorm behavior)
 -- <C-e> scrolls viewport down, <C-y> scrolls viewport up — cursor stays in place

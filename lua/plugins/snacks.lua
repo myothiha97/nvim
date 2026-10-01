@@ -815,8 +815,8 @@ return {
       layout = {
         preview = false,
         layout = {
-          width = picker_size.compact.width,
-          height = picker_size.compact.height,
+          width = picker_size.standard.width,
+          height = picker_size.standard.height,
           -- WARN: SILENT FAILURE: the `default` preset carries `min_width = 120`,
           -- which overrides `width` whenever 0.4 of the screen is under 120
           -- columns, i.e. on most screens. 0 removes the floor.
