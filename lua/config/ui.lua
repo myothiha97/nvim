@@ -97,7 +97,7 @@ local status_line = {
 return {
   -- bg = reference.black_matte_color.darkest,
   bg = reference.black_matte_color.second_darkest, -- start trialling from 1st Oct 2026
-  -- bg = reference.teal, -- current live color,
+  -- bg = candidates.teal, -- current live color,
   status_line = status_line,
   candidates = candidates,
   reference = reference,

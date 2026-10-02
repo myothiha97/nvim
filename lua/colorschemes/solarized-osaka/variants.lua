@@ -45,9 +45,9 @@ local builds = {
   ["custom-latest"] = {
     palette = {
       -- type = palette.variants.type.nvim_type, -- the type color feel a bit higher in contrast
-
-      type = palette.variants.type.sky_dim, -- more calmer type color
-
+      -- type = palette.variants.type.sky_dim, -- more calmer type color, current live
+      -- type = palette.variants.type.sky_dimmer,
+      type = palette.variants.type.sky_dimmest, -- start trialling at 2nd Oct 2026
       -- Brackets and delimiters share the MAXIMIN grey rung, moved off
       -- `kanagawa_mid` (#96abd3) 2026-09-09. The periwinkle was a fourth hue in
       -- the blue band, carrying the third-highest contrast in the palette on its
@@ -81,6 +81,7 @@ local builds = {
       -- `boolean.tokyonight_muted` is the safer swap if either starts to bite.
       boolean = palette.variants.boolean.tokyonight_dim,
 
+      field = palette.variants.boolean.tokyonight_dim,
       -- Back to the theme cyan (`false`) the evening of 2026-09-24: the green
       -- string work is parked as WIP in custom-v4. The history below stays.
       --
@@ -89,6 +90,7 @@ local builds = {
       -- the one-word revert. `vivid` replaced `tokyodark` the same day.
       -- Measurements in palette.lua, `string`.
       string = false,
+      -- go = true,
 
       -- UNUSED since 2026-09-08, and `false` rather than nil on purpose (`M.load`
       -- iterates with `pairs`, so an absent key is a silent no-op). Go fields are

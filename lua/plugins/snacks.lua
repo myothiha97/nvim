@@ -443,8 +443,8 @@ return {
             preview = false,
             layout = {
               box = "horizontal",
-              width = picker_size.compact.width,
-              height = picker_size.compact.height,
+              width = picker_size.standard.width,
+              height = picker_size.standard.height,
               -- Repeated from the picker-wide layout below, and it has to be:
               -- a source layout that spells out its own `box` REPLACES the
               -- picker-wide one instead of merging with it

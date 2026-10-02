@@ -230,6 +230,10 @@ local variants = {
     vscode_support = "#0db9d7",
     claude_desktop_number = "#72E5E7",
     claude_desktop_boolean = "#71E1E3",
+    sky_dimmer = "#38bad4",
+    sky_dimmest = "#37b4ce",
+    green = "#84b975",
+    sky_dark = "#05aac7",
   },
 
   -- Booleans and `@constant`, painted via `Boolean` / `@constant` in init.lua.
@@ -416,6 +420,7 @@ return {
   -- Go-only role overrides, `{ string = , parameter = , escape = }`. `false`
   -- means Go uses the shared roles like every other language.
   go = false,
+  override_go = true,
   -- UNREAD: see `member` above.
   -- member = false,
 }

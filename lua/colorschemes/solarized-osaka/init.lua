@@ -39,7 +39,7 @@ return {
       c.bg_float = bg
       c.bg_sidebar = bg
       -- c.bg_statusline = bg -- current live
-      c.bg_statusline = ui_color.status_line.dark_matte -- start trialling at 1st Oct 2026
+      c.bg_statusline = ui_color.status_line.dark_matte -- start trialling at 1st Oct 2026,
     end,
     -- NO `on_colors` FOR SYNTAX. The theme's base ramp (green500, orange500,
     -- blue500, cyan500) is shared with the UI, so a syntax choice there silently
@@ -337,8 +337,19 @@ return {
       -- notes/palette-reference.md.
       -- `palette.field` lets a build hold fields on their own value (2026-09-24,
       -- all-orange builds, so `Width: 3` does not read as one orange run).
-      for _, group in ipairs({ "@variable.member.go", "@variable.member.key.go", "@property.go" }) do
-        hl[group] = { fg = palette.field or palette.punctuation }
+      for _, group in ipairs({
+        "@variable.member.go",
+        "@variable.parameter.go",
+        "@variable.member.key.go",
+        -- "@variable.",
+        "@property.go",
+      }) do
+        -- hl[group] = { fg = palette.field or palette.punctuation }
+        hl[group] = { fg = palette.punctuation }
+        hl["@variable.parameter.go"] = { fg = palette.field } -- for go orange field color is better for readability
+        -- hl["@variable.member.go"] = { fg = palette. }
+        -- hl["@variable.member.key.go"] = { fg = palette.variants.keyword.olive }
+        -- hl["@variable.parameter.go"]
       end
 
       -- Object-literal and type-literal KEYS, normalised. The base ecma queries
@@ -399,6 +410,21 @@ return {
         end
       end
 
+      local olive_color = palette.variants.keyword.olive
+      local tokyodark = palette.variants.string.tokyodark
+      local vivid_bush_green = palette.variants.string.vivid
+      -- if palette.override_go then
+      --   hl["@variable.member.key.go"] = {
+      --     fg = vivid_bush_green,
+      --   }
+      --   hl["@variable.member.go"] = {
+      --     fg = vivid_bush_green,
+      --   }
+      --   hl["@property.go"] = {
+      --     fg = vivid_bush_green,
+      --   }
+      --   -- hl["@punctuation.delimiter.go"] = { fg = palette.variants.delimiter.kanagawa }
+      -- end
       -- HCL/Terraform attribute names. The member link above is an ecma
       -- decision -- an object literal is a small part of a TS file -- but the HCL
       -- queries file EVERY `key = value` name as `@variable.member.key`, so a
