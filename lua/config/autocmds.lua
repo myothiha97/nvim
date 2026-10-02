@@ -116,3 +116,29 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.spell = false
   end,
 })
+
+-- ── Stop snippet session on leaving insert/select mode ─────────────────────
+-- Native vim.snippet keeps its session (and the blue SnippetTabstop highlight)
+-- alive after you leave insert mode: its CursorMoved check only runs in insert
+-- and select mode, so in normal mode nothing ever ends it. Ending the session
+-- on the mode change covers every exit path (<Esc>, <C-c>, <C-s>...).
+--
+-- WARN: SILENT FAILURE: the check MUST be deferred. Typing over a selected
+-- placeholder passes through normal mode for an instant (s:n, then n:i), so
+-- stopping right away kills the session mid-edit and <Tab> stops jumping to the
+-- next field. On the next tick a real exit is still in "n"; a placeholder
+-- replace is back in "i".
+--
+-- Cost: the pattern is matched in C, so the callback only runs on these two
+-- transitions, about once per insert exit. Never per keystroke.
+vim.api.nvim_create_autocmd("ModeChanged", {
+  group = vim.api.nvim_create_augroup("snippet_stop_on_normal", { clear = true }),
+  pattern = { "i:n", "s:n" },
+  callback = function()
+    vim.schedule(function()
+      if vim.api.nvim_get_mode().mode == "n" and vim.snippet.active() then
+        vim.snippet.stop()
+      end
+    end)
+  end,
+})
