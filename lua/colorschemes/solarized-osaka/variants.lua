@@ -39,9 +39,42 @@ local builds = {
   original = { config = { on_highlights = function() end } },
 
   -- The daily selection. Only the roles that differ from the base palette.
-  -- todo:
-  -- In Oct 1 2026, the main editor background is now set to ui.reference.black_matte_color.second_darkest.
-  -- While the current colors in lua/colorschemes/solarized-osaka/palette.lua function acceptably for now, we must thoroughly analyze and sync the active palette with this new background after the freeze date.
+
+  --  todo: remaining work with the custom color scheme
+  --  2026-10-01: The main editor background is now set to
+  -- `ui.reference.black_matte_color.second_darkest`.
+  --
+  -- The current palette in `lua/colorschemes/solarized-osaka/palette.lua`
+  -- is acceptable for now, but after the freeze date we need to thoroughly
+  -- review and synchronize the active palette with the new editor background.
+  --
+  -- At some point, consider renaming the theme to a unique name, as the
+  -- current implementation has evolved substantially beyond the original
+  -- Solarized Osaka color scheme.
+  --
+  -- Planned custom theme variants:
+  --   1. Dark / Teal Background
+  --      - Teal as the primary editor background.
+  --      - Palette and syntax colors tuned around the teal background.
+  --
+  --   2. Dark / Black Matte Background
+  --      - `black_matte_color.second_darkest` as the primary editor background.
+  --      - Palette and syntax colors re-adjusted to work optimally with the
+  --        darker background.
+  --
+  --   3. Light
+  --      - Implement after the major issues with both dark variants have
+  --        been resolved.
+  --
+  -- The goal of the dark variants is not simply visual consistency, but
+  -- improved readability and symbol differentiation across languages and
+  -- file types, comfortable long-session usage, and strong/appropriate
+  -- contrast ratios.
+  --
+  -- For future review and enhancement work, refer to:
+  -- `todos/theme/colorscheme-review-2026-10-02-and-future-enhancement.md`
+  -- and the other theme-related documents under `todos/theme/`.
+
   ["custom-latest"] = {
     palette = {
       -- type = palette.variants.type.nvim_type, -- the type color feel a bit higher in contrast
