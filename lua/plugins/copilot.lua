@@ -49,7 +49,17 @@ return {
       },
       filetypes = {
         ["*"] = true, -- Enable for all filetypes
+        text = false, -- Disable for text files
       },
+      -- Replaces copilot.lua's default, so its buflisted/buftype check is kept.
+      -- Then keeps secret files (.env*, *secret*) away from the server.
+      should_attach = function(buf, bufname)
+        if not vim.bo[buf].buflisted or vim.bo[buf].buftype ~= "" then
+          return false
+        end
+        local name = vim.fs.basename(bufname):lower()
+        return not name:match("^%.env") and not name:match("secret")
+      end,
     },
     config = function(_, opts)
       require("copilot").setup(opts)
