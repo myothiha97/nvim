@@ -331,6 +331,33 @@ saved as `custom-v4` plus the A/B builds `custom-swap` .. `custom-swap-6`; live
 `brighter` body and `tinted` file names kept. Record and every measurement:
 [`notes/string-and-member-colours.md`](notes/string-and-member-colours.md).
 
+## Copilot NES (2026-10-04)
+
+`lua/plugins/copilot.lua` is tuned toward VS Code-style Next Edit Suggestions.
+Full record, verified plugin facts and the restart checklist:
+[`notes/copilot-nes.md`](notes/copilot-nes.md). Read it before touching the file.
+
+- **Order in `config` is load-bearing.** `require("copilot-lsp").setup()` and the
+  `nes.request_nes` wrap must both run BEFORE `require("copilot").setup()`.
+  Moved after it, both fail silently: `nes/ui.lua` keeps the old thresholds and
+  the debounced caller keeps the unwrapped `request_nes`.
+- **copilot.lua's `opts.nes` only reads `enabled` and `keymap`.** Thresholds or
+  `auto_trigger` there are silently ignored. NES debounce is
+  `vim.g.copilot_nes_debounce`, read once at LSP start.
+- **The toggle (`<leader>ad` / `<M-k>`) gates every NES request and cancels
+  pending ghost-text requests, but the server keeps running on purpose** (better
+  context on re-enable; sync traffic does not use the Free plan quota). Do not
+  "fix" that by stopping the server without asking.
+- **No insert-mode `<Esc>` map, on purpose.** `InsertLeave` already dismisses
+  ghost text; a `feedkeys("<Esc>")` map broke macro replay. NES surviving `<Esc>`
+  into normal mode is intended (`<Tab>` accepts there).
+- **The `CursorHold` NES trigger is deduped per `changedtick` + cursor line**,
+  not column: `<Esc>` moves the cursor one column and would bring a dismissed NES
+  back. Matching VS Code's stricter "only after a recent edit" rule was offered
+  and declined.
+- After every `:Lazy update`, re-check the toggle: the request wrap and render
+  gate patch internal copilot-lsp functions.
+
 ## Silent-failure surfaces — read before debugging "my change did nothing"
 
 Twenty places in this config accept a wrong value and **do nothing** rather than
