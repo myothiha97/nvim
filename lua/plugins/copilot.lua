@@ -273,17 +273,15 @@ return {
         -- suggestion.toggle_auto_trigger(), which would only flip this one buffer.)
         vim.g.copilot_enabled = not vim.g.copilot_enabled
         vim.b.copilot_suggestion_auto_trigger = vim.g.copilot_enabled
-        -- Belt-and-suspenders: when disabling, drop any ghost text and any
-        -- pending NES that was rendered just before the toggle. The
-        -- toggle/render-gate only affects *future* draws.
+        -- When disabling, drop any ghost text and any NES rendered just before
+        -- the toggle; the gates only affect *future* requests and draws.
+        -- dismiss() runs even with nothing visible: it also cancels the debounce
+        -- timer and any in-flight request and resets the request context.
+        -- Otherwise a leftover context keeps copilot.lua re-requesting on every
+        -- CursorMovedI until InsertLeave.
         if not vim.g.copilot_enabled then
-          if suggestion.is_visible() then
-            suggestion.dismiss()
-          end
-          local nes_ok, nes = pcall(require, "copilot-lsp.nes")
-          if nes_ok then
-            nes.clear()
-          end
+          suggestion.dismiss()
+          nes.clear()
         elseif vim.api.nvim_get_mode().mode:find("i") then
           -- Enabling while in insert mode: fire a suggestion now instead of waiting
           -- for the next keystroke, so ghost text appears the moment you toggle on.
