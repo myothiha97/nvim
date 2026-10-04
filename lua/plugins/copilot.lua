@@ -148,16 +148,14 @@ return {
         end
       end, { desc = "Copilot: Accept + Trigger Next" })
 
-      -- Esc: always exit insert mode; if a suggestion is visible, dismiss it first
-      map("i", "<Esc>", function()
-        if suggestion.is_visible() then
-          suggestion.dismiss()
-        end
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-      end, { desc = "Copilot: Dismiss and Exit Insert" })
+      -- No insert-mode <Esc> map on purpose: native <Esc> fires InsertLeave, and
+      -- the autocmd above dismisses the ghost text there. A map that re-feeds
+      -- <Esc> via feedkeys appends it AFTER pending typeahead, so a macro like
+      -- `ihello<Esc>oworld<Esc>` replays as "hellooworld".
 
-      -- Manual copilot trigger: closes blink menu if open, clears the hidden
-      -- guard set by BlinkCmpMenuOpen, then requests/cycles a suggestion.
+      -- Manual copilot trigger: closes blink menu if open, clears the
+      -- copilot_suggestion_hidden guard (set by the BlinkCmpMenuOpen autocmd when
+      -- that is enabled above), then requests/cycles a suggestion.
       -- Press repeatedly to cycle through variants (same as <M-]>).
       map("i", "<C-j>", function()
         local ok, blink = pcall(require, "blink.cmp")
