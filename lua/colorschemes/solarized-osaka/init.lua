@@ -413,18 +413,21 @@ return {
       local olive_color = palette.variants.keyword.olive
       local tokyodark = palette.variants.string.tokyodark
       local vivid_bush_green = palette.variants.string.vivid
-      -- if palette.override_go then
-      --   hl["@variable.member.key.go"] = {
-      --     fg = vivid_bush_green,
-      --   }
-      --   hl["@variable.member.go"] = {
-      --     fg = vivid_bush_green,
-      --   }
-      --   hl["@property.go"] = {
-      --     fg = vivid_bush_green,
-      --   }
-      --   -- hl["@punctuation.delimiter.go"] = { fg = palette.variants.delimiter.kanagawa }
-      -- end
+
+      -- todo: later refactor below line to use the value from palette
+      local tokyonight_cyan_S58 = "#73daca"
+      if palette.override_go then
+        hl["@variable.member.key.go"] = {
+          fg = tokyonight_cyan_S58,
+        }
+        hl["@variable.member.go"] = {
+          fg = tokyonight_cyan_S58,
+        }
+        hl["@property.go"] = {
+          fg = tokyonight_cyan_S58,
+        }
+        -- hl["@punctuation.delimiter.go"] = { fg = palette.variants.delimiter.kanagawa }
+      end
       -- HCL/Terraform attribute names. The member link above is an ecma
       -- decision -- an object literal is a small part of a TS file -- but the HCL
       -- queries file EVERY `key = value` name as `@variable.member.key`, so a

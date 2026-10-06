@@ -2,7 +2,9 @@ if not vim.g.neovide then
   return
 end
 
-vim.o.guifont = "Maple Mono NF:h14"
+-- vim.o.guifont = "Liga SFMono Nerd Font:h14"
+-- SF Mono has no Nerd Font icons, so Maple Mono NF fills in the missing glyphs
+vim.o.guifont = "SF Mono,Maple Mono NF:h14"
 vim.g.neovide_cursor_vfx_mode = ""
 vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_size = 0

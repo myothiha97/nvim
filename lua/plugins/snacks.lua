@@ -489,6 +489,15 @@ return {
           --     is overwritten on the next redraw.
           -- `update_win` merges the box entry over that snapshot, so a `wo` here is
           -- the one thing the layout cannot undo.
+          -- if you dont want to see the snack explorer folder/file indent line
+          -- then un-comments  below lines of icons = {}
+          icons = {
+            -- tree = {
+            --   vertical = " ",
+            --   middle = " ",
+            --   last = " ",
+            -- },
+          },
           layout = {
             -- WARN: SILENT FAILURE. Must stay restated. Spelling out the layout inherits
             -- the PRESET (preview = "main"), not the explorer SOURCE (preview = false),
