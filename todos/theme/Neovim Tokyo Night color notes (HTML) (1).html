@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neovim Tokyo Night — Muted Color Overrides</title>
+<style>
+  :root { --bg:#16161e; --panel:#1f2335; --code:#1a1b26; --fg:#c0caf5; --muted:#7a83a8; --border:#2a2e44; --accent:#7aa2f7; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.6; }
+  main { max-width:860px; margin:0 auto; padding:32px 20px 64px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  h2 { font-size:20px; margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+  h3 { font-size:16px; margin:28px 0 10px; color:var(--accent); }
+  p.sub { color:var(--muted); margin:0 0 24px; font-size:14px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; margin:8px 0 16px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  th { color:var(--muted); font-weight:500; }
+  tr.chosen td { background:#24283b; }
+  .sw { display:inline-block; width:16px; height:16px; border-radius:4px; vertical-align:-3px; margin-right:8px; border:1px solid #ffffff22; }
+  .hex { font-family:ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace; cursor:pointer; padding:2px 6px; border-radius:4px; background:#ffffff0d; }
+  .hex:hover { background:#ffffff1f; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:10px; background:#7aa2f733; color:#a9c1ff; margin-left:6px; }
+  .label { font-size:13px; color:var(--muted); margin:14px 0 4px; }
+  pre { background:var(--code); color:var(--fg); font-family:ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace; font-size:14px; padding:12px 14px; border-radius:8px; margin:0; overflow-x:auto; border:1px solid var(--border); white-space:pre; }
+  .codewrap { position:relative; }
+  .copy { position:absolute; top:8px; right:8px; background:#2a2e44; color:var(--fg); border:1px solid #3b4261; border-radius:6px; font-size:12px; padding:4px 10px; cursor:pointer; }
+  .copy:hover { background:#3b4261; }
+  .k { color:#bb9af7; } .f { color:#7aa2f7; } .c { color:#565f89; font-style:italic; }
+  ul { padding-left:20px; } li { margin:4px 0; }
+  .note { background:var(--panel); border-left:3px solid var(--accent); padding:10px 14px; font-size:14px; color:#a9b1d6; }
+  #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#2a2e44; color:var(--fg); padding:8px 16px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; }
+  #toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Neovim Tokyo Night — Muted Color Overrides</h1>
+  <p class="sub">Saved from an incognito chat on 2026-10-06. Click any hex code to copy it.</p>
+
+  <h2>Final picks</h2>
+  <table>
+    <tr><th>Element</th><th>Original</th><th>Chosen</th><th>HSL (approx.)</th></tr>
+    <tr><td>Object property / field</td><td><span class="sw" style="background:#73DACA"></span><span class="hex">#73DACA</span></td><td><span class="sw" style="background:#7AB8AE"></span><span class="hex">#7AB8AE</span></td><td>H 171°, S 30%, L 60%</td></tr>
+    <tr><td>String</td><td><span class="sw" style="background:#9ECE6A"></span><span class="hex">#9ECE6A</span></td><td><span class="sw" style="background:#95B276"></span><span class="hex">#95B276</span></td><td>H 89°, S 28%, L 58%</td></tr>
+  </table>
+  <p style="font-size:14px;color:#a9b1d6;">The two chosen colors have similar saturation (~30%), so they look consistent together.</p>
+
+  <div class="label">Final combination</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.set(<span style="color:#95B276">"n"</span>, <span style="color:#95B276">"&lt;Space&gt;df"</span>, telescope.<span style="color:#7AB8AE">extensions</span>.<span style="color:#7AB8AE">dap</span>.<span style="color:#7AB8AE">frames</span>, { <span style="color:#7AB8AE">desc</span> = <span style="color:#95B276">"frames"</span> })</pre>
+  <div class="label">Original Tokyo Night (comparison)</div>
+  <pre>vim.<span style="color:#73DACA">keymap</span>.set(<span style="color:#9ECE6A">"n"</span>, <span style="color:#9ECE6A">"&lt;Space&gt;df"</span>, telescope.<span style="color:#73DACA">extensions</span>.<span style="color:#73DACA">dap</span>.<span style="color:#73DACA">frames</span>, { <span style="color:#73DACA">desc</span> = <span style="color:#9ECE6A">"frames"</span> })</pre>
+
+  <h2>Override config</h2>
+  <div class="codewrap">
+    <button class="copy" data-target="cfg">Copy</button>
+<pre id="cfg"><span class="f">require</span>(<span style="color:#95B276">"tokyonight"</span>).<span class="f">setup</span>({
+  on_highlights = <span class="k">function</span>(hl)
+    hl[<span style="color:#95B276">"@variable.member"</span>] = { fg = <span style="color:#95B276">"#7AB8AE"</span> }
+    hl[<span style="color:#95B276">"@property"</span>] = { fg = <span style="color:#95B276">"#7AB8AE"</span> }
+    hl[<span style="color:#95B276">"@string"</span>] = { fg = <span style="color:#95B276">"#95B276"</span> }
+  <span class="k">end</span>,
+})
+vim.cmd.<span class="f">colorscheme</span>(<span style="color:#95B276">"tokyonight"</span>)</pre>
+  </div>
+  <p style="font-size:14px;color:#a9b1d6;">If <span class="hex">:Inspect</span> shows a different highlight group on properties or strings, use that group name instead.</p>
+
+  <h2>All variants considered</h2>
+  <p style="font-size:14px;color:#a9b1d6;">Tokyo Night background <span class="hex">#1a1b26</span>, foreground <span class="hex">#c0caf5</span>.</p>
+
+  <h3>Property / field (hue ~171°)</h3>
+  <table>
+    <tr><th>Variant</th><th>Hex</th><th>Sat.</th><th>Notes</th></tr>
+    <tr><td>Original</td><td><span class="sw" style="background:#73DACA"></span><span class="hex">#73DACA</span></td><td>58%</td><td>Too saturated</td></tr>
+    <tr><td>A · subtle</td><td><span class="sw" style="background:#77C5B9"></span><span class="hex">#77C5B9</span></td><td>40%</td><td>Close to original on some screens</td></tr>
+    <tr class="chosen"><td>B · balanced<span class="badge">chosen</span></td><td><span class="sw" style="background:#7AB8AE"></span><span class="hex">#7AB8AE</span></td><td>30%</td><td>Calm, still distinct</td></tr>
+    <tr><td>C · muted</td><td><span class="sw" style="background:#73ABA2"></span><span class="hex">#73ABA2</span></td><td>25%</td><td>Starts blending into foreground</td></tr>
+  </table>
+
+  <div class="label">Original #73DACA (S 58%)</div>
+  <pre>vim.<span style="color:#73DACA">keymap</span>.<span style="color:#73DACA">set</span>(<span style="color:#9ECE6A">"n"</span>, telescope.<span style="color:#73DACA">extensions</span>)</pre>
+  <div class="label">A · subtle #77C5B9 (S 40%)</div>
+  <pre>vim.<span style="color:#77C5B9">keymap</span>.<span style="color:#77C5B9">set</span>(<span style="color:#9ECE6A">"n"</span>, telescope.<span style="color:#77C5B9">extensions</span>)</pre>
+  <div class="label">B · balanced #7AB8AE (S 30%) — chosen</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.<span style="color:#7AB8AE">set</span>(<span style="color:#9ECE6A">"n"</span>, telescope.<span style="color:#7AB8AE">extensions</span>)</pre>
+  <div class="label">C · muted #73ABA2 (S 25%)</div>
+  <pre>vim.<span style="color:#73ABA2">keymap</span>.<span style="color:#73ABA2">set</span>(<span style="color:#9ECE6A">"n"</span>, telescope.<span style="color:#73ABA2">extensions</span>)</pre>
+
+  <h3>String (hue ~89°)</h3>
+  <table>
+    <tr><th>Variant</th><th>Hex</th><th>Sat.</th><th>Notes</th></tr>
+    <tr><td>Original</td><td><span class="sw" style="background:#9ECE6A"></span><span class="hex">#9ECE6A</span></td><td>51%</td><td>Too saturated</td></tr>
+    <tr><td>Claude Code (terminal)</td><td><span class="sw" style="background:#96BC67"></span><span class="hex">#96BC67</span></td><td>~39%</td><td>H ~87°, L ~57%. ΔE2000 ~5–6 vs original</td></tr>
+    <tr><td>A · subtle</td><td><span class="sw" style="background:#9BC072"></span><span class="hex">#9BC072</span></td><td>38%</td><td>Slight reduction</td></tr>
+    <tr class="chosen"><td>B · balanced<span class="badge">chosen</span></td><td><span class="sw" style="background:#95B276"></span><span class="hex">#95B276</span></td><td>28%</td><td>Matches property saturation</td></tr>
+    <tr><td>C · muted</td><td><span class="sw" style="background:#8DA375"></span><span class="hex">#8DA375</span></td><td>20%</td><td>Close to gray; may stop standing out</td></tr>
+  </table>
+  <p style="font-size:14px;color:#a9b1d6;">Each preview pairs the string color with the chosen property color <span class="hex">#7AB8AE</span>.</p>
+
+  <div class="label">Original #9ECE6A (S 51%)</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.set(<span style="color:#9ECE6A">"n"</span>, <span style="color:#9ECE6A">"&lt;Space&gt;df"</span>, { desc = <span style="color:#9ECE6A">"frames"</span> })</pre>
+  <div class="label">Claude Code #96BC67 (S ~39%)</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.set(<span style="color:#96BC67">"n"</span>, <span style="color:#96BC67">"&lt;Space&gt;df"</span>, { desc = <span style="color:#96BC67">"frames"</span> })</pre>
+  <div class="label">A · subtle #9BC072 (S 38%)</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.set(<span style="color:#9BC072">"n"</span>, <span style="color:#9BC072">"&lt;Space&gt;df"</span>, { desc = <span style="color:#9BC072">"frames"</span> })</pre>
+  <div class="label">B · balanced #95B276 (S 28%) — chosen</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.set(<span style="color:#95B276">"n"</span>, <span style="color:#95B276">"&lt;Space&gt;df"</span>, { desc = <span style="color:#95B276">"frames"</span> })</pre>
+  <div class="label">C · muted #8DA375 (S 20%)</div>
+  <pre>vim.<span style="color:#7AB8AE">keymap</span>.set(<span style="color:#8DA375">"n"</span>, <span style="color:#8DA375">"&lt;Space&gt;df"</span>, { desc = <span style="color:#8DA375">"frames"</span> })</pre>
+
+  <h3>Reference: Catppuccin Mocha</h3>
+  <table>
+    <tr><th>Element</th><th>Hex</th></tr>
+    <tr><td>String</td><td><span class="sw" style="background:#A6E3A1"></span><span class="hex">#A6E3A1</span></td></tr>
+    <tr><td>Property</td><td><span class="sw" style="background:#B4BEFE"></span><span class="hex">#B4BEFE</span> lavender &nbsp; <span class="sw" style="background:#94E2D5"></span><span class="hex">#94E2D5</span> teal</td></tr>
+  </table>
+
+  <h2>Useful Neovim commands</h2>
+  <div class="codewrap">
+    <button class="copy" data-target="cmds">Copy</button>
+<pre id="cmds">:colorscheme        <span class="c">" print active colorscheme name</span>
+:Inspect            <span class="c">" show highlight group under cursor</span>
+
+:lua print(string.format("#%06x", vim.api.nvim_get_hl(0, {name="@string", link=false}).fg))
+:lua print(string.format("#%06x", vim.api.nvim_get_hl(0, {name="@variable.member", link=false}).fg))</pre>
+  </div>
+
+  <h2>Next tweaks</h2>
+  <div class="note">Keywords and functions may now look loud next to the muted strings and properties. Don't change them yet. Evaluate after a week of real use.</div>
+
+  <h2>Context from the same chat</h2>
+  <ul>
+    <li><strong>Editor decision:</strong> Spent ~1 year on Neovim config. Not switching to VS Code/JetBrains; the cost is already paid.</li>
+    <li><strong>Rules going forward:</strong> Freeze the config. Fix only things that block work (one 30-min session per month). Put saved time into one real skill (system design / security / code review) for 90 days.</li>
+    <li><strong>Hybrid workflow:</strong> Claude Code in terminal for generation, Neovim for editing, JetBrains or GitHub PR view for large reviews and debugging.</li>
+    <li><strong>Optional one-weekend review setup:</strong> diffview.nvim, gitsigns.nvim, aerial.nvim, LSP references + Telescope/fzf-lua. Hard stop after that weekend.</li>
+    <li><strong>Next step:</strong> Pick one skill to focus on for the next 3 months.</li>
+  </ul>
+</main>
+<div id="toast"></div>
+<script>
+  const toast = document.getElementById('toast');
+  function show(msg) { toast.textContent = msg; toast.classList.add('show'); clearTimeout(window._t); window._t = setTimeout(() => toast.classList.remove('show'), 1400); }
+  function copy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => show('Copied ' + (text.length < 12 ? text : 'to clipboard'))).catch(() => fallback(text));
+    } else { fallback(text); }
+  }
+  function fallback(text) {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); show('Copied ' + (text.length < 12 ? text : 'to clipboard')); } catch (e) { show('Copy failed'); }
+    ta.remove();
+  }
+  document.querySelectorAll('.hex').forEach(el => el.addEventListener('click', () => copy(el.textContent.trim())));
+  document.querySelectorAll('.copy').forEach(b => b.addEventListener('click', () => copy(document.getElementById(b.dataset.target).innerText)));
+</script>
+</body>
+</html>
