@@ -103,7 +103,8 @@ local builds = {
       -- 11.2. The JSX/TSX/HTML/Vue tag wrappers TRACK THIS VALUE in init.lua --
       -- they used to be pinned to base0 separately, which this change would have
       -- left a bare JND away from body. Ladder and rejects in palette.lua.
-      body = palette.variants.body.tinted,
+      -- body = palette.variants.body.tinted, -- current live
+      body = palette.variants.body.brighter, -- start trialling from 07 Oct 2026
 
       func = palette.variants.func.vivid,
 
