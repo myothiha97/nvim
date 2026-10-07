@@ -304,7 +304,8 @@ vim.keymap.set("v", "#", '"fy?\\V<C-R>f<CR>')
 
 -- Visual Mode: Highlight selected text (stays on current selection using / and N)
 vim.keymap.set("v", "<M-f>", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
-vim.keymap.set("v", "<leader>s", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
+-- leader + s is alrady binded for visual mode search and replace
+-- vim.keymap.set("v", "<leader>s", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
 
 vim.keymap.set("n", "<leader>L", "<cmd>restart<cr>", { desc = "Restart Neovim" })
 vim.keymap.set("n", "<leader>R", "<cmd>Lazy log<cr>", { desc = "Lazy Log" })
