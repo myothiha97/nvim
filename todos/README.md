@@ -61,6 +61,7 @@ is what requires an override to leave a trace here.
 | [`lazy-border-match-snacks-picker.md`](theme/lazy-border-match-snacks-picker.md) | the `:Lazy` float is the one framed panel not wearing the snacks picker ring. lazy.nvim never remaps `FloatBorder`. Link the whole group, fg alone is invisible          | open          |
 | [`string-member-separation.md`](theme/string-member-separation.md)               | the LAST theme item: string/member colours: PARKED WIP in `custom-v4` + `custom-swap*`; live is back on cyan strings. Resume from the notes file                   | open          |
 | [`palette-checkpoint-ideas.md`](theme/palette-checkpoint-ideas.md)             | one-line colour ideas parked while the palette is closed; review at the 2026-12-31 checkpoint                                                                   | open          |
+| [`comment-no-italic.md`](theme/comment-no-italic.md)                             | drop the italic on comments, keep the colour. Same as E6 option 1 in `theme-enhancements.md`                                                                     | open          |
 
 Live colour values and the reasoning behind them are **not** here. See
 [`../notes/palette-reference.md`](../notes/palette-reference.md) (lean) and
