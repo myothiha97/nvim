@@ -12,3 +12,9 @@ data
 # Python bytecode from scripts/
 __pycache__/
 *.pyc
+
+# Agents skill files
+.claude/
+.agents/
+/AGENTS.md
+/CLAUDE.md
