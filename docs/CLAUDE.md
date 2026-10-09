@@ -62,10 +62,10 @@ Preserve that reasoning when editing around it.
 
 ## Completion (blink.cmp)
 
-- Sources: lsp (score 100), snippets (score 90), path, buffer
+- Sources: lsp (score 100), snippets (score 100), path, buffer
 - Tab/S-Tab unbound (use Enter to accept, Ctrl-n/p to navigate)
 - Ghost text disabled
-- Completions disabled in comments and Avante buffers
+- Completions disabled in Avante and prompt buffers
 - Emmet LSP only for HTML files (NOT for TSX/JSX - causes unwanted suggestions)
 - Bracket-only completions from emmet are filtered out
 - Do NOT override snippets provider `opts.search_paths` - blink.cmp defaults already include `~/.config/nvim/snippets/`
@@ -77,7 +77,7 @@ Preserve that reasoning when editing around it.
 - `package.json` maps snippet files to filetypes
 - Do NOT use nested tabstops like `${1: className='$2'}` - causes LSP snippet grammar errors
 - Keep snippet files minimal - only add frequently used patterns
-- Snippets config consolidated in `performance.lua` (not separate snippets.lua)
+- Snippets config lives in `blink-cmp.lua` (`performance.lua` only disables friendly-snippets)
 
 ## LSP
 
@@ -123,7 +123,7 @@ affected workflow, and checking for startup errors or regressions. For plugin,
 completion, formatting or LSP changes, do a manual pass over the related feature
 and run `:Lazy sync` when specs changed.
 
-**A clean result is not proof — parts of this config fail silently.** Fourteen
+**A clean result is not proof — parts of this config fail silently.** Twenty
 known places accept a wrong value and simply do nothing instead of erroring: an
 unresolved picker action name is typed as keystrokes, an action name matching a
 snacks built-in replaces it everywhere, spelling out a layout `box` drops the

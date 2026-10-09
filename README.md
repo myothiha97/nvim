@@ -44,7 +44,7 @@ What makes this feel less like vanilla Neovim:
 | | |
 |---|---|
 | 🖱️ **Hover docs on mouse-over** | LSP documentation appears when the pointer rests on a symbol (Zed/WebStorm parity), behind a throttled handler that's free while you type. |
-| 🤖 **AI inline + Next Edit Suggestions** *(off)* | `copilot.lua` ghost text plus `copilot-lsp` NES — jump-and-apply multi-line edits with `<Tab>`, coexisting with the completion menu. `enabled = false` while the subscription is inactive. |
+| 🤖 **AI inline + Next Edit Suggestions** | `copilot.lua` ghost text plus `copilot-lsp` NES — jump-and-apply multi-line edits with `<Tab>`, coexisting with the completion menu. Loaded but off at startup; `<leader>ad` / `<M-k>` turns it on. |
 | 💬 **CodeCompanion (inline · agentic · chat)** | `<leader>ai` rewrites the line/selection in place; `<leader>aa` opens an agentic chat that applies edits as accept/reject diffs; `<leader>af` is a plain chat. Chat runs on the `codex` adapter (`gpt-5.5`), inline on Copilot — both key-free, lazy-loaded for zero startup cost. |
 | 📋 **AI prompt-copy system** | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent — or `<leader>aci` to pick a template / ask freeform interactively. |
 | 📌 **Persistent quickfix curation** | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project. |
@@ -61,8 +61,8 @@ What makes this feel less like vanilla Neovim:
 | Category | Plugin |
 |----------|--------|
 | **Completion** | blink.cmp — LSP · local snippets · path · buffer |
-| **AI** | CodeCompanion (inline/agentic/chat, chat on `codex`) + prompt-copy system · copilot.lua + copilot-lsp `enabled = false` |
-| **File nav** | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar, also the `nvim <dir>` fallback) · dashboard · terminal |
+| **AI** | CodeCompanion (inline/agentic/chat, chat on `codex`) + prompt-copy system · copilot.lua + copilot-lsp (off at startup, toggle on) |
+| **File nav** | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar) · dashboard · terminal |
 | **Code nav** | Trouble (symbols outline + quickfix views) · treesitter textobjects |
 | **Git** | gitsigns (hunks) + diffview.nvim + custom blame floats |
 | **Search** | grug-far — project/file search-replace & rename |
@@ -80,7 +80,7 @@ What makes this feel less like vanilla Neovim:
 
 | Language | Status | Notes |
 |----------|--------|-------|
-| TypeScript / React | Daily driver | `vtsls`, package JSON auto-imports off, tsserver heap cap `4000`, semantic tokens/inlay hints off |
+| TypeScript / React | Daily driver | `vtsls`, package JSON auto-imports off, tsserver heap cap `3072`, semantic tokens/inlay hints off |
 | Go | Enabled | `gopls`, `goimports`, `gofumpt`, `delve`; project roots guarded to `go.mod` / `go.work` |
 | Python | Enabled | `basedpyright` + `ruff`, `openFilesOnly` diagnostics, safe roots for both servers, `venv-selector.nvim` lazy on Python |
 | JSON | Enabled | LazyVim JSON extra + `prettierd` |
@@ -117,7 +117,6 @@ language server scan the whole home directory.
 | `<leader>sf` · `<leader>sF` | Search & replace — project · current file |
 | `<leader>sr` · `<leader>sR` | Rename word under cursor — file · project |
 | `gd` | Goto definition (skips node_modules & re-imports) |
-| `gf` · `gh` | Function start · end (treesitter) |
 | `[f` · `]f` | Prev · next function |
 | `<M-f>` | Highlight word under cursor |
 
@@ -133,8 +132,7 @@ language server scan the whole home directory.
 | `<leader>m` | Mark line/selection into quickfix — persists across restarts |
 | `<leader>cx` | Clear quickfix list |
 | `<leader>bu` | List unsaved buffers (jump / save) |
-| `gi` | Line diagnostics (focusable) |
-| `ge` · `gp` | Next · prev error |
+| `<leader>cd` | Line diagnostics (focusable) |
 
 </details>
 
@@ -205,11 +203,12 @@ language server scan the whole home directory.
 | Key | Action |
 |-----|--------|
 | `<C-s>` | Save |
-| `<C-->` | Terminal (right split) |
+| `<C-->` | Terminal (bottom split) |
 | `<C-d>` · `<C-u>` | Half-page scroll + recenter |
 | `<C-e>` · `<C-y>` | Scroll popup / file-browser list, else viewport |
-| `<Down>` · `<Up>` | Scroll editor viewport down · up one line |
-| `<Right>` · `<Left>` | Scroll editor viewport right · left one column |
+| `<Up>` · `<Down>` | Scroll editor viewport down · up one line (off by default) |
+| `<Right>` · `<Left>` | Scroll editor viewport right · left one column (off by default) |
+| `<leader>uv` | Toggle arrow-key scrolling |
 | `<leader>uH` | Toggle mouse-hover docs |
 | `<leader>M` | Mason (toggle) |
 | `<leader>L` · `<leader>R` | Restart Neovim · Lazy log |
@@ -344,7 +343,6 @@ snippets/           VSCode-format snippets
 rules.md            the discipline rules I follow when changing the config
 notes/              guides — safe-editing · freeze-policy · maintenance/delegation · reading codebases · learning · journal · palette-reference
 todos/              backlog, grouped by subject (see todos/README.md) — freeze · process · theme · ui · languages · ai · done
-AGENTS.md           pointer for non-Claude agents → CLAUDE.md (the canonical entry point)
 docs/               agent instructions (docs/CLAUDE.md is canonical) · parked phase specs
 ```
 
@@ -356,6 +354,6 @@ Neovim **0.12+**, a Nerd Font, `ripgrep` & `fd` (pickers/grep), `prettierd`
 (web formatting, via Mason), and Go/Python tooling installed through Mason for
 the enabled language extras. The AI layer needs no paid API key: CodeCompanion
 chat runs on the `codex` bridge with a ChatGPT login. A Copilot subscription is
-optional, and currently inactive, so `copilot.lua` is `enabled = false`.
+optional: `copilot.lua` loads with suggestions off until you toggle them on.
 Tuned for the [Ghostty](https://ghostty.org) terminal on macOS; works elsewhere,
 but some `<M-…>`/`<D-…>` keymaps assume Ghostty's key encoding.
