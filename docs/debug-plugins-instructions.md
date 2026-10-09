@@ -5,14 +5,14 @@
 ### Check state from normal mode
 
 ```vim
-" Check if toggle was accidentally turned off
+" Check the toggle (source of truth, default false at startup)
 :lua =vim.g.copilot_enabled
 
 " Check if copilot client is attached to current buffer
 :lua =require("copilot.client").buf_is_attached(0)
 
-" Check auto_trigger internal state (source of truth)
-:lua =require("copilot.suggestion").auto_trigger
+" Check the per-buffer copy (synced from vim.g.copilot_enabled on BufEnter)
+:lua =vim.b.copilot_suggestion_auto_trigger
 
 " General health check
 :checkhealth copilot
@@ -28,19 +28,17 @@
 :lua vim.keymap.set("i", "<C-x><C-c>", require("copilot.suggestion").next)
 ```
 
-### Fix desynced auto_trigger
+### Turn suggestions on
 
-`vim.g.copilot_enabled` is only a display tracker — the real state lives in
-`require("copilot.suggestion").auto_trigger`. They can desync if `<leader>ad`
-was hit accidentally.
+`vim.g.copilot_enabled` is the single source of truth, and it starts as `false`.
+A `BufEnter` autocmd in `lua/plugins/copilot.lua` copies it into
+`vim.b.copilot_suggestion_auto_trigger` for every buffer.
 
-If `auto_trigger` returns `false`, re-enable it:
-
-```vim
-:lua require("copilot.suggestion").toggle_auto_trigger()
-```
+To turn suggestions on, press `<leader>ad` or `<M-k>`. Do NOT call
+`require("copilot.suggestion").toggle_auto_trigger()`: it only changes the
+current buffer, and the next `BufEnter` overwrites it.
 
 ### Common causes
 
-- `<leader>ad` accidentally pressed → `auto_trigger` flipped to `false`
+- Toggle is off (the default at startup) → press `<leader>ad` / `<M-k>`
 - `buf_is_attached(0)` returns `false` → copilot never initialized for the buffer (loaded before buffer existed, or filetype excluded)
