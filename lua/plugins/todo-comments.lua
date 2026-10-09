@@ -66,6 +66,29 @@ local function picker(keyword)
   end
 end
 
+-- todo-comments' own jump_next/jump_prev stop at the buffer edge (no wrap option), so this
+-- scans circularly with the same matching rules, like Vim's `wrapscan`.
+-- NOTE: relies on the plugin's internal `todo-comments.highlight` module. If tt/tp error
+-- after a plugin update, check whether `highlight.match` / `highlight.is_comment` moved.
+local function jump(up)
+  local config = require("todo-comments.config")
+  local highlight = require("todo-comments.highlight")
+  local buf = vim.api.nvim_get_current_buf()
+  local cur = vim.api.nvim_win_get_cursor(0)[1]
+  local count = vim.api.nvim_buf_line_count(buf)
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+  for i = 1, count do
+    local l = (cur - 1 + (up and -i or i)) % count + 1
+    local ok, start, _, kw = pcall(highlight.match, lines[l])
+    if ok and kw and not (config.options.highlight.comments_only and highlight.is_comment(buf, l - 1, start) == false) then
+      vim.api.nvim_win_set_cursor(0, { l, start - 1 })
+      return
+    end
+  end
+  vim.notify("No todo comments in buffer", vim.log.levels.WARN)
+end
+
 return {
   {
     "folke/todo-comments.nvim",
@@ -76,14 +99,14 @@ return {
       {
         "tt",
         function()
-          require("todo-comments").jump_next()
+          jump(false)
         end,
         desc = "Next Todo",
       },
       {
         "tp",
         function()
-          require("todo-comments").jump_prev()
+          jump(true)
         end,
         desc = "Prev Todo",
       },

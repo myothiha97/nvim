@@ -6,6 +6,7 @@
 -- notes/palette-reference.md, sections "Grammar traps" and "UI highlights".
 -- Read it before changing a group list or a chrome value.
 local palette = require("colorschemes.solarized-osaka.palette")
+local ui_color = require("config.ui")
 
 return {
   "craftzdog/solarized-osaka.nvim",
@@ -37,6 +38,8 @@ return {
       c.bg = bg
       c.bg_float = bg
       c.bg_sidebar = bg
+      -- c.bg_statusline = bg -- current live
+      c.bg_statusline = ui_color.status_line.dark_matte -- start trialling at 1st Oct 2026,
     end,
     -- NO `on_colors` FOR SYNTAX. The theme's base ramp (green500, orange500,
     -- blue500, cyan500) is shared with the UI, so a syntax choice there silently
@@ -129,6 +132,9 @@ return {
       -- sat inside green (103 contacts in palette.py alone). Known cost: bash
       -- `${HOME}` reads orange `${`, yellow `HOME` (`@variable.builtin`), orange `}`.
       paint({ "@punctuation.special" }, palette.escape or palette.punctuation)
+
+      -- if you only want the palette.boolean color for  @punctuation.special` comment above line and uncomment the line below
+      -- paint({ "@punctuation.special" }, palette.boolean)
 
       -- `\n`, `\t`, `\"` inside a string. SAME REASONING as `${}` above: an
       -- escape is not string content, it is a switch out of it. The theme leaves
@@ -302,7 +308,7 @@ return {
       -- See notes/palette-reference.md, "Named constants".
       hl["@constant"] = { fg = palette.boolean }
       hl["@constant.macro"] = { fg = palette.boolean }
-
+      hl["@constant.builtin"] = { fg = palette.boolean }
       -- Go struct FIELDS, every grammatical position on one value. Go names the
       -- same field in three spots and the base queries capture each differently,
       -- so `Width` was teal in `type R struct { Width float64 }`, teal again in
@@ -331,8 +337,19 @@ return {
       -- notes/palette-reference.md.
       -- `palette.field` lets a build hold fields on their own value (2026-09-24,
       -- all-orange builds, so `Width: 3` does not read as one orange run).
-      for _, group in ipairs({ "@variable.member.go", "@variable.member.key.go", "@property.go" }) do
-        hl[group] = { fg = palette.field or palette.punctuation }
+      for _, group in ipairs({
+        "@variable.member.go",
+        "@variable.parameter.go",
+        "@variable.member.key.go",
+        -- "@variable.",
+        "@property.go",
+      }) do
+        -- hl[group] = { fg = palette.field or palette.punctuation }
+        hl[group] = { fg = palette.punctuation }
+        hl["@variable.parameter.go"] = { fg = palette.field } -- for go orange field color is better for readability
+        -- hl["@variable.member.go"] = { fg = palette. }
+        -- hl["@variable.member.key.go"] = { fg = palette.variants.keyword.olive }
+        -- hl["@variable.parameter.go"]
       end
 
       -- Object-literal and type-literal KEYS, normalised. The base ecma queries
@@ -350,6 +367,12 @@ return {
       -- own moves every object key with it, which is what flooded object-literal
       -- files with salmon on 2026-09-08. Re-measure dose before doing that.
       hl["@variable.member.key"] = { link = "@variable.member" }
+      -- Member access (`obj.attr`) and, through the link above, object keys, on their
+      -- own colour when a build sets `palette.member`. `false` keeps the theme cyan.
+      -- Go is untouched: `@variable.member.go` is set above and resolves first.
+      if palette.member then
+        hl["@variable.member"] = { fg = palette.member }
+      end
 
       -- Strings, green in EVERY language since 2026-09-24 (`palette.string`).
       -- `false` keeps the theme cyan. `Character` is a bare link to `Constant` in
@@ -387,6 +410,24 @@ return {
         end
       end
 
+      local olive_color = palette.variants.keyword.olive
+      local tokyodark = palette.variants.string.tokyodark
+      local vivid_bush_green = palette.variants.string.vivid
+
+      -- todo: later refactor below line to use the value from palette
+      local tokyonight_cyan_S58 = "#73daca"
+      if palette.override_go then
+        hl["@variable.member.key.go"] = {
+          fg = tokyonight_cyan_S58,
+        }
+        hl["@variable.member.go"] = {
+          fg = tokyonight_cyan_S58,
+        }
+        hl["@property.go"] = {
+          fg = tokyonight_cyan_S58,
+        }
+        -- hl["@punctuation.delimiter.go"] = { fg = palette.variants.delimiter.kanagawa }
+      end
       -- HCL/Terraform attribute names. The member link above is an ecma
       -- decision -- an object literal is a small part of a TS file -- but the HCL
       -- queries file EVERY `key = value` name as `@variable.member.key`, so a
@@ -683,7 +724,8 @@ return {
       -- snacks picker's `border = true` resolves to `rounded` because
       -- `winborder` is unset, and the hover float asks for `rounded` directly
       -- in `config/options.lua` and `plugins/lsp.lua`.
-      hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float }
+      -- hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float } -- previous live
+      hl.FloatBorder = { fg = c.cyan900, bg = c.bg_float } -- start trialling at 1st Oct 2026
       -- A link, so the hover ring can never drift from every other popup's.
       hl.LspDocBorder = "FloatBorder"
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
@@ -702,8 +744,10 @@ return {
       hl.BlinkCmpDoc = { fg = c.base1, bg = c.bg_popup }
       hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.bg_popup }
 
-      hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_popup }
-      hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_popup }
+      -- hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_popup } -- current live values
+      -- hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_popup } - current live values
+      hl.BlinkCmpMenu = { fg = c.base1, bg = ui_color.reference.black_matte_color.second_darkest } -- start trialling at 1st Oct 2026
+      hl.BlinkCmpMenuBorder = { fg = c.base02, bg = ui_color.reference.black_matte_color.second_darkest } -- start trialling at 1st Oct 2026
       hl.BlinkCmpMenuSelection = { fg = c.base2, bg = c.base02, bold = true }
       hl.BlinkCmpLabel = { fg = c.base1, bg = c.none }
       hl.BlinkCmpLabelMatch = { fg = c.blue300, bg = c.none }

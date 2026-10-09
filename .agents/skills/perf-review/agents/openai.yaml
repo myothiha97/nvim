@@ -1,4 +1,0 @@
-interface:
-  display_name: "Performance Review"
-  short_description: "Audit Neovim changes for runtime cost"
-  default_prompt: "Use $perf-review to audit all current changes for performance safety."

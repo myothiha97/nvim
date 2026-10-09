@@ -11,7 +11,8 @@
 
 local M = {}
 
-local DELAY_MS = 500
+-- local DELAY_MS = 500 - current live
+local DELAY_MS = 1000 -- trialling at 1st Oct 2026,
 
 local SKIP_FT = {
   oil = true,
@@ -521,10 +522,7 @@ function M.setup()
         -- via gk, signature help, diagnostic float), the user wants to
         -- inspect it — don't tear down LSP previews from under them.
         local cur = vim.api.nvim_get_current_win()
-        if
-          vim.api.nvim_win_is_valid(cur)
-          and vim.api.nvim_win_get_config(cur).relative ~= ""
-        then
+        if vim.api.nvim_win_is_valid(cur) and vim.api.nvim_win_get_config(cur).relative ~= "" then
           return
         end
         close_hover()

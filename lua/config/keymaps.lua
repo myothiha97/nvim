@@ -252,7 +252,8 @@ end, { desc = "Dismiss hover docs / Clear highlights" })
 -- Save file (Ctrl+S, works in normal and insert mode)
 vim.keymap.set({ "n", "i" }, "<C-s>", "<cmd>w<cr>", { desc = "Save File" })
 
-local scroll_depth = 3
+-- local scroll_depth = 3 -- current live setting
+local scroll_depth = 2 -- temporarily set to 2
 
 -- Mouse/trackpad: scroll viewport without moving cursor (VSCode/WebStorm behavior)
 -- <C-e> scrolls viewport down, <C-y> scrolls viewport up — cursor stays in place
@@ -294,6 +295,17 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 -- Yank into the system clipboard (Normal & Visual mode)
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
+
+-- Search forward for visually selected text
+vim.keymap.set("v", "*", '"fy/\\V<C-R>f<CR>')
+
+-- Search backward for visually selected text
+vim.keymap.set("v", "#", '"fy?\\V<C-R>f<CR>')
+
+-- Visual Mode: Highlight selected text (stays on current selection using / and N)
+vim.keymap.set("v", "<M-f>", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
+-- leader + s is alrady binded for visual mode search and replace
+-- vim.keymap.set("v", "<leader>s", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
 
 vim.keymap.set("n", "<leader>L", "<cmd>restart<cr>", { desc = "Restart Neovim" })
 vim.keymap.set("n", "<leader>R", "<cmd>Lazy log<cr>", { desc = "Lazy Log" })

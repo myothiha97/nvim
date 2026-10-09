@@ -443,8 +443,8 @@ return {
             preview = false,
             layout = {
               box = "horizontal",
-              width = picker_size.compact.width,
-              height = picker_size.compact.height,
+              width = picker_size.standard.width,
+              height = picker_size.standard.height,
               -- Repeated from the picker-wide layout below, and it has to be:
               -- a source layout that spells out its own `box` REPLACES the
               -- picker-wide one instead of merging with it
@@ -489,6 +489,15 @@ return {
           --     is overwritten on the next redraw.
           -- `update_win` merges the box entry over that snapshot, so a `wo` here is
           -- the one thing the layout cannot undo.
+          -- if you dont want to see the snack explorer folder/file indent line
+          -- then un-comments  below lines of icons = {}
+          icons = {
+            -- tree = {
+            --   vertical = " ",
+            --   middle = " ",
+            --   last = " ",
+            -- },
+          },
           layout = {
             -- WARN: SILENT FAILURE. Must stay restated. Spelling out the layout inherits
             -- the PRESET (preview = "main"), not the explorer SOURCE (preview = false),
@@ -815,8 +824,8 @@ return {
       layout = {
         preview = false,
         layout = {
-          width = picker_size.compact.width,
-          height = picker_size.compact.height,
+          width = picker_size.standard.width,
+          height = picker_size.standard.height,
           -- WARN: SILENT FAILURE: the `default` preset carries `min_width = 120`,
           -- which overrides `width` whenever 0.4 of the screen is under 120
           -- columns, i.e. on most screens. 0 removes the floor.

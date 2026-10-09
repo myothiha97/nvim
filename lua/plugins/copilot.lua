@@ -1,3 +1,9 @@
+local nes_debounce = 150 -- ms, read by copilot-lsp at LSP start (default 500)
+local ghost_debounce = 250 -- ms, passed to suggestion.debounce below
+
+-- Must be set before the copilot LSP initializes: copilot-lsp reads it once there.
+vim.g.copilot_nes_debounce = nes_debounce
+
 return {
   {
     "zbirenbaum/copilot.lua",
@@ -7,7 +13,7 @@ return {
     dependencies = { "copilotlsp-nvim/copilot-lsp" },
     enabled = true,
     cmd = "Copilot",
-    event = { "InsertEnter" },
+    event = { "BufReadPost", "BufNewFile" },
     opts = {
       panel = { enabled = false },
       suggestion = {
@@ -16,31 +22,21 @@ return {
         -- copilot's ghost text render even while blink's menu is open, so both
         -- engines stay visible. Accept keys are split: <C-l> = blink menu, <C-;> = copilot ghost.
         --
-        -- debounce: 300ms gives the server time to finish multi-line generations
-        -- before the next keystroke cancels the in-flight request. WebStorm uses
-        -- a similar window (~300-400ms). Lower if you want snappier single-token
-        -- suggestions at the cost of multi-line ones.
         -- Default OFF. The real source of truth at runtime is vim.g.copilot_enabled
         -- (also false by default), synced onto each buffer via BufEnter in config().
         -- This opt is the fallback for any buffer entered before that sync runs, so
         -- it must match the default-off state too.
         auto_trigger = false,
         hide_during_completion = false,
-        debounce = 300,
+        -- Delay before a ghost-text request starts. Higher means fewer requests,
+        -- not more time for the server to finish a multi-line completion.
+        debounce = ghost_debounce,
         keymap = { accept = false },
       },
+      -- copilot.lua reads only enabled + keymap here; unknown keys are silently
+      -- ignored. NES tuning lives in copilot-lsp (see config() below).
       nes = {
         enabled = true,
-        auto_trigger = false,
-
-        -- NES persistence tuning. copilot-lsp's defaults are move_count_threshold=3
-        -- and distance_threshold=40 -- aggressive enough that scrolling up to check
-        -- a function signature wipes the pending edit before you can accept it.
-        -- Bumping both buys time to navigate context first.
-
-        move_count_threshold = 10,
-        distance_threshold = 100,
-        count_horizontal_moves = false,
         keymap = {
           accept_and_goto = "<Tab>",
           accept = false,
@@ -49,10 +45,77 @@ return {
       },
       filetypes = {
         ["*"] = true, -- Enable for all filetypes
+        text = false, -- Disable for text files
       },
+      -- Replaces copilot.lua's default, so its buflisted/buftype check is kept.
+      -- Then keeps secret files (.env*, *secret*) away from the server.
+      should_attach = function(buf, bufname)
+        if not vim.bo[buf].buflisted or vim.bo[buf].buftype ~= "" then
+          return false
+        end
+        local name = vim.fs.basename(bufname):lower()
+        return not name:match("^%.env") and not name:match("secret")
+      end,
     },
     config = function(_, opts)
+      -- 1. NES persistence tuning. Must run BEFORE anything requires
+      --    copilot-lsp.nes: nes/ui.lua captures the config table at load time and
+      --    setup() replaces that table, so a later call is silently ignored.
+      --    Defaults (3 moves / 40 lines) wipe a pending edit as soon as you scroll
+      --    up to check a signature; these give room to navigate first.
+      require("copilot-lsp").setup({
+        nes = {
+          move_count_threshold = 10,
+          distance_threshold = 100,
+          count_horizontal_moves = false,
+          -- Defaults, spelled out to avoid the missing-fields diagnostic
+          clear_on_large_distance = true,
+          reset_on_approaching = true,
+        },
+      })
+
+      -- 2. Gate ALL NES requests on the toggle. Must wrap before copilot starts:
+      --    copilot-lsp captures request_nes when the LSP initializes.
+      local nes = require("copilot-lsp.nes")
+      local original_request = nes.request_nes
+      nes.request_nes = function(...)
+        if not vim.g.copilot_enabled then
+          return
+        end
+        return original_request(...)
+      end
+
+      -- 3. Start copilot (loads the NES modules and the LSP client).
       require("copilot").setup(opts)
+
+      -- Request NES without typing: on entering insert mode, and when the cursor
+      -- rests in normal mode. copilot-lsp itself only requests on TextChanged(I).
+      local function request_nes_now(args)
+        if not vim.g.copilot_enabled or vim.b.nes_state then
+          return -- toggle off, or a suggestion is already showing
+        end
+        -- CursorHold re-arms after ANY key, including the <Esc> that dismissed
+        -- the NES, so without this check the same edit comes back ~updatetime
+        -- later. Only re-request once the text or the cursor line has changed.
+        local key
+        if args.event == "CursorHold" then
+          key = vim.b.changedtick .. ":" .. vim.fn.line(".")
+          if vim.b.copilot_nes_last == key then
+            return
+          end
+        end
+        -- Errors if the client is not started yet. Mark the spot only once the
+        -- request was actually sent, so a failed early attempt is retried.
+        local ok = pcall(nes.request_nes, "copilot")
+        if ok and key then
+          vim.b.copilot_nes_last = key
+        end
+      end
+
+      vim.api.nvim_create_autocmd({ "InsertEnter", "CursorHold" }, {
+        group = vim.api.nvim_create_augroup("CopilotNesTriggers", { clear = true }),
+        callback = request_nes_now,
+      })
 
       -- Fidget notifications for copilot LSP connect / disconnect
       local copilot_ready_shown = false
@@ -148,16 +211,14 @@ return {
         end
       end, { desc = "Copilot: Accept + Trigger Next" })
 
-      -- Esc: always exit insert mode; if a suggestion is visible, dismiss it first
-      map("i", "<Esc>", function()
-        if suggestion.is_visible() then
-          suggestion.dismiss()
-        end
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-      end, { desc = "Copilot: Dismiss and Exit Insert" })
+      -- No insert-mode <Esc> map on purpose: native <Esc> fires InsertLeave, and
+      -- the autocmd above dismisses the ghost text there. A map that re-feeds
+      -- <Esc> via feedkeys appends it AFTER pending typeahead, so a macro like
+      -- `ihello<Esc>oworld<Esc>` replays as "hellooworld".
 
-      -- Manual copilot trigger: closes blink menu if open, clears the hidden
-      -- guard set by BlinkCmpMenuOpen, then requests/cycles a suggestion.
+      -- Manual copilot trigger: closes blink menu if open, clears the
+      -- copilot_suggestion_hidden guard (set by the BlinkCmpMenuOpen autocmd when
+      -- that is enabled above), then requests/cycles a suggestion.
       -- Press repeatedly to cycle through variants (same as <M-]>).
       map("i", "<C-j>", function()
         local ok, blink = pcall(require, "blink.cmp")
@@ -170,8 +231,9 @@ return {
 
       -- Toggle auto-trigger only (Copilot LSP stays loaded so manual <C-j> and
       -- blink.cmp coexistence keep working). vim.g.copilot_enabled is the single
-      -- source of truth: it drives the lualine indicator, the NES render gate, and
-      -- (via the BufEnter sync below) the per-buffer auto-trigger decision.
+      -- source of truth: it drives the lualine indicator, the NES request and
+      -- render gates, and (via the BufEnter sync below) the per-buffer
+      -- auto-trigger decision.
       -- Default OFF: copilot loads and the LSP stays connected, but no ghost text
       -- auto-fires until you toggle it on with <leader>ad / <M-k>.
       vim.g.copilot_enabled = false
@@ -189,10 +251,9 @@ return {
         end,
       })
 
-      -- Gate NES rendering on vim.g.copilot_enabled. The TextChanged autocmd
-      -- in copilot-lsp/nes/init.lua:191 captures request_nes by upvalue at
-      -- LspAttach time, so we can't stop new requests post-hoc — but we can
-      -- block the render. Request still flies (cheap), nothing draws.
+      -- Gate NES rendering on vim.g.copilot_enabled. Requests are already gated
+      -- by the request_nes wrap above; this is a safety net that hides responses
+      -- arriving just after toggle-off.
       local nes_ui_ok, nes_ui = pcall(require, "copilot-lsp.nes.ui")
       if nes_ui_ok and not nes_ui._toggle_wrapped then
         local original_display = nes_ui._display_next_suggestion
@@ -212,17 +273,15 @@ return {
         -- suggestion.toggle_auto_trigger(), which would only flip this one buffer.)
         vim.g.copilot_enabled = not vim.g.copilot_enabled
         vim.b.copilot_suggestion_auto_trigger = vim.g.copilot_enabled
-        -- Belt-and-suspenders: when disabling, drop any ghost text and any
-        -- pending NES that was rendered just before the toggle. The
-        -- toggle/render-gate only affects *future* draws.
+        -- When disabling, drop any ghost text and any NES rendered just before
+        -- the toggle; the gates only affect *future* requests and draws.
+        -- dismiss() runs even with nothing visible: it also cancels the debounce
+        -- timer and any in-flight request and resets the request context.
+        -- Otherwise a leftover context keeps copilot.lua re-requesting on every
+        -- CursorMovedI until InsertLeave.
         if not vim.g.copilot_enabled then
-          if suggestion.is_visible() then
-            suggestion.dismiss()
-          end
-          local nes_ok, nes = pcall(require, "copilot-lsp.nes")
-          if nes_ok then
-            nes.clear()
-          end
+          suggestion.dismiss()
+          nes.clear()
         elseif vim.api.nvim_get_mode().mode:find("i") then
           -- Enabling while in insert mode: fire a suggestion now instead of waiting
           -- for the next keystroke, so ghost text appears the moment you toggle on.

@@ -8,7 +8,7 @@ return {
     event = "VeryLazy",
     opts = {
       health = { checker = false }, -- Disable health check (causes 1.5s overhead)
-      cmdline = { enabled = false }, -- if u want the nvim cmd mode chat box ui then u can enabled it from here.
+      cmdline = { enabled = true }, -- if u want the nvim cmd mode chat box ui then u can enabled it from here.
       views = {
         cmdline_popup = {
           position = { row = "10%", col = "50%" },

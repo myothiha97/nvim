@@ -228,6 +228,12 @@ local variants = {
     periwinkle = "#a7b1fe",
     nvim_type = "#2ac3de", -- LIVE in custom-latest
     vscode_support = "#0db9d7",
+    claude_desktop_number = "#72E5E7",
+    claude_desktop_boolean = "#71E1E3",
+    sky_dimmer = "#38bad4",
+    sky_dimmest = "#37b4ce",
+    green = "#84b975",
+    sky_dark = "#05aac7",
   },
 
   -- Booleans and `@constant`, painted via `Boolean` / `@constant` in init.lua.
@@ -303,6 +309,15 @@ local variants = {
     -- L*64.0 C*33.1 h123.6 6.97:1 | the calmer finalist, worst 17.5. Only dE 2.6
     -- from `tokyodark`, below what can be seen: do not compare the two.
     soft = "#8ca369",
+
+    tokyonight_string_S51 = "#9ECE6A",
+    tokyonight_string_S38 = "#9BC072",
+    tokyonight_string_S28 = "#95b276",
+    tokyonight_string_S20 = "#8DA375",
+    -- S means saturation, not string. The three below are the TokyoNight Islands green
+    -- string = "#9BC072", -- S 38%,
+    -- string = "#95b276", -- S 28%
+    -- string = "#8DA375", -- S 20%
   },
 
   -- Member fields (`@variable.member`). NOT APPLIED as of 2026-09-08: the build
@@ -343,10 +358,21 @@ local variants = {
     mauve = "#c49ac6",
     violet = "#9b9fec",
     tokyonight = "#73daca",
+    light_seagreen = "#20B2AA",
+    ghostty_cyan = "#7bb6ae",
     -- The theme's own cyan500: what `@variable.member` and object keys show in
     -- every non-Go language. Named here so a build can put Go fields on it
     -- (`field` role, custom-swap-3). Keep equal to the theme's cyan500.
     theme_cyan = "#29a298",
+
+    tokyonitght_cyan_S58 = "#73daca",
+    tokyonitght_cyan_S40 = "#77c5b9",
+    tokyonitght_cyan_S30 = "#7ab8ae",
+    tokyonitght_cyan_S25 = "#73aba2",
+    -- member = "#73daca", -- tokyo night cyan, S 58%
+    -- member = "#77c5b9", -- tokyo night cyan, S 40%
+    -- member = "#7ab8ae", -- tokyo night cyan, S 30%
+    -- member = "#73aba2", -- tokyo night cyan, S 25%
   },
 }
 
@@ -412,6 +438,7 @@ return {
   -- Go-only role overrides, `{ string = , parameter = , escape = }`. `false`
   -- means Go uses the shared roles like every other language.
   go = false,
+  override_go = true,
   -- UNREAD: see `member` above.
   -- member = false,
 }
