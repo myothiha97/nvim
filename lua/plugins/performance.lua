@@ -259,7 +259,7 @@ return {
       })
 
       -- Copilot status indicator (LSP status + autocomplete toggle state)
-      -- Color reflects vim.g.copilot_enabled (toggled via <leader>ad / <C-k>):
+      -- Color reflects vim.g.copilot_enabled (toggled via <leader>ad / <M-k>):
       --   enabled  -> color from LSP status (green/yellow/red)
       --   disabled -> dim gray + power-off icon
       table.insert(opts.sections.lualine_x, 1, {
