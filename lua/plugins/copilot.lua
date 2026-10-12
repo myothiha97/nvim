@@ -14,6 +14,9 @@ return {
     enabled = true,
     cmd = "Copilot",
     event = { "BufReadPost", "BufNewFile" },
+    -- Claims insert <M-k> (Cmd+K) for the toggle mapped in config(). LazyVim skips any
+    -- key a plugin claims here, so its insert <A-k> "move line up" never replaces it.
+    keys = { { "<M-k>", mode = "i", desc = "Copilot: Toggle Suggestions" } },
     opts = {
       panel = { enabled = false },
       suggestion = {

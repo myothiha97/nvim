@@ -586,6 +586,16 @@ for key, move in pairs(pane_moves) do
   end, { desc = "Go to " .. move.edge .. " window or tmux pane" })
 end
 
+-- Disabled: LazyVim's insert-mode <A-j> "move line down". Ghostty now sends Cmd+J
+-- to nvim as <M-j> (for the pane moves above), so pressing it while typing would
+-- move the current line. Not used in insert mode. Its <A-k> "move line up" is
+-- never created, because Copilot claims that key (plugins/copilot.lua).
+-- Visual-mode <A-j>/<A-k> (move the selected lines) stay as they are.
+pcall(vim.keymap.del, "i", "<A-j>")
+-- Not needed: Copilot's `keys` claim already stops LazyVim creating insert <A-k>.
+-- Deleting it here would remove Copilot's Cmd+K toggle instead.
+-- pcall(vim.keymap.del, "i", "<A-k>")
+
 -- Explicit state flags for fold toggle (foldlevel is unreliable with ufo)
 vim.g.folds_closed = false
 vim.g.fold_keep_current_open = false
