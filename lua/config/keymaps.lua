@@ -562,6 +562,29 @@ vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window 
 vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
 vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 
+-- Ghostty splits without tmux (dotfiles ghostty/no-tmux): <C-hjkl> moves
+-- between nvim windows as LazyVim's default does, and at an nvim edge moves on
+-- to the Ghostty split that way. Ghostty leaves these keys unbound so nvim always
+-- goes first. Off inside tmux, which sets TERM_PROGRAM=tmux.
+if vim.env.TERM_PROGRAM == "ghostty" and not vim.env.TMUX then
+  for key, direction in pairs({ h = "left", j = "down", k = "up", l = "right" }) do
+    vim.keymap.set("n", "<C-" .. key .. ">", function()
+      local win = vim.api.nvim_get_current_win()
+      vim.cmd.wincmd(key)
+      if vim.api.nvim_get_current_win() == win then
+        -- Async, so nvim never waits on the ~150 ms AppleScript round trip
+        vim.system({
+          "osascript",
+          "-e",
+          ('tell application "Ghostty" to perform action "goto_split:%s" on focused terminal of selected tab of front window'):format(
+            direction
+          ),
+        })
+      end
+    end, { desc = "Go to " .. direction .. " window or Ghostty split" })
+  end
+end
+
 -- Explicit state flags for fold toggle (foldlevel is unreliable with ufo)
 vim.g.folds_closed = false
 vim.g.fold_keep_current_open = false
