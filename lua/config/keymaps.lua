@@ -562,6 +562,40 @@ vim.keymap.set("n", "<S-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window 
 vim.keymap.set("n", "<S-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
 vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 
+-- Cmd+H/J/K/L (Ghostty sends <M-h>/<M-j>/<M-k>/<M-l>; tmux passes them to
+-- nvim panes, see dotfiles tmux/.tmux.conf): move to the nvim window that way,
+-- or at an nvim edge on to the tmux pane that way. tmux checks its own outer
+-- edge, so the far pane never wraps around. A zoomed pane counts as being at
+-- every edge, so nothing moves to another tmux pane while zoomed.
+-- Normal mode only: insert-mode <M-k>/<M-l> stay Copilot toggle/accept line
+-- (plugins/copilot.lua). Replaces LazyVim's normal-mode <A-j>/<A-k> move line.
+local pane_moves = {
+  h = { edge = "left", flag = "-L" },
+  j = { edge = "bottom", flag = "-D" },
+  k = { edge = "top", flag = "-U" },
+  l = { edge = "right", flag = "-R" },
+}
+for key, move in pairs(pane_moves) do
+  vim.keymap.set("n", "<M-" .. key .. ">", function()
+    local win = vim.api.nvim_get_current_win()
+    vim.cmd.wincmd(key)
+    if vim.env.TMUX and vim.api.nvim_get_current_win() == win then
+      -- Async, so nvim never waits on the tmux process
+      vim.system({ "tmux", "if", "-F", "#{pane_at_" .. move.edge .. "}", "", "select-pane " .. move.flag })
+    end
+  end, { desc = "Go to " .. move.edge .. " window or tmux pane" })
+end
+
+-- Disabled: LazyVim's insert-mode <A-j> "move line down". Ghostty now sends Cmd+J
+-- to nvim as <M-j> (for the pane moves above), so pressing it while typing would
+-- move the current line. Not used in insert mode. Its <A-k> "move line up" is
+-- never created, because Copilot claims that key (plugins/copilot.lua).
+-- Visual-mode <A-j>/<A-k> (move the selected lines) stay as they are.
+pcall(vim.keymap.del, "i", "<A-j>")
+-- Not needed: Copilot's `keys` claim already stops LazyVim creating insert <A-k>.
+-- Deleting it here would remove Copilot's Cmd+K toggle instead.
+-- pcall(vim.keymap.del, "i", "<A-k>")
+
 -- Explicit state flags for fold toggle (foldlevel is unreliable with ufo)
 vim.g.folds_closed = false
 vim.g.fold_keep_current_open = false
