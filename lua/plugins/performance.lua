@@ -62,6 +62,12 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     init = function()
+      -- WARN: SILENT FAILURE — this init REPLACES LazyVim's lualine init, which
+      -- is what saves `laststatus` before the dashboard sets it to 0. Without
+      -- this line a bare `nvim` start leaves lualine with globalstatus = false:
+      -- one statusline per window, and `[No Name] 1:1` under the explorer.
+      vim.g.lualine_laststatus = vim.o.laststatus
+
       -- LazyVim's Trouble breadcrumb is useful, but it rebuilds Trouble symbols
       -- during statusline draws and showed up as a runtime hotspot.
       vim.g.trouble_lualine = false
