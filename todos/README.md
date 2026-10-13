@@ -16,6 +16,7 @@ acting on anything in this folder. During a freeze window, items here are
 | [`ui/`](#ui)               | editor surfaces: file browser, tabline, scrolling, keymaps |
 | [`languages/`](#languages) | LSP, formatters, debuggers, per-language support           |
 | [`ai/`](#ai)               | AI plugin configuration                                    |
+| [phase 2](#phase-2)        | larger planned features, specs live in `docs/phases/`      |
 | [`done/`](#done)           | shipped and verified; kept for the reasoning               |
 
 Status column meanings:
@@ -98,6 +99,17 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`codecompanion-codex-acp-fix.md`](ai/codecompanion-codex-acp-fix.md) | Codex ACP adapter broken since the codex-acp 1.6.2 upgrade. Root cause known, values measured, the edit is ~4 lines. Nothing here is a guess | open   |
 | [`cursor-tab-level-suggestions.md`](ai/cursor-tab-level-suggestions.md) | GOAL: Cursor Tab-quality suggestions in nvim. Research-first, checkpoint item. NES `<Tab>` chaining dropped 2026-10-13 (low ROI) | open   |
 | [`avante-ui-optimization.md`](ai/avante-ui-optimization.md)           | Avante disabled since 2026-05-26; CodeCompanion is the active workflow. Do no UI work unless Avante is deliberately re-enabled               | parked |
+
+## phase 2
+
+Larger planned features. The specs stay in
+[`../docs/phases/phase-2/`](../docs/phases/phase-2/); these rows only make sure
+the checkpoint triage sees them. Run the ROI test (rules.md #9) on each.
+
+| file                                                                                                                  | hook                                                                                                                                                                                                                                                                     | status |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| [`features_and_changes_and_optimization.md`](../docs/phases/phase-2/features_and_changes_and_optimization.md)         | three UI items. #1 statusline symbol: a Trouble breadcrumb was built and rejected 2026-09-04 (`documentSymbol` measured at 92 ms), so start from that finding. #2 file inspector: see the next row. #3 scroll info as a top-right overlay: UI change, fails ROI by default | open   |
+| [`neovim-file-inspector-BRD_+_Technical_Specification.md`](../docs/phases/phase-2/neovim-file-inspector-BRD_+_Technical_Specification.md) | Semantic File Inspector, full BRD + spec. Overlaps the Trouble outline (`<leader>cs`), [`symbol-outline-split.md`](ui/symbol-outline-split.md) and [`treesitter-outline-locals.md`](ui/treesitter-outline-locals.md): triage the three together                         | open   |
 
 ## done
 
