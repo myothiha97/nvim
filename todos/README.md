@@ -96,6 +96,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | file                                                                  | hook                                                                                                                                         | status |
 | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | [`codecompanion-codex-acp-fix.md`](ai/codecompanion-codex-acp-fix.md) | Codex ACP adapter broken since the codex-acp 1.6.2 upgrade. Root cause known, values measured, the edit is ~4 lines. Nothing here is a guess | open   |
+| [`cursor-tab-level-suggestions.md`](ai/cursor-tab-level-suggestions.md) | GOAL: Cursor Tab-quality suggestions in nvim. Research-first, checkpoint item. NES `<Tab>` chaining dropped 2026-10-13 (low ROI) | open   |
 | [`avante-ui-optimization.md`](ai/avante-ui-optimization.md)           | Avante disabled since 2026-05-26; CodeCompanion is the active workflow. Do no UI work unless Avante is deliberately re-enabled               | parked |
 
 ## done

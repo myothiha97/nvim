@@ -9,3 +9,4 @@ the single 60-minute checkpoint session.
 - 2026-09-30: compare `body.tinted` vs `body.brighter` for body text and file names on the current teal bg (commit 9a1702f moved to tinted "for eye comfort"); decide which to keep.
 - 2026-10-01: full audit of the live palette (readability, eye comfort, token separation per language) against popular dark themes; not satisfied with the current result.
 - 2026-10-07: markdown inline code (`` `foo` ``) shows yellow text on a faded blue bg and is hard to read; pick a more readable pair. Screenshot: `reference-images/2026-10-07-markdown-inline-code-highlight.png`
+- 2026-10-13: Copilot ghost text in the syntax colours of the theme instead of flat grey (VS Code style). Full context: `todos/ai/cursor-tab-level-suggestions.md`.
