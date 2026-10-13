@@ -33,7 +33,7 @@ variables, vivid blue `#359ee9` on functions, cyan `#2ac3de` on types, violet
 
 **Closed on 2026-09-08:**
 
-- Item: **member colour** — `@variable.member` was a *silent no-op* (the paint
+- Item: **member colour** — `@variable.member` was a _silent no-op_ (the paint
   line in `init.lua` had been commented out since 2026-08-09, so nothing read
   `palette.member`). Enabled, now salmon. This fixed the largest collision in the
   palette: one cyan had carried `variable.member` + `string` + `constant` +
@@ -88,7 +88,7 @@ function name. Full evidence is in the latest section of
 > `notes/syntax-palette-decisions.md`.** Everything in this Status section and in
 > the sections below it describes the palette as of **2026-07-22**, before the
 > 2026-08 rework moved the palette from colour-named slots to role-named ones.
-> It is kept as the historical record of *why* things were tried, not as a
+> It is kept as the historical record of _why_ things were tried, not as a
 > statement of what is set today.
 >
 > **NOTHING LIVE. The palette is CLOSED as of 2026-09-07**. See
@@ -121,13 +121,13 @@ palette is back to its 2026-07-21 state and that is the intended end state.
 
 Current selections:
 
-| role | value | L\* | chroma C\* | Lab hue |
-| --- | --- | --- | --- | --- |
-| yellow | `#aea10c` (`balanced`) | 65.4 | 67.4 | 97.9 |
-| cyan (theme) | `#2aa298` | 60.4 | 34.6 | 186.9 |
-| green | `#849900` (`solarized`) | 59.7 | 66.9 | 110.7 |
-| blue | `#1d98cd` (`azure`) | 59.1 | 38.5 | 249.9 |
-| red | `#b55f4a` (`terracotta`) | 50.1 | 42.9 | 40.1 |
+| role         | value                    | L\*  | chroma C\* | Lab hue |
+| ------------ | ------------------------ | ---- | ---------- | ------- |
+| yellow       | `#aea10c` (`balanced`)   | 65.4 | 67.4       | 97.9    |
+| cyan (theme) | `#2aa298`                | 60.4 | 34.6       | 186.9   |
+| green        | `#849900` (`solarized`)  | 59.7 | 66.9       | 110.7   |
+| blue         | `#1d98cd` (`azure`)      | 59.1 | 38.5       | 249.9   |
+| red          | `#b55f4a` (`terracotta`) | 50.1 | 42.9       | 40.1    |
 
 Green and yellow measure **dE2000 9.9** apart. That is below the threshold where
 small text glyphs stay distinguishable, and it is accepted knowingly. Do NOT
@@ -140,14 +140,14 @@ The palette was suspected of running bright and was measured against
 `tokyonight-night` and `catppuccin-mocha`, both installed, by loading each
 colorscheme and querying the same highlight groups.
 
-| | mean accent L\* | mean perceived L\* | mean contrast | max C\* | background L\* |
-| --- | --- | --- | --- | --- | --- |
-| **solarized-osaka** | 59.2 | **65.6** | **6.0:1** | **67.4** | **3.9** |
-| tokyonight-night | 74.3 | 78.9 | 8.5:1 | 55.0 | 10.1 |
-| catppuccin-mocha | 79.0 | 83.4 | 9.5:1 | 45.7 | 12.0 |
+|                     | mean accent L\* | mean perceived L\* | mean contrast | max C\*  | background L\* |
+| ------------------- | --------------- | ------------------ | ------------- | -------- | -------------- |
+| **solarized-osaka** | 59.2            | **65.6**           | **6.0:1**     | **67.4** | **3.9**        |
+| tokyonight-night    | 74.3            | 78.9               | 8.5:1         | 55.0     | 10.1           |
+| catppuccin-mocha    | 79.0            | 83.4               | 9.5:1         | 45.7     | 12.0           |
 
 "Perceived L\*" applies the Fairchild-Pirrotta Helmholtz-Kohlrausch correction,
-which *flatters* saturated colours — and this palette still comes out the dimmest
+which _flatters_ saturated colours — and this palette still comes out the dimmest
 of the three by 13-18 points.
 
 **Conclusion: it is not too bright. If anything it runs dim.** What is unusual is
@@ -168,13 +168,13 @@ The one genuine weak spot the benchmark surfaced is not yellow:
 
 Sorted by perceived lightness (Helmholtz-Kohlrausch corrected):
 
-| accent | perceived L\* | contrast |
-| --- | --- | --- |
-| yellow | 70.8 | 7.27:1 |
-| blue | 66.9 | 5.91:1 |
-| green | 66.8 | 6.02:1 |
-| cyan | 66.3 | 6.18:1 |
-| **terracotta** | **57.3** | **4.33:1** |
+| accent         | perceived L\* | contrast   |
+| -------------- | ------------- | ---------- |
+| yellow         | 70.8          | 7.27:1     |
+| blue           | 66.9          | 5.91:1     |
+| green          | 66.8          | 6.02:1     |
+| cyan           | 66.3          | 6.18:1     |
+| **terracotta** | **57.3**      | **4.33:1** |
 
 Four accents cluster inside 4.5 points; yellow leads the next by only 3.9.
 Terracotta trails the cluster by **9.0**. So a lingering sense that "yellow looks
@@ -201,9 +201,9 @@ Yellow could not be moved back, and its chroma is not a lever:
   orange. Hue up is green itself.
 - Dropping yellow's chroma does nothing: even at C\* 34 the olive pair only
   reaches dE2000 12.0, because 13 degrees of hue is the entire problem. Worse,
-  a lower-chroma yellow *reduces* the chroma-gap term, so green then has to sit
+  a lower-chroma yellow _reduces_ the chroma-gap term, so green then has to sit
   at hue 136 instead of 134 to clear it.
-- Lightness cannot *solve* it: at hue 98 the pair does not clear dE2000 20 until
+- Lightness cannot _solve_ it: at hue 98 the pair does not clear dE2000 20 until
   L\* 85, a near-fluorescent lemon.
 
   But it does help, and this pair is the one place lightness is worth using.
@@ -220,12 +220,12 @@ That left only green, and green could not move to anywhere acceptable either.
 The opposite of the first read, and the thing that cost this session three
 rounds. Verified against real files:
 
-| candidate | hue | C\* | verdict |
-| --- | --- | --- | --- |
+| candidate             | hue   | C\*  | verdict                             |
+| --------------------- | ----- | ---- | ----------------------------------- |
 | `solarized` `#859900` | 110.7 | 66.9 | **kept** — collides, but reads best |
-| `grass` `#56a325` | 129.9 | 70.3 | too bright |
-| `clover` `#599e49` | 136.0 | 53.8 | still too bright |
-| `moss` `#629959` | 138.1 | 41.9 | closest call, still rejected on hue |
+| `grass` `#56a325`     | 129.9 | 70.3 | too bright                          |
+| `clover` `#599e49`    | 136.0 | 53.8 | still too bright                    |
+| `moss` `#629959`      | 138.1 | 41.9 | closest call, still rejected on hue |
 
 The highest-chroma option reads calmest, and dropping chroma 25 points did not
 stop hue 136 reading as vivid. Below hue ~122 green reads warm and olive; above
@@ -239,12 +239,12 @@ and the warmth is worth more in daily use than the separation is.
 
 Yellow density does differ sharply by language:
 
-| language | what is yellow |
-| --- | --- |
+| language  | what is yellow                                            |
+| --------- | --------------------------------------------------------- |
 | TSX / JSX | `@tag.tsx` — every `<div>`, `<p>`, `<span>` — plus `Type` |
-| Go | `Type` (`int`, `string`, `float64`) |
-| Python | `Type` (`str` annotations) |
-| Lua | nothing |
+| Go        | `Type` (`int`, `string`, `float64`)                       |
+| Python    | `Type` (`str` annotations)                                |
+| Lua       | nothing                                                   |
 
 That suggested scoping a separate green to `tsx` / `typescript` / `javascript`
 and keeping the olive elsewhere. It was implemented and then reverted: Go is not
@@ -258,13 +258,13 @@ wrong.
 Everything tried is saved by name in the palette file, so re-testing is a
 one-word edit to the `return` block. The full fix that was built and reverted:
 
-| pair | as shipped (now) | with `moss` + `balanced` |
-| --- | --- | --- |
-| green / yellow | **8.3** | 21.9 |
-| green / cyan | 30.6 | 18.7 |
-| cyan / blue | 21.8 | 21.8 |
+| pair           | as shipped (now) | with `moss` + `balanced` |
+| -------------- | ---------------- | ------------------------ |
+| green / yellow | **8.3**          | 21.9                     |
+| green / cyan   | 30.6             | 18.7                     |
+| cyan / blue    | 21.8             | 21.8                     |
 
-Note that green/cyan gets *worse* under the fix. It stays usable — the two are
+Note that green/cyan gets _worse_ under the fix. It stays usable — the two are
 49 degrees apart in hue and dE2000 understates hue separation at low chroma —
 but it is a second reason the trade was not clearly worth taking.
 
@@ -323,13 +323,13 @@ Both clients were sampled by solving `pixel = alpha*base0 + (1-alpha)*bg` per
 pixel over the code area, keeping pixels on that colour line, and taking the
 distribution of `alpha` (stroke coverage).
 
-| | Ghostty 13pt, thicken 140 | Neovide `guifont h14` |
-| --- | --- | --- |
-| colour sent | `#9eabac` | `#9eabac` (identical) |
-| mean stroke coverage | 0.386 | 0.492 (+27%) |
-| pixels at full colour | 2.0% | 4.4% |
-| effective rendered text | `#3c4e51` | `#4d5e62` |
-| effective L\* | 31.8 | 38.7 |
+|                         | Ghostty 13pt, thicken 140 | Neovide `guifont h14` |
+| ----------------------- | ------------------------- | --------------------- |
+| colour sent             | `#9eabac`                 | `#9eabac` (identical) |
+| mean stroke coverage    | 0.386                     | 0.492 (+27%)          |
+| pixels at full colour   | 2.0%                      | 4.4%                  |
+| effective rendered text | `#3c4e51`                 | `#4d5e62`             |
+| effective L\*           | 31.8                      | 38.7                  |
 
 The colour is byte-identical. The whole 6.9 L\* gap is coverage. That is above the
 ~5 L\* perceptual floor noted below, so the complaint was real, just misattributed.
@@ -348,12 +348,12 @@ Contributing causes, both client-side:
 
 At 0.386 coverage the colour barely gets a vote:
 
-| change | Ghostty effective L\* | gain |
-| --- | --- | --- |
-| nothing | 31.8 | baseline |
-| `base0` -> `base1` `#adb7b7` | 34.0 | +2.2 |
-| `base0` -> `#b0bdbe` | 34.8 | +3.0 |
-| coverage 0.386 -> 0.492 | 38.7 | **+6.9** |
+| change                       | Ghostty effective L\* | gain     |
+| ---------------------------- | --------------------- | -------- |
+| nothing                      | 31.8                  | baseline |
+| `base0` -> `base1` `#adb7b7` | 34.0                  | +2.2     |
+| `base0` -> `#b0bdbe`         | 34.8                  | +3.0     |
+| coverage 0.386 -> 0.492      | 38.7                  | **+6.9** |
 
 Thickening is ~3x more effective. A palette change also hits every client:
 Neovide is already at the target, so it would overshoot there, and it would push
@@ -378,24 +378,24 @@ The candidate values and knock-on checks that were filed before this was resolve
 are kept below, for the unlikely case the palette is ever reopened on purpose.
 
 **This is a different axis from everything else in this file.** Items 1-3 and all
-the Notes below are about *accent* colours, where the rule is tune hue and chroma,
+the Notes below are about _accent_ colours, where the rule is tune hue and chroma,
 never lightness. Base text is a single neutral with no neighbour to stay distinct
 from, so lightness is the correct and only lever here. Do not apply the
 "never lightness" note to this item.
 
 Measured state (background is the transparent-blend base, `#001419`, L\* 5.2):
 
-| role | value | L\* | contrast |
-| --- | --- | --- | --- |
-| `Normal` fg = `base0` | `#9eabac` | 69.0 | 7.97:1 |
-| `base1` (theme, brighter neutral) | `#adb7b7` | 73.7 | 9.19:1 |
-| `Comment` | `#576d74` | 44.6 | 3.45:1 |
+| role                              | value     | L\*  | contrast |
+| --------------------------------- | --------- | ---- | -------- |
+| `Normal` fg = `base0`             | `#9eabac` | 69.0 | 7.97:1   |
+| `base1` (theme, brighter neutral) | `#adb7b7` | 73.7 | 9.19:1   |
+| `Comment`                         | `#576d74` | 44.6 | 3.45:1   |
 
 So base text already passes WCAG AAA comfortably. The complaint is perceptual,
-not a contrast failure. Two plausible readings, worth deciding between *before*
+not a contrast failure. Two plausible readings, worth deciding between _before_
 touching a colour:
 
-- **Base text really is low.** At L\* 69 it sits *below* four of the five accents
+- **Base text really is low.** At L\* 69 it sits _below_ four of the five accents
   (yellow 70.8, blue 66.9, green 66.8, cyan 66.3 perceived). Ordinary code is
   therefore no brighter than the syntax highlighting around it, which inverts the
   usual figure/ground and can read as washed out.
@@ -412,11 +412,11 @@ Candidates if it goes ahead (nothing is overridden today — `Normal` fg comes
 straight from the plugin, so this would be a **new** `on_colors` entry setting
 `c.base0`, not an edit to an existing line):
 
-| candidate | value | L\* | contrast | note |
-| --- | --- | --- | --- | --- |
-| theme `base1` | `#adb7b7` | 73.7 | 9.19:1 | already in the palette, +4.7 L\* |
-| mid | `#b0bdbe` | 75.7 | 9.76:1 | keeps base0's hue, +6.7 L\* |
-| high | `#bcc9ca` | 80.0 | 11.08:1 | +11 L\*, likely too stark on near-black |
+| candidate     | value     | L\*  | contrast | note                                    |
+| ------------- | --------- | ---- | -------- | --------------------------------------- |
+| theme `base1` | `#adb7b7` | 73.7 | 9.19:1   | already in the palette, +4.7 L\*        |
+| mid           | `#b0bdbe` | 75.7 | 9.76:1   | keeps base0's hue, +6.7 L\*             |
+| high          | `#bcc9ca` | 80.0 | 11.08:1  | +11 L\*, likely too stark on near-black |
 
 Start with `base1` or the mid value. A move under ~5 L\* on text glyphs is below
 the perceptual threshold and will return no signal, which is the same trap the
@@ -431,7 +431,7 @@ Knock-on checks before shipping any of these:
 - Raising base text widens the gap to `Comment` (3.45:1). Comments are
   intentionally dim, but check they do not start reading as disabled text.
 - If base text goes up, the terracotta shortfall from the benchmark above gets
-  *relatively* worse. Terracotta is already the lead candidate if the palette is
+  _relatively_ worse. Terracotta is already the lead candidate if the palette is
   reopened, so consider doing both in the same session or neither.
 
 ### 5. Keyword: olive vs yellow — CLOSED 2026-08-09, yellow selected
@@ -456,15 +456,15 @@ written.
 **The dose finding that settled it.** Yellow is not too loud in general, it is
 too loud past a threshold. Measured shares of glyphs painted `#aea10c`:
 
-| language | yellow | verdict |
-| --- | --- | --- |
-| Go | 1.6% | comfortable |
-| TSX (real work file) | 5.3% | confirmed comfortable |
-| Python | 5.8% | comfortable |
-| Bash | 7.8% | fine |
-| TypeScript | 10.1% | between the two, closer to the bad end |
-| JavaScript | 10.2% | as above |
-| Lua | 11.6% | rejected |
+| language             | yellow | verdict                                |
+| -------------------- | ------ | -------------------------------------- |
+| Go                   | 1.6%   | comfortable                            |
+| TSX (real work file) | 5.3%   | confirmed comfortable                  |
+| Python               | 5.8%   | comfortable                            |
+| Bash                 | 7.8%   | fine                                   |
+| TypeScript           | 10.1%  | between the two, closer to the bad end |
+| JavaScript           | 10.2%  | as above                               |
+| Lua                  | 11.6%  | rejected                               |
 
 Lua is the only language in the stack that overdoses it, and Lua is a config
 language here, not part of the daily JS/TS, Go, Python and Bash work. That is the
@@ -472,12 +472,12 @@ accepted trade: Lua stays loud.
 
 Original framing, kept because the measurements are still valid:
 
-| | olive `#849900` | yellow `#aea10c` |
-| --- | --- | --- |
-| L\* | 59.6 | 65.4 |
-| chroma C\* | 67.0 | 67.4 |
-| Lab hue | 111.0 | 97.9 |
-| contrast vs `#031219` | 5.92:1 | 7.16:1 |
+|                       | olive `#849900` | yellow `#aea10c` |
+| --------------------- | --------------- | ---------------- |
+| L\*                   | 59.6            | 65.4             |
+| chroma C\*            | 67.0            | 67.4             |
+| Lab hue               | 111.0           | 97.9             |
+| contrast vs `#031219` | 5.92:1          | 7.16:1           |
 
 The trade, stated plainly: yellow is the better colour in ordinary files and the
 worse one in keyword-dense files, where it reads loud. Olive gives that up for
@@ -490,7 +490,7 @@ Three things to carry into the review so it is not re-derived:
   Dropping chroma to calm either one has already failed twice — `drab` at C\* 44
   read "too fade", and the `subdued`/`hushed` ladder went the same way.
 - **This is the documented exception to rule 2.** Lightness normally returns no
-  signal here, but 5.8 L\* clears the ~5 floor, so between *these two* it is real.
+  signal here, but 5.8 L\* clears the ~5 floor, so between _these two_ it is real.
 - **Olive sits on the git-added green.** `#849900` is dE2000 ≈ 0.2 from
   solarized's `#859900`, which gitsigns and `diffAdded` use. Commit `bdb87f0`
   had deliberately decoupled the lualine git marker from the keyword colour;
@@ -531,18 +531,18 @@ push it past 16% and tilt the screen red.
 
 **Measured effect**, simulated on real files:
 
-| | yellow area | separate yellow marks |
-| --- | --- | --- |
-| tsx | 5.3% → 2.7% | 546 → 128 (−77%) |
-| typescript | 10.1% → 6.3% | 1222 → 351 (−71%) |
-| javascript | 10.2% → 6.8% | 655 → 214 (−67%) |
-| python | 5.8% → 3.1% | 434 → 112 (−74%) |
-| lua | 11.6% → 8.6% | 660 → 277 (−58%) |
-| go | 1.6% → 1.5% | 101 → 69 (−32%) |
+|            | yellow area  | separate yellow marks |
+| ---------- | ------------ | --------------------- |
+| tsx        | 5.3% → 2.7%  | 546 → 128 (−77%)      |
+| typescript | 10.1% → 6.3% | 1222 → 351 (−71%)     |
+| javascript | 10.2% → 6.8% | 655 → 214 (−67%)      |
+| python     | 5.8% → 3.1%  | 434 → 112 (−74%)      |
+| lua        | 11.6% → 8.6% | 660 → 277 (−58%)      |
+| go         | 1.6% → 1.5%  | 101 → 69 (−32%)       |
 
 It lands TypeScript and JavaScript inside the dose already confirmed comfortable
-in TSX, and it removes about three quarters of the yellow *fragments* while only
-removing a third to a half of the yellow *area* — because a `.` or `,` is a
+in TSX, and it removes about three quarters of the yellow _fragments_ while only
+removing a third to a half of the yellow _area_ — because a `.` or `,` is a
 single character and therefore its own isolated mark.
 
 What each language actually captures as a delimiter, so the effect is not a
@@ -578,13 +578,13 @@ Reverting is `rm -r after/`, or deleting one file to drop one language.
 
 **Measured effect** on real files, keyword-colour area and separate marks:
 
-| file | glyphs | area | marks |
-| --- | --- | --- | --- |
-| `index.tsx` (the file that raised it) | 7,028 | 2.65% → 3.53% | 60 → 98 |
-| gin `context.go` | 38,402 | 4.92% → 5.01% | 425 → 447 |
-| rust `ci/run.sh` | 9,316 | 2.81% → 3.06% | 91 → 103 |
-| rust `install-template.sh` | 21,183 | 6.22% → 6.31% | 395 → 411 |
-| `free-disk-space-linux.sh` | 8,406 | 4.28% → 4.53% | 110 → 122 |
+| file                                  | glyphs | area          | marks     |
+| ------------------------------------- | ------ | ------------- | --------- |
+| `index.tsx` (the file that raised it) | 7,028  | 2.65% → 3.53% | 60 → 98   |
+| gin `context.go`                      | 38,402 | 4.92% → 5.01% | 425 → 447 |
+| rust `ci/run.sh`                      | 9,316  | 2.81% → 3.06% | 91 → 103  |
+| rust `install-template.sh`            | 21,183 | 6.22% → 6.31% | 395 → 411 |
+| `free-disk-space-linux.sh`            | 8,406  | 4.28% → 4.53% | 110 → 122 |
 
 Largest move is +0.88 points against the 7% stop rule on the violet. Bash was
 expected to be the risk and moved least; see the note file for why.
@@ -605,12 +605,12 @@ and it is the only imported colour — dE 20.0 from Solarized's own blue, agains
 
 **It is language-specific, and the numbers say why.** Measured coverage:
 
-| file | area | marks | avg run |
-| --- | --- | --- | --- |
-| `recurringCheckoutService.ts` | **10.86%** | 269 | **18.3 ch** |
-| `index.tsx` | 6.79% | 61 | 7.8 ch |
-| `demo.go` | 4.89% | 101 | 5.2 ch |
-| `test.sh` | 0% | 0 | – |
+| file                          | area       | marks | avg run     |
+| ----------------------------- | ---------- | ----- | ----------- |
+| `recurringCheckoutService.ts` | **10.86%** | 269   | **18.3 ch** |
+| `index.tsx`                   | 6.79%      | 61    | 7.8 ch      |
+| `demo.go`                     | 4.89%      | 101   | 5.2 ch      |
+| `test.sh`                     | 0%         | 0     | –           |
 
 TS is the bad case because an `import type { ... }` block is 18-character runs of
 the brightest colour, line after line. Go gets 5-character runs of `int`,
@@ -622,14 +622,14 @@ candidate was re-scored against the current palette on 2026-08-11 (the previous
 scores predate both the violet keyword and the copper punctuation, and rejections
 are only valid against the palette that existed when they were made):
 
-| candidate | L\* | vs Function |
-| --- | --- | --- |
-| `sky_calm` `#56cae7` | 75.7 | 16.0 |
-| `sky_dim` `#39cce9` | 75.6 | 16.7 |
-| `periwinkle` `#a7b1fe` | 74.3 | 21.9, but worst neighbour 17.3 |
-| `nvim_type` `#2ac3de` | 72.3 | 15.2 |
-| `vscode_support` `#0db9d7` | 68.8 | 12.7 |
-| `sky` `#0edfff` | **81.3** | 20.7 — the only one that clears, and it is *brighter* |
+| candidate                  | L\*      | vs Function                                           |
+| -------------------------- | -------- | ----------------------------------------------------- |
+| `sky_calm` `#56cae7`       | 75.7     | 16.0                                                  |
+| `sky_dim` `#39cce9`        | 75.6     | 16.7                                                  |
+| `periwinkle` `#a7b1fe`     | 74.3     | 21.9, but worst neighbour 17.3                        |
+| `nvim_type` `#2ac3de`      | 72.3     | 15.2                                                  |
+| `vscode_support` `#0db9d7` | 68.8     | 12.7                                                  |
+| `sky` `#0edfff`            | **81.3** | 20.7 — the only one that clears, and it is _brighter_ |
 
 Every dimmer option collides with `Function`. That is arithmetic, not bad luck:
 `Type` and `Function` sit at hue 249 and 250, one degree apart, so their entire
@@ -643,7 +643,7 @@ collapses the pair. The blue band cannot produce a dimmer Type.
    against a yellow keyword, and violet is now the keyword, so magenta is the
    surviving lead and needs re-scoring against violet at hue 310.
 2. **Move `Function` instead**, freeing room below for a dimmer Type. Never
-   tried. The existing note only records that Function cannot be *brightened*
+   tried. The existing note only records that Function cannot be _brightened_
    without collapsing the pair; going the other way was not tested.
 3. **Reduce the dose rather than the value.** No mechanism known — `@type` cannot
    be scoped to "not inside an import block" by highlight group, and an
@@ -651,6 +651,12 @@ collapses the pair. The blue band cannot produce a dimmer Type.
 
 Review at the 2026-12-31 checkpoint. Judge on a real `.ts` file with a large
 `import type` block, not on Go.
+
+# SQL Syntax Highlighting
+
+- Current SQL syntax highlighting in Neovim is basic and incomplete.
+- SQL keywords, identifiers, operators, and other syntax elements are not visually differentiated enough.
+- Future improvements should introduce a carefully curated color palette with distinct colors for key SQL elements to improve readability and reduce visual ambiguity.
 
 ## Notes
 
@@ -673,7 +679,7 @@ Review at the 2026-12-31 checkpoint. Judge on a real `.ts` file with a large
 - **Judge green on hue, not chroma.** The 2026-07-22 session wasted three rounds
   assuming "too bright" meant chroma. It did not: `solarized` at C\* 66.9 reads
   calm and `clover` at C\* 53.8 reads bright, because the difference is hue 111
-  vs 136. Chroma only decides flat vs alive *within* a hue.
+  vs 136. Chroma only decides flat vs alive _within_ a hue.
 - **Check a candidate in every language before shipping it.** The binding
   neighbour changes: TSX is yellow-dense (`@tag.tsx`), Go and Python are
   cyan-dense (strings) with almost no yellow, Lua has neither. A green that
