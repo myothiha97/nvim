@@ -106,7 +106,12 @@ local builds = {
       -- body = palette.variants.body.tinted, -- current live
       body = palette.variants.body.brighter, -- start trialling from 07 Oct 2026
 
-      func = palette.variants.func.vivid,
+      -- NOTE: future enhancement
+      -- Consider using a distinct blue for functions and other symbols in the future,
+      -- as reusing the same blue across too many code elements can result in too much
+      -- blue on screen, making syntax highlighting feel visually repetitive.
+      func = palette.variants.func.vivid, -- current live
+      -- func = palette.variants.func.azure, -- Second-best option.
 
       -- One value for every language, Go included. Tokyo Night's hue at our
       -- L*68, chosen by eye 2026-09-08 for the widest separation from the accent
