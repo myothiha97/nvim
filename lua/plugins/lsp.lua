@@ -64,6 +64,13 @@ return {
             end
             on_dir(root or vim.fs.dirname(fname))
           end,
+          -- Formatting is off in postgres-language-server.jsonc, but the server still
+          -- advertises it. Format-on-save then waits on it (blocked on a DB connect)
+          -- until conform's 3s timeout, freezing every save when Postgres is down.
+          on_attach = function(client)
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+          end,
         },
         emmet_ls = {
           -- Only HTML/CSS - TSX/JSX use custom snippets for tag completion
