@@ -1,8 +1,8 @@
 -- The three numbers that decide the Explorer sidebar's width, in COLUMNS.
 -- Edit these; `explorer_width` below is only the arithmetic.
-local EXPLORER_WIDTH_RATIO = 0.25 -- share of the window it asks for
+local EXPLORER_WIDTH_RATIO = 0.28 -- share of the window it asks for
 local EXPLORER_MIN_WIDTH = 30 -- never narrower than this, but see EXPLORER_MAX_SHARE
-local EXPLORER_MAX_WIDTH = 40 -- never wider than this, however wide the window gets
+local EXPLORER_MAX_WIDTH = 43 -- never wider than this, however wide the window gets
 
 -- The escape hatch on the floor: the sidebar may never take more than this share
 -- of the window, so EXPLORER_MIN_WIDTH gives way on a genuinely narrow one.
@@ -57,9 +57,9 @@ end
 -- 50-column pane, the difference showing as dead space beside the tree.
 --
 -- EXPLORER_MAX_WIDTH stops the tree growing on a wide screen, where the ratio asks
--- for more width than any path here prints. The ratio read 36 on the 146-column
+-- for more width than any path here prints. The ratio reads 40 on the 146-column
 -- window this was tuned against, so at the shipped values the cap only engages
--- past 160 columns.
+-- past about 154 columns (43 / 0.28).
 --
 -- EXPLORER_MIN_WIDTH keeps a typical nested filename readable: 2 columns per indent
 -- level, 2 for the icon, then the name (`snacks-file-browser.lua` at depth 2 needs
