@@ -676,7 +676,7 @@ return {
       -- Not `palette.body` itself: prose matching code exactly removes the cue
       -- that the float is a different surface. Not `base0` either -- that is the
       -- file-list value, and 8.19:1 read brighter than a doc needs to be.
-      hl.LspDocFloat = { fg = palette.variants.body.faded or c.fg, bg = c.bg_float }
+      hl.LspDocFloat = { fg = palette.variants.body.base0 or c.fg, bg = c.bg_float }
       -- FLOAT BORDERS, 2026-09-22, by preference. Both surfaces moved off the
       -- theme's `yellow700` (#664c00) to `c.cyan700` -- the faded end of the same
       -- cyan ramp the string green `cyan500` sits on, read by theme key rather
