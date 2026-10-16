@@ -12,7 +12,7 @@ Review date: 2026-10-02. Values below were sampled from real screenshots (Go, TS
 |---|---|---|---|---|---|
 | background | `#131312` | 5.9 | | | neutral, about Material's `#121212` |
 | body (`body.tinted`) | `#a0b6b8` | 72.5 | 8.74:1 | 59.9 | brightest syntax role, as it should be |
-| Go field / TS param / JSX tag | `#baac0d` | 69.5 | 7.96:1 | 55.6 | most saturated colour (C\* 71) |
+| TS param / JSX tag | `#baac0d` | 69.5 | 7.96:1 | 55.6 | most saturated colour (C\* 71). Go fields left this on 2026-10-02 (`override_go`, teal `#73daca`, verified live 2026-10-16); not measured here |
 | literal / boolean / null / Go param | `#ed8e55` | 68.0 | 7.61:1 | 53.6 | |
 | type | `#05aac7` | 64.1 | 6.71:1 | 48.4 | chosen 2026-10-02 |
 | function / JSX attribute | `#359ee9` | 62.6 | 6.39:1 | 46.1 | |
@@ -141,6 +141,8 @@ In Go, parameters and receivers are `#ed8e55`, identical to numbers and `nil`. I
 
 Small code cleanup: in the Go field loop in `init.lua`, `hl["@variable.parameter.go"] = { fg = palette.field }` runs on every pass. Move it below the loop so it runs once. Behaviour is unchanged.
 
+Stale comments (found 2026-10-16), comment-only, for the same cleanup pass: `init.lua` (the Go field block, ~line 312) and `palette.lua` (`member`, ~line 323, and `field`, ~line 435) still say Go fields follow `punctuation`. Since 2026-10-02 `override_go = true` repaints them teal `#73daca` after that loop, and `override_go` itself has no comment. Its hex is also hard-coded in `init.lua` (its own `todo` says so).
+
 ---
 
 ## 4. Housekeeping
@@ -208,7 +210,7 @@ These came up in the review and are settled. Do not reopen them without a concre
 | Background `#131312` | keep, confirm 2026-10-08 (section 5) | never on numbers alone |
 | Body `body.tinted` | keep | squinting, leaning in, or tired eyes over several days of normal work. Then use `brighter` (`#b1bebf`, Lc 65), which is already in the palette |
 | Type `#05aac7` | keep | types and strings blur in real struct or interface code |
-| Go field yellow `#baac0d` | keep | it feels loud after a week. Then use `#b5ad49` (same lightness, C\* 52, nearest role 16.6) |
+| Go field yellow `#baac0d` | superseded: Go fields are teal `#73daca` via `override_go` since 2026-10-02 | (n/a) |
 | Keyword violet `#a17bcc` | keep | you decide to raise readability. This is the first role to lift, before body: `#a680d1` (Lc 42) or `#ac85d7` (Lc 45, nearest role 16.9) |
 
 ---
