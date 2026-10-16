@@ -43,6 +43,14 @@ vim.keymap.set("v", "<D-/>", "<Esc>:normal gvgc<CR>", { desc = "Toggle comment b
 vim.keymap.set("n", "<D-d>", "<Plug>(VM-Find-Under)", { desc = "Multi-cursor: add next" })
 vim.keymap.set("v", "<D-d>", "<Plug>(VM-Find-Subword-Under)", { desc = "Multi-cursor: add next" })
 
+-- Scrollbar: DISABLED, does nothing. Neovide 0.16.2 has no scrollbar option
+-- (checked 2026-10-16: "scrollbar" is not in its binary), and it ignores
+-- `guioptions`. A scrollbar needs a plugin instead; see
+-- todos/ui/vscode-style-scrollbar.md.
+-- vim.g.neovide_scrollbar_enabled = true
+-- vim.g.neovide_scrollbar_mode = "scroll"
+-- vim.opt.guioptions:append("r")
+
 -- Cmd+K: toggle Copilot suggestions in insert mode (Ghostty sends this as <M-k>).
 -- Forwards to the <M-k> handler in plugins/copilot.lua rather than duplicating the
 -- toggle, which lives in that file's config closure and is not exported.
