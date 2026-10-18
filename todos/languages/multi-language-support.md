@@ -14,6 +14,7 @@ configuration that has already been installed.
 | Go | gopls | gofumpt, goimports, golangci-lint | delve; neotest-golang | Production-ready and debug-verified |
 | Python | basedpyright | ruff | debugpy; neotest-python | Configured; real-project verification remains |
 | Bash | bashls | shfmt; shellcheck | Not needed | Ready |
+| Make | none | mbake (conform `bake`) | Not needed | Ready |
 | Lua | lua_ls | stylua available through Mason | Not needed | Ready |
 | JSON | jsonls | prettierd | Not needed | Ready |
 | YAML | yamlls + SchemaStore | prettierd | Not needed | Verified |

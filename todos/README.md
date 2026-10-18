@@ -116,5 +116,6 @@ the checkpoint triage sees them. Run the ROI test (rules.md #9) on each.
 
 | file                                                                  | hook                                                                                                 |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [`makefile-formatter.md`](done/makefile-formatter.md)                 | conform `bake` (mbake) formats Makefiles on save; ~120 ms per save, Makefiles only                   |
 | [`quickfix-list-persistence.md`](done/quickfix-list-persistence.md)   | cwd-scoped JSON, bounded restore, pcall-wrapped I/O                                                  |
 | [`scroll-popup-without-focus.md`](done/scroll-popup-without-focus.md) | `<C-e>` / `<C-y>` scroll a visible doc popup without entering it; falls back to native when no popup |

@@ -18,6 +18,8 @@ return {
         graphql = { "prettierd" },
         sh = { "shfmt" },
         bash = { "shfmt" },
+        -- mbake: indents recipe lines with the tab make requires
+        make = { "bake" },
       },
       -- prettierd natively resolves project-local config (walking up from the file,
       -- same as VS Code). For files with no project config (e.g. this nvim repo),
@@ -44,6 +46,8 @@ return {
       opts.ensure_installed = opts.ensure_installed or {}
       -- Add prettierd
       table.insert(opts.ensure_installed, "prettierd")
+      -- Makefile formatter for conform's `bake`
+      table.insert(opts.ensure_installed, "mbake")
       -- Remove packages we don't use (added by LazyVim extras)
       local exclude = { "prettier", "eslint-lsp" }
       opts.ensure_installed = vim.tbl_filter(function(pkg)
