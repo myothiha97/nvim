@@ -510,6 +510,9 @@ return {
             -- inheriting the preset instead of the source, so this has to be
             -- restated -- it was briefly lost that way on 2026-09-05.
             preview = false,
+            -- Search input removed from the layout (2026-10-19): it is not used.
+            -- This also drops the "Explorer" title, which lives on its border.
+            hidden = { "input" },
             layout = {
               backdrop = false,
               -- Ratio with a ceiling AND a floor; see `explorer_width` above for
@@ -798,6 +801,7 @@ return {
                 ["<Esc>"] = false, -- don't close on Esc
                 ["q"] = { "close", mode = { "n" }, desc = "Close explorer" },
                 ["/"] = false, -- use vim search instead of explorer filter
+                ["i"] = false, -- default `focus_input` would bring the hidden input back
                 ["?"] = false, -- use vim search instead of help
                 ["<C-f>"] = { "explorer_close_all", mode = { "n" } },
                 ["<C-c>"] = { "close", mode = { "n" } },
