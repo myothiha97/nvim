@@ -474,6 +474,20 @@ return {
           layout = "diff2_horizontal",
         },
       },
+      -- Match the VS Code Timeline (`git log --follow -- <file>`). With the default
+      -- --diff-merges=first-parent, --follow also lists every merge that touched
+      -- the file (183 entries vs 59 real commits on a real file). Merges only
+      -- bring in commits already listed; `g!` shows them again for one session.
+      file_history_panel = {
+        log_options = {
+          git = {
+            single_file = {
+              follow = true,
+              no_merges = true,
+            },
+          },
+        },
+      },
       keymaps = {
         view = {
           { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
