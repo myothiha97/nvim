@@ -63,6 +63,7 @@ is what requires an override to leave a trace here.
 | [`string-member-separation.md`](theme/string-member-separation.md)               | the LAST theme item: string/member colours: PARKED WIP in `custom-v4` + `custom-swap*`; live is back on cyan strings. Resume from the notes file                   | open          |
 | [`palette-checkpoint-ideas.md`](theme/palette-checkpoint-ideas.md)             | one-line colour ideas parked while the palette is closed; review at the 2026-12-31 checkpoint                                                                   | open          |
 | [`comment-no-italic.md`](theme/comment-no-italic.md)                             | drop the italic on comments, keep the colour. Same as E6 option 1 in `theme-enhancements.md`                                                                     | open          |
+| [`rainbow-brackets-and-operator-colours.md`](theme/rainbow-brackets-and-operator-colours.md) | rainbow bracket pairs plus a distinct operator colour. Plugin trial works in Lua/Go/Python, broken in JSX/TSX | open          |
 
 Live colour values and the reasoning behind them are **not** here. See
 [`../notes/palette-reference.md`](../notes/palette-reference.md) (lean) and
