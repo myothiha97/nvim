@@ -4,7 +4,7 @@ local base_width = 0.35
 return {
   {
     "olimorris/codecompanion.nvim",
-    enabled = true,
+    enabled = false,
     -- Lazy-load only on its commands/keymaps so there is zero startup cost.
     -- The `keys` trigger loads the plugin before feeding the mapping; `cmd`
     -- covers typing `:CodeCompanion ...` directly at the cmdline.
