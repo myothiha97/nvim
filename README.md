@@ -4,7 +4,7 @@
 
 **Built on [LazyVim](https://github.com/LazyVim/LazyVim), customized for everyday coding and tuned to stay fast.**
 
-*Reads and navigates large codebases like an IDE — and keeps every keystroke instant.*
+_Reads and navigates large codebases like an IDE — and keeps every keystroke instant._
 
 `~50ms cold start` · `solarized-osaka` · `version-frozen`
 
@@ -32,7 +32,7 @@ quietly regressing speed.
 > **For Claude Code / AI agents:** read [`rules.md`](rules.md) **first** — before
 > proposing or making any change — then the docs under `docs/` as usual. It holds
 > the discipline rules and the active **config-freeze window**, which govern
-> whether a change should happen at all (default answer is *no* unless it unblocks
+> whether a change should happen at all (default answer is _no_ unless it unblocks
 > the current workflow).
 
 ---
@@ -41,55 +41,55 @@ quietly regressing speed.
 
 What makes this feel less like vanilla Neovim:
 
-| | |
-|---|---|
-| 🖱️ **Hover docs on mouse-over** | LSP documentation appears when the pointer rests on a symbol (Zed/WebStorm parity), behind a throttled handler that's free while you type. |
-| 🤖 **AI inline + Next Edit Suggestions** | `copilot.lua` ghost text plus `copilot-lsp` NES — jump-and-apply multi-line edits with `<Tab>`, coexisting with the completion menu. Loaded but off at startup; `<leader>ad` / `<M-k>` turns it on. |
-| 💬 **CodeCompanion (inline · agentic · chat)** | `<leader>ai` rewrites the line/selection in place; `<leader>aa` opens an agentic chat that applies edits as accept/reject diffs; `<leader>af` is a plain chat. Chat runs on the `codex` adapter (`gpt-5.5`), inline on Copilot — both key-free, lazy-loaded for zero startup cost. |
-| 📋 **AI prompt-copy system** | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent — or `<leader>aci` to pick a template / ask freeform interactively. |
-| 📌 **Persistent quickfix curation** | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project. |
-| 🗂️ **Symbols outline** | `<leader>cs` opens an IDE-style structure pane that follows your cursor. |
-| 📂 **Edit-the-filesystem file browser** | `<leader>e` opens **oil.nvim** as a centred popup, with the path rendered in the border and a dimmed backdrop behind it. Rename, create and delete by editing the buffer and `:w`. Oil owns netrw, so `:e <dir>` lands in the same place. |
-| 🚀 **Startup screen** | Bare `nvim` shows the dashboard (plain `Welcome, Myo Thiha!` header plus the current folder, both aligned with the action list). `nvim <dir>` opens **oil.nvim** in the same box and position as `<leader>e`, with a visible border matched to the Snacks picker and the gutter behind it blanked so it reads as a screen rather than a popup. |
-| 🔍 **In-buffer git blame** | `<leader>gw` / `<leader>gb` show compact and full blame as floats, without leaving the file. |
-| 📝 **Rendered markdown in-buffer** | `.md` files render inline (headings, code blocks, inline code) with flat no-highlight styling; `<leader>uh` flips the buffer back to raw for editing. Tables render in body text, spell check is off, and `<leader>ui` opens a browser preview. Same renderer polishes LSP hover popups. |
+|                                                |                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🖱️ **Hover docs on mouse-over**                | LSP documentation appears when the pointer rests on a symbol (Zed/WebStorm parity), behind a throttled handler that's free while you type.                                                                                                                                                                                                     |
+| 🤖 **AI inline + Next Edit Suggestions**       | `copilot.lua` ghost text plus `copilot-lsp` NES — jump-and-apply multi-line edits with `<Tab>`, coexisting with the completion menu. Loaded but off at startup; `<leader>ad` / `<M-k>` turns it on.                                                                                                                                            |
+| 💬 **CodeCompanion (inline · agentic · chat)** | `<leader>ai` rewrites the line/selection in place; `<leader>aa` opens an agentic chat that applies edits as accept/reject diffs; `<leader>af` is a plain chat. Chat runs on the `codex` adapter (`gpt-5.5`), inline on Copilot — both key-free, lazy-loaded for zero startup cost.                                                             |
+| 📋 **AI prompt-copy system**                   | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent — or `<leader>aci` to pick a template / ask freeform interactively.                                                                                                                              |
+| 📌 **Persistent quickfix curation**            | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project.                                                                                                                                                                                                                                                |
+| 🗂️ **Symbols outline**                         | `<leader>cs` opens an IDE-style structure pane that follows your cursor.                                                                                                                                                                                                                                                                       |
+| 📂 **Edit-the-filesystem file browser**        | `<leader>e` opens **oil.nvim** as a centred popup, with the path rendered in the border and a dimmed backdrop behind it. Rename, create and delete by editing the buffer and `:w`. Oil owns netrw, so `:e <dir>` lands in the same place.                                                                                                      |
+| 🚀 **Startup screen**                          | Bare `nvim` shows the dashboard (plain `Welcome, Myo Thiha!` header plus the current folder, both aligned with the action list). `nvim <dir>` opens **oil.nvim** in the same box and position as `<leader>e`, with a visible border matched to the Snacks picker and the gutter behind it blanked so it reads as a screen rather than a popup. |
+| 🔍 **In-buffer git blame**                     | `<leader>gw` / `<leader>gb` show compact and full blame as floats, without leaving the file.                                                                                                                                                                                                                                                   |
+| 📝 **Rendered markdown in-buffer**             | `.md` files render inline (headings, code blocks, inline code) with flat no-highlight styling; `<leader>uh` flips the buffer back to raw for editing. Tables render in body text, spell check is off, and `<leader>ui` opens a browser preview. Same renderer polishes LSP hover popups.                                                       |
 
 ---
 
 ## Core Stack
 
-| Category | Plugin |
-|----------|--------|
-| **Completion** | blink.cmp — LSP · local snippets · path · buffer |
-| **AI** | CodeCompanion (inline/agentic/chat, chat on `codex`) + prompt-copy system · copilot.lua + copilot-lsp (off at startup, toggle on) |
-| **File nav** | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar) · dashboard · terminal |
-| **Code nav** | Trouble (symbols outline + quickfix views) · treesitter textobjects |
-| **Git** | gitsigns (hunks) + diffview.nvim + custom blame floats |
-| **Search** | grug-far — project/file search-replace & rename |
-| **Multi-cursor** | vim-visual-multi |
-| **Folding** | nvim-ufo — treesitter + indent, async |
-| **Formatting** | conform.nvim — prettierd for web/JSON/Markdown, goimports/gofumpt for Go, shfmt for shell |
-| **Languages** | TypeScript/React daily driver, Go + Python enabled, DevOps filetypes (YAML · Docker · Terraform · Helm) enabled, Rust lazy/deferred |
-| **Markdown** | render-markdown.nvim — `.md` files · LSP hover popups (flat, no-highlight) · markdown-preview.nvim (`<leader>ui`) |
-| **UI** | lualine · noice (cmdline only) · fidget · which-key |
-| **Theme** | solarized-osaka, customized — `solarized-osaka-custom-latest` (default: violet keyword, one warm accent, neutral punctuation on a single grey rung, raised body text) · `-custom-v1` (the copper build it replaced, 2026-08-11 to 2026-09-05) · `-custom-v2` (v1 + warm/yellow keyword) · `-custom-v3` (v1 + softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against). `custom-latest` is a moving name; the numbered builds are frozen snapshots. See [Theme](#theme) below. |
+| Category         | Plugin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Completion**   | blink.cmp — LSP · local snippets · path · buffer                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **AI**           | CodeCompanion (inline/agentic/chat, chat on `codex`) + prompt-copy system · copilot.lua + copilot-lsp (off at startup, toggle on)                                                                                                                                                                                                                                                                                                                                                                            |
+| **File nav**     | oil.nvim (`<leader>e`, centred popup, owns netrw) · Snacks — picker · explorer (`<leader>r` sidebar) · dashboard · terminal                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Code nav**     | Trouble (symbols outline + quickfix views) · treesitter textobjects                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Git**          | gitsigns (hunks) + diffview.nvim + custom blame floats                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Search**       | grug-far — project/file search-replace & rename                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Multi-cursor** | vim-visual-multi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Folding**      | nvim-ufo — treesitter + indent, async                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Formatting**   | conform.nvim — prettierd for web/JSON/Markdown, goimports/gofumpt for Go, shfmt for shell                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Languages**    | TypeScript/React daily driver, Go + Python enabled, DevOps filetypes (YAML · Docker · Terraform · Helm) enabled, Rust lazy/deferred                                                                                                                                                                                                                                                                                                                                                                          |
+| **Markdown**     | render-markdown.nvim — `.md` files · LSP hover popups (flat, no-highlight) · markdown-preview.nvim (`<leader>ui`)                                                                                                                                                                                                                                                                                                                                                                                            |
+| **UI**           | lualine · noice (cmdline only) · fidget · which-key                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Theme**        | solarized-osaka, customized — `solarized-osaka-custom-latest` (default: violet keyword, one warm accent, neutral punctuation on a single grey rung, raised body text) · `-custom-v1` (the copper build it replaced, 2026-08-11 to 2026-09-05) · `-custom-v2` (v1 + warm/yellow keyword) · `-custom-v3` (v1 + softer terracotta punctuation) · `-original` (untouched upstream, kept to diff against). `custom-latest` is a moving name; the numbered builds are frozen snapshots. See [Theme](#theme) below. |
 
 ---
 
 ## Language Support
 
-| Language | Status | Notes |
-|----------|--------|-------|
-| TypeScript / React | Daily driver | `vtsls`, package JSON auto-imports off, tsserver heap cap `3072`, semantic tokens/inlay hints off |
-| Go | Enabled | `gopls`, `goimports`, `gofumpt`, `delve`; project roots guarded to `go.mod` / `go.work` |
-| Python | Enabled | `basedpyright` + `ruff`, `openFilesOnly` diagnostics, safe roots for both servers, `venv-selector.nvim` lazy on Python |
-| JSON | Enabled | LazyVim JSON extra + `prettierd` |
-| YAML | Enabled | `yamlls`; the daily DevOps filetype |
-| Docker | Enabled | `dockerls` — `Dockerfile` / compose |
-| Terraform | Enabled | `terraform-ls` |
-| Helm | Enabled | `helm-ls` — chart templates and `values.yaml` |
-| Shell | Enabled | `shfmt` formatting |
-| Rust | Deferred | Lazy extra is installed but filetype-gated; no runtime cost until opening Rust/Cargo files |
+| Language           | Status       | Notes                                                                                                                  |
+| ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| TypeScript / React | Daily driver | `vtsls`, package JSON auto-imports off, tsserver heap cap `3072`, semantic tokens/inlay hints off                      |
+| Go                 | Enabled      | `gopls`, `goimports`, `gofumpt`, `delve`; project roots guarded to `go.mod` / `go.work`                                |
+| Python             | Enabled      | `basedpyright` + `ruff`, `openFilesOnly` diagnostics, safe roots for both servers, `venv-selector.nvim` lazy on Python |
+| JSON               | Enabled      | LazyVim JSON extra + `prettierd`                                                                                       |
+| YAML               | Enabled      | `yamlls`; the daily DevOps filetype                                                                                    |
+| Docker             | Enabled      | `dockerls` — `Dockerfile` / compose                                                                                    |
+| Terraform          | Enabled      | `terraform-ls`                                                                                                         |
+| Helm               | Enabled      | `helm-ls` — chart templates and `values.yaml`                                                                          |
+| Shell              | Enabled      | `shfmt` formatting                                                                                                     |
+| Rust               | Deferred     | Lazy extra is installed but filetype-gated; no runtime cost until opening Rust/Cargo files                             |
 
 Python and Go root detection intentionally avoids treating `$HOME/.git` as a
 workspace. Loose files fall back to their own directory instead of making the
@@ -105,34 +105,34 @@ language server scan the whole home directory.
 <details open>
 <summary><b>Navigation &amp; search</b></summary>
 
-| Key | Action |
-|-----|--------|
-| `<leader><leader>` | Smart finder (recent + buffers + files) |
-| `<leader>ff` · `<leader>fi` | Find files — root · current dir |
-| `<leader>fp` | Switch project |
-| `<leader>r` | Toggle Snacks explorer (tree sidebar) |
-| `<leader>e` | Oil file manager (centred popup; edit the buffer to rename/create/delete) |
-| `<leader>E` | Same as `<leader>e`, kept for muscle memory |
-| `<leader>sl` | Grep within current file |
-| `<leader>sf` · `<leader>sF` | Search & replace — project · current file |
-| `<leader>sr` · `<leader>sR` | Rename word under cursor — file · project |
-| `gd` | Goto definition (skips node_modules & re-imports) |
-| `[f` · `]f` | Prev · next function |
-| `<M-f>` | Highlight word under cursor |
+| Key                         | Action                                                                    |
+| --------------------------- | ------------------------------------------------------------------------- |
+| `<leader><leader>`          | Smart finder (recent + buffers + files)                                   |
+| `<leader>ff` · `<leader>fi` | Find files — root · current dir                                           |
+| `<leader>fp`                | Switch project                                                            |
+| `<leader>r`                 | Toggle Snacks explorer (tree sidebar)                                     |
+| `<leader>e`                 | Oil file manager (centred popup; edit the buffer to rename/create/delete) |
+| `<leader>E`                 | Same as `<leader>e`, kept for muscle memory                               |
+| `<leader>sl`                | Grep within current file                                                  |
+| `<leader>sf` · `<leader>sF` | Search & replace — project · current file                                 |
+| `<leader>sr` · `<leader>sR` | Rename word under cursor — file · project                                 |
+| `gd`                        | Goto definition (skips node_modules & re-imports)                         |
+| `[f` · `]f`                 | Prev · next function                                                      |
+| `<M-f>`                     | Highlight word under cursor                                               |
 
 </details>
 
 <details>
 <summary><b>Code navigation — Trouble &amp; quickfix</b></summary>
 
-| Key | Action |
-|-----|--------|
-| `<leader>cs` | Symbols outline (press `a` inside to include variables) |
-| `<leader>cc` · `<leader>ce` | Quickfix · location list (Trouble) |
-| `<leader>m` | Mark line/selection into quickfix — persists across restarts |
-| `<leader>cx` | Clear quickfix list |
-| `<leader>bu` | List unsaved buffers (jump / save) |
-| `<leader>cd` | Line diagnostics (focusable) |
+| Key                         | Action                                                       |
+| --------------------------- | ------------------------------------------------------------ |
+| `<leader>cs`                | Symbols outline (press `a` inside to include variables)      |
+| `<leader>cc` · `<leader>ce` | Quickfix · location list (Trouble)                           |
+| `<leader>m`                 | Mark line/selection into quickfix — persists across restarts |
+| `<leader>cx`                | Clear quickfix list                                          |
+| `<leader>bu`                | List unsaved buffers (jump / save)                           |
+| `<leader>cd`                | Line diagnostics (focusable)                                 |
 
 </details>
 
@@ -142,76 +142,76 @@ language server scan the whole home directory.
 <details>
 <summary><b>Editing</b></summary>
 
-| Key | Action |
-|-----|--------|
-| `<Tab>` | Accept NES → focus float → jumplist forward |
-| `<M-d>` | Add next occurrence (multi-cursor) |
-| `<M-/>` | Toggle comment (line / selection) |
-| `ys` · `ds` · `cs` · `s` (visual) | Surround |
-| `zm` · `zn` | Toggle all folds — keep current open · fold all |
-| `<leader>uh` · `<leader>ui` | Toggle markdown render — raw ⇄ rendered · open browser preview |
-| `zR` · `zM` · `zv` | Open all · close all · toggle function folds |
-| `K` · `<M-i>` | Hover docs · signature help |
+| Key                               | Action                                                         |
+| --------------------------------- | -------------------------------------------------------------- |
+| `<Tab>`                           | Accept NES → focus float → jumplist forward                    |
+| `<M-d>`                           | Add next occurrence (multi-cursor)                             |
+| `<M-/>`                           | Toggle comment (line / selection)                              |
+| `ys` · `ds` · `cs` · `s` (visual) | Surround                                                       |
+| `zm` · `zn`                       | Toggle all folds — keep current open · fold all                |
+| `<leader>uh` · `<leader>ui`       | Toggle markdown render — raw ⇄ rendered · open browser preview |
+| `zR` · `zM` · `zv`                | Open all · close all · toggle function folds                   |
+| `K` · `<M-i>`                     | Hover docs · signature help                                    |
 
 </details>
 
 <details>
 <summary><b>AI &amp; Copilot</b></summary>
 
-| Key | Action |
-|-----|--------|
-| `<C-;>` | Accept suggestion + trigger next |
-| `<C-l>` | Accept blink completion item |
-| `<C-j>` | Trigger / cycle suggestion |
-| `<M-k>` · `<leader>ad` | Toggle Copilot suggestions |
-| `<M-w>` · `<M-l>` | Accept word · line |
-| `<M-]>` · `<M-[>` | Cycle suggestions |
-| `<leader>ab` · `<C-b>` | Toggle blink completion menu |
-| `<leader>ai` | CodeCompanion — inline ask (line / selection, edits in place) |
-| `<leader>aa` | CodeCompanion — agentic chat (applies edits as accept/reject diffs) |
-| `<leader>af` | CodeCompanion — plain chat buffer (toggle) |
-| `<leader>ae` | CodeCompanion — add line/selection content to chat |
-| `<leader>ar` | CodeCompanion — reset chat approvals (undo accidental "always accept") |
-| `<leader>as` · `<leader>al` | Copy file path · path:line (visual: line range) — for CLI agents |
-| `<leader>acc` · `aca` · `ace` | Prompt — commit · codebase analysis · explain file |
-| `<leader>acs` · `acd` (visual) | Prompt — explain symbol · explain selection |
-| `<leader>acf` · `acr` | Prompt — refactor · pre-commit review |
-| `<leader>aci` | Prompt — interactive picker (template or freeform + one-off instruction) |
+| Key                            | Action                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| `<C-;>`                        | Accept suggestion + trigger next                                         |
+| `<C-l>`                        | Accept blink completion item                                             |
+| `<C-j>`                        | Trigger / cycle suggestion                                               |
+| `<M-k>` · `<leader>ad`         | Toggle Copilot suggestions                                               |
+| `<M-w>` · `<M-l>`              | Accept word · line                                                       |
+| `<M-]>` · `<M-[>`              | Cycle suggestions                                                        |
+| `<leader>ab` · `<C-b>`         | Toggle blink completion menu                                             |
+| `<leader>ai`                   | CodeCompanion — inline ask (line / selection, edits in place)            |
+| `<leader>aa`                   | CodeCompanion — agentic chat (applies edits as accept/reject diffs)      |
+| `<leader>af`                   | CodeCompanion — plain chat buffer (toggle)                               |
+| `<leader>ae`                   | CodeCompanion — add line/selection content to chat                       |
+| `<leader>ar`                   | CodeCompanion — reset chat approvals (undo accidental "always accept")   |
+| `<leader>as` · `<leader>al`    | Copy file path · path:line (visual: line range) — for CLI agents         |
+| `<leader>acc` · `aca` · `ace`  | Prompt — commit · codebase analysis · explain file                       |
+| `<leader>acs` · `acd` (visual) | Prompt — explain symbol · explain selection                              |
+| `<leader>acf` · `acr`          | Prompt — refactor · pre-commit review                                    |
+| `<leader>aci`                  | Prompt — interactive picker (template or freeform + one-off instruction) |
 
 </details>
 
 <details>
 <summary><b>Git</b></summary>
 
-| Key | Action |
-|-----|--------|
-| `<leader>gd` | Toggle diff view |
-| `<leader>gl` · `<leader>gL` | File history — current file · repo |
-| `<leader>gf` | File history (open commit diff on enter) |
-| `<leader>gw` · `<leader>gb` | Git who (compact blame) · blame line (full diff) |
-| `]c` · `[c` | Next · previous hunk (gitsigns) |
-| `<leader>ghs` · `<leader>ghr` | Stage · reset hunk |
-| `<leader>ghS` · `<leader>ghR` | Stage · reset buffer |
-| `<leader>ghu` · `<leader>ghp` | Undo stage hunk · preview hunk |
-| `<leader>ghb` | Toggle inline blame |
+| Key                           | Action                                           |
+| ----------------------------- | ------------------------------------------------ |
+| `<leader>gd`                  | Toggle diff view                                 |
+| `<leader>gl` · `<leader>gL`   | File history — current file · repo               |
+| `<leader>gf`                  | File history (open commit diff on enter)         |
+| `<leader>gw` · `<leader>gb`   | Git who (compact blame) · blame line (full diff) |
+| `]c` · `[c`                   | Next · previous hunk (gitsigns)                  |
+| `<leader>ghs` · `<leader>ghr` | Stage · reset hunk                               |
+| `<leader>ghS` · `<leader>ghR` | Stage · reset buffer                             |
+| `<leader>ghu` · `<leader>ghp` | Undo stage hunk · preview hunk                   |
+| `<leader>ghb`                 | Toggle inline blame                              |
 
 </details>
 
 <details>
 <summary><b>General</b></summary>
 
-| Key | Action |
-|-----|--------|
-| `<C-s>` | Save |
-| `<C-->` | Terminal (bottom split) |
-| `<C-d>` · `<C-u>` | Half-page scroll + recenter |
-| `<C-e>` · `<C-y>` | Scroll popup / file-browser list, else viewport |
-| `<Up>` · `<Down>` | Scroll editor viewport down · up one line (off by default) |
-| `<Right>` · `<Left>` | Scroll editor viewport right · left one column (off by default) |
-| `<leader>uv` | Toggle arrow-key scrolling |
-| `<leader>uH` | Toggle mouse-hover docs |
-| `<leader>M` | Mason (toggle) |
-| `<leader>L` · `<leader>R` | Restart Neovim · Lazy log |
+| Key                       | Action                                                          |
+| ------------------------- | --------------------------------------------------------------- |
+| `<C-s>`                   | Save                                                            |
+| `<C-->`                   | Terminal (bottom split)                                         |
+| `<C-d>` · `<C-u>`         | Half-page scroll + recenter                                     |
+| `<C-e>` · `<C-y>`         | Scroll popup / file-browser list, else viewport                 |
+| `<Up>` · `<Down>`         | Scroll editor viewport down · up one line (off by default)      |
+| `<Right>` · `<Left>`      | Scroll editor viewport right · left one column (off by default) |
+| `<leader>uv`              | Toggle arrow-key scrolling                                      |
+| `<leader>uH`              | Toggle mouse-hover docs                                         |
+| `<leader>M`               | Mason (toggle)                                                  |
+| `<leader>L` · `<leader>R` | Restart Neovim · Lazy log                                       |
 
 </details>
 
@@ -233,6 +233,7 @@ The whole point. What's tuned, and what's off on purpose.
 - noice restricted to the cmdline popup; python/ruby/perl/node providers disabled
 
 **Disabled by decision** — don't re-add without a reason:
+
 > bufferline · flash · harpoon · spectre · avante · sidekick · telescope ·
 > treesitter-context · nvim-lint · persistence · mini.\* · friendly-snippets
 
@@ -256,17 +257,17 @@ pixels of screenshots of those same files rather than judging by eye.
 
 Live values, measured against the current background `#001014`:
 
-| role | value | L\* | contrast |
-|---|---|---|---|
-| type | `#2ac3de` | 72.8 | 9.19:1 |
-| body / `@variable` | `#a0b6b8` | 72.5 | 9.11:1 |
-| names — params, `${}`, punctuation | `#baac0d` | 69.5 | 8.30:1 |
-| boolean / constant / number | `#ed8e55` | 68.0 | 7.93:1 |
-| function | `#359ee9` | 62.6 | 6.66:1 |
-| string / object members | `#29a298` | 60.4 | 6.19:1 |
-| punctuation — delimiters and brackets | `#7f9195` | 58.9 | 5.89:1 |
-| keyword | `#a17bcc` | 58.1 | 5.74:1 |
-| comment | `#5f767d` | 48.1 | 4.03:1 |
+| role                                  | value     | L\*  | contrast |
+| ------------------------------------- | --------- | ---- | -------- |
+| type                                  | `#2ac3de` | 72.8 | 9.19:1   |
+| body / `@variable`                    | `#a0b6b8` | 72.5 | 9.11:1   |
+| names — params, `${}`, punctuation    | `#baac0d` | 69.5 | 8.30:1   |
+| boolean / constant / number           | `#ed8e55` | 68.0 | 7.93:1   |
+| function                              | `#359ee9` | 62.6 | 6.66:1   |
+| string / object members               | `#29a298` | 60.4 | 6.19:1   |
+| punctuation — delimiters and brackets | `#7f9195` | 58.9 | 5.89:1   |
+| keyword                               | `#a17bcc` | 58.1 | 5.74:1   |
+| comment                               | `#5f767d` | 48.1 | 4.03:1   |
 
 The shape, and the thing to preserve if any single value is ever retuned:
 **lightness steps ordered by how much the thing means, and one dominant warm hue
@@ -285,14 +286,14 @@ measurements. The reasoning, the rejected candidates and the numbers are in
 [`notes/syntax-palette-decisions.md`](notes/syntax-palette-decisions.md).
 
 **Panel and doc text sit BELOW body text, on purpose.** Body text is the editor's
-value and nothing else should reach it, so the two surfaces you read *around* the
+value and nothing else should reach it, so the two surfaces you read _around_ the
 code each take their own rung of the same grey axis:
 
-| surface | value | L\* | contrast | group |
-|---|---|---|---|---|
-| editor body | `#a0b6b8` | 72.5 | 9.11:1 | `Normal` (`body.tinted`) |
-| file/folder names | `#9eabac` | 69.0 | 8.19:1 | `SnacksPickerDirectory`/`File`, `OilDir`/`OilFile` (`body.base0`) |
-| LSP doc prose | `#919e9f` | 64.1 | 7.01:1 | `LspDocFloat` (`body.faded`) |
+| surface           | value     | L\*  | contrast | group                                                             |
+| ----------------- | --------- | ---- | -------- | ----------------------------------------------------------------- |
+| editor body       | `#a0b6b8` | 72.5 | 9.11:1   | `Normal` (`body.tinted`)                                          |
+| file/folder names | `#9eabac` | 69.0 | 8.19:1   | `SnacksPickerDirectory`/`File`, `OilDir`/`OilFile` (`body.base0`) |
+| LSP doc prose     | `#919e9f` | 64.1 | 7.01:1   | `LspDocFloat` (`body.faded`)                                      |
 
 File and folder names are ONE grey in both browsers, files and folders alike —
 the ICON carries the type distinction in colour, the way the VS Code Material
