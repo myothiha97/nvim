@@ -180,6 +180,7 @@ local builds = {
       -- parameter = palette.variants.punctuation.explored.dusty_rose,                -- Disabled: Low saturation blurs with string/SQL highlights
       -- parameter = palette.variants.body.brighter,                                  -- React/TSX Fallback: Reduces visual fatigue from massive prop destructuring
       parameter = palette.variants.keyword.coral_red, -- Active Default: High contrast against Gold types. Optimized for backend, scripting, and systems logic.
+      punctuation = palette.variants.keyword.brighter,
 
       -- `import`/`export`/`from`/`package`/`use` on the keyword violet, live since
       -- the evening of 2026-09-24 (the one piece of that day's parked work kept).
