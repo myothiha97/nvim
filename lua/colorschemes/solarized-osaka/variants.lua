@@ -122,11 +122,13 @@ local builds = {
       -- `boolean.tokyonight_muted` is the safer swap if either starts to bite.
       boolean = palette.variants.boolean.tokyonight_dim,
 
-      -- NOTE: for go lang, the actual color code used for go field, member, member.key, member.property is tokyonight_cyan_S58 -> "#73daca"
-      -- below color value is only used for function parameter value color
+      -- Note: Go explicitly overrides struct fields/members to Cyan (#73daca).
+      -- The 'field' assignment below primarily acts as a parameter value fallback.
 
-      -- field = palette.variants.boolean.tokyonight_dim, -- current live before vscode_onedark_pro_darker_yellow_2
-      field = palette.variants.keyword.vscode_onedark_pro_darker_yellow_2, -- start trialling at 21 Oct 2026
+      -- field = palette.variants.boolean.tokyonight_dim,                             -- Legacy default
+      -- field = palette.variants.keyword.vscode_onedark_pro_darker_yellow_2,         -- Disabled: Warm yellow causes visual collision with Gold type declarations
+      -- field = palette.variants.punctuation.explored.dusty_rose,                    -- Disabled: Low saturation blurs with SQL/string highlights
+      field = palette.variants.keyword.coral_red, -- Active Default: High contrast against Gold types. Optimized for backend, scripting, and systems logic.
       -- Back to the theme cyan (`false`) the evening of 2026-09-24: the green
       -- string work is parked as WIP in custom-v4. The history below stays.
       --
@@ -172,9 +174,12 @@ local builds = {
       -- terracotta red stayed close and suits my taste better, but the census
       -- gave yellow the wider separation and it has held up in daily use. No red
       -- variant beat it. Candidates live in palette.lua, not parked here.
-      -- parameter = palette.variants.keyword.brighter, -- current live
-      parameter = palette.variants.keyword.vscode_onedark_pro_darker_yellow_2, -- start trialling at 21 Oct 2026
-      punctuation = palette.variants.keyword.brighter,
+      -- parameter = palette.variants.keyword.brighter,                               -- Legacy default
+      -- parameter = palette.variants.keyword.vscode_onedark_pro_darker_yellow_2,     -- Disabled: Warm yellow causes visual collision with Gold type declarations
+      -- parameter = "#4fd6be",                                                       -- Mint Teal alternative
+      -- parameter = palette.variants.punctuation.explored.dusty_rose,                -- Disabled: Low saturation blurs with string/SQL highlights
+      -- parameter = palette.variants.body.brighter,                                  -- React/TSX Fallback: Reduces visual fatigue from massive prop destructuring
+      parameter = palette.variants.keyword.coral_red, -- Active Default: High contrast against Gold types. Optimized for backend, scripting, and systems logic.
 
       -- `import`/`export`/`from`/`package`/`use` on the keyword violet, live since
       -- the evening of 2026-09-24 (the one piece of that day's parked work kept).

@@ -45,6 +45,9 @@ local variants = {
     vscode_onedark_pro_darker_yellow_1 = "#E8AF6F", -- default lighter orange-yellow collor with lower saturation
     vscode_onedark_pro_darker_yellow_2 = "#FAAC55", -- daker orange-yellow collor with higher saturation
 
+    -- Primary parameter default: High contrast against Gold types. Optimized for backend, scripting, and systems languages.
+    coral_red = "#e06c75",
+
     amber = "#b59a00",
     citron = "#9ea100",
     subdued = "#aea134", -- the yellow; base default for punctuation + parameter

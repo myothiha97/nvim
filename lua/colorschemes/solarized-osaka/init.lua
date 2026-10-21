@@ -147,11 +147,23 @@ return {
       -- candidates: notes/string-and-member-colours.md.
       hl["@string.escape"] = { fg = palette.escape or palette.punctuation }
 
+      -- Legacy configuration: Constructors and parameters were previously coupled.
+      -- paint({
+      --   "@variable.parameter",
+      --   "@constructor",
+      --   "@constructor.tsx",
+      -- }, palette.parameter)
+
+      -- Apply the active parameter color (Coral Red by default).
       paint({
         "@variable.parameter",
+      }, palette.parameter)
+
+      -- Decouple constructors from parameters and map them to the Gold type color.
+      paint({
         "@constructor",
         "@constructor.tsx",
-      }, palette.parameter)
+      }, palette.type)
 
       -- Lua captures `{` as BOTH @punctuation.bracket and @constructor, so this
       -- pin is what stops a `palette.parameter` change recolouring every Lua
