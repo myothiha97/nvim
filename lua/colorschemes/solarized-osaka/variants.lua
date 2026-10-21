@@ -78,9 +78,10 @@ local builds = {
   ["custom-latest"] = {
     palette = {
       -- type = palette.variants.type.nvim_type, -- the type color feel a bit higher in contrast
-      -- type = palette.variants.type.sky_dim, -- more calmer type color, current live
+      -- type = palette.variants.type.sky_dim, -- more calmer type color, previous live before trialling sky_dimmest
       -- type = palette.variants.type.sky_dimmer,
-      type = palette.variants.type.sky_dimmest, -- start trialling at 2nd Oct 2026
+      -- type = palette.variants.type.sky_dimmest, -- start trialling at 2nd Oct 2026 and the trial end at 21 Oct 2026 due to color value being fade to my eye
+      type = palette.variants.type.high_contrast_warn_gold, -- Warm Gold (High Contrast) -- start trialling at 21 Oct 2026,
       -- Brackets and delimiters share the MAXIMIN grey rung, moved off
       -- `kanagawa_mid` (#96abd3) 2026-09-09. The periwinkle was a fourth hue in
       -- the blue band, carrying the third-highest contrast in the palette on its
@@ -110,8 +111,9 @@ local builds = {
       -- Consider using a distinct blue for functions and other symbols in the future,
       -- as reusing the same blue across too many code elements can result in too much
       -- blue on screen, making syntax highlighting feel visually repetitive.
-      func = palette.variants.func.vivid, -- current live
-      -- func = palette.variants.func.azure, -- Second-best option.
+      -- func = palette.variants.func.vivid, -- current live before onedark_pro_func_blue
+      -- func = palette.variants.func.azure, -- Second-best option after func.vivid and func.onedark_pro_func_blue.
+      func = palette.variants.func.onedark_pro_func_blue, -- start trialling at 21 Oct 2026, the color code is reference from vscode_onedark_pro and webstorm one dark pro theme
 
       -- One value for every language, Go included. Tokyo Night's hue at our
       -- L*68, chosen by eye 2026-09-08 for the widest separation from the accent
@@ -120,7 +122,11 @@ local builds = {
       -- `boolean.tokyonight_muted` is the safer swap if either starts to bite.
       boolean = palette.variants.boolean.tokyonight_dim,
 
-      field = palette.variants.boolean.tokyonight_dim,
+      -- NOTE: for go lang, the actual color code used for go field, member, member.key, member.property is tokyonight_cyan_S58 -> "#73daca"
+      -- below color value is only used for function parameter value color
+
+      -- field = palette.variants.boolean.tokyonight_dim, -- current live before vscode_onedark_pro_darker_yellow_2
+      field = palette.variants.keyword.vscode_onedark_pro_darker_yellow_2, -- start trialling at 21 Oct 2026
       -- Back to the theme cyan (`false`) the evening of 2026-09-24: the green
       -- string work is parked as WIP in custom-v4. The history below stays.
       --
