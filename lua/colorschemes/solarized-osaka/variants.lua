@@ -166,7 +166,8 @@ local builds = {
       -- terracotta red stayed close and suits my taste better, but the census
       -- gave yellow the wider separation and it has held up in daily use. No red
       -- variant beat it. Candidates live in palette.lua, not parked here.
-      parameter = palette.variants.keyword.brighter,
+      -- parameter = palette.variants.keyword.brighter, -- current live
+      parameter = palette.variants.keyword.vscode_onedark_pro_darker_yellow_2, -- start trialling at 21 Oct 2026
       punctuation = palette.variants.keyword.brighter,
 
       -- `import`/`export`/`from`/`package`/`use` on the keyword violet, live since

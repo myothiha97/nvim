@@ -40,6 +40,11 @@ local variants = {
     -- was at or below the JND. If the yellow reads dull the lever is DOSE, not
     -- lightness. Full measurements in notes/palette-reference.md, "keyword".
     vivid = "#c7b903",
+
+    -- vscode-onedark-pro-darker-yellow
+    vscode_onedark_pro_darker_yellow_1 = "#E8AF6F", -- default lighter orange-yellow collor with lower saturation
+    vscode_onedark_pro_darker_yellow_2 = "#FAAC55", -- daker orange-yellow collor with higher saturation
+
     amber = "#b59a00",
     citron = "#9ea100",
     subdued = "#aea134", -- the yellow; base default for punctuation + parameter
