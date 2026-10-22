@@ -18,9 +18,9 @@ return {
       diagnostics = {
         update_in_insert = false,
         severity_sort = true,
-        -- Hide end-of-line diagnostic text; keep the sign-column color + underline.
-        -- Read the full message via the hover/line-diagnostic float (<leader>k).
-        virtual_text = false,
+        -- End-of-line text for ERRORS only (2026-10-22); warnings and hints keep
+        -- just the sign-column color + underline, read via <leader>cd.
+        virtual_text = { severity = vim.diagnostic.severity.ERROR },
       },
       servers = {
         -- Free <C-k> in insert mode for our Copilot toggle.

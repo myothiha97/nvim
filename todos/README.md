@@ -42,6 +42,7 @@ Status column meanings:
 | [`freeze-override-2026-09-19.md`](freeze/freeze-override-2026-09-19.md)                           | startup explorer, then the oil box and dashboard; scope grew past the one gate                                                       | record |
 | [`freeze-override-2026-09-23.md`](freeze/freeze-override-2026-09-23.md)                           | git hunk keys, arrow toggle, outline rows; plus the week's safety review                                                             | record |
 | [`freeze-override-2026-09-24.md`](freeze/freeze-override-2026-09-24.md)                           | green strings, keys follow members; one hex and one link, scope held to the todo                                                     | record |
+| [`freeze-override-2026-10-22.md`](freeze/freeze-override-2026-10-22.md)                           | inline error diagnostics; one line, scope held                                                                                       | record |
 
 Rule 10 in [`process/discipline-stop-rules.md`](process/discipline-stop-rules.md)
 is what requires an override to leave a trace here.
@@ -89,6 +90,7 @@ Live colour values and the reasoning behind them are **not** here. See
 
 | file                                                                                                     | hook                                                                                                                                      | status      |
 | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [`inline-error-diagnostics.md`](languages/inline-error-diagnostics.md)                                   | end-of-line virtual text for errors only; today the message needs `<leader>cd`                                                            | done        |
 | [`lsp-popup-style-consolidation.md`](languages/lsp-popup-style-consolidation.md)                         | four entry points each carry their own `{ border, max_width, max_height }`, so a popup looks different depending on how it was opened     | open        |
 | [`multi-language-support.md`](languages/multi-language-support.md)                                       | the live per-language state table (LSP / format / debug). Build-out complete; now tracks verification and deliberately deferred languages | reference   |
 | [`nvim-dap-webstorm-parity-and-enhancements.md`](languages/nvim-dap-webstorm-parity-and-enhancements.md) | Go pass done 2026-08-28 (goroutines, function breakpoints, log points, hit counts). Other languages still at LazyVim defaults             | partly done |
