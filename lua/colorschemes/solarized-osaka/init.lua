@@ -426,17 +426,20 @@ return {
       local tokyodark = palette.variants.string.tokyodark
       local vivid_bush_green = palette.variants.string.vivid
 
-      -- todo: later refactor below line to use the value from palette
+      -- Trialling tokyonight_cyan_S58: Oct 10, 2026. Status: Rejected (too saturated for daily use, despite good syntax highlighting).
+      -- Note: 50% saturation might work, but the 40% variant below is comfortable enough for my eye so i set it to go member color since thats the best option after S58
+      -- TODO: Revisit after the config freeze period ends.
       local tokyonight_cyan_S58 = "#73daca"
+      local go_member_color = palette.variants.member.tokyonitght_cyan_S40 -- start trialling at 22 Oct 2026
       if palette.override_go then
         hl["@variable.member.key.go"] = {
-          fg = tokyonight_cyan_S58,
+          fg = go_member_color,
         }
         hl["@variable.member.go"] = {
-          fg = tokyonight_cyan_S58,
+          fg = go_member_color,
         }
         hl["@property.go"] = {
-          fg = tokyonight_cyan_S58,
+          fg = go_member_color,
         }
         -- hl["@punctuation.delimiter.go"] = { fg = palette.variants.delimiter.kanagawa }
       end
