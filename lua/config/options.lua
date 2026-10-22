@@ -58,10 +58,10 @@ local hover_opts_literal = [[{ border = "rounded", max_width = 80, max_height = 
 
 vim.cmd([[anoremenu 1.10 PopUp.Go\ to\ definition <Cmd>lua vim.lsp.buf.definition()<CR>]])
 vim.cmd([[anoremenu 1.20 PopUp.-LspExtras- <Nop>]])
+vim.cmd("anoremenu 1.30 PopUp.Show\\ Hover\\ Docs <Cmd>lua vim.lsp.buf.hover(" .. hover_opts_literal .. ")<CR>")
 vim.cmd(
-  "anoremenu 1.30 PopUp.Show\\ Signature\\ Help <Cmd>lua vim.lsp.buf.signature_help(" .. hover_opts_literal .. ")<CR>"
+  "anoremenu 1.40 PopUp.Show\\ Signature\\ Help <Cmd>lua vim.lsp.buf.signature_help(" .. hover_opts_literal .. ")<CR>"
 )
-vim.cmd("anoremenu 1.40 PopUp.Show\\ Hover\\ Docs <Cmd>lua vim.lsp.buf.hover(" .. hover_opts_literal .. ")<CR>")
 
 -- horizontal scroll setting
 vim.o.wrap = false
