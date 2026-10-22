@@ -38,6 +38,11 @@ require("lazy").setup({
     enabled = false, -- check for plugin updates periodically
     -- notify = false, -- notify on update
   }, -- automatically check for plugin updates
+
+  -- Do not live-reload on config edits. The watcher reloads every running nvim
+  -- (e.g. in other tmux sessions) and leaves its screen half redrawn. Restart
+  -- nvim to pick up config changes instead.
+  change_detection = { enabled = false },
   ui = {
     border = "rounded",
   },
