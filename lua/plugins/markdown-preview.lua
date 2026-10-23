@@ -18,11 +18,29 @@ return {
     keys = {
       -- Buffer-local to markdown (ft), so it never collides with the global
       -- <leader>u toggle group elsewhere.
+      -- Opens the file in Obsidian, the one viewer for every markdown file
+      -- (2026-10-23 freeze override, todos/freeze/). Obsidian shows the file as
+      -- saved, so unsaved edits are written first. `open` runs async, so nvim
+      -- never waits on it. The browser preview stays on :MarkdownPreview.
       {
         "<leader>ui",
-        "<cmd>MarkdownPreviewToggle<cr>",
+        function()
+          local file = vim.api.nvim_buf_get_name(0)
+          if file == "" then
+            vim.notify("Save the file first, Obsidian opens files from disk", vim.log.levels.WARN)
+            return
+          end
+          vim.cmd("silent update")
+          vim.system({ "open", "-a", "Obsidian", file }, {}, function(result)
+            if result.code ~= 0 then
+              vim.schedule(function()
+                vim.notify("Could not open in Obsidian: " .. vim.trim(result.stderr or ""), vim.log.levels.ERROR)
+              end)
+            end
+          end)
+        end,
         ft = "markdown",
-        desc = "Markdown Preview (browser)",
+        desc = "Open in Obsidian",
       },
     },
     init = function()
