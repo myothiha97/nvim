@@ -257,7 +257,7 @@ local scroll_depth = 1 -- temporarily set to 1 since smaller value is better scr
 
 -- Mouse/trackpad: scroll viewport without moving cursor (VSCode/WebStorm behavior)
 -- <C-e> scrolls viewport down, <C-y> scrolls viewport up — cursor stays in place
--- Adjust the multiplier (3) if trackpad feels too slow or too fast.
+-- Adjust `scroll_depth` above if scrolling feels too slow or too fast.
 -- TODO(smooth-scroll): The timer-based experiment is parked in
 -- lua/config/smooth-scroll.lua but intentionally not enabled. It improved
 -- transition feel in some files, then stuttered/paused in heavier TSX buffers.
