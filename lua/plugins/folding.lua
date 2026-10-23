@@ -236,28 +236,29 @@ return {
 
         return { "indent" }
       end,
-      fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate)
-        local newVirtText = {}
-        local suffix = ("  %d lines "):format(endLnum - lnum)
-        local sufWidth = vim.fn.strdisplaywidth(suffix)
-        local targetWidth = width - sufWidth
-        local curWidth = 0
-        for _, chunk in ipairs(virtText) do
-          local chunkText = chunk[1]
-          local chunkWidth = vim.fn.strdisplaywidth(chunkText)
-          if targetWidth > curWidth + chunkWidth then
-            table.insert(newVirtText, chunk)
-          else
-            chunkText = truncate(chunkText, targetWidth - curWidth)
-            local hlGroup = chunk[2]
-            table.insert(newVirtText, { chunkText, hlGroup })
-            break
-          end
-          curWidth = curWidth + chunkWidth
-        end
-        table.insert(newVirtText, { suffix, "UfoFoldCount" })
-        return newVirtText
-      end,
+      -- use fold_virt_text_handler to customize the virtual text displayed for folded lines
+      -- fold_virt_text_handler = function(virtText, lnum, endLnum, width, truncate)
+      --   local newVirtText = {}
+      --   local suffix = ("  %d lines "):format(endLnum - lnum) -- display number of lines in fold
+      --   local sufWidth = vim.fn.strdisplaywidth(suffix)
+      --   local targetWidth = width - sufWidth
+      --   local curWidth = 0
+      --   for _, chunk in ipairs(virtText) do
+      --     local chunkText = chunk[1]
+      --     local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+      --     if targetWidth > curWidth + chunkWidth then
+      --       table.insert(newVirtText, chunk)
+      --     else
+      --       chunkText = truncate(chunkText, targetWidth - curWidth)
+      --       local hlGroup = chunk[2]
+      --       table.insert(newVirtText, { chunkText, hlGroup })
+      --       break
+      --     end
+      --     curWidth = curWidth + chunkWidth
+      --   end
+      --   table.insert(newVirtText, { suffix, "UfoFoldCount" })
+      --   return newVirtText
+      -- end,
       open_fold_hl_timeout = 0,
     },
   },
