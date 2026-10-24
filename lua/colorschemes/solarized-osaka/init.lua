@@ -408,6 +408,7 @@ return {
       -- Go-only overrides (`palette.go`, a table of role -> value), so a build
       -- can give Go its own strings, parameters and escapes while every other
       -- language keeps the shared roles. `false` means none.
+      -- NOTE: below config with palette.go is no longer used, since we no longer use palette.go
       local go = palette.go
       if go then
         if go.string then
