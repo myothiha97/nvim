@@ -351,8 +351,11 @@ vim.keymap.set("n", comment_key, "<cmd>normal gcc<CR>", { desc = "Toggle comment
 -- Visual mode: Comment the highlighted selection
 vim.keymap.set("v", comment_key, "<Esc>:normal gvgc<CR>", { desc = "Toggle comment block" })
 
+-- turn on below lines if u dont use snacks scroll animation
 vim.keymap.set({ "n", "v" }, "<C-d>", "<C-d>zz", { desc = "Scroll Down and Recenter" })
 vim.keymap.set({ "n", "v" }, "<C-u>", "<C-u>zz", { desc = "Scroll Up and Recenter" })
+vim.keymap.set({ "n", "v" }, "<C-f>", "<C-f>zz", { desc = "Scroll Down Page and Recenter" })
+vim.keymap.set({ "n", "v" }, "<C-b>", "<C-b>zz", { desc = "Scroll Up Page and Recenter" })
 
 -- <C-e> / <C-y>: scroll a visible info popup (LSP hover, signature help,
 -- diagnostic float) in place without moving focus into it. Semantically a
@@ -461,9 +464,6 @@ Snacks.toggle
     set = set_arrow_scroll,
   })
   :map("<leader>uv")
-
-vim.keymap.set({ "n", "v" }, "<C-f>", "<C-f>zz", { desc = "Scroll Down Page and Recenter" })
-vim.keymap.set({ "n", "v" }, "<C-b>", "<C-b>zz", { desc = "Scroll Up Page and Recenter" })
 
 -- Tab in normal mode: accept NES if pending, else focus float, else native
 -- jumplist forward (the built-in <C-i> behavior, since <Tab> and <C-i> share the
