@@ -43,6 +43,7 @@ Status column meanings:
 | [`freeze-override-2026-09-23.md`](freeze/freeze-override-2026-09-23.md)                           | git hunk keys, arrow toggle, outline rows; plus the week's safety review                                                             | record |
 | [`freeze-override-2026-09-24.md`](freeze/freeze-override-2026-09-24.md)                           | green strings, keys follow members; one hex and one link, scope held to the todo                                                     | record |
 | [`freeze-override-2026-10-22.md`](freeze/freeze-override-2026-10-22.md)                           | inline error diagnostics; one line, scope held                                                                                       | record |
+| [`freeze-override-2026-10-24-copilot-load-on-use.md`](freeze/freeze-override-2026-10-24-copilot-load-on-use.md) | Copilot loads on first use instead of every file open; load trigger only | record |
 
 Rule 10 in [`process/discipline-stop-rules.md`](process/discipline-stop-rules.md)
 is what requires an override to leave a trace here.
@@ -53,6 +54,7 @@ is what requires an override to leave a trace here.
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | [`discipline-stop-rules.md`](process/discipline-stop-rules.md) | for the checkpoint session, ~10 min, doc-only. Closes the gap where `rules.md` decides **whether to start** but nothing decides **when something is finished** | open   |
 | [`config-refactoring.md`](process/config-refactoring.md)       | unify LSP, folding, search/replace, diagnostics, debugging, code analysis into consistent shapes                                                               | open   |
+| [`october-cleanup.md`](process/october-cleanup.md) | dead code, stale comments/todos and live trials found in the October review; no behaviour change | open |
 
 ## theme
 
@@ -104,6 +106,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`codecompanion-codex-acp-fix.md`](ai/codecompanion-codex-acp-fix.md) | Codex ACP adapter broken since the codex-acp 1.6.2 upgrade. Root cause known, values measured, the edit is ~4 lines. Nothing here is a guess | open   |
 | [`cursor-tab-level-suggestions.md`](ai/cursor-tab-level-suggestions.md) | GOAL: Cursor Tab-quality suggestions in nvim. Research-first, checkpoint item. NES `<Tab>` chaining dropped 2026-10-13 (low ROI) | open   |
 | [`avante-ui-optimization.md`](ai/avante-ui-optimization.md)           | Avante disabled since 2026-05-26; CodeCompanion is the active workflow. Do no UI work unless Avante is deliberately re-enabled               | parked |
+| [`copilot-load-on-toggle.md`](ai/copilot-load-on-toggle.md) | start Copilot on first use instead of every file open; saves one Node server per idle nvim. Done 2026-10-24 by override | done |
 
 ## phase 2
 

@@ -1,6 +1,28 @@
 local nes_debounce = 150 -- ms, read by copilot-lsp at LSP start (default 500)
 local ghost_debounce = 250 -- ms, passed to suggestion.debounce below
 
+-- Credential files Copilot never attaches to. Once loaded, Copilot can send open
+-- files to GitHub as context, so a match keeps the file off the server entirely.
+-- A false match only turns Copilot off in that one file. Both lists are matched
+-- against the lowercased name / path in should_attach below.
+local secret_names = {
+  "^%.env", -- .env, .env.local, .envrc
+  "secret",
+  "%.pem$",
+  "%.key$",
+  "%.p12$",
+  "%.pfx$",
+  "%.tfvars$",
+  "%.tfstate", -- also *.tfstate.backup
+  "^id_[%w_]+$", -- SSH private keys (id_rsa, id_ed25519), not id_generator.go
+  "^%.npmrc$",
+  "^%.pypirc$",
+  "^%.netrc$",
+  "^%.git%-credentials$",
+  "^credentials", -- ~/.aws/credentials, credentials.json
+}
+local secret_dirs = { "/.ssh/", "/.kube/", "/.aws/", "/.gnupg/", "/.docker/" }
+
 -- Must be set before the copilot LSP initializes: copilot-lsp reads it once there.
 vim.g.copilot_nes_debounce = nes_debounce
 
@@ -13,10 +35,18 @@ return {
     dependencies = { "copilotlsp-nvim/copilot-lsp" },
     enabled = true,
     cmd = "Copilot",
-    event = { "BufReadPost", "BufNewFile" },
-    -- Claims insert <M-k> (Cmd+K) for the toggle mapped in config(). LazyVim skips any
-    -- key a plugin claims here, so its insert <A-k> "move line up" never replaces it.
-    keys = { { "<M-k>", mode = "i", desc = "Copilot: Toggle Suggestions" } },
+    -- Loaded on first use, not on file open (2026-10-24, see
+    -- todos/freeze/freeze-override-2026-10-24-copilot-load-on-use.md). Copilot is
+    -- off by default and every loaded nvim starts its own Copilot server, so an
+    -- nvim that never uses it should start none. These keys (and :Copilot) load it;
+    -- lazy.nvim then replays the key, so the first press also toggles / triggers.
+    -- Insert <M-k> (Cmd+K) is claimed here for one more reason: LazyVim skips any
+    -- key a plugin claims, so its insert <A-k> "move line up" never replaces it.
+    keys = {
+      { "<M-k>", mode = "i", desc = "Copilot: Toggle Suggestions" },
+      { "<leader>ad", desc = "Copilot: Toggle Suggestions" },
+      { "<C-j>", mode = "i", desc = "Copilot: Trigger / cycle suggestion" },
+    },
     opts = {
       panel = { enabled = false },
       suggestion = {
@@ -51,13 +81,25 @@ return {
         text = false, -- Disable for text files
       },
       -- Replaces copilot.lua's default, so its buflisted/buftype check is kept.
-      -- Then keeps secret files (.env*, *secret*) away from the server.
+      -- Then keeps credential files (secret_names / secret_dirs above) away from
+      -- the server. Runs once per buffer attach, never per keystroke.
       should_attach = function(buf, bufname)
         if not vim.bo[buf].buflisted or vim.bo[buf].buftype ~= "" then
           return false
         end
-        local name = vim.fs.basename(bufname):lower()
-        return not name:match("^%.env") and not name:match("secret")
+        local path = bufname:lower()
+        local name = vim.fs.basename(path)
+        for _, pattern in ipairs(secret_names) do
+          if name:match(pattern) then
+            return false
+          end
+        end
+        for _, dir in ipairs(secret_dirs) do
+          if path:find(dir, 1, true) then
+            return false
+          end
+        end
+        return true
       end,
     },
     config = function(_, opts)
@@ -237,8 +279,9 @@ return {
       -- source of truth: it drives the lualine indicator, the NES request and
       -- render gates, and (via the BufEnter sync below) the per-buffer
       -- auto-trigger decision.
-      -- Default OFF: copilot loads and the LSP stays connected, but no ghost text
-      -- auto-fires until you toggle it on with <leader>ad / <M-k>.
+      -- Default OFF. Copilot loads on its first toggle (<leader>ad / <M-k>), <C-j>
+      -- or :Copilot; from then on the LSP stays connected and the toggle only
+      -- decides whether ghost text auto-fires.
       vim.g.copilot_enabled = false
 
       -- copilot.lua's auto-trigger check reads vim.b.copilot_suggestion_auto_trigger

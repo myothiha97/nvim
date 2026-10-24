@@ -42,8 +42,8 @@ local variants = {
     vivid = "#c7b903",
 
     -- vscode-onedark-pro-darker-yellow
-    vscode_onedark_pro_darker_yellow_1 = "#E8AF6F", -- default lighter orange-yellow collor with lower saturation
-    vscode_onedark_pro_darker_yellow_2 = "#FAAC55", -- daker orange-yellow collor with higher saturation
+    vscode_onedark_pro_darker_yellow_1 = "#E8AF6F", -- default lighter orange-yellow color with lower saturation
+    vscode_onedark_pro_darker_yellow_2 = "#FAAC55", -- darker orange-yellow color with higher saturation
 
     -- Primary parameter default: High contrast against Gold types. Optimized for backend, scripting, and systems languages.
     coral_red = "#e06c75",
