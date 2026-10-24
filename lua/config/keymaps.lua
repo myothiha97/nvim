@@ -296,15 +296,9 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 
--- Search forward for visually selected text
-vim.keymap.set("v", "*", '"fy/\\V<C-R>f<CR>')
-
--- Search backward for visually selected text
-vim.keymap.set("v", "#", '"fy?\\V<C-R>f<CR>')
-
--- Visual Mode: Highlight selected text (stays on current selection using / and N)
-vim.keymap.set("v", "<M-f>", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
--- leader + s is alrady binded for visual mode search and replace
+-- Highlight and Search forward for visually selected text
+vim.keymap.set("x", "<M-f>", "*N", { remap = true, desc = "Highlight visual selection" })
+-- leader + s is already binded for visual mode search and replace
 -- vim.keymap.set("v", "<leader>s", '"fy/\\V<C-R>f<CR>N', { desc = "Highlight visual selection" })
 
 vim.keymap.set("n", "<leader>L", "<cmd>restart<cr>", { desc = "Restart Neovim" })
