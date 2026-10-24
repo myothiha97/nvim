@@ -344,7 +344,14 @@ return {
         { section = "startup" },
       },
     },
-    scroll = { enabled = false },
+    scroll = {
+      enabled = false,
+      animate = {
+        duration = { step = 10, total = 200 },
+        easing = "linear",
+        fps = 100,
+      },
+    },
     animate = { enabled = false },
     words = { enabled = false }, -- CursorMoved buffer-wide search on every j/k
     indent = { enabled = false }, -- decoration provider + scope listener on hot paths
