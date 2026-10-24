@@ -54,6 +54,7 @@ is what requires an override to leave a trace here.
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | [`discipline-stop-rules.md`](process/discipline-stop-rules.md) | for the checkpoint session, ~10 min, doc-only. Closes the gap where `rules.md` decides **whether to start** but nothing decides **when something is finished** | open   |
 | [`config-refactoring.md`](process/config-refactoring.md)       | unify LSP, folding, search/replace, diagnostics, debugging, code analysis into consistent shapes                                                               | open   |
+| [`october-cleanup.md`](process/october-cleanup.md) | dead code, stale comments/todos and live trials found in the October review; no behaviour change | open |
 
 ## theme
 
