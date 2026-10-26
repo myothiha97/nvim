@@ -426,9 +426,11 @@ local function editor_scroll_or_arrow(scroll_key, arrow_key)
   end
 end
 
+-- Up shows the lines above and Down the lines below, the same direction as the
+-- native cursor keys they fall back to outside file windows.
 local arrow_scroll_maps = {
-  { "<Up>", "<C-e>", "<Down>", "Scroll Viewport Down" },
-  { "<Down>", "<C-y>", "<Up>", "Scroll Viewport Up" },
+  { "<Up>", "<C-y>", "<Up>", "Scroll Viewport Up" },
+  { "<Down>", "<C-e>", "<Down>", "Scroll Viewport Down" },
   { "<Right>", "2zl", "<Right>", "Scroll Viewport Right" },
   { "<Left>", "2zh", "<Left>", "Scroll Viewport Left" },
 }
@@ -580,12 +582,16 @@ for key, move in pairs(pane_moves) do
   end, { desc = "Go to " .. move.edge .. " window or tmux pane" })
 end
 
--- Disabled: LazyVim's insert-mode <A-j> "move line down". Ghostty now sends Cmd+J
--- to nvim as <M-j> (for the pane moves above), so pressing it while typing would
--- move the current line. Not used in insert mode. Its <A-k> "move line up" is
--- never created, because Copilot claims that key (plugins/copilot.lua).
--- Visual-mode <A-j>/<A-k> (move the selected lines) stay as they are.
-pcall(vim.keymap.del, "i", "<A-j>")
+-- Insert-mode Cmd+H/J/L do nothing. Ghostty sends them as <M-h>/<M-j>/<M-l> (for
+-- the pane moves above), and an UNMAPPED Alt key in insert mode acts as <Esc>
+-- plus the key, so deleting a map is not enough: Cmd+J would leave insert mode
+-- and move down a line. <Nop> also replaces LazyVim's <A-j> "move line down".
+-- Copilot's accept-line map replaces the <M-l> one once Copilot loads.
+-- LazyVim's insert <A-k> "move line up" is never created, because Copilot claims
+-- that key (plugins/copilot.lua). Visual-mode <A-j>/<A-k> (move the selected lines) stay.
+for _, key in ipairs({ "<M-h>", "<M-j>", "<M-l>" }) do
+  vim.keymap.set("i", key, "<Nop>", { desc = "Nothing (Cmd+" .. key:sub(4, 4):upper() .. " is a pane move)" })
+end
 -- Not needed: Copilot's `keys` claim already stops LazyVim creating insert <A-k>.
 -- Deleting it here would remove Copilot's Cmd+K toggle instead.
 -- pcall(vim.keymap.del, "i", "<A-k>")

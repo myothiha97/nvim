@@ -1,0 +1,1073 @@
+@annotation {link = "PreProc"}
+@attribute {fg = 12233741}
+@attribute.builtin {link = "Special"}
+@boolean {link = "Boolean"}
+@character {link = "Character"}
+@character.special {link = "SpecialChar"}
+@comment {link = "Comment"}
+@comment.error {fg = 14364717}
+@comment.hint {fg = 2728600}
+@comment.info {fg = 2526163}
+@comment.note {fg = 2728600}
+@comment.todo {fg = 7172548}
+@comment.warning {fg = 11699456}
+@constant {fg = 15568469}
+@constant.builtin {fg = 15568469}
+@constant.macro {fg = 15568469}
+@constructor {fg = 15057019}
+@constructor.lua {fg = 8360341}
+@constructor.tsx {fg = 15057019}
+@diff.delta {link = "DiffChange"}
+@diff.minus {link = "DiffDelete"}
+@diff.plus {link = "DiffAdd"}
+@function {link = "Function"}
+@function.builtin {fg = 6402031}
+@function.call {link = "@function"}
+@function.macro {link = "Macro"}
+@function.method {link = "Function"}
+@function.method.builtin {fg = 6402031}
+@function.method.call {link = "@function.method"}
+@keyword {cterm = {italic = true},fg = 10582988,italic = true}
+@keyword.conditional {link = "Conditional"}
+@keyword.coroutine {link = "@keyword"}
+@keyword.debug {link = "Debug"}
+@keyword.directive {link = "PreProc"}
+@keyword.directive.define {link = "Define"}
+@keyword.exception {link = "Exception"}
+@keyword.function {fg = 10582988}
+@keyword.import {fg = 10582988}
+@keyword.javascript {cterm = {italic = true},fg = 10582988,italic = true}
+@keyword.operator {fg = 10582988}
+@keyword.repeat {link = "Repeat"}
+@keyword.return {link = "@keyword"}
+@keyword.return.javascript {cterm = {italic = true},fg = 10582988,italic = true}
+@keyword.return.tsx {cterm = {italic = true},fg = 10582988,italic = true}
+@keyword.storage {link = "StorageClass"}
+@keyword.tsx {cterm = {italic = true},fg = 10582988,italic = true}
+@label {fg = 10582988}
+@lsp.mod.deprecated {link = "DiagnosticDeprecated"}
+@lsp.type.boolean {link = "@boolean"}
+@lsp.type.builtintype {link = "@type.builtin"}
+@lsp.type.class {link = "@type"}
+@lsp.type.comment {link = "@comment"}
+@lsp.type.decorator {link = "@attribute"}
+@lsp.type.derivehelper {link = "@attribute"}
+@lsp.type.enum {link = "@type"}
+@lsp.type.enummember {link = "@constant"}
+@lsp.type.escapesequence {link = "@string.escape"}
+@lsp.type.event {link = "@type"}
+@lsp.type.formatspecifier {link = "@markup.list"}
+@lsp.type.function {link = "@function"}
+@lsp.type.generic {link = "@variable"}
+@lsp.type.interface {fg = 2526163}
+@lsp.type.keyword {link = "@keyword"}
+@lsp.type.lifetime {link = "@keyword.storage"}
+@lsp.type.macro {link = "@constant.macro"}
+@lsp.type.method {link = "@function.method"}
+@lsp.type.modifier {link = "@type.qualifier"}
+@lsp.type.namespace {link = "@module"}
+@lsp.type.number {link = "@number"}
+@lsp.type.operator {link = "@operator"}
+@lsp.type.parameter {link = "@variable.parameter"}
+@lsp.type.property {link = "@property"}
+@lsp.type.regexp {link = "@string.regexp"}
+@lsp.type.selfkeyword {link = "@variable.builtin"}
+@lsp.type.selftypekeyword {link = "@variable.builtin"}
+@lsp.type.string {link = "@string"}
+@lsp.type.struct {link = "@type"}
+@lsp.type.type {link = "@type"}
+@lsp.type.typealias {link = "@type.definition"}
+@lsp.type.typeparameter {link = "@type.definition"}
+@lsp.type.unresolvedreference {cterm = {undercurl = true},sp = 14364717,undercurl = true}
+@lsp.type.variable vim.empty_dict()
+@lsp.typemod.class.defaultlibrary {link = "@type.builtin"}
+@lsp.typemod.enum.defaultlibrary {link = "@type.builtin"}
+@lsp.typemod.enummember.defaultlibrary {link = "@constant.builtin"}
+@lsp.typemod.function.defaultlibrary {link = "@function.builtin"}
+@lsp.typemod.keyword.async {link = "@keyword.coroutine"}
+@lsp.typemod.keyword.injected {link = "@keyword"}
+@lsp.typemod.macro.defaultlibrary {link = "@function.builtin"}
+@lsp.typemod.method.defaultlibrary {link = "@function.builtin"}
+@lsp.typemod.operator.injected {link = "@operator"}
+@lsp.typemod.string.injected {link = "@string"}
+@lsp.typemod.struct.defaultlibrary {link = "@type.builtin"}
+@lsp.typemod.type.defaultlibrary {fg = 2526163}
+@lsp.typemod.typealias.defaultlibrary {fg = 2526163}
+@lsp.typemod.variable.callable {link = "@function"}
+@lsp.typemod.variable.defaultlibrary {link = "@variable.builtin"}
+@lsp.typemod.variable.injected {link = "@variable"}
+@lsp.typemod.variable.static {link = "@constant"}
+@markup {link = "@none"}
+@markup.environment {link = "Macro"}
+@markup.environment.name {link = "Type"}
+@markup.heading {link = "Title"}
+@markup.heading.1.delimiter.vimdoc {bg = 1250066,cterm = {nocombine = true,underdouble = true},fg = 1250066,nocombine = true,sp = 11648703,underdouble = true}
+@markup.heading.1.javascript {fg = 11648703}
+@markup.heading.1.markdown {bold = true,cterm = {bold = true},fg = 8689920}
+@markup.heading.1.tsx {fg = 11648703}
+@markup.heading.2.delimiter.vimdoc {bg = 1250066,cterm = {nocombine = true,underline = true},fg = 1250066,nocombine = true,sp = 11648703,underline = true}
+@markup.heading.2.javascript {fg = 11648703}
+@markup.heading.2.markdown {bold = true,cterm = {bold = true},fg = 8689920}
+@markup.heading.2.tsx {fg = 11648703}
+@markup.heading.3.javascript {fg = 11648703}
+@markup.heading.3.markdown {bold = true,cterm = {bold = true},fg = 8689920}
+@markup.heading.3.tsx {fg = 11648703}
+@markup.heading.4.javascript {fg = 11648703}
+@markup.heading.4.markdown {bold = true,cterm = {bold = true},fg = 8689920}
+@markup.heading.4.tsx {fg = 11648703}
+@markup.heading.5.javascript {fg = 11648703}
+@markup.heading.5.markdown {bold = true,cterm = {bold = true},fg = 8689920}
+@markup.heading.5.tsx {fg = 11648703}
+@markup.heading.6.javascript {fg = 11648703}
+@markup.heading.6.markdown {bold = true,cterm = {bold = true},fg = 8689920}
+@markup.heading.6.tsx {fg = 11648703}
+@markup.heading.markdown {fg = 11648703}
+@markup.italic {cterm = {italic = true},italic = true}
+@markup.link {cterm = {underline = true},fg = 2526163,underline = true}
+@markup.link.label {link = "SpecialChar"}
+@markup.link.label.symbol {link = "Identifier"}
+@markup.link.url {link = "Underlined"}
+@markup.list {fg = 2526163}
+@markup.list.checked {fg = 8689920}
+@markup.list.markdown {bold = true,cterm = {bold = true},fg = 13192214}
+@markup.list.unchecked {fg = 11699456}
+@markup.math {link = "Special"}
+@markup.raw {fg = 2728600}
+@markup.raw.markdown {fg = 2526163}
+@markup.raw.markdown_inline {bg = 2896640,fg = 11699456}
+@markup.strikethrough {cterm = {strikethrough = true},strikethrough = true}
+@markup.strong {bold = true,cterm = {bold = true}}
+@markup.underline {cterm = {underline = true},underline = true}
+@module {fg = 15591379}
+@module.builtin {fg = 12233741}
+@namespace.builtin {link = "@variable.builtin"}
+@none vim.empty_dict()
+@number {link = "Number"}
+@number.float {link = "Float"}
+@operator {link = "Operator"}
+@property {link = "Identifier"}
+@property.go {fg = 7849401}
+@punctuation {link = "Delimiter"}
+@punctuation.bracket {fg = 8360341}
+@punctuation.delimiter {fg = 8360341}
+@punctuation.special {fg = 12233741}
+@punctuation.special.markdown {fg = 11648703}
+@string {link = "String"}
+@string.documentation {fg = 10407530}
+@string.escape {fg = 12233741}
+@string.regexp {fg = 2813405}
+@string.special {link = "SpecialChar"}
+@string.special.url {link = "Underlined"}
+@tag {link = "Label"}
+@tag.attribute {link = "@property"}
+@tag.builtin {link = "Special"}
+@tag.builtin.javascript {fg = 12233741}
+@tag.builtin.tsx {fg = 12233741}
+@tag.delimiter {link = "Delimiter"}
+@tag.delimiter.html {fg = 11648703}
+@tag.delimiter.javascript {fg = 11648703}
+@tag.delimiter.tsx {fg = 11648703}
+@tag.delimiter.vue {fg = 11648703}
+@tag.javascript {fg = 12233741}
+@tag.tsx {fg = 12233741}
+@type {link = "Type"}
+@type.builtin {link = "Type"}
+@type.definition {link = "Typedef"}
+@type.qualifier {link = "@keyword"}
+@variable {fg = 11648703}
+@variable.builtin {fg = 12233741}
+@variable.javascript {link = "@variable"}
+@variable.member {fg = 7849401}
+@variable.member.go {fg = 7849401}
+@variable.member.key {link = "@variable.member"}
+@variable.member.key.go {fg = 7849401}
+@variable.member.key.hcl {link = "@property"}
+@variable.member.key.terraform {link = "@property"}
+@variable.parameter {fg = 14707829}
+@variable.parameter.builtin {fg = 16760576}
+@variable.parameter.go {fg = 14707829}
+@variable.typescript {link = "@variable"}
+added {ctermfg = 10,fg = 11794112}
+blinkcmpdoc {bg = 5145,fg = 11384759}
+blinkcmpdocborder {bg = 5145,fg = 15057019}
+blinkcmpghosttext {fg = 5729652}
+blinkcmpkind {fg = 5729652}
+blinkcmpkindclass {fg = 13192214}
+blinkcmpkindcodeium {fg = 2728600}
+blinkcmpkindconstant {fg = 13776513}
+blinkcmpkindconstructor {fg = 2526163}
+blinkcmpkindcopilot {fg = 2728600}
+blinkcmpkindenum {fg = 13192214}
+blinkcmpkindenummember {fg = 2728600}
+blinkcmpkindevent {fg = 13192214}
+blinkcmpkindfield {fg = 2728600}
+blinkcmpkindfunction {fg = 2526163}
+blinkcmpkindinterface {fg = 13192214}
+blinkcmpkindkeyword {fg = 2728600}
+blinkcmpkindmethod {fg = 2526163}
+blinkcmpkindmodule {fg = 11699456}
+blinkcmpkindoperator {fg = 2728600}
+blinkcmpkindproperty {fg = 2728600}
+blinkcmpkindreference {fg = 13776513}
+blinkcmpkindsnippet {fg = 7172548}
+blinkcmpkindstruct {fg = 13192214}
+blinkcmpkindsupermaven {fg = 2728600}
+blinkcmpkindtabnine {fg = 2728600}
+blinkcmpkindtypeparameter {fg = 2728600}
+blinkcmpkindunit {fg = 13192214}
+blinkcmpkindvalue {fg = 13776513}
+blinkcmpkindvariable {fg = 13776513}
+blinkcmplabel {fg = 11384759}
+blinkcmplabeldeprecated {cterm = {strikethrough = true},fg = 5729652,strikethrough = true}
+blinkcmplabelmatch {fg = 4631797}
+blinkcmpmenu {bg = 1250066,fg = 11384759}
+blinkcmpmenuborder {bg = 1250066,fg = 406848}
+blinkcmpmenuselection {bg = 406848,bold = true,cterm = {bold = true},fg = 15591379}
+blinkcmpsignaturehelp {fg = 7172548}
+blinkcmpsignaturehelpactiveparameter {fg = 13192214}
+blinkcmpsignaturehelpborder {fg = 406848}
+boolean {fg = 15568469}
+changed {ctermfg = 14,fg = 9238775}
+character {fg = 10407530}
+colorcolumn {bg = 406848}
+comment {cterm = {italic = true},fg = 6256253,italic = true}
+complhint {link = "NonText"}
+complhintmore {link = "MoreMsg"}
+complmatchins vim.empty_dict()
+conceal {fg = 2526163}
+conditional {link = "Statement"}
+constant {fg = 2728600}
+cssatkeyword {link = "@keyword"}
+cssatrule {link = "@keyword"}
+cssatrulelogical {link = "@keyword"}
+cssattrcomma {link = "@punctuation.delimiter"}
+cssbraces {link = "@punctuation.bracket"}
+cssclassnamedot {link = "@punctuation.delimiter"}
+cssfunction {link = "Operator"}
+cssfunctioncomma {link = "@punctuation.delimiter"}
+cssmathgroup {link = "Operator"}
+cssmathparens {link = "@punctuation.bracket"}
+cssmediacomma {link = "@punctuation.delimiter"}
+cssnoise {link = "@punctuation.delimiter"}
+csspagepseudo {link = "@keyword"}
+csspseudoclass {link = "@keyword"}
+csspseudoclassid {link = "@keyword"}
+cssselectorop {link = "Operator"}
+cssselectorop2 {link = "Operator"}
+cursearch {link = "IncSearch"}
+cursor {bg = 10398636,fg = 11320}
+cursorcolumn {bg = 406848}
+cursorim {bg = 10398636,fg = 11320}
+cursorline vim.empty_dict()
+cursorlinefold {link = "FoldColumn"}
+cursorlinenr {fg = 13328385}
+cursorlinesign {link = "SignColumn"}
+debug {fg = 12233741}
+define {link = "PreProc"}
+delimiter {fg = 14738154}
+diagnosticdeprecated {cterm = {strikethrough = true},sp = 16761017,strikethrough = true}
+diagnosticerror {fg = 14364717}
+diagnosticfloatingerror {link = "DiagnosticError"}
+diagnosticfloatinghint {link = "DiagnosticHint"}
+diagnosticfloatinginfo {link = "DiagnosticInfo"}
+diagnosticfloatingok {link = "DiagnosticOk"}
+diagnosticfloatingwarn {link = "DiagnosticWarn"}
+diagnostichint {fg = 2728600}
+diagnosticinfo {fg = 2526163}
+diagnosticok {ctermfg = 10,fg = 11794112}
+diagnosticsignerror {link = "DiagnosticError"}
+diagnosticsignhint {link = "DiagnosticHint"}
+diagnosticsigninfo {link = "DiagnosticInfo"}
+diagnosticsignok {link = "DiagnosticOk"}
+diagnosticsignwarn {link = "DiagnosticWarn"}
+diagnosticunderlineerror {cterm = {undercurl = true},sp = 14364717,undercurl = true}
+diagnosticunderlinehint {cterm = {undercurl = true},sp = 2728600,undercurl = true}
+diagnosticunderlineinfo {cterm = {undercurl = true},sp = 2526163,undercurl = true}
+diagnosticunderlineok {cterm = {underline = true},sp = 11794112,underline = true}
+diagnosticunderlinewarn {cterm = {undercurl = true},sp = 11699456,undercurl = true}
+diagnosticunnecessary {fg = 6519169}
+diagnosticvirtuallineserror {link = "DiagnosticError"}
+diagnosticvirtuallineshint {link = "DiagnosticHint"}
+diagnosticvirtuallinesinfo {link = "DiagnosticInfo"}
+diagnosticvirtuallinesok {link = "DiagnosticOk"}
+diagnosticvirtuallineswarn {link = "DiagnosticWarn"}
+diagnosticvirtualtexterror {fg = 16726832}
+diagnosticvirtualtexthint {fg = 1752220}
+diagnosticvirtualtextinfo vim.empty_dict()
+diagnosticvirtualtextok {link = "DiagnosticOk"}
+diagnosticvirtualtextwarn {fg = 14724968}
+diagnosticwarn {fg = 11699456}
+diffadd {bg = 1063484}
+diffadded {fg = 8689920}
+diffchange {bg = 1645824}
+diffchanged {fg = 11699456}
+diffdelete {bg = 3671557}
+difffile {fg = 2526163}
+diffindexline {fg = 13776513}
+diffline {fg = 5729652}
+diffnewfile {fg = 13192214}
+diffoldfile {fg = 7172548}
+diffremoved {fg = 14364717}
+difftext {bg = 2896640,bold = true,cterm = {bold = true}}
+difftextadd {link = "DiffText"}
+directory {fg = 2526163}
+endofbuffer {fg = 5729652}
+error {bg = 5832712,ctermbg = 9,ctermfg = 0,fg = 15659512}
+errormsg {cterm = {reverse = true},fg = 14364717,reverse = true}
+exception {link = "Statement"}
+float {link = "Number"}
+floatborder {bg = 1250066,fg = 1063484}
+floatfooter {link = "FloatTitle"}
+floatnontexthidden {bg = 1250066,fg = 1250066}
+floatshadow {bg = 5198424,blend = 80,ctermbg = 0}
+floatshadowthrough {bg = 5198424,blend = 100,ctermbg = 0}
+floattitle {bg = 1250066,fg = 15591379}
+foldcolumn {fg = 10398636}
+folded vim.empty_dict()
+function {fg = 6402031}
+gitsignsadd {fg = 8689920}
+gitsignsaddcul {default = true,link = "GitSignsAdd"}
+gitsignsaddinline {default = true,link = "TermCursor"}
+gitsignsaddln {default = true,link = "DiffAdd"}
+gitsignsaddlninline {default = true,link = "GitSignsAddInline"}
+gitsignsaddnr {default = true,link = "GitSignsAdd"}
+gitsignsaddpreview {default = true,link = "DiffAdd"}
+gitsignschange {fg = 11699456}
+gitsignschangecul {default = true,link = "GitSignsChange"}
+gitsignschangedelete {default = true,link = "GitSignsChange"}
+gitsignschangedeletecul {default = true,link = "GitSignsChangeCul"}
+gitsignschangedeleteln {default = true,link = "GitSignsChangeLn"}
+gitsignschangedeletenr {default = true,link = "GitSignsChangeNr"}
+gitsignschangeinline {default = true,link = "TermCursor"}
+gitsignschangeln {default = true,link = "DiffChange"}
+gitsignschangelninline {default = true,link = "GitSignsChangeInline"}
+gitsignschangenr {default = true,link = "GitSignsChange"}
+gitsignscurrentlineblame {default = true,link = "NonText"}
+gitsignsdelete {fg = 14364717}
+gitsignsdeletecul {default = true,link = "GitSignsDelete"}
+gitsignsdeleteinline {default = true,link = "TermCursor"}
+gitsignsdeletelninline {default = true,link = "GitSignsDeleteInline"}
+gitsignsdeletenr {default = true,link = "GitSignsDelete"}
+gitsignsdeletepreview {default = true,link = "DiffDelete"}
+gitsignsdeletevirtln {default = true,link = "DiffDelete"}
+gitsignsdeletevirtlninline {default = true,link = "GitSignsDeleteLnInline"}
+gitsignsdiffstaged {bg = 1250066,default = true,fg = 9871778}
+gitsignsnoeolpreview {default = true,link = "Constant"}
+gitsignsstagedadd {default = true,fg = 4344832}
+gitsignsstagedaddcul {default = true,fg = 4344832}
+gitsignsstagedaddln {bg = 1063484,default = true}
+gitsignsstagedaddnr {default = true,fg = 4344832}
+gitsignsstagedchange {default = true,fg = 5849600}
+gitsignsstagedchangecul {default = true,fg = 5849600}
+gitsignsstagedchangedelete {default = true,fg = 5849600}
+gitsignsstagedchangedeletecul {default = true,fg = 5849600}
+gitsignsstagedchangedeleteln {bg = 1645824,default = true}
+gitsignsstagedchangedeletenr {default = true,fg = 5849600}
+gitsignsstagedchangeln {bg = 1645824,default = true}
+gitsignsstagedchangenr {default = true,fg = 5849600}
+gitsignsstageddelete {default = true,fg = 7149590}
+gitsignsstageddeletecul {default = true,fg = 7149590}
+gitsignsstageddeletenr {default = true,fg = 7149590}
+gitsignsstagedtopdelete {default = true,fg = 7149590}
+gitsignsstagedtopdeletecul {default = true,fg = 7149590}
+gitsignsstagedtopdeletenr {default = true,fg = 7149590}
+gitsignsstageduntracked {default = true,fg = 4344832}
+gitsignsstageduntrackedcul {default = true,fg = 4344832}
+gitsignsstageduntrackedln {bg = 1063484,default = true}
+gitsignsstageduntrackednr {default = true,fg = 4344832}
+gitsignstopdelete {default = true,link = "GitSignsDelete"}
+gitsignstopdeletecul {default = true,link = "GitSignsDeleteCul"}
+gitsignstopdeletenr {default = true,link = "GitSignsDeleteNr"}
+gitsignsuntracked {default = true,link = "GitSignsAdd"}
+gitsignsuntrackedcul {default = true,link = "GitSignsAddCul"}
+gitsignsuntrackedln {default = true,link = "GitSignsAddLn"}
+gitsignsuntrackednr {default = true,link = "GitSignsAddNr"}
+gitsignsvirtlnum {default = true,link = "GitSignsDeleteVirtLn"}
+grugfarresultsmatch {bg = 2813405,fg = 5145}
+grugfarresultsstats {fg = 15591379}
+healtherror {fg = 14364717}
+healthsuccess {fg = 2728600}
+healthwarning {fg = 11699456}
+htmlh1 {bold = true,cterm = {bold = true},fg = 13776513}
+htmlh2 {bold = true,cterm = {bold = true},fg = 2526163}
+identifier {fg = 6402031}
+ignore {link = "Normal"}
+include {link = "PreProc"}
+incsearch {bg = 13192214,fg = 15591379}
+keyword {cterm = {italic = true},fg = 10582988,italic = true}
+label {link = "Statement"}
+lcursor {bg = 6519169,fg = 11320}
+linenr {fg = 4019547}
+linenrabove {fg = 4019547}
+linenrbelow {fg = 4019547}
+listcursorline {bg = 3883617}
+lspcodelens {fg = 5729652}
+lspcodelensseparator {link = "LspCodeLens"}
+lspdocborder {link = "FloatBorder"}
+lspdocfloat {bg = 1250066,fg = 10398636}
+lspdocinlinecode {fg = 9090264}
+lspdoctitle {bg = 1250066,bold = true,cterm = {bold = true},fg = 10582988}
+lspinfoborder {bg = 1250066,fg = 406848}
+lspinlayhint {bg = 2369370,fg = 7172548}
+lspreferenceread {bg = 5509425}
+lspreferencetarget {link = "LspReferenceText"}
+lspreferencetext {bg = 5509425}
+lspreferencewrite {bg = 5509425}
+lspsignatureactiveparameter {bg = 11320,bold = true,cterm = {bold = true}}
+luacomment {link = "Comment"}
+luacommentdelimiter {link = "luaComment"}
+luacond {link = "Conditional"}
+luacondelse {link = "Conditional"}
+luaconstant {link = "Constant"}
+luaerror {link = "Error"}
+luafor {link = "Repeat"}
+luafunc {link = "Identifier"}
+luafunction {link = "Function"}
+lualabel {link = "Label"}
+lualine_a_command {bg = 11699456,fg = 4116,nocombine = true}
+lualine_a_inactive {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_a_insert {bg = 8689920,fg = 4116,nocombine = true}
+lualine_a_normal {bg = 2526163,fg = 4116,nocombine = true}
+lualine_a_replace {bg = 14364717,fg = 4116,nocombine = true}
+lualine_a_terminal {bg = 8689920,fg = 4116,nocombine = true}
+lualine_a_visual {bg = 13776513,fg = 4116,nocombine = true}
+lualine_b_inactive {bg = 1973789,bold = true,fg = 8622997,nocombine = true}
+lualine_b_normal {bg = 10398636,fg = 5145,nocombine = true}
+lualine_c_diagnostics_error_command {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_error_inactive {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_error_insert {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_error_normal {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_error_replace {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_error_terminal {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_error_visual {bg = 1973789,fg = 14364717,nocombine = true}
+lualine_c_diagnostics_hint_command {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_hint_inactive {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_hint_insert {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_hint_normal {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_hint_replace {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_hint_terminal {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_hint_visual {bg = 1973789,fg = 2728600,nocombine = true}
+lualine_c_diagnostics_info_command {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_info_inactive {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_info_insert {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_info_normal {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_info_replace {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_info_terminal {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_info_visual {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_c_diagnostics_warn_command {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_diagnostics_warn_inactive {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_diagnostics_warn_insert {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_diagnostics_warn_normal {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_diagnostics_warn_replace {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_diagnostics_warn_terminal {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_diagnostics_warn_visual {bg = 1973789,fg = 11699456,nocombine = true}
+lualine_c_filename_command {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filename_inactive {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filename_insert {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filename_normal {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filename_replace {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filename_terminal {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filename_visual {bg = 1973789,bold = true,fg = 9024762,nocombine = true}
+lualine_c_filetype_miniiconsazure_command {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_filetype_miniiconsazure_inactive {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_filetype_miniiconsazure_insert {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_filetype_miniiconsazure_normal {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_filetype_miniiconsazure_replace {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_filetype_miniiconsazure_terminal {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_filetype_miniiconsazure_visual {bg = 1973789,fg = 4631797,nocombine = true}
+lualine_c_inactive {bg = 1973789,fg = 8622997,nocombine = true}
+lualine_c_normal {bg = 1973789,fg = 8622997,nocombine = true}
+lualine_transitional_lualine_a_normal_to_lualine_b_normal {bg = 10398636,fg = 2526163,nocombine = true}
+lualine_transitional_lualine_a_normal_to_lualine_c_normal {bg = 1973789,fg = 2526163,nocombine = true}
+lualine_transitional_lualine_b_normal_to_lualine_c_normal {bg = 1973789,fg = 10398636,nocombine = true}
+lualine_transparent {bg = 1250066,fg = 11648703,nocombine = true}
+luametamethod {link = "Function"}
+luanumber {link = "Number"}
+luaoperator {link = "Operator"}
+luaparenerror {link = "Error"}
+luarepeat {link = "Repeat"}
+luaspecial {link = "SpecialChar"}
+luastatement {link = "Statement"}
+luastring {link = "String"}
+luastring2 {link = "String"}
+luastringdelimiter {link = "luaString"}
+luasymboloperator {link = "luaOperator"}
+luatable {link = "Structure"}
+luatodo {link = "Todo"}
+macro {link = "PreProc"}
+markdowncode {bg = 2896640,fg = 11699456}
+markdowncodeblock {bg = 2896640,fg = 11699456}
+markdownh1 {bold = true,cterm = {bold = true},fg = 13776513}
+markdownh2 {bold = true,cterm = {bold = true},fg = 7172548}
+markdownheadingdelimiter {bold = true,cterm = {bold = true},fg = 13192214}
+markdownlinktext {cterm = {underline = true},fg = 2526163,underline = true}
+matchparen {bg = 14364717,bold = true,cterm = {bold = true},fg = 16751257}
+miniiconsazure {fg = 4631797}
+miniiconsblue {fg = 2526163}
+miniiconscyan {fg = 2728600}
+miniiconsgreen {fg = 8689920}
+miniiconsgrey {fg = 15591379}
+miniiconsorange {fg = 13192214}
+miniiconspurple {fg = 7172548}
+miniiconsred {fg = 14364717}
+miniiconsyellow {fg = 11699456}
+mkdcode {bg = 2896640}
+mkdcodedelimiter {bg = 5793280,fg = 10398636}
+mkdcodeend {bold = true,cterm = {bold = true},fg = 13192214}
+mkdcodestart {bold = true,cterm = {bold = true},fg = 13192214}
+modemsg {fg = 2526163}
+moremsg {fg = 2526163}
+msgarea {fg = 5729652}
+msgseparator {link = "StatusLine"}
+multicursor {link = "VM_Cursor"}
+neotestadaptername {bold = true,cterm = {bold = true},fg = 7172548}
+neotestborder {fg = 2526163}
+neotestdir {fg = 2526163}
+neotestexpandmarker {fg = 10398636}
+neotestfailed {fg = 14364717}
+neotestfile {fg = 2728600}
+neotestfocused {fg = 11699456}
+neotestindent {fg = 6519169}
+neotestmarked {fg = 2526163}
+neotestnamespace {fg = 2728600}
+neotestpassed {fg = 8689920}
+neotestrunning {fg = 11699456}
+neotestskipped {fg = 2526163}
+neotesttarget {fg = 2526163}
+neotesttest {fg = 6519169}
+neotestwinselect {fg = 2526163}
+noicecmdline {default = true,link = "MsgArea"}
+noicecmdlineicon {default = true,link = "DiagnosticSignInfo"}
+noicecmdlineiconcalculator {default = true,link = "NoiceCmdlineIcon"}
+noicecmdlineiconcmdline {default = true,link = "NoiceCmdlineIcon"}
+noicecmdlineiconfilter {default = true,link = "NoiceCmdlineIcon"}
+noicecmdlineiconhelp {default = true,link = "NoiceCmdlineIcon"}
+noicecmdlineiconinput {default = true,link = "NoiceCmdlineIcon"}
+noicecmdlineiconlua {default = true,link = "NoiceCmdlineIcon"}
+noicecmdlineiconsearch {default = true,link = "DiagnosticSignWarn"}
+noicecmdlinepopup {default = true,link = "Normal"}
+noicecmdlinepopupborder {default = true,link = "DiagnosticSignInfo"}
+noicecmdlinepopupbordercalculator {default = true,link = "NoiceCmdlinePopupBorder"}
+noicecmdlinepopupbordercmdline {default = true,link = "NoiceCmdlinePopupBorder"}
+noicecmdlinepopupborderfilter {default = true,link = "NoiceCmdlinePopupBorder"}
+noicecmdlinepopupborderhelp {default = true,link = "NoiceCmdlinePopupBorder"}
+noicecmdlinepopupborderinput {default = true,link = "NoiceCmdlinePopupBorder"}
+noicecmdlinepopupborderlua {default = true,link = "NoiceCmdlinePopupBorder"}
+noicecmdlinepopupbordersearch {default = true,link = "DiagnosticSignWarn"}
+noicecmdlinepopuptitle {default = true,link = "DiagnosticSignInfo"}
+noicecmdlinepopuptitlecalculator {default = true,link = "NoiceCmdlinePopupBorderCalculator"}
+noicecmdlinepopuptitlecmdline {default = true,link = "NoiceCmdlinePopupBorderCmdline"}
+noicecmdlinepopuptitlefilter {default = true,link = "NoiceCmdlinePopupBorderFilter"}
+noicecmdlinepopuptitlehelp {default = true,link = "NoiceCmdlinePopupBorderHelp"}
+noicecmdlinepopuptitleinput {default = true,link = "NoiceCmdlinePopupBorderInput"}
+noicecmdlinepopuptitlelua {default = true,link = "NoiceCmdlinePopupBorderLua"}
+noicecmdlinepopuptitlesearch {default = true,link = "NoiceCmdlinePopupBorderSearch"}
+noicecmdlineprompt {default = true,link = "Title"}
+noicecompletionitemkindclass {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindcolor {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindconstant {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindconstructor {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkinddefault {fg = 5729652}
+noicecompletionitemkindenum {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindenummember {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindfield {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindfile {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindfolder {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindfunction {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindinterface {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindkeyword {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindmethod {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindmodule {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindproperty {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindsnippet {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindstruct {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindtext {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindunit {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindvalue {default = true,link = "NoiceCompletionItemKindDefault"}
+noicecompletionitemkindvariable {default = true,link = "NoiceCompletionItemKindDefault"}
+noiceconfirm {default = true,link = "Normal"}
+noiceconfirmborder {default = true,link = "DiagnosticSignInfo"}
+noicecursor {default = true,link = "Cursor"}
+noiceformatconfirm {default = true,link = "CursorLine"}
+noiceformatconfirmdefault {default = true,link = "Visual"}
+noiceformatdate {default = true,link = "Special"}
+noiceformatevent {default = true,link = "NonText"}
+noiceformatkind {default = true,link = "NonText"}
+noiceformatleveldebug {default = true,link = "NonText"}
+noiceformatlevelerror {default = true,link = "DiagnosticVirtualTextError"}
+noiceformatlevelinfo {default = true,link = "DiagnosticVirtualTextInfo"}
+noiceformatleveloff {default = true,link = "NonText"}
+noiceformatleveltrace {default = true,link = "NonText"}
+noiceformatlevelwarn {default = true,link = "DiagnosticVirtualTextWarn"}
+noiceformatprogressdone {cterm = {reverse = true},default = true,fg = 11699456,reverse = true}
+noiceformatprogresstodo {default = true,link = "CursorLine"}
+noiceformattitle {default = true,link = "Title"}
+noicehiddencursor {blend = 100,cterm = {nocombine = true},nocombine = true}
+noicelspprogressclient {default = true,link = "Title"}
+noicelspprogressspinner {default = true,link = "Constant"}
+noicelspprogresstitle {default = true,link = "NonText"}
+noicemini {default = true,link = "MsgArea"}
+noicepopup {default = true,link = "NormalFloat"}
+noicepopupborder {default = true,link = "FloatBorder"}
+noicepopupmenu {default = true,link = "Pmenu"}
+noicepopupmenuborder {default = true,link = "FloatBorder"}
+noicepopupmenumatch {default = true,link = "Special"}
+noicepopupmenuselected {default = true,link = "PmenuSel"}
+noicescrollbar {default = true,link = "PmenuSbar"}
+noicescrollbarthumb {default = true,link = "PmenuThumb"}
+noicesplit {default = true,link = "NormalFloat"}
+noicesplitborder {default = true,link = "FloatBorder"}
+noicevirtualtext {default = true,link = "DiagnosticVirtualTextInfo"}
+nontext {bold = true,cterm = {bold = true},fg = 6519169}
+normal {bg = 1250066,fg = 11648703}
+normalfloat {bg = 1250066,fg = 11648703}
+normalnc {bg = 1250066,fg = 6519169}
+normalsb {bg = 1250066,fg = 5729652}
+number {fg = 15568469}
+nvimand {link = "NvimBinaryOperator"}
+nvimarrow {link = "Delimiter"}
+nvimassignment {link = "Operator"}
+nvimassignmentwithaddition {link = "NvimAugmentedAssignment"}
+nvimassignmentwithconcatenation {link = "NvimAugmentedAssignment"}
+nvimassignmentwithsubtraction {link = "NvimAugmentedAssignment"}
+nvimaugmentedassignment {link = "NvimAssignment"}
+nvimbinaryminus {link = "NvimBinaryOperator"}
+nvimbinaryoperator {link = "NvimOperator"}
+nvimbinaryplus {link = "NvimBinaryOperator"}
+nvimcallingparenthesis {link = "NvimParenthesis"}
+nvimcolon {link = "Delimiter"}
+nvimcomma {link = "Delimiter"}
+nvimcomparison {link = "NvimBinaryOperator"}
+nvimcomparisonmodifier {link = "NvimComparison"}
+nvimconcat {link = "NvimBinaryOperator"}
+nvimconcatorsubscript {link = "NvimConcat"}
+nvimcontainer {link = "NvimParenthesis"}
+nvimcurly {link = "NvimSubscript"}
+nvimdict {link = "NvimContainer"}
+nvimdivision {link = "NvimBinaryOperator"}
+nvimdoublequote {link = "NvimStringQuote"}
+nvimdoublequotedbody {link = "NvimStringBody"}
+nvimdoublequotedescape {link = "NvimStringSpecial"}
+nvimdoublequotedunknownescape {link = "NvimInvalidValue"}
+nvimenvironmentname {link = "NvimIdentifier"}
+nvimenvironmentsigil {link = "NvimOptionSigil"}
+nvimfigurebrace {link = "NvimInternalError"}
+nvimfloat {link = "NvimNumber"}
+nvimidentifier {link = "Identifier"}
+nvimidentifierkey {link = "NvimIdentifier"}
+nvimidentifiername {link = "NvimIdentifier"}
+nvimidentifierscope {link = "NvimIdentifier"}
+nvimidentifierscopedelimiter {link = "NvimIdentifier"}
+nviminternalerror {bg = 16711680,ctermbg = 9,ctermfg = 9,fg = 16711680}
+nviminvalid {link = "Error"}
+nviminvalidand {link = "NvimInvalidBinaryOperator"}
+nviminvalidarrow {link = "NvimInvalidDelimiter"}
+nviminvalidassignment {link = "NvimInvalid"}
+nviminvalidassignmentwithaddition {link = "NvimInvalidAugmentedAssignment"}
+nviminvalidassignmentwithconcatenation {link = "NvimInvalidAugmentedAssignment"}
+nviminvalidassignmentwithsubtraction {link = "NvimInvalidAugmentedAssignment"}
+nviminvalidaugmentedassignment {link = "NvimInvalidAssignment"}
+nviminvalidbinaryminus {link = "NvimInvalidBinaryOperator"}
+nviminvalidbinaryoperator {link = "NvimInvalidOperator"}
+nviminvalidbinaryplus {link = "NvimInvalidBinaryOperator"}
+nviminvalidcallingparenthesis {link = "NvimInvalidParenthesis"}
+nviminvalidcolon {link = "NvimInvalidDelimiter"}
+nviminvalidcomma {link = "NvimInvalidDelimiter"}
+nviminvalidcomparison {link = "NvimInvalidBinaryOperator"}
+nviminvalidcomparisonmodifier {link = "NvimInvalidComparison"}
+nviminvalidconcat {link = "NvimInvalidBinaryOperator"}
+nviminvalidconcatorsubscript {link = "NvimInvalidConcat"}
+nviminvalidcontainer {link = "NvimInvalidParenthesis"}
+nviminvalidcurly {link = "NvimInvalidSubscript"}
+nviminvaliddelimiter {link = "NvimInvalid"}
+nviminvaliddict {link = "NvimInvalidContainer"}
+nviminvaliddivision {link = "NvimInvalidBinaryOperator"}
+nviminvaliddoublequote {link = "NvimInvalidStringQuote"}
+nviminvaliddoublequotedbody {link = "NvimInvalidStringBody"}
+nviminvaliddoublequotedescape {link = "NvimInvalidStringSpecial"}
+nviminvaliddoublequotedunknownescape {link = "NvimInvalidValue"}
+nviminvalidenvironmentname {link = "NvimInvalidIdentifier"}
+nviminvalidenvironmentsigil {link = "NvimInvalidOptionSigil"}
+nviminvalidfigurebrace {link = "NvimInvalidDelimiter"}
+nviminvalidfloat {link = "NvimInvalidNumber"}
+nviminvalididentifier {link = "NvimInvalidValue"}
+nviminvalididentifierkey {link = "NvimInvalidIdentifier"}
+nviminvalididentifiername {link = "NvimInvalidIdentifier"}
+nviminvalididentifierscope {link = "NvimInvalidIdentifier"}
+nviminvalididentifierscopedelimiter {link = "NvimInvalidIdentifier"}
+nviminvalidlambda {link = "NvimInvalidParenthesis"}
+nviminvalidlist {link = "NvimInvalidContainer"}
+nviminvalidmod {link = "NvimInvalidBinaryOperator"}
+nviminvalidmultiplication {link = "NvimInvalidBinaryOperator"}
+nviminvalidnestingparenthesis {link = "NvimInvalidParenthesis"}
+nviminvalidnot {link = "NvimInvalidUnaryOperator"}
+nviminvalidnumber {link = "NvimInvalidValue"}
+nviminvalidnumberprefix {link = "NvimInvalidNumber"}
+nviminvalidoperator {link = "NvimInvalid"}
+nviminvalidoptionname {link = "NvimInvalidIdentifier"}
+nviminvalidoptionscope {link = "NvimInvalidIdentifierScope"}
+nviminvalidoptionscopedelimiter {link = "NvimInvalidIdentifierScopeDelimiter"}
+nviminvalidoptionsigil {link = "NvimInvalidIdentifier"}
+nviminvalidor {link = "NvimInvalidBinaryOperator"}
+nviminvalidparenthesis {link = "NvimInvalidDelimiter"}
+nviminvalidplainassignment {link = "NvimInvalidAssignment"}
+nviminvalidregister {link = "NvimInvalidValue"}
+nviminvalidsinglequote {link = "NvimInvalidStringQuote"}
+nviminvalidsinglequotedbody {link = "NvimInvalidStringBody"}
+nviminvalidsinglequotedquote {link = "NvimInvalidStringSpecial"}
+nviminvalidsinglequotedunknownescape {link = "NvimInternalError"}
+nviminvalidspacing {link = "ErrorMsg"}
+nviminvalidstring {link = "NvimInvalidValue"}
+nviminvalidstringbody {link = "NvimStringBody"}
+nviminvalidstringquote {link = "NvimInvalidString"}
+nviminvalidstringspecial {link = "NvimStringSpecial"}
+nviminvalidsubscript {link = "NvimInvalidParenthesis"}
+nviminvalidsubscriptbracket {link = "NvimInvalidSubscript"}
+nviminvalidsubscriptcolon {link = "NvimInvalidSubscript"}
+nviminvalidternary {link = "NvimInvalidOperator"}
+nviminvalidternarycolon {link = "NvimInvalidTernary"}
+nviminvalidunaryminus {link = "NvimInvalidUnaryOperator"}
+nviminvalidunaryoperator {link = "NvimInvalidOperator"}
+nviminvalidunaryplus {link = "NvimInvalidUnaryOperator"}
+nviminvalidvalue {link = "NvimInvalid"}
+nvimlambda {link = "NvimParenthesis"}
+nvimlist {link = "NvimContainer"}
+nvimmod {link = "NvimBinaryOperator"}
+nvimmultiplication {link = "NvimBinaryOperator"}
+nvimnestingparenthesis {link = "NvimParenthesis"}
+nvimnot {link = "NvimUnaryOperator"}
+nvimnumber {link = "Number"}
+nvimnumberprefix {link = "Type"}
+nvimoperator {link = "Operator"}
+nvimoptionname {link = "NvimIdentifier"}
+nvimoptionscope {link = "NvimIdentifierScope"}
+nvimoptionscopedelimiter {link = "NvimIdentifierScopeDelimiter"}
+nvimoptionsigil {link = "Type"}
+nvimor {link = "NvimBinaryOperator"}
+nvimparenthesis {link = "Delimiter"}
+nvimplainassignment {link = "NvimAssignment"}
+nvimregister {link = "SpecialChar"}
+nvimsinglequote {link = "NvimStringQuote"}
+nvimsinglequotedbody {link = "NvimStringBody"}
+nvimsinglequotedquote {link = "NvimStringSpecial"}
+nvimsinglequotedunknownescape {link = "NvimInternalError"}
+nvimspacing {link = "Normal"}
+nvimstring {link = "String"}
+nvimstringbody {link = "NvimString"}
+nvimstringquote {link = "NvimString"}
+nvimstringspecial {link = "SpecialChar"}
+nvimsubscript {link = "NvimParenthesis"}
+nvimsubscriptbracket {link = "NvimSubscript"}
+nvimsubscriptcolon {link = "NvimSubscript"}
+nvimternary {link = "NvimOperator"}
+nvimternarycolon {link = "NvimTernary"}
+nvimunaryminus {link = "NvimUnaryOperator"}
+nvimunaryoperator {link = "NvimOperator"}
+nvimunaryplus {link = "NvimUnaryOperator"}
+oilchange {default = true,link = "Special"}
+oilcopy {default = true,link = "DiagnosticHint"}
+oilcreate {default = true,link = "DiagnosticInfo"}
+oilcursorline {bg = 406848}
+oildelete {default = true,link = "DiagnosticError"}
+oildir {fg = 10532536}
+oildirhidden {default = true,link = "OilHidden"}
+oildiricon {fg = 2526163}
+oilempty {default = true,link = "Comment"}
+oilfile {fg = 10532536}
+oilfilehidden {default = true,link = "OilHidden"}
+oilfloatborder {bg = 1250066,fg = 1250066}
+oilhidden {default = true,link = "Comment"}
+oillinkhidden {default = true,link = "OilHidden"}
+oillinktarget {default = true,link = "Comment"}
+oillinktargethidden {default = true,link = "OilHidden"}
+oilmove {default = true,link = "DiagnosticWarn"}
+oilorphanlinkhidden {default = true,link = "OilLinkHidden"}
+oilorphanlinktarget {default = true,link = "DiagnosticError"}
+oilorphanlinktargethidden {default = true,link = "OilOrphanLinkTarget"}
+oilpathsegment {default = true,fg = 1939661}
+oilpathseparator {default = true,link = "NonText"}
+oilpurge {default = true,link = "OilDelete"}
+oilrestore {default = true,link = "OilCreate"}
+oilsocket {default = true,link = "Keyword"}
+oilsockethidden {default = true,link = "OilHidden"}
+oilstartupborder {link = "SnacksPickerBorder"}
+oiltrash {default = true,link = "OilDelete"}
+oiltrashsourcepath {default = true,link = "Comment"}
+okmsg {ctermfg = 10,fg = 11794112}
+operator {fg = 8360341}
+pmenu {bg = 5145,fg = 11384759}
+pmenuborder {link = "Pmenu"}
+pmenuextra {link = "Pmenu"}
+pmenuextrasel {link = "PmenuSel"}
+pmenukind {link = "Pmenu"}
+pmenukindsel {link = "PmenuSel"}
+pmenumatch {bold = true,cterm = {bold = true}}
+pmenumatchsel {bold = true,cterm = {bold = true}}
+pmenusbar {bg = 11320}
+pmenusel {bg = 406848,bold = true,cterm = {bold = true},fg = 15591379}
+pmenushadow {link = "FloatShadow"}
+pmenushadowthrough {link = "FloatShadowThrough"}
+pmenuthumb {bg = 5729652}
+precondit {link = "PreProc"}
+preinsert {link = "Added"}
+preproc {fg = 14364717}
+question {bold = true,cterm = {bold = true},fg = 2728600}
+quickfixline {bg = 1729431,bold = true,cterm = {bold = true}}
+redrawdebugclear {bg = 7033600,ctermbg = 11,ctermfg = 0}
+redrawdebugcomposed {bg = 21795,ctermbg = 10,ctermfg = 0}
+redrawdebugnormal {cterm = {reverse = true},reverse = true}
+redrawdebugrecompose {bg = 5832712,ctermbg = 9,ctermfg = 0}
+removed {ctermfg = 9,fg = 16761017}
+rendermarkdowntablehead {fg = 11648703}
+rendermarkdowntablerow {fg = 11648703}
+repeat {link = "Statement"}
+search {cterm = {reverse = true},fg = 11699456,reverse = true}
+signcolumn {fg = 10398636}
+signcolumnsb {fg = 10398636}
+snacksdashboarddesc {fg = 2728600}
+snacksdashboarddir {default = true,link = "NonText"}
+snacksdashboardfile {default = true,link = "Special"}
+snacksdashboardfooter {cterm = {italic = true},fg = 11699456,italic = true}
+snacksdashboardheader {fg = 2526163}
+snacksdashboardicon {bold = true,cterm = {bold = true},fg = 2728600}
+snacksdashboardkey {fg = 13192214}
+snacksdashboardnormal {default = true,link = "Normal"}
+snacksdashboardspecial {fg = 11699456}
+snacksdashboardterminal {default = true,link = "SnacksDashboardNormal"}
+snacksdashboardtitle {default = true,link = "Title"}
+snacksexploreractivefile {bg = 16210}
+snacksexplorerblank {fg = 1250066}
+snacksexplorerinvisibleborder {bg = 1250066,fg = 1250066}
+snacksindent {cterm = {nocombine = true},fg = 5795445,nocombine = true}
+snacksindentscope {cterm = {nocombine = true},fg = 4738742,nocombine = true}
+snacksinputborder {default = true,link = "DiagnosticInfo"}
+snacksinputicon {default = true,link = "DiagnosticHint"}
+snacksinputnormal {default = true,link = "Normal"}
+snacksinputprompt {default = true,link = "SnacksInputTitle"}
+snacksinputtitle {default = true,link = "DiagnosticInfo"}
+snacksnotifierbordertrace {fg = 13776513}
+snacksnotifiericontrace {fg = 13776513}
+snacksnotifiertitletrace {fg = 13776513}
+snackspickerauevent {default = true,link = "Constant"}
+snackspickeraugroup {default = true,link = "Type"}
+snackspickeraupattern {default = true,link = "String"}
+snackspickerbold {default = true,link = "Bold"}
+snackspickerborder {bg = 1250066,fg = 406848}
+snackspickerbufflags {default = true,link = "NonText"}
+snackspickerbufnr {default = true,link = "Number"}
+snackspickerbuftype {default = true,link = "Function"}
+snackspickercmd {default = true,link = "Function"}
+snackspickercmdbuiltin {default = true,link = "@constructor"}
+snackspickercode {default = true,link = "@markup.raw.markdown_inline"}
+snackspickercol {default = true,link = "LineNr"}
+snackspickercomment {default = true,link = "Comment"}
+snackspickerdelim {default = true,link = "Delimiter"}
+snackspickerdesc {default = true,link = "Comment"}
+snackspickerdiagnosticcode {default = true,link = "Special"}
+snackspickerdiagnosticsource {default = true,link = "Comment"}
+snackspickerdimmed {default = true,link = "Conceal"}
+snackspickerdir {default = true,link = "NonText"}
+snackspickerdirectory {fg = 10532536}
+snackspickerfile {fg = 10532536}
+snackspickerfiletype {default = true,link = "DiagnosticHint"}
+snackspickergitauthor {default = true,link = "Constant"}
+snackspickergitbranch {default = true,link = "Title"}
+snackspickergitbranchcurrent {default = true,link = "Number"}
+snackspickergitbreaking {default = true,link = "Error"}
+snackspickergitcommit {default = true,link = "@variable.builtin"}
+snackspickergitdate {default = true,link = "Special"}
+snackspickergitdetached {default = true,link = "DiagnosticWarn"}
+snackspickergitissue {default = true,link = "Number"}
+snackspickergitscope {default = true,link = "Italic"}
+snackspickergitstatus {default = true,link = "Special"}
+snackspickergitstatusadded {default = true,link = "Added"}
+snackspickergitstatuscopied {default = true,link = "SnacksPickerGitStatus"}
+snackspickergitstatusdeleted {default = true,link = "Removed"}
+snackspickergitstatusignored {default = true,link = "NonText"}
+snackspickergitstatusmodified {default = true,link = "DiagnosticWarn"}
+snackspickergitstatusrenamed {default = true,link = "SnacksPickerGitStatus"}
+snackspickergitstatusstaged {default = true,link = "DiagnosticHint"}
+snackspickergitstatusunmerged {default = true,link = "DiagnosticError"}
+snackspickergitstatusuntracked {default = true,link = "NonText"}
+snackspickergittype {default = true,link = "Title"}
+snackspickericon {default = true,link = "Special"}
+snackspickericonarray {default = true,link = "@punctuation.bracket"}
+snackspickericonboolean {default = true,link = "@boolean"}
+snackspickericoncategory {default = true,link = "@module"}
+snackspickericonclass {default = true,link = "@type"}
+snackspickericonconstant {default = true,link = "@constant"}
+snackspickericonconstructor {default = true,link = "@constructor"}
+snackspickericonenum {default = true,link = "@lsp.type.enum"}
+snackspickericonenummember {default = true,link = "@lsp.type.enumMember"}
+snackspickericonevent {default = true,link = "Special"}
+snackspickericonfield {default = true,link = "@variable.member"}
+snackspickericonfile {default = true,link = "Normal"}
+snackspickericonfunction {default = true,link = "@function"}
+snackspickericoninterface {default = true,link = "@lsp.type.interface"}
+snackspickericonkey {default = true,link = "@lsp.type.keyword"}
+snackspickericonmethod {default = true,link = "@function.method"}
+snackspickericonmodule {default = true,link = "@module"}
+snackspickericonname {default = true,link = "@keyword"}
+snackspickericonnamespace {default = true,link = "@module"}
+snackspickericonnull {default = true,link = "@constant.builtin"}
+snackspickericonnumber {default = true,link = "@number"}
+snackspickericonobject {default = true,link = "@constant"}
+snackspickericonoperator {default = true,link = "@operator"}
+snackspickericonpackage {default = true,link = "@module"}
+snackspickericonproperty {default = true,link = "@property"}
+snackspickericonsource {default = true,link = "@constant"}
+snackspickericonstring {default = true,link = "@string"}
+snackspickericonstruct {default = true,link = "@lsp.type.struct"}
+snackspickericontypeparameter {default = true,link = "@lsp.type.typeParameter"}
+snackspickericonvariable {default = true,link = "@variable"}
+snackspickeridx {default = true,link = "Number"}
+snackspickerinputsearch {default = true,link = "@keyword"}
+snackspickeritalic {default = true,link = "Italic"}
+snackspickerkeymaplhs {default = true,link = "Special"}
+snackspickerkeymapmode {default = true,link = "Number"}
+snackspickerkeymapnowait {default = true,link = "@variable.builtin"}
+snackspickerkeymaprhs {default = true,link = "NonText"}
+snackspickerlabel {default = true,link = "SnacksPickerSpecial"}
+snackspickerlink {default = true,link = "Comment"}
+snackspickerlinkbroken {default = true,link = "DiagnosticError"}
+snackspickerlistcursorline {link = "ListCursorLine"}
+snackspickerlspattached {default = true,link = "DiagnosticWarn"}
+snackspickerlspattachedbuf {default = true,link = "DiagnosticInfo"}
+snackspickerlspdisabled {default = true,link = "DiagnosticWarn"}
+snackspickerlspenabled {default = true,link = "Special"}
+snackspickerlspunavailable {default = true,link = "DiagnosticError"}
+snackspickermanpage {default = true,link = "Special"}
+snackspickermansection {default = true,link = "Number"}
+snackspickermatch {link = "DiffText"}
+snackspickerpathhidden {default = true,link = "NonText"}
+snackspickerpathignored {default = true,link = "NonText"}
+snackspickerpickwin {default = true,link = "Search"}
+snackspickerpickwincurrent {default = true,link = "CurSearch"}
+snackspickerpreviewcursorline {link = "ListCursorLine"}
+snackspickerpreviewtitle {bg = 1250066,fg = 2526163}
+snackspickerprompt {default = true,link = "Special"}
+snackspickerregister {default = true,link = "Number"}
+snackspickerrow {default = true,link = "String"}
+snackspickerrule {default = true,link = "@punctuation.special.markdown"}
+snackspickersearch {default = true,link = "Search"}
+snackspickerselected {default = true,link = "Number"}
+snackspickerspecial {default = true,link = "Special"}
+snackspickerspinner {default = true,link = "Special"}
+snackspickertime {default = true,link = "Special"}
+snackspickertitle {link = "Title"}
+snackspickertoggle {default = true,link = "DiagnosticVirtualTextInfo"}
+snackspickertogglefollow {default = true,link = "SnacksPickerToggle"}
+snackspickertogglehidden {default = true,link = "SnacksPickerToggle"}
+snackspickertoggleignored {default = true,link = "SnacksPickerToggle"}
+snackspickertogglemodified {default = true,link = "SnacksPickerToggle"}
+snackspickertoggleregex {default = true,link = "SnacksPickerToggle"}
+snackspickertotals {default = true,link = "NonText"}
+snackspickertree {default = true,link = "LineNr"}
+snackspickerundoadded {default = true,link = "Added"}
+snackspickerundocurrent {default = true,link = "@variable.builtin"}
+snackspickerundoremoved {default = true,link = "Removed"}
+snackspickerundosaved {default = true,link = "Special"}
+snackspickerunselected {default = true,link = "NonText"}
+snippettabstop {link = "Visual"}
+snippettabstopactive {link = "SnippetTabstop"}
+special {fg = 12233741}
+specialchar {link = "Special"}
+specialcomment {link = "Special"}
+specialkey {fg = 6519169}
+spellbad {cterm = {undercurl = true},sp = 14364717,undercurl = true}
+spellcap {cterm = {undercurl = true},sp = 7172548,undercurl = true}
+spelllocal {cterm = {undercurl = true},sp = 2728600,undercurl = true}
+spellrare {cterm = {undercurl = true},sp = 11699456,undercurl = true}
+statement {fg = 10582988}
+statusline {bg = 11320,fg = 11384759}
+statuslinenc {bg = 5145,fg = 10398636}
+statuslineterm {link = "StatusLine"}
+statuslinetermnc {link = "StatusLineNC"}
+stderrmsg {link = "ErrorMsg"}
+stdoutmsg vim.empty_dict()
+storageclass {link = "Type"}
+string {fg = 10407530}
+structure {link = "Type"}
+substitute {bg = 14364717,fg = 5145}
+tabline {bg = 406848,fg = 10398636,sp = 10398636}
+tablinefill {bg = 406848,fg = 10398636}
+tablinesel {bg = 1250066,fg = 11699456}
+tag {link = "Special"}
+termcursor {cterm = {reverse = true},reverse = true}
+title {bold = true,cterm = {bold = true},fg = 13192214}
+todo {bold = true,cterm = {bold = true},fg = 14738154}
+todobgfix {bg = 14364717,bold = true,fg = 1250066}
+todobghack {bg = 11699456,bold = true,fg = 1250066}
+todobgissue {bg = 14364717,bold = true,fg = 1250066}
+todobgnote {bg = 2728600,bold = true,fg = 1250066}
+todobgperf {bg = 6402031,bold = true,fg = 1250066}
+todobgrefactor {bg = 6402031,bold = true,fg = 1250066}
+todobgtest {bg = 6402031,bold = true,fg = 1250066}
+todobgtodo {bg = 2526163,bold = true,fg = 1250066}
+todobgwarn {bg = 11699456,bold = true,fg = 1250066}
+todofgfix {fg = 14364717}
+todofghack {fg = 11699456}
+todofgissue {fg = 14364717}
+todofgnote {fg = 2728600}
+todofgperf {fg = 6402031}
+todofgrefactor {fg = 6402031}
+todofgtest {fg = 6402031}
+todofgtodo {fg = 2526163}
+todofgwarn {fg = 11699456}
+todosignfix {fg = 14364717}
+todosignhack {fg = 11699456}
+todosignissue {fg = 14364717}
+todosignnote {fg = 2728600}
+todosignperf {fg = 6402031}
+todosignrefactor {fg = 6402031}
+todosigntest {fg = 6402031}
+todosigntodo {fg = 2526163}
+todosignwarn {fg = 11699456}
+troublecount {fg = 13776513}
+troublenormal {fg = 10398636}
+troublepreview vim.empty_dict()
+troubletext {fg = 10398636}
+type {fg = 15057019}
+typedef {link = "Type"}
+ufocursorfoldedline {link = "CursorLine"}
+ufofoldedbg {link = "Visual"}
+ufofoldedellipsis {link = "Comment"}
+ufofoldedfg {fg = 11648703}
+ufopreviewcursorline {link = "Visual"}
+ufopreviewsbar {link = "PmenuSbar"}
+ufopreviewthumb {link = "PmenuThumb"}
+ufopreviewwinbar {link = "UfoFoldedBg"}
+underlined {cterm = {underline = true},underline = true}
+vertsplit {fg = 6519169}
+visual {bg = 2369370}
+visualnos {bg = 2369370}
+vm_cursor {link = "Visual"}
+vm_extend {link = "PmenuSel"}
+vm_insert {link = "DiffChange"}
+vm_mono {link = "IncSearch"}
+warningmsg {bold = true,cterm = {bold = true},fg = 13192214}
+whichkey {fg = 2728600}
+whichkeyborder {bg = 1250066,fg = 406848}
+whichkeydesc {fg = 13776513}
+whichkeygroup {fg = 2526163}
+whichkeyicon {default = true,link = "@markup.link"}
+whichkeyiconazure {link = "MiniIconsAzure"}
+whichkeyiconblue {link = "MiniIconsBlue"}
+whichkeyiconcyan {link = "MiniIconsCyan"}
+whichkeyicongreen {link = "MiniIconsGreen"}
+whichkeyicongrey {link = "MiniIconsGrey"}
+whichkeyiconorange {link = "MiniIconsOrange"}
+whichkeyiconpurple {link = "MiniIconsPurple"}
+whichkeyiconred {link = "MiniIconsRed"}
+whichkeyiconyellow {link = "MiniIconsYellow"}
+whichkeynormal {default = true,link = "NormalFloat"}
+whichkeyseparator {fg = 5729652}
+whichkeytitle {default = true,link = "FloatTitle"}
+whichkeyvalue {fg = 7172548}
+whitespace {fg = 5729652}
+wildmenu {bg = 406848,cterm = {reverse = true},fg = 15591379,reverse = true}
+winbar {link = "Normal"}
+winbarnc {link = "Normal"}
+winseparator {bold = true,cterm = {bold = true},fg = 406848}
+yankyput {link = "IncSearch"}
+yankyyanked {link = "IncSearch"}

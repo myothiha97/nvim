@@ -30,7 +30,9 @@ return {
             vim.notify("Save the file first, Obsidian opens files from disk", vim.log.levels.WARN)
             return
           end
-          vim.cmd("silent update")
+          -- A readonly or nomodifiable buffer cannot be written (E45/E21). Obsidian
+          -- then shows the file as it is on disk, which is fine.
+          pcall(vim.cmd, "silent update")
           vim.system({ "open", "-a", "Obsidian", file }, {}, function(result)
             if result.code ~= 0 then
               vim.schedule(function()

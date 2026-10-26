@@ -7,8 +7,7 @@ Added 2026-09-23/24. All code lives in `lua/plugins/git.lua` (gitsigns spec).
 | key | mode | action | where |
 | --- | --- | --- | --- |
 | `gn` / `gN` | n | open next / prev changed file, cursor on its first hunk | gitsigns `keys` |
-| `]]` / `[[` | n | next / prev hunk in this file | `on_attach` |
-| `]c` / `[c` | n | same as `]]`/`[[` (kept; native diff jump inside a diff split) | `on_attach` |
+| `]c` / `[c` | n | next / prev hunk in this file (native diff jump inside a diff split) | `on_attach` |
 | `ghp` | n | preview hunk popup | `on_attach` |
 | `ghs` / `ghr` | n | stage / reset the hunk under the cursor | `on_attach` |
 | `ghs` / `ghr` | v | stage / reset only the selected lines (partial hunk) | `on_attach` |
@@ -75,8 +74,11 @@ on line 1, after up to 10 s of cheap polling in the background.
   untouched: the mapping is normal mode only.
 - **`gh`**: native "start Select mode", unused. A bare `gh` now waits
   `timeoutlen` (300 ms) before acting.
-- **`]]`/`[[`**: LazyVim maps them to `Snacks.words.jump` only while
-  `Snacks.words` is enabled, and it is off in `lua/plugins/snacks.lua`.
+- **No `]]`/`[[` for hunks (dropped 2026-10-26).** They were a second pair
+  next to `]c`/`[c`, on the belief that nothing else claims them. Wrong:
+  Neovim's own ftplugins map them buffer-locally as section jumps (markdown
+  headers, Go/Python/Vim sections), and the gitsigns map replaced those in
+  every git-tracked file, so `]]` in a tracked `.md` went to a hunk.
 - **`n`/`N`**: LazyVim's global search keys; ours are buffer-local and removed
   when the popup is gone.
 

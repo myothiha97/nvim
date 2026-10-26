@@ -171,6 +171,14 @@ end)(vim.paste)
 -- Performance optimizations
 vim.opt.updatetime = 400 -- faster CursorHold (default 4000ms)
 vim.opt.timeoutlen = 300 -- faster keymap timeout (default 1000ms)
+-- How long a lone <Esc> waits for more bytes before nvim decides it is not an
+-- Alt chord (default 50ms). Measured 2026-10-26 in tmux: <Esc> to normal mode
+-- 61 ms -> 22 ms. It also matters for the insert <M-h>/<M-j>/<M-l> <Nop> maps
+-- (config/keymaps.lua): at 50ms a quick <Esc> then j was read as <M-j> and both
+-- keys were lost. Cmd+J still arrives as one write, so it is still <M-j>.
+-- tmux escape-time is 0, so tmux adds no wait of its own. Raise it only for
+-- slow remote links, where escape sequences can arrive split.
+vim.opt.ttimeoutlen = 10
 vim.opt.signcolumn = "yes" -- fixed signcolumn prevents layout shift
 -- vim.opt.statuscolumn = "%s%=%{v:relnum == 0 ? v:lnum : v:relnum}  %C"
 -- vim.opt.lazyredraw = true -- DISABLED: causes async UI freezes with LSP
