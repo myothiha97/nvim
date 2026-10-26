@@ -26,3 +26,9 @@ They were overridden by explicit confirmation ("ok proceed with these fixes").
 (tmux for Cmd+J, stubs for Copilot and `open`); keymap diff against the phase-0
 baseline shows only the intended changes; startup A/B against `main` is
 52.83 ms vs 52.96 ms median (noise).
+
+**Follow-up the same day (regression fix, not an override):** the L2 `<Nop>`
+maps made a quick `<Esc>` then `j`/`h` (under `ttimeoutlen`, 50 ms) read as
+`<M-j>`/`<M-h>`, losing both keys. `ttimeoutlen` is now 10 in
+`lua/config/options.lua`: fixed at every gap tested (5 to 50 ms), Cmd+J still a
+no-op, and `<Esc>` to normal mode went from 61 to 22 ms.
