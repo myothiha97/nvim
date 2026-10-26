@@ -569,8 +569,10 @@ return {
           end
           -- Only once there is something to fold: before the LSP answers the list is empty,
           -- and marking that as "folded" is what left the real symbols open afterwards.
+          -- The outlined buffer comes from the items, not the current buffer: an async
+          -- LSP reply can run this while another buffer (the panel itself) is current.
           if #filter_memo.result > 0 then
-            request_fold(vim.api.nvim_get_current_buf())
+            request_fold(filter_memo.result[1].buf or vim.api.nvim_get_current_buf())
           end
           return filter_memo.result
         end,

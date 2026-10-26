@@ -7,7 +7,16 @@ local ghost_debounce = 250 -- ms, passed to suggestion.debounce below
 -- against the lowercased name / path in should_attach below.
 local secret_names = {
   "^%.env", -- .env, .env.local, .envrc
+  "%.env$", -- prod.env, docker/app.env
   "secret",
+  "^%.dev%.vars$", -- Cloudflare Wrangler secrets
+  "^%.pgpass$",
+  "^%.vault%-token$",
+  "kubeconfig",
+  "%.jks$", -- Java keystores
+  "%.keystore$",
+  "%.ovpn$", -- VPN profiles embed keys
+  "^service%-account.*%.json$", -- GCP service account keys
   "%.pem$",
   "%.key$",
   "%.p12$",
@@ -21,7 +30,7 @@ local secret_names = {
   "^%.git%-credentials$",
   "^credentials", -- ~/.aws/credentials, credentials.json
 }
-local secret_dirs = { "/.ssh/", "/.kube/", "/.aws/", "/.gnupg/", "/.docker/" }
+local secret_dirs = { "/.ssh/", "/.kube/", "/.aws/", "/.gnupg/", "/.docker/", "/secret/", "/secrets/" }
 
 -- Must be set before the copilot LSP initializes: copilot-lsp reads it once there.
 vim.g.copilot_nes_debounce = nes_debounce
@@ -139,6 +148,11 @@ return {
         if not vim.g.copilot_enabled or vim.b.nes_state then
           return -- toggle off, or a suggestion is already showing
         end
+        -- A macro replay enters insert mode once per iteration, so `100@a` would
+        -- fire ~100 requests at once and burn the quota.
+        if vim.fn.reg_executing() ~= "" then
+          return
+        end
         -- CursorHold re-arms after ANY key, including the <Esc> that dismissed
         -- the NES, so without this check the same edit comes back ~updatetime
         -- later. Only re-request once the text or the cursor line has changed.
@@ -149,9 +163,15 @@ return {
             return
           end
         end
-        -- Errors if the client is not started yet. Mark the spot only once the
-        -- request was actually sent, so a failed early attempt is retried.
-        local ok = pcall(nes.request_nes, "copilot")
+        -- request_nes returns quietly (no error) when the buffer is not attached
+        -- yet, which happens just after Copilot loads. Send only to a client
+        -- attached to this buffer, so the spot is marked only once the request
+        -- really went out and an early attempt is retried.
+        local client = vim.lsp.get_clients({ name = "copilot", bufnr = 0 })[1]
+        if not client then
+          return
+        end
+        local ok = pcall(nes.request_nes, client)
         if ok and key then
           vim.b.copilot_nes_last = key
         end
@@ -327,7 +347,13 @@ return {
         -- CursorMovedI until InsertLeave.
         if not vim.g.copilot_enabled then
           suggestion.dismiss()
-          nes.clear()
+          -- nes.clear() only clears the current buffer; an NES left in another
+          -- split would still apply on <Tab> there.
+          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.api.nvim_buf_is_loaded(buf) and vim.b[buf].nes_state then
+              vim.api.nvim_buf_call(buf, nes.clear)
+            end
+          end
         elseif vim.api.nvim_get_mode().mode:find("i") then
           -- Enabling while in insert mode: fire a suggestion now instead of waiting
           -- for the next keystroke, so ghost text appears the moment you toggle on.
