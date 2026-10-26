@@ -1,6 +1,6 @@
-# Deep config review — QUEUED, not started
+# Deep config review — IN PROGRESS
 
-**Status: not started. Queued 2026-09-09, to run 2026-09-10 or later.**
+**Status: phase 0 done 2026-10-26 (baseline in `deep-config-review-baseline/`), except the two measurements added that day. Phase 1 next.**
 **Plan refreshed 2026-10-24** against the live config: sizes, line ranges, phase 2
 and the skip list were stale (CodeCompanion is now disabled, Copilot is live).
 **Estimated: 4 sessions.** Do not try to do it in one.
@@ -78,16 +78,25 @@ on. See the skip list in phase 5.
 
 Capture what "unchanged" means so any later fix can be proven safe.
 
-- [ ] Snapshot all highlight groups. The method from 2026-09-09:
+- [x] Snapshot all highlight groups. The method from 2026-09-09:
       dump `nvim_get_hl` for every name in `getcompletion("", "highlight")`,
       sorted, to a file. **Filter out `lualine_[abcxyz]_<n>_*`** — those numbers
       are allocation counters that shift without any colour changing, and they
       will produce a false diff.
-- [ ] Snapshot startup: `--startuptime`, 5 runs. Current baseline is **~50 ms**,
+- [x] Snapshot startup: `--startuptime`, 5 runs. Current baseline is **~50 ms**,
       slowest entry `require('config.lazy')` at 23.7 ms.
-- [ ] Snapshot the keymap table for `n`, `i`, `v`, `t` from a **non-headless**
+- [x] Snapshot the keymap table for `n`, `i`, `v`, `t` from a **non-headless**
       instance, or accept that keymaps.lua findings cannot be probed headlessly.
-- [ ] Confirm a clean boot: `XDG_STATE_HOME=/tmp/nvs XDG_CACHE_HOME=/tmp/nvc nvim --headless '+qa'`.
+- [x] Confirm a clean boot: `XDG_STATE_HOME=/tmp/nvs XDG_CACHE_HOME=/tmp/nvc nvim --headless '+qa'`.
+- [ ] Added 2026-10-26: measure insert-mode cost (per-keystroke time with
+      blink.cmp and Copilot loaded) in a Go, TS, Bash, Python, Rust, C/C++ and
+      C# file. Phase 0 only measured normal mode, because both load on first use.
+      Record per language which LSP attached: C/C++ (`clangd`) and C# have no
+      extra enabled in `lazyvim.json` (deferred to 2027+), so those two measure
+      blink + Copilot + treesitter without an LSP. Say so next to their numbers.
+- [ ] Added 2026-10-26: run `nvim --startuptime /tmp/s.log +q` once in Ghostty
+      and check `require('vim._core.defaults')`. It took 114 ms in the test
+      terminal (likely a terminal query timing out there, not the config).
 
 ### Phase 1 — `lua/config/keymaps.lua`, 943 lines (1 session)
 
