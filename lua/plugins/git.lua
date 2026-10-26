@@ -259,10 +259,9 @@ return {
         end
         map("n", "]c", next_hunk, "Next hunk")
         map("n", "[c", prev_hunk, "Prev hunk")
-        -- ]]/[[ as a second pair. LazyVim binds them to Snacks.words only while words
-        -- is enabled, and it is off in plugins/snacks.lua, so nothing else claims them.
-        map("n", "]]", next_hunk, "Next hunk")
-        map("n", "[[", prev_hunk, "Prev hunk")
+        -- No ]]/[[ pair for hunks (dropped 2026-10-26). Neovim's ftplugins own those
+        -- keys as section jumps (markdown headers, Go/Python/Vim sections), and a
+        -- buffer-local map here silently replaced them in every git-tracked file.
 
         -- Hunk actions. `ghs`/`ghr`/`ghp` are the primary keys; the <leader>gh* twins are
         -- SECONDARY, kept for muscle memory until they are rebound to something else.
