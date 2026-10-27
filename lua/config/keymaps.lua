@@ -252,12 +252,15 @@ end, { desc = "Dismiss hover docs / Clear highlights" })
 -- Save file (Ctrl+S, works in normal and insert mode)
 vim.keymap.set({ "n", "i" }, "<C-s>", "<cmd>w<cr>", { desc = "Save File" })
 
--- local scroll_depth = 3 -- current live setting, best value for scrolling with mac trackpad
-local scroll_depth = 1 -- temporarily set to 1 since smaller value is better scrolling with mouse scroll wheel
+-- 1 line per scroll event (2026-10-27). Per-device speed now lives in Ghostty's
+-- mouse-scroll-multiplier: discrete:1 = 1 line per wheel notch, precision:3 =
+-- trackpad speed (matches the old depth 3 that was best for the trackpad).
+-- Tune speed there, not here.
+local scroll_depth = 1
 
 -- Mouse/trackpad: scroll viewport without moving cursor (VSCode/WebStorm behavior)
 -- <C-e> scrolls viewport down, <C-y> scrolls viewport up — cursor stays in place
--- Adjust `scroll_depth` above if scrolling feels too slow or too fast.
+-- If scrolling feels too slow or too fast, adjust Ghostty's multiplier (see above).
 -- TODO(smooth-scroll): The timer-based experiment is parked in
 -- lua/config/smooth-scroll.lua but intentionally not enabled. It improved
 -- transition feel in some files, then stuttered/paused in heavier TSX buffers.
@@ -351,14 +354,14 @@ vim.keymap.set({ "n", "v" }, "<C-u>", "<C-u>zz", { desc = "Scroll Up and Recente
 vim.keymap.set({ "n", "v" }, "<C-f>", "<C-f>zz", { desc = "Scroll Down Page and Recenter" })
 vim.keymap.set({ "n", "v" }, "<C-b>", "<C-b>zz", { desc = "Scroll Up Page and Recenter" })
 
--- <C-e> / <C-y>: scroll a visible info popup (LSP hover, signature help,
--- diagnostic float) in place without moving focus into it. Semantically a
--- match: <C-e>/<C-y> are vim's "scroll viewport by N lines without moving
--- cursor" keys — ideal for smooth doc reading. POPUP_SCROLL_LINES tunes the
--- per-press step. When no popup is visible — or the cursor is in a panel
--- rather than a file window, see the gate below — fall back to native
--- <C-e>/<C-y> (no recenter — these are fine viewport nudges, not jumps),
--- which scrolls whatever window has focus. nvim_win_call
+-- <C-e> / <C-y>: scroll a visible LSP doc popup (hover, signature help) in
+-- place without moving focus into it. Semantically a match: <C-e>/<C-y> are
+-- vim's "scroll viewport by N lines without moving cursor" keys — ideal for
+-- smooth doc reading. POPUP_SCROLL_LINES tunes the per-press step. When no
+-- LSP doc popup is visible — or the cursor is in a panel rather than a file
+-- window, see the gate below — fall back to native <C-e>/<C-y> (no recenter —
+-- these are fine viewport nudges, not jumps), which scrolls whatever window
+-- has focus. nvim_win_call
 -- runs `normal!` with the float temporarily current and restores focus; the
 -- buffer never changes, so the mouse-hover BufLeave-close path
 -- (mouse-hover.lua) won't fire. No collision with the existing scroll-wheel
@@ -380,13 +383,47 @@ end
 -- cursor moves inside the panel. So pressing <C-e> in the focused outline
 -- found that preview and scrolled the CODE under it while the outline itself
 -- stood still, with nothing logged. Same class as the picker-over-Oil case
--- the snacks_picker skip below was added for.
+-- a snacks_picker skip used to handle; pickers (and Trouble's preview) now
+-- never match, because only LSP doc and diagnostic floats are considered
+-- (see below).
 --
 -- Only the CURRENT tab is searched (a hover left open in another tab is not
 -- visible here), and with several floats the topmost (highest zindex) wins.
 -- A count is honoured on both paths (`5<C-e>`), and the fallback runs with
 -- `normal!` rather than feedkeys, so it happens now, not after whatever input
 -- is still queued (a macro).
+--
+-- Popup scope (2026-10-27): ONLY LSP doc floats and diagnostic floats are
+-- scrolled. Gitsigns hunk previews, pickers and other plugin popups are
+-- skipped, so <C-e>/<C-y> act on the editor while those are open.
+-- Detection: open_floating_preview tags its window with the caller's focus_id
+-- as a window variable (Nvim 0.12 runtime lsp/util.lua, nvim_win_set_var):
+-- "textDocument/hover" for K hover, "textDocument/signatureHelp" for signature
+-- help. Gitsigns uses its own popup, so it never matches. rustaceanvim's
+-- `:RustLsp hover actions` uses its own id. mouse-hover.lua's popup is LSP
+-- hover too but passes no focus_id; it marks its buffer with
+-- `mouse_hover_popup` instead.
+-- Diagnostic floats (2026-10-27, added back so long TS errors scroll):
+-- vim.diagnostic.open_float uses its scope as focus_id ("line" for
+-- <leader>cd, "cursor" for ]d/[d jump floats, "buffer"). <leader>cd focuses
+-- its float, so <C-e> there is native anyway; this covers the unfocused ones.
+local LSP_DOC_FOCUS_IDS = {
+  "textDocument/hover",
+  "textDocument/signatureHelp",
+  "rust-analyzer-hover-actions",
+  "line",
+  "cursor",
+  "buffer",
+}
+local function is_lsp_doc_float(win)
+  for _, id in ipairs(LSP_DOC_FOCUS_IDS) do
+    if vim.w[win][id] ~= nil then
+      return true
+    end
+  end
+  return vim.b[vim.api.nvim_win_get_buf(win)].mouse_hover_popup == true
+end
+
 local function scroll_popup_or(key)
   local count = vim.v.count1
   local keys = vim.api.nvim_replace_termcodes(key, true, true, true)
@@ -394,11 +431,8 @@ local function scroll_popup_or(key)
     local popup, top_z = nil, -1
     for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
       local cfg = vim.api.nvim_win_get_config(win)
-      if cfg.relative ~= "" and cfg.focusable ~= false and (cfg.zindex or 50) >= top_z then
-        local buf = vim.api.nvim_win_get_buf(win)
-        if not vim.bo[buf].filetype:match("^snacks_picker") then
-          popup, top_z = win, cfg.zindex or 50
-        end
+      if cfg.relative ~= "" and (cfg.zindex or 50) >= top_z and is_lsp_doc_float(win) then
+        popup, top_z = win, cfg.zindex or 50
       end
     end
     if popup then
