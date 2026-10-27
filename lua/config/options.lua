@@ -36,6 +36,11 @@ vim.g.snacks_animate = false
 
 -- enabled mouse
 vim.o.mouse = "a"
+-- 1 line per wheel event wherever the wheel is not remapped. Snacks pickers
+-- (incl. the explorer) bind their own wheel handler that scrolls by this value,
+-- so the keymaps.lua scroll_depth never reaches them (default ver:3). hor keeps
+-- its default. Per-device speed lives in Ghostty's mouse-scroll-multiplier.
+vim.o.mousescroll = "ver:1,hor:6"
 -- popup_setpos: right-click moves the cursor to the click first, so LSP
 -- hover / signature_help fire on the symbol under the pointer (not wherever
 -- the cursor happened to be). Use "popup" if you'd rather keep the cursor.
