@@ -20,9 +20,10 @@ return {
       max_width = { 43, 0.30 }, -- Lesser of 43 columns or 28% width
     }
 
-    -- Collapse all symbols by default on startup
-    opts.manage_folds = true
-    opts.start_folded = true
+    opts.manage_folds = false
+    -- Block two-way sync between your code folds and the aerial tree
+    opts.link_folds_to_tree = false
+    opts.link_tree_to_folds = false
     return opts
   end,
   config = function(_, opts)
