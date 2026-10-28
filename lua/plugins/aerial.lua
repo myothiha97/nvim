@@ -1,55 +1,126 @@
--- WIP:
--- post_parse_symbol still does not able to display certain react symbols like built in hooks and custom hooks
--- for Go, the aerial config still cant distinguish betweeen normal function and method
+-- React-aware symbol list for JS/TS/JSX/TSX. The extra nodes (hook calls,
+-- destructured hook results, object methods, `obj.fn = () => {}`) come from
+-- after/queries/{javascript,typescript,tsx}/aerial.scm. This function decides
+-- what each symbol is shown as, by reading its treesitter node:
+--   Hook       use*() calls and custom hook definitions
+--   Component  PascalCase functions, incl. memo()/forwardRef() (JSX languages only)
+--   Function   other function values, plus useCallback()/useMemo() results
+--   Object     an object literal holding functions, so its methods nest under it
+-- Every other variable is hidden.
+--
+-- Do not go back to matching source text: `text:find("memo")` listed
+-- `const memoryLimit = 5` as a function, and it cost a buffer read per symbol.
+
+local ECMA_LANGS = { javascript = true, typescript = true, tsx = true }
+-- Plain .ts has no JSX, so a PascalCase function there is a factory or a
+-- decorator (NestJS `Roles()`), not a component. `javascript` also parses .jsx.
+local COMPONENT_LANGS = { javascript = true, tsx = true }
+
+local FUNCTION_NODES = { arrow_function = true, function_expression = true, generator_function = true }
+-- Calls whose result is still a function or component, so they keep the
+-- function/component row instead of the hook row
+local FUNCTION_WRAPPERS = { useCallback = true, useMemo = true, memo = true, forwardRef = true }
+
+local get_node_text = vim.treesitter.get_node_text
+
+local function is_hook_name(name)
+  return name:match("^use%u") ~= nil
+end
+
+-- `useState` for useState(...), `memo` for React.memo(...)
+local function callee_name(call, bufnr)
+  local fn = call:field("function")[1]
+  if fn and fn:type() == "member_expression" then
+    fn = fn:field("property")[1]
+  end
+  if fn and (fn:type() == "identifier" or fn:type() == "property_identifier") then
+    return get_node_text(fn, bufnr)
+  end
+end
+
+local function has_function_member(object)
+  for child in object:iter_children() do
+    local type = child:type()
+    if type == "method_definition" then
+      return true
+    end
+    if type == "pair" then
+      local value = child:field("value")[1]
+      if value and FUNCTION_NODES[value:type()] then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+local function set_function_kind(item, lang)
+  if is_hook_name(item.name) then
+    item.kind = "Hook"
+  elseif COMPONENT_LANGS[lang] and item.name:match("^%u") then
+    item.kind = "Component"
+  else
+    item.kind = "Function"
+  end
+end
 
 local post_parse_symbol = function(bufnr, item, ctx)
-  -- 1. Scope exclusively to JS, TS, JSX, and TSX filetypes
-  local ft = vim.bo[bufnr].filetype
-  local js_ts_filetypes = {
-    javascript = true,
-    typescript = true,
-    javascriptreact = true,
-    typescriptreact = true,
-  }
-
-  if not js_ts_filetypes[ft] then
+  -- Only the treesitter backend hands over the matched nodes
+  if ctx.backend_name ~= "treesitter" or not ECMA_LANGS[ctx.lang] then
+    return true
+  end
+  if item.kind ~= "Variable" and item.kind ~= "Function" then
     return true
   end
 
-  -- Catch Variable, Constant, Function, and Component
-  if item.kind == "Variable" or item.kind == "Constant" or item.kind == "Function" or item.kind == "Component" then
-    local end_line = math.min(item.lnum + 2, item.end_lnum or item.lnum)
-    local lines = vim.api.nvim_buf_get_lines(bufnr, item.lnum - 1, end_line, false)
-    local text = table.concat(lines, " ")
-
-    -- Stricter check: Ensures the variable is directly assigned to a function.
-    -- This prevents inline arrows (like inside .find or .map) from being mislabeled.
-    local is_func = text:find("useCallback")
-      or text:find("useMemo")
-      or text:find("forwardRef")
-      or text:find("memo")
-      or text:match("=%s*%(.-%)%s*=>")
-      or text:match("=%s*async%s*%(.-%)%s*=>")
-      or text:match("=%s*function")
-
-    if is_func then
-      -- PascalCase names starting with a capital letter are React components
-      if item.name:match("^[A-Z]") then
-        -- Map to "Component" to give it the unique React icon
-        item.kind = "Component"
-      else
-        item.kind = "Function"
-      end
-      return true
+  local symbol = ctx.match.symbol and ctx.match.symbol.node
+  -- A statement call: useEffect(...) from aerial.scm, or a describe()/it() test
+  -- block from aerial's own query, which must stay a Function
+  if symbol and symbol:type() == "call_expression" then
+    if is_hook_name(item.name) then
+      item.kind = "Hook"
     end
-
-    -- Hide non-function variables (like selectedVariant) and constants
-    if item.kind == "Variable" or item.kind == "Constant" then
-      return false
-    end
+    return true
   end
 
-  return true
+  local value = ctx.match.var_type and ctx.match.var_type.node
+  if not value then
+    -- Function declarations, and JS function variables the base query already typed
+    set_function_kind(item, ctx.lang)
+    return true
+  end
+
+  local type = value:type()
+  if type == "as_expression" or type == "satisfies_expression" then
+    value = value:named_child(0)
+    type = value and value:type()
+  end
+
+  if FUNCTION_NODES[type] then
+    set_function_kind(item, ctx.lang)
+    return true
+  end
+  if type == "call_expression" then
+    local callee = callee_name(value, bufnr)
+    if callee and FUNCTION_WRAPPERS[callee] then
+      set_function_kind(item, ctx.lang)
+      return true
+    end
+    if callee and is_hook_name(callee) then
+      -- "useState [count, setCount]": the hook says what it is, the binding says which
+      item.kind = "Hook"
+      item.name = callee .. " " .. (item.name:gsub("%s+", " "))
+      return true
+    end
+    return false
+  end
+  if type == "object" and has_function_member(value) then
+    item.kind = "Object"
+    return true
+  end
+
+  -- Plain data (selectedVariant, items.find(...), config objects)
+  return false
 end
 
 return {
@@ -102,6 +173,8 @@ return {
     opts.icons = vim.tbl_deep_extend("force", opts.icons or {}, {
       Component = " ",
       ComponentCollapsed = " ", -- Keeps the React icon when the component node is collapsed
+      Hook = "󰛢 ",
+      HookCollapsed = "󰛢 ",
     })
     opts.post_parse_symbol = post_parse_symbol
 
@@ -123,6 +196,8 @@ return {
     -- Run standard base setup
     require("aerial").setup(opts)
     vim.api.nvim_set_hl(0, "AerialComponentIcon", { fg = "#61afef" })
+    -- A link, not a new colour: Hook is a custom kind, so aerial defines no group for it
+    vim.api.nvim_set_hl(0, "AerialHookIcon", { link = "AerialFunctionIcon" })
     -- Force Aerial's hover highlight to use your theme's grep/search highlight color
     vim.api.nvim_set_hl(0, "AerialHoverHighlight", { link = "Search" })
   end,
