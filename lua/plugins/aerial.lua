@@ -123,6 +123,19 @@ local post_parse_symbol = function(bufnr, item, ctx)
   return false
 end
 
+-- `l` in the panel: expand a collapsed row, otherwise jump like <CR>. A leaf or
+-- an already open row has nothing to expand, and aerial's own `tree_open` would
+-- then do nothing at all.
+local function open_or_jump()
+  local bufdata = require("aerial.data").get(0)
+  local item = bufdata and bufdata:item(vim.api.nvim_win_get_cursor(0)[1])
+  if item and bufdata:is_collapsable(item) and bufdata:is_collapsed(item) then
+    require("aerial").tree_open()
+  else
+    require("aerial").select()
+  end
+end
+
 return {
   "stevearc/aerial.nvim",
   keys = {
@@ -189,6 +202,7 @@ return {
     opts.keymaps = {
       -- ["<2-LeftMouse>"] = "actions.tree_toggle", -- Double click to expand/collapse node
       ["<RightMouse>"] = "actions.tree_toggle",
+      ["l"] = { callback = open_or_jump, desc = "Expand the symbol, or jump to it when there is nothing to expand" },
     }
     return opts
   end,
