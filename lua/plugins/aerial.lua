@@ -300,9 +300,20 @@ return {
       opts.layout = {
         default_direction = "right",
         width = nil,
-        min_width = 40,
-        max_width = { 45, 0.32 }, -- Lesser of 45 columns or 35% width
+        -- Width fits the content, capped by max_width (the lesser of 60 columns
+        -- or 35% of the editor); min_width wins over the cap in a narrow pane
+        min_width = 50,
+        max_width = { 60, 0.35 },
+        -- Replacing `layout` drops LazyVim's win_opts, which left the rows flush
+        -- against the window edge. The empty 2-cell sign column is the left
+        -- padding; statuscolumn = "" stops LazyVim's global one drawing in it.
+        win_opts = {
+          signcolumn = "yes",
+          statuscolumn = "",
+        },
       }
+      -- Nesting shows through indentation alone, without tree-guide lines
+      opts.show_guides = false
       opts.backends = { "treesitter", "lsp", "markdown", "man" }
       opts.filter_kind = {
         "Class",

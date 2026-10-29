@@ -177,9 +177,9 @@ return {
   init = function()
     -- Brighter indent-guide color — the theme's default links SnacksIndent to a
     -- near-invisible group. Safe to override globally: SnacksIndent is used only
-    -- when Snacks indent is enabled. Tweak INDENT_GUIDE_FG to taste
-    -- (#586e75 = solarized base01 / comment brightness; #839496 = body-text bright).
-    local INDENT_GUIDE_FG = "#586e75"
+    -- when Snacks indent is enabled. Same neutral as the explorer tree lines
+    -- (`surface.guide` in config/ui.lua); was solarized base01 #586e75 until 2026-10-29.
+    local INDENT_GUIDE_FG = require("config.ui").surface.guide
     local function set_snacks_hl()
       vim.api.nvim_set_hl(0, "SnacksPickerMatch", { link = "DiffText" })
       -- File and folder NAMES in the picker lists: ONE neutral grey, a step below
@@ -248,7 +248,11 @@ return {
       -- room too: every candidate above C* 20 clips the red channel to 0 at this
       -- lightness. The hue gap does the rest of the work -- 229 vs the cursor
       -- row's 287.
-      vim.api.nvim_set_hl(0, "SnacksExplorerActiveFile", { bg = "#003f52" })
+      --
+      -- Warm taupe since 2026-10-29 (`surface.active_file` in config/ui.lua): the
+      -- teal was tuned for the retired teal background. It sits 6 L* below the
+      -- slate cursor row, and warm against cool keeps the two rows apart.
+      vim.api.nvim_set_hl(0, "SnacksExplorerActiveFile", { bg = require("config.ui").surface.active_file })
       -- Invisible text: fg matched to the background. Used only through the
       -- explorer input's `winhighlight`, to blank the `x/y` counter (see the
       -- explorer source below).

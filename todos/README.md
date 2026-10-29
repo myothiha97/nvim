@@ -44,6 +44,9 @@ Status column meanings:
 | [`freeze-override-2026-09-24.md`](freeze/freeze-override-2026-09-24.md)                           | green strings, keys follow members; one hex and one link, scope held to the todo                                                     | record |
 | [`freeze-override-2026-10-22.md`](freeze/freeze-override-2026-10-22.md)                           | inline error diagnostics; one line, scope held                                                                                       | record |
 | [`freeze-override-2026-10-24-copilot-load-on-use.md`](freeze/freeze-override-2026-10-24-copilot-load-on-use.md) | Copilot loads on first use instead of every file open; load trigger only | record |
+| [`freeze-override-2026-10-29-aerial-spacing.md`](freeze/freeze-override-2026-10-29-aerial-spacing.md) | aerial panel left padding, no tree guides, wider panel; scope grew once | record |
+| [`freeze-override-2026-10-29-vscode-bg.md`](freeze/freeze-override-2026-10-29-vscode-bg.md) | editor bg tried at VS Code's `#16181d`, reverted the same day; candidate parked for the checkpoint | record |
+| [`freeze-override-2026-10-29-teal-ui-surfaces.md`](freeze/freeze-override-2026-10-29-teal-ui-surfaces.md) | leftover teal UI surfaces moved to neutral values derived from `ui.bg`, incl. the completion doc popup; UI only | record |
 
 Rule 10 in [`process/discipline-stop-rules.md`](process/discipline-stop-rules.md)
 is what requires an override to leave a trace here.
@@ -65,6 +68,7 @@ is what requires an override to leave a trace here.
 | [`lazy-border-match-snacks-picker.md`](theme/lazy-border-match-snacks-picker.md) | the `:Lazy` float is the one framed panel not wearing the snacks picker ring. lazy.nvim never remaps `FloatBorder`. Link the whole group, fg alone is invisible          | open          |
 | [`string-member-separation.md`](theme/string-member-separation.md)               | the LAST theme item: string/member colours: PARKED WIP in `custom-v4` + `custom-swap*`; live is back on cyan strings. Resume from the notes file                   | open          |
 | [`palette-checkpoint-ideas.md`](theme/palette-checkpoint-ideas.md)             | one-line colour ideas parked while the palette is closed; review at the 2026-12-31 checkpoint                                                                   | open          |
+| [`background-16181d-candidate.md`](theme/background-16181d-candidate.md)     | editor bg `#16181d` vs live `#131312`: measured, small comfort gain, no readability gain. Decide at the checkpoint                                                   | open          |
 | [`comment-no-italic.md`](theme/comment-no-italic.md)                             | drop the italic on comments, keep the colour. Same as E6 option 1 in `theme-enhancements.md`                                                                     | open          |
 | [`rainbow-brackets-and-operator-colours.md`](theme/rainbow-brackets-and-operator-colours.md) | rainbow bracket pairs plus a distinct operator colour. Plugin trial works in Lua/Go/Python, broken in JSX/TSX | open          |
 

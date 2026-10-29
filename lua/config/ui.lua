@@ -87,6 +87,11 @@ local reference = {
     second_darkest = "#131312",
     darkest = "#10100f",
   },
+  -- Checkpoint candidates, not live. Findings: todos/theme/background-16181d-candidate.md
+  one_dark_pro_vscode = {
+    darker = "#23272e", -- theme's own editor bg; reads brighter than VS Code shows it
+    darker_custom = "#16181d", -- VS Code colorCustomizations override of One Dark Pro Darker
+  },
 }
 local status_line = {
   light_matte = "#222221",
@@ -94,7 +99,7 @@ local status_line = {
   darker_matte = "#171716",
 }
 
-return {
+local M = {
   -- bg = reference.black_matte_color.darkest,
   bg = reference.black_matte_color.second_darkest, -- start trialling from 1st Oct 2026
   -- bg = candidates.teal, -- current live color,
@@ -102,3 +107,38 @@ return {
   candidates = candidates,
   reference = reference,
 }
+
+-- Mixes `hex` toward white by `amount` (0..1), so the result keeps its tint.
+local function lift(hex, amount)
+  local function channel(i)
+    local value = tonumber(hex:sub(i, i + 1), 16)
+    return math.floor(value + (255 - value) * amount + 0.5)
+  end
+  return string.format("#%02x%02x%02x", channel(2), channel(4), channel(6))
+end
+
+-- Neutral UI surfaces derived from `bg`, so they move with it. They replace the
+-- theme's teal base04/base03/base02 ramp, which was tuned for the retired teal
+-- background (#001014) and showed as teal bands on the black matte one.
+M.surface = {
+  panel = lift(M.bg, 0.03), -- base04: popup panels (Pmenu)
+  raised = lift(M.bg, 0.09), -- base03: native StatusLine, Pmenu scrollbar
+  selection = lift(M.bg, 0.12), -- base02: borders, separators, ColorColumn
+  -- Explorer active-file band. Warm taupe against the cool `list_cursor`: warm
+  -- means "open file", cool means "cursor here". dE00 9.0 from bg and 11.5 from
+  -- the slate, 6 L* below it so the cursor row stays the stronger mark. #37332b
+  -- (C* 5.7) read too heavy; a lighter plain grey drifted toward the slate. 2026-10-29.
+  active_file = "#312f2b",
+  -- The one "selected row" colour: picker, explorer, outline, completion menu,
+  -- Pmenu and Oil. A muted slate, not bg-derived: a little hue makes the row
+  -- easier to find than plain grey (dE00 15.6 vs 13.2 on #131312) without the
+  -- old violet's loss of text contrast. Measured 2026-10-29.
+  list_cursor = "#383c4a",
+  -- Softer step down, if the slate still feels heavy after a few days of use:
+  -- dE00 14.3 from bg (catppuccin's PmenuSel level), 10.7 from the active-file
+  -- band, body text 6.09:1. Still easy to find in a list.
+  -- list_cursor = "#353845",
+  guide = lift(M.bg, 0.19), -- explorer tree lines and indent guides
+}
+
+return M

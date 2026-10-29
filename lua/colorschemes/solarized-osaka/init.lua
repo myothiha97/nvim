@@ -30,16 +30,25 @@ return {
     -- band is not new -- the 2026-09-05 winbar flattening is what made it stand
     -- out, not a regression.
     --
-    -- WARN: SILENT NO-OP. `bg_popup` is deliberately NOT set and must stay unset
-    -- -- it is not the key it looks like, and the completion menu depends on it
-    -- staying base04. Measured.
+    -- WARN: SILENT NO-OP. `bg_popup` must stay EQUAL to base04 -- it is not the
+    -- key it looks like, and the completion menu depends on it. Measured.
+    --
+    -- The dark ramp (base04/base03/base02) follows `bg` too since 2026-10-29: the
+    -- theme's teal values were tuned for the retired teal background. The theme
+    -- derives `bg_popup` and `bg_highlight` from them BEFORE this hook runs, so
+    -- both are re-pointed here or they keep the old teal.
     on_colors = function(c)
-      local bg = require("config.ui").bg
-      c.bg = bg
-      c.bg_float = bg
-      c.bg_sidebar = bg
+      local ui = require("config.ui")
+      c.bg = ui.bg
+      c.bg_float = ui.bg
+      c.bg_sidebar = ui.bg
       -- c.bg_statusline = bg -- current live
-      c.bg_statusline = ui_color.status_line.dark_matte -- start trialling at 1st Oct 2026,
+      c.bg_statusline = ui.status_line.dark_matte -- start trialling at 1st Oct 2026,
+      c.base04 = ui.surface.panel
+      c.base03 = ui.surface.raised
+      c.base02 = ui.surface.selection
+      c.bg_popup = c.base04
+      c.bg_highlight = c.base03
     end,
     -- NO `on_colors` FOR SYNTAX. The theme's base ramp (green500, orange500,
     -- blue500, cyan500) is shared with the UI, so a syntax choice there silently
@@ -580,7 +589,7 @@ return {
       -- Oil-only current-row band: a file list needs a row marker even though the
       -- editor's own CursorLine band is off. Oil remaps CursorLine -> OilCursorLine
       -- via winhighlight.
-      hl.OilCursorLine = { bg = c.base02 }
+      hl.OilCursorLine = { bg = ui_color.surface.list_cursor }
 
       -- The focused row of a LIST panel -- picker, picker preview, and the outline
       -- panel, which remaps its CursorLine here (lua/plugins/trouble.lua).
@@ -607,9 +616,17 @@ return {
       -- because it is the same hue family as the active-file band and the focused
       -- row then reads as one thing with the open file. Violet against that teal
       -- is the separation.
-      hl.ListCursorLine = { bg = "#3b4261" }
+      --
+      -- Muted slate since 2026-10-29 (`surface.list_cursor` in config/ui.lua),
+      -- shared by every selected row. Against the warm taupe active-file band
+      -- (`surface.active_file`) it separates by lightness and hue: dE00 11.5.
+      -- hl.ListCursorLine = { bg = "#3b4261" } -- violet, until 2026-10-29
+      hl.ListCursorLine = { bg = ui_color.surface.list_cursor }
       hl.SnacksPickerListCursorLine = "ListCursorLine"
       hl.SnacksPickerPreviewCursorLine = "ListCursorLine"
+      -- Explorer tree lines. snacks links them to `LineNr` (teal grey) with
+      -- `default = true`, so this definition wins.
+      hl.SnacksPickerTree = { fg = ui_color.surface.guide }
       --
       -- WARN: SILENT FAILURE -- this CANNOT be scoped to the explorer alone, and
       -- both ways of trying look like they work until you look at the window:
@@ -741,7 +758,8 @@ return {
       -- `winborder` is unset, and the hover float asks for `rounded` directly
       -- in `config/options.lua` and `plugins/lsp.lua`.
       -- hl.FloatBorder = { fg = c.cyan700, bg = c.bg_float } -- previous live
-      hl.FloatBorder = { fg = c.cyan900, bg = c.bg_float } -- start trialling at 1st Oct 2026
+      -- hl.FloatBorder = { fg = c.cyan900, bg = c.bg_float } -- teal, until 2026-10-29
+      hl.FloatBorder = { fg = c.base02, bg = c.bg_float } -- the same neutral as every other border
       -- A link, so the hover ring can never drift from every other popup's.
       hl.LspDocBorder = "FloatBorder"
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
@@ -753,25 +771,31 @@ return {
       -- inline span in a real .md file.
       hl.LspDocInlineCode = { fg = "#8ab4d8", bg = "NONE" }
 
-      -- Completion menu family: `c.bg_popup`, NOT `c.bg_float`. Since 2026-09-04
-      -- `bg_float` is the shared editor background, which left the menu with no
-      -- panel of its own. `bg_popup` is still base04 and is the right key -- these
-      -- are popups, not floats.
-      hl.BlinkCmpDoc = { fg = c.base1, bg = c.bg_popup }
-      hl.BlinkCmpDocBorder = { fg = palette.type, bg = c.bg_popup }
+      -- Completion doc: the same background and border as the menu beside it, so
+      -- the pair reads as one popup. Was teal `bg_popup` with a `palette.type`
+      -- border until 2026-10-29.
+      hl.BlinkCmpDoc = { fg = c.base1, bg = c.bg }
+      hl.BlinkCmpDocBorder = { fg = c.base02, bg = c.bg }
 
       -- hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg_popup } -- current live values
       -- hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg_popup } - current live values
-      hl.BlinkCmpMenu = { fg = c.base1, bg = ui_color.reference.black_matte_color.second_darkest } -- start trialling at 1st Oct 2026
-      hl.BlinkCmpMenuBorder = { fg = c.base02, bg = ui_color.reference.black_matte_color.second_darkest } -- start trialling at 1st Oct 2026
-      hl.BlinkCmpMenuSelection = { fg = c.base2, bg = c.base02, bold = true }
+      -- On the editor background, so it follows `bg` instead of a fixed value.
+      hl.BlinkCmpMenu = { fg = c.base1, bg = c.bg }
+      hl.BlinkCmpMenuBorder = { fg = c.base02, bg = c.bg }
+      hl.BlinkCmpMenuSelection = { fg = c.base2, bg = ui_color.surface.list_cursor, bold = true }
       hl.BlinkCmpLabel = { fg = c.base1, bg = c.none }
       hl.BlinkCmpLabelMatch = { fg = c.blue300, bg = c.none }
 
       hl.Pmenu = { fg = c.base1, bg = c.bg_popup }
-      hl.PmenuSel = { fg = c.base2, bg = c.base02, bold = true }
+      hl.PmenuSel = { fg = c.base2, bg = ui_color.surface.list_cursor, bold = true }
       hl.PmenuSbar = { bg = c.bg_highlight }
       hl.PmenuThumb = { bg = c.base01 }
+      -- Current quickfix entry: the same "selected row" slate as every list.
+      -- Was the theme's blue #1a6397 until 2026-10-29.
+      hl.QuickFixLine = { bg = ui_color.surface.list_cursor, bold = true }
+      -- Native cmdline completion row (only shown with `wildoptions` minus `pum`;
+      -- blink handles the cmdline here). Slate for consistency.
+      hl.WildMenu = { fg = c.base2, bg = ui_color.surface.list_cursor, bold = true }
 
       hl.DiagnosticVirtualTextError = { fg = "#ff3b30", bg = c.none }
       hl.DiagnosticVirtualTextWarn = { fg = "#e0af68", bg = c.none }
