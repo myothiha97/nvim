@@ -44,6 +44,7 @@ Status column meanings:
 | [`freeze-override-2026-09-24.md`](freeze/freeze-override-2026-09-24.md)                           | green strings, keys follow members; one hex and one link, scope held to the todo                                                     | record |
 | [`freeze-override-2026-10-22.md`](freeze/freeze-override-2026-10-22.md)                           | inline error diagnostics; one line, scope held                                                                                       | record |
 | [`freeze-override-2026-10-24-copilot-load-on-use.md`](freeze/freeze-override-2026-10-24-copilot-load-on-use.md) | Copilot loads on first use instead of every file open; load trigger only | record |
+| [`freeze-override-2026-10-29-aerial-spacing.md`](freeze/freeze-override-2026-10-29-aerial-spacing.md) | aerial panel left padding, no tree guides, wider panel; scope grew once | record |
 | [`freeze-override-2026-10-29-vscode-bg.md`](freeze/freeze-override-2026-10-29-vscode-bg.md) | editor bg tried at VS Code's `#16181d`, reverted the same day; candidate parked for the checkpoint | record |
 
 Rule 10 in [`process/discipline-stop-rules.md`](process/discipline-stop-rules.md)
