@@ -87,6 +87,11 @@ local reference = {
     second_darkest = "#131312",
     darkest = "#10100f",
   },
+  -- Checkpoint candidates, not live. Findings: todos/theme/background-16181d-candidate.md
+  one_dark_pro_vscode = {
+    darker = "#23272e", -- theme's own editor bg; reads brighter than VS Code shows it
+    darker_custom = "#16181d", -- VS Code colorCustomizations override of One Dark Pro Darker
+  },
 }
 local status_line = {
   light_matte = "#222221",
