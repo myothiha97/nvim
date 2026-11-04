@@ -23,3 +23,10 @@ right-click Debug menu, hover values while stopped.
 
 **Scope:** debugger only. Plan: project file
 `go-debugger/go-debugger-gui-plan.md`. Branch: `feat/debugger-gui`.
+
+**Phase 2 (branch `feat/debugger-phase2`, Myo asked 2026-11-04):** right-click
+debug entries (MenuPopup), hover values while stopped (`config/mouse-hover.lua`
+asks `debugging.hover` first), `<leader>dm` / `<leader>dM` breakpoint list
+picker, and snacks' Lua profiler moved from `<leader>dpp/dph/dps` to
+`<leader>uPp/uPh/uPs` so `<leader>d` is debugger-only (Myo: "move to different
+suitable place").

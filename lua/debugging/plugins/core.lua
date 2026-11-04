@@ -30,12 +30,14 @@ return {
     "mfussenegger/nvim-dap",
     init = function()
       require("debugging.breakpoints").setup()
-      -- Gutter click -> breakpoint (a normal-mode <LeftMouse> mapping).
+      -- Gutter click -> breakpoint (a normal-mode <LeftMouse> mapping) and
+      -- the right-click debug entries (MenuPopup). Neither loads nvim-dap.
       vim.api.nvim_create_autocmd("User", {
         pattern = "VeryLazy",
         once = true,
         callback = function()
           require("debugging.mouse").setup()
+          require("debugging.menu").setup()
         end,
       })
     end,
@@ -49,6 +51,10 @@ return {
       { "<leader>dv", focus_element("scopes"), desc = "Variables" },
       { "<leader>dW", focus_element("watches"), desc = "Watches" },
       { "<leader>dp", focus_element("breakpoints"), desc = "Breakpoints List" },
+      -- Breakpoint list as a picker (same UI as <leader>xd / xD): m = markers,
+      -- lowercase = this file, uppercase = project.
+      { "<leader>dm", function() require("debugging.list").open("file") end, desc = "Breakpoints (current file)" },
+      { "<leader>dM", function() require("debugging.list").open("project") end, desc = "Breakpoints (project)" },
       -- LazyVim: dB = condition. Clearing a file is more frequent, so dB clears
       -- and the condition prompt moves to dN.
       { "<leader>dB", function() require("debugging.breakpoints").clear_buffer() end, desc = "Clear Breakpoints (File)" },

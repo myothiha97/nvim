@@ -43,18 +43,6 @@ local function gutter_target()
   return buf, pos.line
 end
 
-local function toggle(buf, line)
-  local bps = require("dap.breakpoints") -- loads nvim-dap on first click
-  bps.toggle({}, buf, line)
-  -- Running sessions need the buffer's full list; the key must be present
-  -- even when the list is now empty, or the removal isn't sent.
-  local list = { [buf] = bps.get(buf)[buf] or {} }
-  for _, session in pairs(require("dap").sessions()) do
-    session:set_breakpoints(list)
-  end
-  require("debugging.breakpoints").save()
-end
-
 local function passthrough(key)
   local codes = vim.api.nvim_replace_termcodes(key, true, true, true)
   return function()
@@ -64,7 +52,7 @@ local function passthrough(key)
       return
     end
     if key == "<LeftMouse>" then
-      toggle(buf, line)
+      require("debugging.breakpoints").toggle(buf, line)
     end
   end
 end

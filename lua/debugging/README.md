@@ -20,6 +20,9 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `controls.lua` | The control bar, built in full (no patching of dap-ui's string) |
 | `layout.lua` | When panels open/close, which panels, titles, fixed sizes |
 | `mouse.lua` | Click the gutter (sign area or line number) to toggle a breakpoint without moving the cursor; fold cells still fold |
+| `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file) |
+| `hover.lua` | While stopped, mouse hover shows the value of the hovered expression (called from `config/mouse-hover.lua`; LSP hover is the fallback) |
+| `list.lua` | Breakpoint list picker (`<leader>dm` file, `<leader>dM` project), same look as `<leader>xd` |
 
 ## How a session looks
 
@@ -45,6 +48,7 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>db` | Toggle breakpoint (saved immediately) |
 | `<leader>dB` | Clear breakpoints in this file |
 | `<leader>dX` | Clear all breakpoints in this project (incl. function breakpoints) |
+| `<leader>dm` / `dM` | Breakpoint list (current file / project) in a picker with preview; `<CR>` jumps |
 | `<leader>dN` / `dH` / `dL` | Condition / hit count / log message for the line's breakpoint (float; empty answer clears that field) |
 | `<leader>dF` | Toggle function breakpoint by name (saved) |
 | `<leader>do` / `dO` | Step over / step out (swapped vs LazyVim) |
@@ -81,9 +85,13 @@ nvim-dap-ui, run one Go debug session and check each item:
 | `stacks.lua` + `plugins/ui.lua` | replaces `dapui.components.threads` | Call Stack shows goroutines, click/za collapses | delete the `package.loaded[...]` line in `plugins/ui.lua` |
 | `controls.lua` | replaces `dapui.controls.controls` | bar shows 6 buttons; after exit shows Run Again + exit code | remove `require("dapui.controls").controls = M.render` |
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
+| `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
 
 ## Known limits
 
 See "Known Ceiling" in `todos/languages/nvim-dap-webstorm-parity-and-enhancements.md`
 and §7 of the plan. In short: no deferred-call view, no set-next-statement,
 no single-click tree expansion, no draggable panels.
+
+- Run to Cursor (nvim-dap) clears all breakpoints until the next stop, then puts them back. If a buffer is unloaded in that window, its breakpoints are saved without them.
+- Hover shows a one-line value; nested values are expanded with right-click → Evaluate.

@@ -127,6 +127,79 @@ function M.reset_signs()
   end
 end
 
+-- Toggle the breakpoint on one line (gutter click, right-click menu) and
+-- push the file's list to running sessions.
+function M.toggle(buf, line)
+  local bps = require("dap.breakpoints") -- loads nvim-dap on first use
+  bps.toggle({}, buf, line)
+  -- Running sessions need the buffer's full list; the key must be present
+  -- even when the list is now empty, or the removal isn't sent.
+  local list = { [buf] = bps.get(buf)[buf] or {} }
+  for _, session in pairs(require("dap").sessions()) do
+    session:set_breakpoints(list)
+  end
+  M.save()
+end
+
+-- Picker items (debugging/list.lua) for one buffer, or the whole project
+-- when bufnr is nil. Project scope also lists saved breakpoints of files that
+-- aren't open. Runs only when the list is opened.
+function M.list(bufnr)
+  local items, open_files = {}, {}
+  local function add(file, bp, code)
+    local notes = {}
+    if bp.condition then
+      notes[#notes + 1] = "if " .. bp.condition
+    end
+    if bp.hitCondition then
+      notes[#notes + 1] = "hit " .. bp.hitCondition
+    end
+    if bp.logMessage then
+      notes[#notes + 1] = "log " .. bp.logMessage
+    end
+    local comment = #notes > 0 and table.concat(notes, " · ") or nil
+    code = code and vim.trim(code) or nil
+    items[#items + 1] = {
+      file = file,
+      pos = { bp.line, 0 },
+      comment = comment,
+      line = code,
+      text = ("%s:%d %s %s"):format(file, bp.line, comment or "", code or ""),
+    }
+  end
+  if package.loaded["dap"] then
+    for buf, list in pairs(require("dap.breakpoints").get(bufnr)) do
+      local name = vim.api.nvim_buf_get_name(buf)
+      for _, bp in ipairs(list) do
+        add(name, bp, vim.api.nvim_buf_get_lines(buf, bp.line - 1, bp.line, false)[1])
+      end
+    end
+  end
+  if not bufnr then
+    -- Open files are covered above (their saved entries may be stale).
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_loaded(buf) then
+        open_files[vim.api.nvim_buf_get_name(buf)] = true
+      end
+    end
+    for name, list in pairs(load().files) do
+      if not open_files[name] then
+        for _, bp in ipairs(list) do
+          local ok, lines = pcall(vim.fn.readfile, name, "", bp.line)
+          add(name, bp, ok and lines[bp.line] or nil)
+        end
+      end
+    end
+  end
+  table.sort(items, function(a, b)
+    if a.file ~= b.file then
+      return a.file < b.file
+    end
+    return a.pos[1] < b.pos[1]
+  end)
+  return items
+end
+
 -- Clear every breakpoint in the current file, in the store and in any
 -- running session.
 function M.clear_buffer()

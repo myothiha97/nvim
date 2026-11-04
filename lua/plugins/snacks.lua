@@ -894,6 +894,7 @@ return {
       end,
     },
     { "<leader>gD", false },
+    { "<leader>dps", false }, -- moved to <leader>uPs (config/keymaps.lua)
     {
       "<leader>xd",
       function()
