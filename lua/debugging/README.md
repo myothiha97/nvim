@@ -1,0 +1,89 @@
+# Debugging (DAP)
+
+Everything debugger-related lives here. Imported from `lua/config/lazy.lua`
+as `{ import = "debugging.plugins" }`. Built on LazyVim's `dap.core` and
+`lang.*` extras; nothing extra is installed.
+
+Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
+(project files), freeze trace: `todos/freeze/freeze-override-2026-11-04-debugger-gui.md`.
+
+## Files
+
+| File | What |
+|---|---|
+| `plugins/core.lua` | nvim-dap spec: keys, session listeners, Delve config hook, breakpoint restore at startup |
+| `plugins/ui.lua` | nvim-dap-ui spec (replaces LazyVim's open/close listeners) + inline values |
+| `plugins/go.lua` | mason-nvim-dap Delve handler (no duplicate Go configs) |
+| `delve.lua` | Delve launch options, function breakpoints |
+| `breakpoints.lua` | Persistence per project: line (+condition/hit/log) and function breakpoints |
+| `prompts.lua` | Floating prompts for condition / hit count / log message; Esc cancels |
+| `controls.lua` | The control bar, built in full (no patching of dap-ui's string) |
+| `layout.lua` | When panels open/close, which panels, titles, fixed sizes |
+| `mouse.lua` | Click the gutter (sign area or line number) to toggle a breakpoint without moving the cursor; fold cells still fold |
+
+## How a session looks
+
+1. **Start** (`<leader>dc`): only the bottom tray opens: REPL/output with the
+   control bar (Continue/Pause · Step Over · Step Into · Step Out · Restart · Stop).
+2. **First stop**: the left sidebar opens: VARIABLES + CALL STACK (goroutines).
+   Nothing else moves for the rest of the session.
+3. **Watches** join the sidebar only while you have at least one watch
+   (`<leader>dW` opens them as a float until then).
+4. **Breakpoints list** is never in the layout: `<leader>dp` opens it as a float.
+5. **Terminal pane** joins the tray only if the adapter runs the program in a
+   terminal (Python, Rust, C/C++ do; Delve sends output to the REPL instead).
+6. **End**: panels stay; the bar shows `Run Again · Close  exited (code N)`.
+   Click Close (or `<leader>du`) to close everything.
+
+Run to Cursor is `<leader>dC` (right-click menu in phase 2).
+
+## Keys (changed or added vs LazyVim)
+
+| Key | Action |
+|---|---|
+| `<leader>du` | Toggle debug panels (tray + sidebar) |
+| `<leader>db` | Toggle breakpoint (saved immediately) |
+| `<leader>dB` | Clear breakpoints in this file |
+| `<leader>dX` | Clear all breakpoints in this project (incl. function breakpoints) |
+| `<leader>dN` / `dH` / `dL` | Condition / hit count / log message for the line's breakpoint (float; empty answer clears that field) |
+| `<leader>dF` | Toggle function breakpoint by name (saved) |
+| `<leader>do` / `dO` | Step over / step out (swapped vs LazyVim) |
+| `<leader>dR` | Restart |
+| `<leader>dx` | Exception breakpoint filters |
+| `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
+
+In panels: double-click expands, `e` edits a value, `o` opens a frame,
+`t` toggles runtime-internal frames (Call Stack) or enables/disables (Breakpoints).
+
+## Goroutine list freshness
+
+nvim-dap only refetches the thread list when the adapter sends `thread`
+events, and Delve never does. `plugins/core.lua` marks it stale before every
+stop and refetches on Delve's `invalidated` event, so new goroutines appear
+and `dlv config hideSystemGoroutines false` takes effect immediately.
+
+## Breakpoint persistence
+
+Saved to `stdpath("data")/debugging/breakpoints/<cwd>.json` on every
+breakpoint key, on buffer unload, at session start and on exit. Restored when
+a file is opened. Opening a file that has saved breakpoints loads nvim-dap at
+that moment (its signs must exist); files without breakpoints cost one table
+lookup.
+
+## Upstream internals we depend on (check after plugin updates)
+
+These use plugin internals, not public APIs. lazy-lock.json pins the
+versions, so nothing changes until you update. After updating nvim-dap or
+nvim-dap-ui, run one Go debug session and check each item:
+
+| File | Internal used | Check | Rollback |
+|---|---|---|---|
+| `stacks.lua` + `plugins/ui.lua` | replaces `dapui.components.threads` | Call Stack shows goroutines, click/za collapses | delete the `package.loaded[...]` line in `plugins/ui.lua` |
+| `controls.lua` | replaces `dapui.controls.controls` | bar shows 6 buttons; after exit shows Run Again + exit code | remove `require("dapui.controls").controls = M.render` |
+| `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
+
+## Known limits
+
+See "Known Ceiling" in `todos/languages/nvim-dap-webstorm-parity-and-enhancements.md`
+and §7 of the plan. In short: no deferred-call view, no set-next-statement,
+no single-click tree expansion, no draggable panels.
