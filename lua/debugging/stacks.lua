@@ -6,9 +6,9 @@
 -- dapui.setup) and reuses its frame renderer unchanged.
 --
 --   * the stopped goroutine is expanded, every other one starts collapsed
---   * click (or <CR> / za) on a goroutine line toggles it; your choice is
+--   * double-click (or <CR> / za) on a goroutine line toggles it; your choice is
 --     kept per goroutine id until the session ends
---   * click (or <CR> / o) on a frame jumps to it and repoints Variables
+--   * double-click (or <CR> / o) on a frame jumps to it and repoints Variables
 --   * t toggles runtime-internal ("subtle") frames of that goroutine
 --
 -- Same factory signature as upstream: function(client, send_ready).
@@ -96,7 +96,7 @@ return function(client, send_ready)
         local first = canvas:length()
         render_frames.render(canvas, id, subtle[id] or false, indent + config.render.indent)
         local last = canvas:length()
-        -- A click/<CR> on a frame line opens that frame: give the frame
+        -- A double-click/<CR> on a frame line opens that frame: give the frame
         -- lines' "open" callbacks to "expand" as well.
         for line = first, last do
           local callbacks = canvas.mappings.open[line]

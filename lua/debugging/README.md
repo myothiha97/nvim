@@ -53,10 +53,12 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dF` | Toggle function breakpoint by name (saved) |
 | `<leader>do` / `dO` | Step over / step out (swapped vs LazyVim) |
 | `<leader>dR` | Restart |
+| `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
 | `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
 
-In panels: double-click expands, `e` edits a value, `o` opens a frame,
+In panels: double-click expands, `e` edits a value, `w` (or right-click →
+Add to Watches) watches a variable, `o` opens a frame,
 `t` toggles runtime-internal frames (Call Stack) or enables/disables (Breakpoints).
 
 ## Goroutine list freshness

@@ -147,8 +147,8 @@ end
 -- Window titles + one hint each. Sidebar windows keep their width and the
 -- tray its height when other splits open or close.
 local TITLES = {
-  dapui_scopes = { "VARIABLES", "dbl-click expand · e edit" },
-  dapui_stacks = { "CALL STACK", "click expand/open · t internals" },
+  dapui_scopes = { "VARIABLES", "dbl-click expand · e edit · w watch" },
+  dapui_stacks = { "CALL STACK", "dbl-click expand/open · t internals" },
   dapui_watches = { "WATCHES", "i add · e edit · d remove" },
   dapui_breakpoints = { "BREAKPOINTS", "o open · t enable/disable · d remove" },
   dapui_console = { "TERMINAL", "" },
@@ -217,6 +217,24 @@ function M.setup()
       end
     end,
   })
+  -- A watch added from anywhere (`w` in Variables, right-click Add to
+  -- Watches) shows the Watches panel at once, and an expression that is
+  -- already watched is skipped. Wraps dap-ui's PUBLIC `elements.watches.add`,
+  -- which its own `w` action also calls. Typing in the Watches panel (`i`)
+  -- bypasses it, so duplicates are still possible there.
+  local watches = require("dapui").elements.watches
+  local add = watches.add
+  watches.add = function(expr, ...)
+    for _, w in ipairs(watches.get()) do
+      if w.expression == expr then
+        vim.notify("Already watching " .. expr, vim.log.levels.INFO)
+        return
+      end
+    end
+    add(expr, ...)
+    vim.schedule(M.refresh_sidebar)
+  end
+
   -- Adding/removing a watch (typed in the Watches float or panel) can change
   -- which sidebar variant should be shown.
   vim.api.nvim_create_autocmd("BufLeave", {

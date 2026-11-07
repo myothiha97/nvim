@@ -67,6 +67,9 @@ return {
       { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
       { "<leader>dO", function() require("dap").step_out() end, desc = "Step Out" },
       { "<leader>dR", function() require("dap").restart() end, desc = "Restart Session" },
+      -- LazyVim's dl = dap.run_last, which re-resolves ${file} against the open
+      -- buffer; ours reruns the file you originally debugged (controls.lua).
+      { "<leader>dl", function() require("debugging.controls").run_again() end, desc = "Run Last" },
       { "<leader>dx", function() require("dap").set_exception_breakpoints() end, desc = "Exception Breakpoints" },
     },
     opts = function()

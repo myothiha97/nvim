@@ -30,7 +30,7 @@ local M = {}
 -- Step Over landed on Continue.
 local PAD = " "
 local DEAD = " "
-local status = { ran = false, exit_code = nil }
+local status = { ran = false, exit_code = nil, config = nil }
 
 local function dap()
   return require("dap")
@@ -50,6 +50,20 @@ local function is_stopped(session)
     end
   end
   return false
+end
+
+-- Run Again / <leader>dl: rerun the last session's RESOLVED config (the one
+-- the adapter actually got). nvim-dap's run_last keeps the raw config and
+-- re-expands `${file}` against whatever buffer is open now, so after stepping
+-- into fmt/print.go "Run Again" tried to build print.go. Caveat: a config
+-- that prompted (e.g. program arguments) reruns with the same answers; pick
+-- it again from <leader>dc to be asked anew.
+function M.run_again()
+  if status.config then
+    dap().run(vim.deepcopy(status.config))
+  else
+    dap().run_last()
+  end
 end
 
 _G._debugging_bar = {
@@ -74,7 +88,7 @@ _G._debugging_bar = {
     if dap().session() then
       dap().restart()
     else
-      dap().run_last()
+      M.run_again()
     end
   end,
   stop = function()
@@ -86,7 +100,7 @@ _G._debugging_bar = {
   end,
   run = function()
     if status.ran then
-      dap().run_last()
+      M.run_again()
     else
       dap().continue()
     end
@@ -156,8 +170,9 @@ function M.setup()
 
   local key = "debugging_controls"
   local listeners = dap().listeners
-  listeners.after.event_initialized[key] = function()
+  listeners.after.event_initialized[key] = function(session)
     status.ran, status.exit_code = true, nil
+    status.config = vim.deepcopy(session.config)
   end
   listeners.after.event_exited[key] = function(_, body)
     status.exit_code = body and body.exitCode

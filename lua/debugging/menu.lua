@@ -7,6 +7,8 @@
 --   line has breakpoint  -> Edit Condition… · Edit Log Message… · Remove Breakpoint
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
 --   Go test file, idle   -> Debug Test
+--   Variables panel      -> Add to Watches (the row's full expression, e.g.
+--                           wg.state, via dap-ui's own `w` action)
 --
 -- The entries are defined once. On each right-click a MenuPopup autocmd
 -- enables the ones that apply and disables the rest; Neovim's popup menu
@@ -80,8 +82,11 @@ local ITEMS = {
       return c.stopped and c.expr
     end,
     run = function()
-      require("dapui").elements.watches.add(expr())
-      require("debugging.layout").refresh_sidebar()
+      if vim.bo.filetype == "dapui_scopes" then
+        vim.cmd.normal("w") -- dap-ui's watch action for the row under the cursor
+      else
+        require("dapui").elements.watches.add(expr())
+      end
     end,
   },
   {
@@ -154,8 +159,13 @@ local function on_popup()
   end
   pcall(vim.cmd, "aunmenu " .. SEP)
 
+  if vim.bo.filetype == "dapui_scopes" then
+    vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(#ITEMS, SEP))
+    return
+  end
   if vim.bo.buftype ~= "" then
-    return -- panels, terminals, pickers: no debug entries
+    return -- other panels, terminals, pickers: no debug entries
   end
   local e = expr()
   local s = stopped_session()

@@ -17,10 +17,10 @@ return {
       opts.expand_lines = false
       opts.layouts = require("debugging.layout").layouts
       opts.controls = vim.tbl_deep_extend("force", opts.controls or {}, { enabled = true, element = "repl" })
-      -- Call Stack: single click / <CR> / za toggles a goroutine or opens a
+      -- Call Stack: double-click / <CR> / za toggles a goroutine or opens a
       -- frame (see debugging/stacks.lua); o opens, t shows runtime frames.
       opts.element_mappings = vim.tbl_deep_extend("force", opts.element_mappings or {}, {
-        stacks = { expand = { "<CR>", "<LeftRelease>", "za" }, open = "o", toggle = "t" },
+        stacks = { expand = { "<CR>", "<2-LeftMouse>", "za" }, open = "o", toggle = "t" },
       })
       return opts
     end,
