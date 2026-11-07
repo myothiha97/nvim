@@ -4,8 +4,9 @@
 -- terminate, disconnect) with 2-column gaps, a click region that stays open to
 -- the right edge, and no extension point. The old fix rewrote its output with
 -- gsub, which silently stops matching on any upstream format change. Instead,
--- `dapui.controls.controls` is replaced by `M.render`; dap-ui still decides
--- WHEN to redraw (its listeners), this module decides WHAT is drawn.
+-- `dapui.controls.controls` is replaced by `M.render` (used by dap-ui on
+-- WinEnter/WinLeave of the tray), and M.refresh redraws the bar itself on DAP
+-- events (see M.refresh for why dap-ui's own redraw can't be relied on).
 --
 -- !! WARNING: replaces `dapui.controls.controls`, a dap-ui INTERNAL function.
 -- Relies on dap-ui calling `M.controls(is_active)` from
@@ -131,10 +132,23 @@ function M.render(is_active)
     .. "%<"
 end
 
+-- Draw the bar on every window showing the REPL tray in this tab.
+--
+-- Not via dap-ui's refresh_control_panel: that remembers ONE window id and
+-- only re-learns it on BufWinEnter when it holds none. Its WinClosed check
+-- runs while the window is still valid, so after the tray closes (Close,
+-- <leader>du) the stale id survives, the next BufWinEnter is skipped, the
+-- first refresh fails and clears it, and every later refresh is a no-op.
+-- The bar then only changed on WinEnter/WinLeave of the tray: Pause and
+-- greyed steps while stopped, after Close -> Run Again / Restart.
+-- Cost: a scan of the current tab's windows on DAP events only.
 function M.refresh()
-  pcall(function()
-    require("dapui.controls").refresh_control_panel()
-  end)
+  local current = vim.api.nvim_get_current_win()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "dap-repl" then
+      pcall(vim.api.nvim_set_option_value, "winbar", M.render(win == current), { win = win })
+    end
+  end
 end
 
 function M.setup()
@@ -149,17 +163,27 @@ function M.setup()
     status.exit_code = body and body.exitCode
   end
 
-  -- dap-ui redraws the bar right after the `stopped` event arrives, but
-  -- nvim-dap handles that event asynchronously: when it first refetches the
-  -- thread list (every stop, see plugins/core.lua) `stopped_thread_id` is set
-  -- only after that reply. The bar was drawn too early and showed Pause with
-  -- greyed-out steps while the program was stopped. Redraw again once the
-  -- stop is fully processed (threads -> stackTrace -> scopes).
+  -- Redraw on the events dap-ui uses, plus once a stop is fully processed:
+  -- nvim-dap sets `stopped_thread_id` only after it refetched the thread
+  -- list (every stop, see plugins/core.lua), i.e. after `event_stopped`.
   local function late_refresh()
     vim.schedule(M.refresh)
   end
-  for _, request in ipairs({ "threads", "stackTrace", "scopes" }) do
-    listeners.after[request][key] = late_refresh
+  for _, event in ipairs({
+    "event_initialized",
+    "event_stopped",
+    "event_continued",
+    "event_exited",
+    "event_terminated",
+    "continue",
+    "terminate",
+    "restart",
+    "disconnect",
+    "threads",
+    "stackTrace",
+    "scopes",
+  }) do
+    listeners.after[event][key .. "_redraw"] = late_refresh
   end
 end
 

@@ -83,7 +83,7 @@ nvim-dap-ui, run one Go debug session and check each item:
 | File | Internal used | Check | Rollback |
 |---|---|---|---|
 | `stacks.lua` + `plugins/ui.lua` | replaces `dapui.components.threads` | Call Stack shows goroutines, click/za collapses | delete the `package.loaded[...]` line in `plugins/ui.lua` |
-| `controls.lua` | replaces `dapui.controls.controls` | bar shows 6 buttons; after exit shows Run Again + exit code | remove `require("dapui.controls").controls = M.render` |
+| `controls.lua` | replaces `dapui.controls.controls` | bar shows 6 buttons; after exit shows Run Again + exit code; after Close -> Run Again the first stop shows Continue (not Pause) | remove `require("dapui.controls").controls = M.render` |
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
 | `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
 
