@@ -4,7 +4,9 @@
 -- on the clicked line and word when these run.
 --
 --   stopped in a session -> Run to Cursor · Evaluate · Add to Watches
---   line has breakpoint  -> Edit Condition… · Edit Log Message… · Remove Breakpoint
+--   line has breakpoint  -> Remove Breakpoint · Edit Condition… · Edit Log Message…
+--                           (VS Code order; with 5 entries max, Edit Log Message
+--                           is the one dropped when all of the above apply)
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
 --   Go test file, idle   -> Debug Test
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
@@ -33,6 +35,35 @@ local function expr()
     return table.concat(vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = mode }), "\n")
   end
   return vim.fn.expand("<cexpr>")
+end
+
+-- The expression to Evaluate / Watch, or nil when there is nothing sensible.
+-- A selection is used as is. Otherwise the cursor must be on a name
+-- (variable, field, package, type), like GoLand's Quick Evaluate: keywords,
+-- operators and literals (`for`, `:=`, `0`) give nil (hover.is_name, also
+-- used by mouse hover). Runs only on right-click / <leader>de.
+local function evaluable()
+  local e = expr()
+  if e == "" or e:match("^%s*$") then
+    return nil
+  end
+  if vim.fn.mode():find("^[vV\22]") then
+    return e
+  end
+  local pos = vim.api.nvim_win_get_cursor(0)
+  return require("debugging.hover").is_name(vim.api.nvim_get_current_buf(), pos[1] - 1, pos[2]) and e or nil
+end
+
+-- <leader>de: dap-ui's Eval, with the same check as the menu. The popup takes
+-- focus (like GoLand's Quick Evaluate) so <CR>/double-click expands, e edits
+-- the expression, q/<Esc> or leaving the popup closes it.
+function M.eval()
+  local e = evaluable()
+  if e then
+    require("dapui").eval(e, { enter = true })
+  else
+    vim.notify("Nothing to evaluate here: put the cursor on a name or select an expression", vim.log.levels.INFO)
+  end
 end
 
 local function stopped_session()
@@ -73,7 +104,7 @@ local ITEMS = {
       return c.stopped and c.expr
     end,
     run = function()
-      require("dapui").eval(expr())
+      M.eval()
     end,
   },
   {
@@ -85,8 +116,20 @@ local ITEMS = {
       if vim.bo.filetype == "dapui_scopes" then
         vim.cmd.normal("w") -- dap-ui's watch action for the row under the cursor
       else
-        require("dapui").elements.watches.add(expr())
+        local e = evaluable()
+        if e then
+          require("dapui").elements.watches.add(e)
+        end
       end
+    end,
+  },
+  {
+    label = "Remove Breakpoint",
+    when = function(c)
+      return c.bp
+    end,
+    run = function()
+      require("debugging.breakpoints").toggle(vim.api.nvim_get_current_buf(), vim.fn.line("."))
     end,
   },
   {
@@ -105,15 +148,6 @@ local ITEMS = {
     end,
     run = function()
       require("debugging.prompts").log_point()
-    end,
-  },
-  {
-    label = "Remove Breakpoint",
-    when = function(c)
-      return c.bp
-    end,
-    run = function()
-      require("debugging.breakpoints").toggle(vim.api.nvim_get_current_buf(), vim.fn.line("."))
     end,
   },
   {
@@ -167,13 +201,12 @@ local function on_popup()
   if vim.bo.buftype ~= "" then
     return -- other panels, terminals, pickers: no debug entries
   end
-  local e = expr()
   local s = stopped_session()
   local ctx = {
     stopped = s ~= nil,
     idle = not (package.loaded["dap"] and require("dap").session()),
     bp = has_bp(),
-    expr = e ~= "" and e:match("^%s*$") == nil,
+    expr = evaluable() ~= nil,
   }
   local shown = 0
   for _, item in ipairs(ITEMS) do

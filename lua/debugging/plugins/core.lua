@@ -28,6 +28,9 @@ end
 return {
   {
     "mfussenegger/nvim-dap",
+    -- Pinned: :Lazy update skips it (README "Upstream internals"). To update on
+    -- purpose, remove this line, update, run the README checks, put it back.
+    pin = true,
     init = function()
       require("debugging.breakpoints").setup()
       -- Gutter click -> breakpoint (a normal-mode <LeftMouse> mapping) and

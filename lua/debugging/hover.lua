@@ -23,6 +23,20 @@ local function stopped_session()
   end
 end
 
+-- True when (row, col), 0-based, is on a name: variable, field, package,
+-- type. Keywords, operators and literals (`for`, `:=`, `0`) are not. The
+-- tree-sitter node there decides; without a parser, the character must start
+-- a name. Also used by debugging/menu.lua (right-click, <leader>de).
+function M.is_name(bufnr, row, col)
+  local ok, node = pcall(vim.treesitter.get_node, { bufnr = bufnr, pos = { row, col } })
+  if ok and node then
+    local t = node:type()
+    return t:find("identifier", 1, true) ~= nil or t == "self" or t == "this"
+  end
+  local text = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ""
+  return text:sub(col + 1, col + 1):match("[%a_]") ~= nil
+end
+
 local function expression(text, s, e)
   while s > 2 and text:sub(s - 1, s - 1) == "." and text:sub(s - 2, s - 2):match("[%w_]") do
     s = s - 2
@@ -41,8 +55,8 @@ end
 ---@return boolean handled false when no session is stopped (caller does LSP now)
 function M.request(bufnr, line, s, e, on_result)
   local session = stopped_session()
-  if not session then
-    return false
+  if not session or not M.is_name(bufnr, line - 1, s - 1) then
+    return false -- not stopped, or a keyword/operator/literal: LSP hover
   end
   local text = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1] or ""
   local expr = expression(text, s, e)

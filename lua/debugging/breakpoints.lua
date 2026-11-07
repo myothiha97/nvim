@@ -14,6 +14,7 @@ local M = {}
 
 local cache ---@type {files: table<string, table[]>, functions: string[]}?
 local cache_cwd
+local last_written ---@type string? JSON last written, to skip identical writes
 
 local function store_path(cwd)
   local name = cwd:gsub("[/\\:]", "%%")
@@ -39,12 +40,17 @@ local function load()
 end
 
 local function write(data)
+  local json = vim.json.encode(data)
+  if json == last_written then
+    return
+  end
   local path = store_path(cache_cwd)
   vim.fn.mkdir(vim.fs.dirname(path), "p")
   local fd = io.open(path, "w")
   if fd then
-    fd:write(vim.json.encode(data))
+    fd:write(json)
     fd:close()
+    last_written = json
   end
 end
 
@@ -54,6 +60,13 @@ end
 function M.save()
   if not package.loaded["dap"] then
     return -- nothing can have changed: no breakpoint was ever set this session
+  end
+  -- Run to Cursor removes every breakpoint until the next stop; nvim-dap
+  -- registers this listener (public listeners table, nvim-dap's own key) to
+  -- put them back. Saving now would persist the cleared state, so skip it:
+  -- every real change was already saved when it was made.
+  if require("dap").listeners.before.event_stopped["dap.run_to_cursor"] then
+    return
   end
   local data = load()
   local current = require("dap.breakpoints").get()
@@ -243,8 +256,17 @@ function M.setup()
       end
     end,
   })
-  -- Signs disappear with the buffer, so snapshot before that happens.
-  vim.api.nvim_create_autocmd({ "BufUnload", "VimLeavePre" }, {
+  -- Signs disappear with the buffer, so snapshot before that happens. Only
+  -- file buffers can hold breakpoints; pickers, panels and terminals skip it.
+  vim.api.nvim_create_autocmd("BufUnload", {
+    group = group,
+    callback = function(args)
+      if vim.bo[args.buf].buftype == "" and args.file ~= "" then
+        M.save()
+      end
+    end,
+  })
+  vim.api.nvim_create_autocmd("VimLeavePre", {
     group = group,
     callback = function()
       M.save()
@@ -253,7 +275,7 @@ function M.setup()
   vim.api.nvim_create_autocmd("DirChanged", {
     group = group,
     callback = function()
-      cache = nil
+      cache, last_written = nil, nil
     end,
   })
   -- Function breakpoints come back for the next session.

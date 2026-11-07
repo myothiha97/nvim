@@ -4,6 +4,8 @@ Everything debugger-related lives here. Imported from `lua/config/lazy.lua`
 as `{ import = "debugging.plugins" }`. Built on LazyVim's `dap.core` and
 `lang.*` extras; nothing extra is installed.
 
+**Need to change or fix something? Start with `MAINTENANCE.md`** (situations, steps, rollbacks).
+
 Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 (project files), freeze trace: `todos/freeze/freeze-override-2026-11-04-debugger-gui.md`.
 
@@ -55,6 +57,7 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dR` | Restart |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
+| `<leader>de` | Evaluate the name under the cursor or the selection (keywords, operators, literals are skipped, as in the right-click menu) |
 | `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
 
 In panels: double-click expands, `e` edits a value, `w` (or right-click →
@@ -78,8 +81,9 @@ lookup.
 
 ## Upstream internals we depend on (check after plugin updates)
 
-These use plugin internals, not public APIs. lazy-lock.json pins the
-versions, so nothing changes until you update. After updating nvim-dap or
+These use plugin internals, not public APIs. nvim-dap and nvim-dap-ui are
+`pin = true` (plugins/core.lua, plugins/ui.lua), so `:Lazy update` never moves
+them; nothing here changes until you unpin one on purpose. After updating nvim-dap or
 nvim-dap-ui, run one Go debug session and check each item:
 
 | File | Internal used | Check | Rollback |
@@ -87,6 +91,7 @@ nvim-dap-ui, run one Go debug session and check each item:
 | `stacks.lua` + `plugins/ui.lua` | replaces `dapui.components.threads` | Call Stack shows goroutines, click/za collapses | delete the `package.loaded[...]` line in `plugins/ui.lua` |
 | `controls.lua` | replaces `dapui.controls.controls` | bar shows 6 buttons; after exit shows Run Again + exit code; after Close -> Run Again the first stop shows Continue (not Pause) | remove `require("dapui.controls").controls = M.render` |
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
+| `layout.lua` | dap-ui `require("dapui.windows").layouts[i]:is_open()` (no public "is this layout open") | first stop opens the sidebar once; first watch swaps in the Watches variant; `<leader>du` toggles | none short of rewriting the open/close logic; if it breaks, panels may open twice or not swap |
 | `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
 
 ## Known limits
@@ -95,5 +100,5 @@ See "Known Ceiling" in `todos/languages/nvim-dap-webstorm-parity-and-enhancement
 and §7 of the plan. In short: no deferred-call view, no set-next-statement,
 no single-click tree expansion, no draggable panels.
 
-- Run to Cursor (nvim-dap) clears all breakpoints until the next stop, then puts them back. If a buffer is unloaded in that window, its breakpoints are saved without them.
+- Run to Cursor (nvim-dap) clears all breakpoints until the next stop, then puts them back. Saving is paused in that window (breakpoints.lua), so quitting or closing a buffer then can't persist the cleared state.
 - Hover shows a one-line value; nested values are expanded with right-click → Evaluate.

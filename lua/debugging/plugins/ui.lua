@@ -4,9 +4,14 @@
 return {
   {
     "rcarriga/nvim-dap-ui",
+    -- Pinned: :Lazy update skips it (README "Upstream internals"). To update on
+    -- purpose, remove this line, update, run the README checks, put it back.
+    pin = true,
     -- stylua: ignore
     keys = {
       { "<leader>du", function() require("debugging.layout").toggle() end, desc = "Debug Panels" },
+      -- Replaces LazyVim's dapui.eval(): skips keywords/operators/literals (debugging/menu.lua).
+      { "<leader>de", function() require("debugging.menu").eval() end, desc = "Eval", mode = { "n", "x" } },
     },
     opts = function(_, opts)
       -- Long values (a sync.WaitGroup prints ~200 chars) stay inside the panel.
@@ -16,6 +21,12 @@ return {
       opts.wrap = true
       opts.expand_lines = false
       opts.layouts = require("debugging.layout").layouts
+      -- Evaluate / floated panels: capped so big values don't cover the
+      -- screen. Width is generous because dap-ui floats never wrap (float.lua
+      -- forces nowrap) and horizontal scrolling is awkward in Neovim; only a
+      -- line wider than 90% of the screen needs zl / horizontal scroll.
+      -- Height scrolls normally (wheel, j/k).
+      opts.floating = vim.tbl_deep_extend("force", opts.floating or {}, { max_width = 0.9, max_height = 0.5 })
       opts.controls = vim.tbl_deep_extend("force", opts.controls or {}, { enabled = true, element = "repl" })
       -- Call Stack: double-click / <CR> / za toggles a goroutine or opens a
       -- frame (see debugging/stacks.lua); o opens, t shows runtime frames.
