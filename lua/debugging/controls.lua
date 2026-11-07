@@ -52,6 +52,37 @@ local function is_stopped(session)
   return false
 end
 
+-- js-debug (Node) runs the program in a CHILD session (DAP startDebugging)
+-- under a launcher session. Run Again, Restart and Stop act on the top-level
+-- session, which owns the program; for Go there is only one, so no change.
+local function root(session)
+  while session and session.parent do
+    session = session.parent
+  end
+  return session
+end
+
+-- Restart (bar button, <leader>dR): the whole program, not a child session.
+-- With no session, same as Run Again.
+function M.restart()
+  local session = dap().session()
+  if not session then
+    M.run_again()
+    return
+  end
+  dap().set_session(root(session))
+  dap().restart()
+end
+
+-- Stop (bar button, <leader>dt): the top-level session and its children.
+function M.stop()
+  local session = dap().session()
+  if session then
+    dap().set_session(root(session))
+    dap().terminate({ hierarchy = true })
+  end
+end
+
 -- Run Again / <leader>dl: rerun the last session's RESOLVED config (the one
 -- the adapter actually got). nvim-dap's run_last keeps the raw config and
 -- re-expands `${file}` against whatever buffer is open now, so after stepping
@@ -85,15 +116,11 @@ _G._debugging_bar = {
     dap().step_out()
   end,
   restart = function()
-    if dap().session() then
-      dap().restart()
-    else
-      M.run_again()
-    end
+    M.restart()
   end,
   stop = function()
     if dap().session() then
-      dap().terminate()
+      M.stop()
     else
       require("debugging.layout").close_all()
     end
@@ -172,7 +199,7 @@ function M.setup()
   local listeners = dap().listeners
   listeners.after.event_initialized[key] = function(session)
     status.ran, status.exit_code = true, nil
-    status.config = vim.deepcopy(session.config)
+    status.config = vim.deepcopy(root(session).config)
   end
   listeners.after.event_exited[key] = function(_, body)
     status.exit_code = body and body.exitCode

@@ -8,7 +8,7 @@
 --                           (VS Code order; with 5 entries max, Edit Log Message
 --                           is the one dropped when all of the above apply)
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
---   Go test file, idle   -> Debug Test
+--   test file, idle      -> Debug Test (per language: delve.lua, node.lua, python.lua)
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
 --                           wg.state, via dap-ui's own `w` action)
 --
@@ -85,6 +85,22 @@ local function has_bp()
     end
   end
   return false
+end
+
+-- Debug Test: each language's own module says what a test file is and how
+-- to debug the test at the cursor, so languages stay independent.
+local TEST_LANGS = {
+  go = "debugging.delve",
+  javascript = "debugging.node",
+  typescript = "debugging.node",
+  javascriptreact = "debugging.node",
+  typescriptreact = "debugging.node",
+  python = "debugging.python",
+}
+
+local function test_lang()
+  local mod = TEST_LANGS[vim.bo.filetype]
+  return mod and require(mod) or nil
 end
 
 -- In menu order. `when(ctx)` decides visibility; `run()` is the action.
@@ -171,10 +187,11 @@ local ITEMS = {
   {
     label = "Debug Test",
     when = function(c)
-      return c.idle and vim.api.nvim_buf_get_name(0):match("_test%.go$") ~= nil
+      local lang = test_lang()
+      return c.idle and lang ~= nil and lang.is_test_file(vim.api.nvim_buf_get_name(0))
     end,
     run = function()
-      require("dap-go").debug_test()
+      test_lang().debug_test()
     end,
   },
 }

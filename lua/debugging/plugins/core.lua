@@ -69,7 +69,10 @@ return {
       -- LazyVim ships these the other way round (do = step out, dO = step over).
       { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
       { "<leader>dO", function() require("dap").step_out() end, desc = "Step Out" },
-      { "<leader>dR", function() require("dap").restart() end, desc = "Restart Session" },
+      -- Restart / Terminate act on the top-level session (Node runs the program
+      -- in a child session; see controls.lua). Same as LazyVim's for Go.
+      { "<leader>dR", function() require("debugging.controls").restart() end, desc = "Restart Session" },
+      { "<leader>dt", function() require("debugging.controls").stop() end, desc = "Terminate" },
       -- LazyVim's dl = dap.run_last, which re-resolves ${file} against the open
       -- buffer; ours reruns the file you originally debugged (controls.lua).
       { "<leader>dl", function() require("debugging.controls").run_again() end, desc = "Run Last" },

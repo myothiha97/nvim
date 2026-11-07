@@ -16,6 +16,8 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `plugins/core.lua` | nvim-dap spec: keys, session listeners, Delve config hook, breakpoint restore at startup |
 | `plugins/ui.lua` | nvim-dap-ui spec (replaces LazyVim's open/close listeners) + inline values |
 | `plugins/go.lua` | mason-nvim-dap Delve handler (no duplicate Go configs) |
+| `plugins/node.lua`, `node.lua` | Node/JS/TS: `npm script…` and `Attach to port 9229` configs (nvim-dap config provider) on top of LazyVim's js-debug setup; Debug Test via neotest |
+| `plugins/python.lua`, `python.lua` | Python: `Module… (python -m)` and `Django: runserver` configs on top of LazyVim's nvim-dap-python/debugpy; Debug Test via neotest |
 | `delve.lua` | Delve launch options, function breakpoints |
 | `breakpoints.lua` | Persistence per project: line (+condition/hit/log) and function breakpoints |
 | `prompts.lua` | Floating prompts for condition / hit count / log message; Esc cancels |
@@ -54,7 +56,7 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dN` / `dH` / `dL` | Condition / hit count / log message for the line's breakpoint (float; empty answer clears that field) |
 | `<leader>dF` | Toggle function breakpoint by name (saved) |
 | `<leader>do` / `dO` | Step over / step out (swapped vs LazyVim) |
-| `<leader>dR` | Restart |
+| `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
 | `<leader>de` | Evaluate the name under the cursor or the selection (keywords, operators, literals are skipped, as in the right-click menu) |
@@ -63,6 +65,20 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 In panels: double-click expands, `e` edits a value, `w` (or right-click →
 Add to Watches) watches a variable, `o` opens a frame,
 `t` toggles runtime-internal frames (Call Stack) or enables/disables (Breakpoints).
+
+## Languages
+
+| Language | Adapter (installed by) | Start | Tests |
+|---|---|---|---|
+| Go | Delve (LazyVim `lang.go`) | `<leader>dc` → Debug / Debug Package / Attach | right-click Debug Test, `<leader>td` |
+| Node / JS / TS | js-debug (LazyVim `lang.typescript`) | `<leader>dc` → npm script… (e.g. `dev`), Launch file (scripts; TS via `tsx`, `npm i -g tsx`), Attach, Attach to port 9229 | vitest + jest via neotest: right-click Debug Test, `<leader>td` |
+| Python | debugpy (LazyVim `lang.python`; interpreter from `<leader>cv` venv, else ./venv / ./.venv) | `<leader>dc` → file, file:args, Module… (`uvicorn main:app`, `flask run`), Django: runserver, attach | pytest via neotest: right-click Debug Test, `<leader>td`; `<leader>dPt` / `dPc` method / class |
+
+Each language lives in its own file; shared code (panels, bar, menu, hover,
+breakpoints) has no language-specific branches except the menu's Debug Test
+lookup table, which only maps a filetype to that language's file.
+
+Per-project settings (args, env, a different entry point): `.vscode/launch.json`, see MAINTENANCE.md §2.
 
 ## Goroutine list freshness
 

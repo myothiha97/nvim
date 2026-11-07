@@ -53,6 +53,15 @@ function M.sync_fn_breakpoints(session)
   end)
 end
 
+-- Right-click Debug Test (menu.lua): Go test files, nvim-dap-go's nearest test.
+function M.is_test_file(name)
+  return name:match("_test%.go$") ~= nil
+end
+
+function M.debug_test()
+  require("dap-go").debug_test()
+end
+
 function M.toggle_fn_breakpoint()
   require("debugging.prompts").input({ prompt = "Function breakpoint (e.g. main.worker)" }, function(name)
     if name == "" then
