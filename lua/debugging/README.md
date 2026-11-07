@@ -17,6 +17,7 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `plugins/ui.lua` | nvim-dap-ui spec (replaces LazyVim's open/close listeners) + inline values |
 | `plugins/go.lua` | mason-nvim-dap Delve handler (no duplicate Go configs) |
 | `plugins/node.lua`, `node.lua` | Node/JS/TS: `npm script…` and `Attach to port 9229` configs (nvim-dap config provider) on top of LazyVim's js-debug setup; Debug Test via neotest |
+| `plugins/csharp.lua`, `csharp.lua` | C# / .NET: easy-dotnet.nvim (native arm64 netcoredbg, builds first, launchSettings.json profiles); `<leader>dc` entries that Restart / Run Again can repeat; Debug Test via its test keys |
 | `plugins/python.lua`, `python.lua` | Python: `Module… (python -m)` and `Django: runserver` configs on top of LazyVim's nvim-dap-python/debugpy; Debug Test via neotest |
 | `delve.lua` | Delve launch options, function breakpoints |
 | `breakpoints.lua` | Persistence per project: line (+condition/hit/log) and function breakpoints |
@@ -73,10 +74,17 @@ Add to Watches) watches a variable, `o` opens a frame,
 | Go | Delve (LazyVim `lang.go`) | `<leader>dc` → Debug / Debug Package / Attach | right-click Debug Test, `<leader>td` |
 | Node / JS / TS | js-debug (LazyVim `lang.typescript`) | `<leader>dc` → npm script… (e.g. `dev`), Launch file (scripts; TS via `tsx`, `npm i -g tsx`), Attach, Attach to port 9229 | vitest + jest via neotest: right-click Debug Test, `<leader>td` |
 | Python | debugpy (LazyVim `lang.python`; interpreter from `<leader>cv` venv, else ./venv / ./.venv) | `<leader>dc` → file, file:args, Module… (`uvicorn main:app`, `flask run`), Django: runserver, attach | pytest via neotest: right-click Debug Test, `<leader>td`; `<leader>dPt` / `dPc` method / class |
+| C# / .NET | netcoredbg bundled with easy-dotnet's server (`dotnet tool install -g EasyDotnet`, done on first use) | `<leader>dc` → Debug startup project, Debug project… (pick project + launch profile), Attach to .NET process… | xUnit / NUnit / MSTest: right-click Debug Test, `<leader>td` (easy-dotnet's in-file test keys) |
 
 Each language lives in its own file; shared code (panels, bar, menu, hover,
-breakpoints) has no language-specific branches except the menu's Debug Test
-lookup table, which only maps a filetype to that language's file.
+breakpoints) has no language-specific branches except two lookup tables
+that only map to that language's file: the menu's Debug Test table (by
+filetype) and controls.lua's Restart / Run Again table (by adapter type, C#
+only, because its sessions attach to a one-off debug server).
+
+Stop ends the debuggee for attached processes too (nvim-dap sends
+`terminate`), except Node, whose js-debug only detaches. GoLand / VS Code
+detach instead.
 
 Per-project settings (args, env, a different entry point): `.vscode/launch.json`, see MAINTENANCE.md §2.
 
@@ -100,7 +108,8 @@ lookup.
 These use plugin internals, not public APIs. nvim-dap and nvim-dap-ui are
 `pin = true` (plugins/core.lua, plugins/ui.lua), so `:Lazy update` never moves
 them; nothing here changes until you unpin one on purpose. After updating nvim-dap or
-nvim-dap-ui, run one Go debug session and check each item:
+nvim-dap-ui, run one Go debug session and check each item (easy-dotnet is not
+pinned; check its row after `:Lazy update`):
 
 | File | Internal used | Check | Rollback |
 |---|---|---|---|
@@ -109,6 +118,7 @@ nvim-dap-ui, run one Go debug session and check each item:
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
 | `layout.lua` | dap-ui `require("dapui.windows").layouts[i]:is_open()` (no public "is this layout open") | first stop opens the sidebar once; first watch swaps in the Watches variant; `<leader>du` toggles | none short of rewriting the open/close logic; if it breaks, panels may open twice or not swap |
 | `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
+| `plugins/csharp.lua` | wraps easy-dotnet `terminal.tabline.destroy` (it deletes the global `<LeftMouse>` / `<2-LeftMouse>` maps) | after `:Dotnet run` and closing its panel, a gutter click in a Go file still toggles a breakpoint | delete the `tabline.destroy` block (gutter clicks then stop working after that panel closes, until restart) |
 
 ## Known limits
 

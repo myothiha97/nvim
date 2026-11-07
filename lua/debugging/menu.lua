@@ -96,6 +96,7 @@ local TEST_LANGS = {
   javascriptreact = "debugging.node",
   typescriptreact = "debugging.node",
   python = "debugging.python",
+  cs = "debugging.csharp",
 }
 
 local function test_lang()

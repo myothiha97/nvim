@@ -64,13 +64,38 @@ end
 
 -- Restart (bar button, <leader>dR): the whole program, not a child session.
 -- With no session, same as Run Again.
+-- A session nvim-dap cannot replay from its config (C#: an attach to a
+-- debug-server port that closes with the session) reruns through its
+-- language module instead. Key = config type.
+local RERUN = { ["easy-dotnet"] = "debugging.csharp" }
+
+local function rerun_module(config)
+  local mod = config and RERUN[config.type]
+  return mod and require(mod) or nil
+end
+
 function M.restart()
   local session = dap().session()
   if not session then
     M.run_again()
     return
   end
-  dap().set_session(root(session))
+  session = root(session)
+  local lang = rerun_module(session.config)
+  if lang then
+    -- Stop, then start again once nvim-dap has closed the session.
+    local key = "debugging_controls_restart"
+    local function again()
+      dap().listeners.after.event_terminated[key] = nil
+      dap().listeners.after.disconnect[key] = nil
+      vim.schedule(lang.rerun)
+    end
+    dap().listeners.after.event_terminated[key] = again
+    dap().listeners.after.disconnect[key] = again
+    M.stop()
+    return
+  end
+  dap().set_session(session)
   dap().restart()
 end
 
@@ -90,7 +115,10 @@ end
 -- that prompted (e.g. program arguments) reruns with the same answers; pick
 -- it again from <leader>dc to be asked anew.
 function M.run_again()
-  if status.config then
+  local lang = rerun_module(status.config)
+  if lang then
+    lang.rerun()
+  elseif status.config then
     dap().run(vim.deepcopy(status.config))
   else
     dap().run_last()
