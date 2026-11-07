@@ -20,6 +20,8 @@ require("lazy").setup({
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
     -- import/override with your plugins
     { import = "plugins" },
+    -- Debugger (DAP): all of it lives in lua/debugging/, see its README.md.
+    { import = "debugging.plugins" },
     -- Active colorscheme spec lives outside plugins/ so the alternate theme
     -- files in lua/colorschemes/ stay un-imported (reference-only).
     { import = "colorschemes.config" },

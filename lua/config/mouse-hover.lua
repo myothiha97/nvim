@@ -243,37 +243,19 @@ local function fire_hover(pos)
     return
   end
 
-  local clients = vim.lsp.get_clients({ bufnr = bufnr, method = "textDocument/hover" })
-  if #clients == 0 then
-    return
-  end
-
   request_id = request_id + 1
   local my_id = request_id
-  local shown = false
 
-  local params = {
-    textDocument = { uri = vim.uri_from_bufnr(bufnr) },
-    position = { line = pos.line - 1, character = pos.column - 1 },
-  }
-
-  vim.lsp.buf_request(bufnr, "textDocument/hover", params, function(err, result)
-    if my_id ~= request_id or shown then
-      return
+  -- True while this is the latest request and the mouse hasn't moved.
+  local function still_current()
+    if my_id ~= request_id then
+      return false
     end
-    if err or not result or not result.contents then
-      return
-    end
-
     local current = vim.fn.getmousepos()
-    if current.line ~= pos.line or current.column ~= pos.column or current.winid ~= pos.winid then
-      return
-    end
+    return current.line == pos.line and current.column == pos.column and current.winid == pos.winid
+  end
 
-    local contents = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
-    if not contents or vim.tbl_isempty(contents) then
-      return
-    end
+  local function show(contents)
     -- Bail when there is no visible text. open_floating_preview strips blank
     -- markdown lines internally; whitespace-only contents would collapse to
     -- zero lines and crash nvim_open_win with "Invalid 'height'".
@@ -285,7 +267,7 @@ local function fire_hover(pos)
       end
     end
     if not has_text then
-      return
+      return false
     end
 
     close_hover()
@@ -299,10 +281,9 @@ local function fire_hover(pos)
       close_events = {},
     })
     if not ok then
-      return
+      return false
     end
     hover_win = winid
-    shown = true
 
     if winid then
       hover_geom = capture_geom(winid)
@@ -320,7 +301,53 @@ local function fire_hover(pos)
       col_start = word_start,
       col_end = word_end,
     }
-  end)
+    return true
+  end
+
+  local function lsp_hover()
+    local clients = vim.lsp.get_clients({ bufnr = bufnr, method = "textDocument/hover" })
+    if #clients == 0 then
+      return
+    end
+
+    local shown = false
+    local params = {
+      textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+      position = { line = pos.line - 1, character = pos.column - 1 },
+    }
+
+    vim.lsp.buf_request(bufnr, "textDocument/hover", params, function(err, result)
+      if shown or not still_current() then
+        return
+      end
+      if err or not result or not result.contents then
+        return
+      end
+      local contents = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
+      if not contents or vim.tbl_isempty(contents) then
+        return
+      end
+      shown = show(contents)
+    end)
+  end
+
+  -- While a debug session is stopped, show the variable's value instead
+  -- (lua/debugging/hover.lua); LSP hover is the fallback when the debugger
+  -- can't evaluate the word. Skipped entirely until nvim-dap is loaded.
+  if package.loaded["dap"] then
+    local handled = require("debugging.hover").request(bufnr, pos.line, word_start, word_end, function(lines)
+      if not still_current() then
+        return
+      end
+      if not (lines and show(lines)) then
+        lsp_hover()
+      end
+    end)
+    if handled then
+      return
+    end
+  end
+  lsp_hover()
 end
 
 local function on_mouse_move()

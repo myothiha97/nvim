@@ -10,7 +10,7 @@
 --          • Go     → neotest-golang   (+ DAP debug on <leader>td)
 --          • Python → neotest-python
 --          • Rust   → rustaceanvim
---      This file only adds the TS/JS adapter (the typescript extra ships none) and tightens
+--      This file only adds the TS/JS adapters (the typescript extra ships none) and tightens
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
 --
@@ -27,11 +27,47 @@ return {
     "nvim-neotest/neotest",
     optional = true, -- only applies if test.core is enabled (it is)
     dependencies = {
-      "marilari88/neotest-vitest", -- Vitest. For Jest: swap to "nvim-neotest/neotest-jest".
+      "marilari88/neotest-vitest",
+      "nvim-neotest/neotest-jest",
     },
     opts = {
+      -- Both can stay on: each only claims test files of a project whose
+      -- package.json depends on its runner (hasVitestDependency /
+      -- hasJestDependency). <leader>td debugs the nearest test with js-debug.
       adapters = {
-        ["neotest-vitest"] = {}, -- Jest: replace this key with ["neotest-jest"] = {}
+        ["neotest-vitest"] = {},
+        ["neotest-jest"] = {
+          -- Replaces neotest-jest's own check, which also reads the package.json
+          -- of the directory nvim started in and, when there is none, calls
+          -- vim.notify from an async context: that error aborts the whole
+          -- neotest run, vitest files included. Same rule, without that read:
+          -- a jest dependency (or a "jest" script) in any package.json from the
+          -- test file upward, which also covers a monorepo root.
+          isTestFile = function(file)
+            if not require("neotest-jest.util").defaultTestFileMatcher(file) then
+              return false
+            end
+            local found = vim.fs.find("package.json", { upward = true, path = vim.fs.dirname(file), limit = math.huge })
+            for _, path in ipairs(found) do
+              local f = io.open(path)
+              local ok, pkg = pcall(vim.json.decode, f and f:read("*a") or "")
+              if f then
+                f:close()
+              end
+              if ok and type(pkg) == "table" then
+                for _, field in ipairs({ "dependencies", "devDependencies" }) do
+                  if type(pkg[field]) == "table" and pkg[field].jest then
+                    return true
+                  end
+                end
+                if type(pkg.scripts) == "table" and vim.tbl_contains(vim.tbl_values(pkg.scripts), "jest") then
+                  return true
+                end
+              end
+            end
+            return false
+          end,
+        },
       },
       -- PROTECT your curated/persisted quickfix pins. neotest defaults quickfix.enabled=true,
       -- which repopulates the live list on every run — and the VimLeavePre persistence

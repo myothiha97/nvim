@@ -28,6 +28,7 @@
 ## Performance Rules
 
 - All changes MUST be performance-safe. No heavy per-keystroke computations.
+- Every change, especially Lua, must be safe, clean, minimal and precise. If a fix needs a heavy or big workaround, or has a potential issue or drawback, flag it to the user BEFORE writing it, and mark any accepted caveat in a code comment.
 - Silently ensure performance safety — do NOT remind the user about performance checks unless there is an actual issue.
 - Before committing, always review ALL changed files for performance safety (no per-keystroke work, no expensive autocmds, no blocking operations)
 - Prefer in-process solutions (snippets, treesitter) over external LSP servers when possible

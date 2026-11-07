@@ -981,3 +981,16 @@ vim.keymap.set("n", "<leader>uk", function()
   vim.treesitter.inspect_tree()
   vim.api.nvim_input("I")
 end, { desc = "Inspect Tree" })
+
+-- Relocate snacks' Lua profiler off LazyVim's <leader>dpp / <leader>dph /
+-- <leader>dps to <leader>uPp / uPh / uPs. It profiles Neovim itself, not the
+-- program being debugged, so <leader>d stays debugger-only, and <leader>dp
+-- (Breakpoints panel) no longer waits for a possible third key.
+-- (<leader>dps is a snacks spec key, disabled in lua/plugins/snacks.lua.)
+pcall(vim.keymap.del, "n", "<leader>dpp")
+pcall(vim.keymap.del, "n", "<leader>dph")
+Snacks.toggle.profiler():map("<leader>uPp")
+Snacks.toggle.profiler_highlights():map("<leader>uPh")
+vim.keymap.set("n", "<leader>uPs", function()
+  Snacks.profiler.scratch()
+end, { desc = "Profiler Scratch Buffer" })
