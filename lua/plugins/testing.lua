@@ -120,6 +120,13 @@ return {
       -- pressed. Caveats: each test is its own run (Go compiles each package once, then hits the
       -- cache), and C# is not covered: its tests run in easy-dotnet's runner, not neotest.
       consumers = {
+        -- A failed test's error shows the way VS Code and JetBrains show it: the message inline at
+        -- the failing line, underlined, with no gutter sign (gutter stays as before neotest).
+        -- Runs once at neotest setup (not at startup), after LazyVim's test.core sets this
+        -- namespace's virtual_text format; per-namespace keys merge, so that format is kept.
+        failure_style = function()
+          vim.diagnostic.config({ signs = false }, vim.api.nvim_create_namespace("neotest"))
+        end,
         -- Discover Tests (<leader>tD): the project-wide test tree, on demand only. Nothing is
         -- discovered at startup or on first neotest use (discovery = false above); this key
         -- finds every test file under each adapter's root (skipping SKIP_DIRS), parses them in
