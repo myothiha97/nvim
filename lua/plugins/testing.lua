@@ -9,7 +9,7 @@
 --      adapters from your already-enabled lang extras — you get these for free:
 --          • Go     → neotest-golang   (+ DAP debug on <leader>td)
 --          • Python → neotest-python
---          • Rust   → rustaceanvim
+--          • Rust   → rustaceanvim (adapter off below until rust-analyzer is installed)
 --      This file only adds the TS/JS adapters (the typescript extra ships none) and tightens
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
@@ -49,6 +49,12 @@ return {
       -- package.json depends on its runner (hasVitestDependency /
       -- hasJestDependency). <leader>td debugs the nearest test with js-debug.
       adapters = {
+        -- Off: LazyVim's rust extra registers this adapter, so the first neotest use in ANY
+        -- project (<leader>to, tr, right-click Run Test…) required it, which loaded rustaceanvim
+        -- and raised "rust-analyzer not found in PATH" when rust-analyzer isn't installed.
+        -- rustaceanvim still loads in .rs files. Set back to {} when you do Rust and have
+        -- rust-analyzer installed (rustup component add rust-analyzer).
+        ["rustaceanvim.neotest"] = false,
         ["neotest-vitest"] = {},
         ["neotest-jest"] = {
           -- Replaces neotest-jest's own check, which also reads the package.json
