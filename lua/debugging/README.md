@@ -65,6 +65,10 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
+| `<leader>dd` | Disable / enable the line's breakpoint (kept as a grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>db` on a disabled one removes it |
+| `<leader>dD` | Mute / unmute all breakpoints (line + function). Not saved; breakpoints added while muted are active |
+| `<leader>dI` | Smart Step Into: pick which call on the line to step into (Python, Node; elsewhere a plain Step Into). Also right-click on the current line |
+| `<leader>dg` | Jump to Line (LazyVim's; Python only). Also right-click while stopped |
 | `<leader>de` | Evaluate the name under the cursor or the selection (keywords, operators, literals are skipped, as in the right-click menu) |
 | `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
 
@@ -77,6 +81,14 @@ Add to Watches) watches a variable, `y` (or right-click → Copy Value) copies
 the full value to the clipboard (Variables, Watches; `v`/`V` then `y` still
 yanks panel text), `o` opens a frame,
 `t` toggles runtime-internal frames (Call Stack) or enables/disables (Breakpoints).
+In Call Stack, `y` (or right-click → Copy Stack) copies the stopped thread's
+frames as text; right-click → Reset Frame re-runs the current frame (Node only;
+double-click a frame first to reset another one).
+
+Two kinds of "disabled": `t` in the Breakpoints panel is dap-ui's own,
+kept only in memory (no sign, lost on restart); `<leader>dd` / right-click is
+ours (grey sign, saved, listed as "disabled" in `<leader>dm`), and those do
+not appear in the Breakpoints panel.
 
 ## Languages
 
@@ -142,4 +154,5 @@ no single-click tree expansion, no draggable panels.
 - Run to Cursor (nvim-dap) clears all breakpoints until the next stop, then puts them back. Saving is paused in that window (breakpoints.lua), so quitting or closing a buffer then can't persist the cleared state.
 - Copy Value: netcoredbg (C#) has no clipboard context, so it copies the value as the panel shows it (long strings may be shortened by the adapter).
 - REPL completion: none from Delve (Go); buffer words remain.
+- Smart Step Into: Python, Node only (Delve's DAP server lacks it, though GoLand has it; netcoredbg too). Reset Frame: Node only. Jump to Line: Python only. Menu entries for them appear only where supported.
 - Hover shows a one-line value; nested values are expanded with right-click → Evaluate.
