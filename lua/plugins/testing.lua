@@ -124,9 +124,9 @@ return {
       summary = { mappings = { expand = { "<Tab>", "<2-LeftMouse>" }, jumpto = { "<CR>", "i" } } },
       icons = { test = "\u{f04b}", namespace = "\u{f04b}" },
       highlights = { test = "DiagnosticInfo", namespace = "DiagnosticInfo" },
-      -- PERFORMANCE: skip project-wide discovery / file-watching. Running nearest/file/cwd
-      -- still works; the summary just lists tests from files you've opened or run, not the
-      -- whole tree. Flip to { enabled = true } if you want auto-populated project discovery.
+      -- PERFORMANCE: no automatic project-wide discovery / file-watching. Running nearest/file/cwd
+      -- still works; the summary lists tests from files you've opened or run. <leader>tD
+      -- (discover consumer below) fills the whole tree on demand.
       discovery = { enabled = false },
       -- Rerun Failed (<leader>tF): reruns the tests whose last result is failed, one at a time,
       -- in the order neotest returns them. A consumer is neotest's public extension point (the
@@ -252,7 +252,9 @@ return {
           return {
             run = function()
               require("nio").run(function()
-                local count = 0
+                -- Collect first, then run: a run resets the results it covers, so the failed
+                -- set must be read before the first run starts.
+                local todo = {}
                 for _, adapter_id in ipairs(client:get_adapters()) do
                   local tree = client:get_position(nil, { adapter = adapter_id })
                   local results = tree and client:get_results(adapter_id) or {}
@@ -265,12 +267,14 @@ return {
                       and parent:data().type == "test"
                       and (results[parent:data().id] or {}).status == "failed"
                     if node and node:data().type == "test" and not parent_failed then
-                      count = count + 1
-                      client:run_tree(node, { adapter = adapter_id })
+                      todo[#todo + 1] = { node, adapter_id }
                     end
                   end
                 end
-                if count == 0 then
+                for _, t in ipairs(todo) do
+                  client:run_tree(t[1], { adapter = t[2] })
+                end
+                if #todo == 0 then
                   vim.schedule(function()
                     vim.notify("No failed tests to rerun", vim.log.levels.INFO)
                   end)
