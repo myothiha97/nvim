@@ -19,10 +19,13 @@
 --
 --   2. nvim-coverage — paints covered/uncovered lines in the sign column from a REPORT your
 --      test runner produced. It does NOT run anything itself — generate the report first:
---          • TS/JS (Vitest): npx vitest run --coverage    → coverage/lcov.info
---          • Go:             go test -coverprofile=cover.out ./...
---      then <leader>tcc (or :Coverage) to load + show. lcov/coverprofile parse natively;
---      no luarocks needed.
+--          • TS/JS (Vitest): npx vitest run --coverage --coverage.reporter=lcov → coverage/lcov.info
+--          • TS/JS (Jest):   npx jest --coverage                  → coverage/lcov.info
+--          • Go:             go test -coverprofile=coverage.out ./... → coverage.out
+--          • Python:         pytest --cov  (pytest-cov)          → .coverage
+--      Run these from the project root (Neovim's cwd): nvim-coverage looks for exactly those
+--      file names there. Then <leader>tcc (or :Coverage) to load + show. lcov/coverprofile
+--      parse natively; Python needs the `coverage` CLI (comes with pytest-cov) on PATH.
 
 -- Directories never searched for tests by <leader>tD (dependencies and build output). Adapters
 -- skip some of these already; this covers the rest so large repos stay quick.
