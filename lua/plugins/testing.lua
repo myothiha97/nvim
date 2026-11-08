@@ -107,6 +107,11 @@ return {
       -- passed / failed / running keep neotest's green / red / yellow. The same highlight
       -- colours test names in the summary tree.
       status = { signs = false, virtual_text = true },
+      -- Summary tree (<leader>ts), JetBrains-style: Enter jumps to the test in the code (on any
+      -- node: file, test, subtest). Double-click expands / collapses like every other panel;
+      -- Tab does the same from the keyboard. Neotest's defaults put Enter on expand, which did
+      -- nothing on a test with no children. Other keys unchanged (r run, d debug, o output, ? help).
+      summary = { mappings = { expand = { "<Tab>", "<2-LeftMouse>" }, jumpto = { "<CR>", "i" } } },
       icons = { test = "\u{f04b}", namespace = "\u{f04b}" },
       highlights = { test = "DiagnosticInfo", namespace = "DiagnosticInfo" },
       -- PERFORMANCE: skip project-wide discovery / file-watching. Running nearest/file/cwd
@@ -124,8 +129,16 @@ return {
         -- the failing line, underlined, with no gutter sign (gutter stays as before neotest).
         -- Runs once at neotest setup (not at startup), after LazyVim's test.core sets this
         -- namespace's virtual_text format; per-namespace keys merge, so that format is kept.
-        failure_style = function()
+        -- Also: `q` closes the <leader>ta attach window (leave terminal mode first with
+        -- <C-\><C-n>). Closing only detaches the view; the test keeps running.
+        ui = function()
           vim.diagnostic.config({ signs = false }, vim.api.nvim_create_namespace("neotest"))
+          vim.api.nvim_create_autocmd("FileType", {
+            pattern = "neotest-attach",
+            callback = function(ev)
+              vim.keymap.set("n", "q", "<Cmd>close<CR>", { buffer = ev.buf, desc = "Detach (close window)" })
+            end,
+          })
         end,
         -- Discover Tests (<leader>tD): the project-wide test tree, on demand only. Nothing is
         -- discovered at startup or on first neotest use (discovery = false above); this key
