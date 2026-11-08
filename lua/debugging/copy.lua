@@ -16,6 +16,10 @@
 -- `.namespace` (README "Upstream internals"). If dap-ui changes them, `y`
 -- reports "Nothing to copy here" and nothing else is affected.
 --
+-- Copy Stack (JetBrains): `y` or right-click in the Call Stack panel copies
+-- the stopped thread's frames as text, one "function  file:line" per line,
+-- runtime frames included (one DAP stackTrace request).
+--
 -- Cost: runs only on `y` / the menu entry; a few DAP requests per copy.
 
 local M = {}
@@ -173,14 +177,42 @@ function M.copy()
   end)()
 end
 
--- `y` in the Variables and Watches panels. Normal-mode only: to copy panel
--- text itself, select it (v / V) and press y as usual.
+function M.copy_stack()
+  local session = package.loaded["dap"] and require("dap").session()
+  local thread = session and session.stopped_thread_id
+  if not thread then
+    vim.notify("Copy Stack: not stopped", vim.log.levels.INFO)
+    return
+  end
+  coroutine.wrap(function()
+    local ok, res = pcall(request, session, "stackTrace", { threadId = thread })
+    vim.schedule(function()
+      if not ok then
+        vim.notify("Copy Stack: " .. tostring(res), vim.log.levels.WARN)
+        return
+      end
+      local lines = {}
+      for _, f in ipairs(res.stackFrames or {}) do
+        local path = f.source and (f.source.path or f.source.name)
+        lines[#lines + 1] = path and ("%s  %s:%d"):format(f.name, vim.fn.fnamemodify(path, ":~:."), f.line) or f.name
+      end
+      put(table.concat(lines, "\n"), "call stack")
+    end)
+  end)()
+end
+
+-- `y` in the Variables, Watches and Call Stack panels. Normal-mode only: to
+-- copy panel text itself, select it (v / V) and press y as usual.
 function M.setup()
   api.nvim_create_autocmd("FileType", {
     group = api.nvim_create_augroup("debugging_copy", { clear = true }),
-    pattern = { "dapui_scopes", "dapui_watches" },
+    pattern = { "dapui_scopes", "dapui_watches", "dapui_stacks" },
     callback = function(args)
-      vim.keymap.set("n", "y", M.copy, { buffer = args.buf, desc = "Copy Value" })
+      if vim.bo[args.buf].filetype == "dapui_stacks" then
+        vim.keymap.set("n", "y", M.copy_stack, { buffer = args.buf, desc = "Copy Stack" })
+      else
+        vim.keymap.set("n", "y", M.copy, { buffer = args.buf, desc = "Copy Value" })
+      end
     end,
   })
 end

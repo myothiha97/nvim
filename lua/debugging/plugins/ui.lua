@@ -47,7 +47,7 @@ return {
       require("dapui").setup(opts)
       require("debugging.controls").setup()
       require("debugging.layout").setup()
-      require("debugging.copy").setup() -- y / right-click Copy Value in Variables, Watches
+      require("debugging.copy").setup() -- y: Copy Value (Variables, Watches), Copy Stack (Call Stack)
     end,
   },
 

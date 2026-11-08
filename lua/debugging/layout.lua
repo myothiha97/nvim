@@ -148,7 +148,7 @@ end
 -- tray its height when other splits open or close.
 local TITLES = {
   dapui_scopes = { "VARIABLES", "dbl-click expand · e edit · w watch · y copy" },
-  dapui_stacks = { "CALL STACK", "dbl-click expand/open/switch · t internals" },
+  dapui_stacks = { "CALL STACK", "dbl-click expand/open/switch · t internals · y copy" },
   dapui_watches = { "WATCHES", "i add · e edit · d remove · y copy" },
   dapui_breakpoints = { "BREAKPOINTS", "o open · t enable/disable · d remove" },
   dapui_console = { "TERMINAL", "" },
