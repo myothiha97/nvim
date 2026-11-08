@@ -182,29 +182,25 @@ return {
     local INDENT_GUIDE_FG = require("config.ui").surface.guide
     local function set_snacks_hl()
       vim.api.nvim_set_hl(0, "SnacksPickerMatch", { link = "DiffText" })
-      -- File and folder NAMES in the picker lists: ONE neutral grey, a step below
-      -- the editor's body text.
+
+      -- File and folder NAMES in the picker lists: ONE neutral grey, at editor
+      -- body level.
       --
       -- Two defects, fixed together. Folders took `SnacksPickerDirectory` ->
       -- `Directory` (#268bd3 in this theme), the same blue family as the folder
       -- ICON beside them, so the two ran together and the name was the harder
       -- half to read. Files took `SnacksPickerFile`, which snacks defines as the
-      -- EMPTY STRING, so they fell through to `Normal` and matched editor body
-      -- text exactly (measured identical at the pixel).
+      -- EMPTY STRING, so they fell through to `Normal`.
       --
-      -- `body.tinted` (#a0b6b8) since 2026-09-24, when the editor body moved up
-      -- to `brighter`: names moved with it, keeping the same dE 4.1 step below
-      -- body that the paragraph below approved. That paragraph describes the
-      -- 2026-09-22 choice. Numbers: notes/string-and-member-colours.md.
-      --
-      -- Both now read `body.base0` (#9eabac) -- the theme's own body value, one
-      -- chroma step under the `tinted` white the editor runs. dE00 4.2 from editor
-      -- body text, so the panel reads softer without reading as dimmed, and 18.8
-      -- from `NonText`, the gap that keeps HIDDEN entries looking hidden.
-      --
-      -- `body.faded` (#919e9f) was tried first, one rung lower again. It read as
-      -- too faded for a name you scan and was reverted the same day; that rung and
-      -- its measurements stay in palette.lua, and it is now the LSP doc value.
+      -- `body.base1` (#adb7b7) since 2026-11-08, replacing `body.tinted` (#a0b6b8):
+      -- near-neutral (C*3.7 vs 8.0), so names lose the teal cast and match the
+      -- neutral path prefix below. On #131312: 9.06:1, 5.35:1 on the
+      -- `ListCursorLine` band, 6.51:1 on the explorer active-file band; dE00 2.1
+      -- from editor body (names now read at body level rather than one step
+      -- softer, a knowing trade) and 21.6 from `NonText`, the gap that keeps
+      -- HIDDEN entries looking hidden. Same value as oil (lua/plugins/oil.lua), so
+      -- both browsers read alike. Earlier values (`faded`, `base0`, `tinted`) and
+      -- their measurements are in palette.lua.
       --
       -- Structure copied from the VS Code Material Icon theme: the ICON carries
       -- the file/folder distinction in colour, every NAME stays one grey. Hidden
@@ -220,11 +216,23 @@ return {
       -- with it, which would paint over the cursor row and the active-file band
       -- below.
       local ok_palette, palette = pcall(require, "colorschemes.solarized-osaka.palette")
-      local list_fg = ok_palette and palette.variants.body.tinted or nil
+      local list_fg = ok_palette and palette.variants.body.base1 or nil
       if list_fg then
         vim.api.nvim_set_hl(0, "SnacksPickerDirectory", { fg = list_fg })
         vim.api.nvim_set_hl(0, "SnacksPickerFile", { fg = list_fg })
       end
+
+      -- Path PREFIX before each name (`lua/plugins/` in `lua/plugins/snacks.lua`).
+      -- Not the same group as `SnacksPickerDirectory` above, which colours a
+      -- folder's NAME. snacks links this one to `NonText` (#637981, blue-teal);
+      -- neutral comment grey since 2026-11-08 to match the rest of the UI. Same
+      -- lightness as before (L* 51.7 vs ~50), so the path stays secondary to the
+      -- name; only the hue moves. fg only, for the same background reason as above.
+      local dir_fg = ok_palette and palette.variants.comment.neutral or nil
+      if dir_fg then
+        vim.api.nvim_set_hl(0, "SnacksPickerDir", { fg = dir_fg })
+      end
+
       vim.api.nvim_set_hl(0, "SnacksIndent", { fg = INDENT_GUIDE_FG, nocombine = true })
       -- Full-width band on the active file's row in the Explorer. Only used by
       -- the explorer format wrapper, so no other picker or window is affected.

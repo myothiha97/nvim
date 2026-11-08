@@ -13,6 +13,14 @@ return {
   lazy = false,
   priority = 1000,
   opts = {
+    styles = {
+      comments = {
+        -- Upright since 2026-11-08: slanted strokes render less cleanly on the 1x
+        -- external monitor, and the lightness gap to body already marks comments.
+        italic = false,
+      },
+    },
+
     -- WARN: SILENT FAILURE. Must be an explicit `false`. The plugin defaults
     -- `transparent` to `true`, so deleting or commenting this line re-enables
     -- transparency rather than disabling it. Opaque since 2026-09-04.
@@ -524,43 +532,43 @@ return {
       hl.VisualNOS = { bg = c.violet900 }
 
       -- The theme's `yellow700` gutter is a CHROMA problem, not a lightness one:
-      -- it read as content competing with code. This is a low-chroma cool grey on
-      -- the background's own hue. DO NOT go back toward a saturated hue: raise
+      -- it read as content competing with code. Keep the gutter a low-chroma grey
+      -- on the background's own hue. DO NOT go back toward a saturated hue: raise
       -- LIGHTNESS and keep C* < 10.
       --
-      -- Raised 2026-09-23 from #2d3f43 (L* 25.3, 1.76:1), which was unreadable at
-      -- a glance -- ui.lua already named it the theme's worst group. The ladder,
-      -- all measured against the #001014 background:
+      -- Neutral warm grey since 2026-11-08, replacing the blue-teal #3d555b, to
+      -- match the #131312 background and the `neutral` comment. Measured on
+      -- #131312:
       --
-      --   #2d3f43  L* 25.3  1.76:1  the old value, too faint
-      --   #33474b  L* 28.7  1.98:1  read as readable in a real pane
-      --   #384e53  L* 31.6  2.20:1  the midpoint, also tried
-      --   #3d555b  L* 34.5  2.44:1  SELECTED, all three rungs viewed in a real pane
+      --   #3d555b  L* 34.5  2.35:1  APCA 14.0  the old value, blue-teal
+      --   #5b5a56  L* 38.2  2.69:1  APCA 17.4  SELECTED, same family as comments
       --
-      -- The selected value is +9.2 L* over the old one (1.39x contrast), which is
-      -- a large RELATIVE move but still an objectively dim element: 2.44:1 is far
-      -- under the 4.5:1 text threshold, and the gutter remains the dimmest thing
-      -- on screen by a wide margin.
+      -- On screen (thin strokes render darker than the hex) relative counts rose
+      -- from APCA 10.3 to 13.4: easier to read at a glance for `5j`/`12k`, in the
+      -- editor and the oil popup alike.
       --
-      -- THE STOP RULE IS THE GAP TO `comment` (#5f767d, L* 48.1), the dimmest
-      -- value that carries meaning. The gutter must stay under it or the numbers
-      -- start reading as content. This holds 13.6 L*, and the comment still
-      -- carries 1.65x its contrast. That is the last rung with a real gap: do NOT
-      -- go past it, the next step lands inside a JND-scale margin of `comment`.
+      -- THE STOP RULE IS THE GAP TO `comment` (`neutral` #7d7b77, L* 51.7), the
+      -- dimmest value that carries meaning. The gutter must stay under it or the
+      -- numbers start reading as content. This holds 13.5 L* and dE00 12.8, above
+      -- the ~10 blur band. The comment's 2026-11-08 raise is what made room for
+      -- this step; do not lift the gutter again without lifting comments first.
       --
-      -- Dose is not the risk here. The gutter is about 5.7% of visible glyphs (73
-      -- of ~1290 in a 45-row viewport) and sits in its own column rather than
-      -- interleaved with code, so the eye can drop it. What to watch for instead
+      -- Dose is not the risk here. The gutter is about 5.7% of visible glyphs and
+      -- sits in its own column, so the eye can drop it. What to watch for instead
       -- is MOTION: `relativenumber` redraws the whole column on every cursor move,
       -- so if this value ever pulls the eye it will be while navigating, not while
-      -- reading. #384e53 and #33474b are the fallbacks, in that order.
+      -- reading. #575652 (L* 36.5) is the fallback one step down.
+      --
+      -- History: #2d3f43 -> #3d555b on 2026-09-23 (teal background), ladder in
+      -- notes/palette-reference.md.
       --
       -- All three carry explicit values in the theme, so all three must be set.
       -- With `number` + `relativenumber` both on, LineNrAbove/Below carry almost
       -- the whole gutter and the cursor's own row is `CursorLineNr` below.
-      hl.LineNr = { fg = "#3d555b" }
-      hl.LineNrAbove = { fg = "#3d555b" }
-      hl.LineNrBelow = { fg = "#3d555b" }
+      local gutter_fg = "#5b5a56"
+      hl.LineNr = { fg = gutter_fg }
+      hl.LineNrAbove = { fg = gutter_fg }
+      hl.LineNrBelow = { fg = gutter_fg }
 
       -- Current-line band, OFF. Turned on 2026-09-23 and turned back off the same
       -- day -- not on the numbers, which were fine, but because months of reading
@@ -624,8 +632,8 @@ return {
       hl.ListCursorLine = { bg = ui_color.surface.list_cursor }
       hl.SnacksPickerListCursorLine = "ListCursorLine"
       hl.SnacksPickerPreviewCursorLine = "ListCursorLine"
-      -- Explorer tree lines. snacks links them to `LineNr` (teal grey) with
-      -- `default = true`, so this definition wins.
+      -- Explorer tree lines. snacks links them to `LineNr` with `default = true`,
+      -- so this definition wins and the tree keeps the dimmer `surface.guide`.
       hl.SnacksPickerTree = { fg = ui_color.surface.guide }
       --
       -- WARN: SILENT FAILURE -- this CANNOT be scoped to the explorer alone, and

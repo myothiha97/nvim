@@ -88,11 +88,18 @@ local variants = {
   -- going dimmer moves AWAY from it, so the "two low-chroma greys blur" risk
   -- only exists above `readable`. L*54 (#6e858c, 4.89:1) is the brightest safe
   -- value while punctuation stays chromatic.
+  --
+  -- `neutral` is the exception: OFF this axis (warm grey, C*2.4) and measured
+  -- on the #131312 background, while the rungs below are blue-teal and were
+  -- measured on the retired teal one. Leaving the delimiter's hue is what lets
+  -- it sit brighter than `dimmer` and still FURTHER from the delimiter (dE00
+  -- 11.4 vs 10.7), so the L*54 ceiling above applies only to on-axis rungs.
   comment = {
+    neutral = "#7d7b77", -- L*51.7  C*2.4  4.40:1 on #131312   SELECTED 2026-11-08, off-axis (see above)
     readable = "#698087", -- L*52.1  4.56:1  (dE 0.0)   the only AA stop
     dim = "#647b82", -- L*50.0  4.25:1  (dE 2.0)   below JND, do not bother
     subtle = "#637981", -- L*49.4  4.15:1  (dE 2.8)   one stop down, not enough
-    dimmer = "#5f767d", -- L*48.0  3.96:1  (dE 4.0)   SELECTED 2026-09-09
+    dimmer = "#5f767d", -- L*48.0  3.96:1  (dE 4.0)   selected 2026-09-09, replaced by `neutral` 2026-11-08
     dimmest = "#5a7178", -- L*46.0  3.68:1  (dE 5.9)   one short of upstream
     -- Upstream #576d74 (L*44.6, 3.48:1, dE 7.4) is reached with `comment = false`,
     -- not a key here: `false` means "leave the theme's own ramp alone".
