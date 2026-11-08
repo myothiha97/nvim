@@ -184,6 +184,9 @@ return {
         -- root is already one of its workspace folders). Like stock lspconfig,
         -- they join the running gopls instead. Before the first `go env` answer
         -- (or with no gopls running yet) they root as before.
+        -- CAVEAT: plain prefix match on the `go env` paths; a library file opened
+        -- through a symlinked path (e.g. /opt/homebrew/opt/go) misses it and roots
+        -- as before. gopls's own definition results use the real paths.
         gopls = {
           root_dir = function(bufnr, on_dir)
             load_go_lib_dirs()
