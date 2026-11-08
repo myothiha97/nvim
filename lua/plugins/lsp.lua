@@ -7,6 +7,25 @@ local lsp_hover_popup_opts = {
   max_height = 20,
 }
 
+-- Go module cache and stdlib source dirs (trailing "/"), read once per session
+-- with one async `go env`. nil = not asked yet; false = asked, not answered (or
+-- `go` failed: then files there just root on their own go.mod, as before).
+local go_lib_dirs
+
+local function load_go_lib_dirs()
+  if go_lib_dirs ~= nil then
+    return
+  end
+  go_lib_dirs = false
+  -- pcall: vim.system() throws at once when `go` is not on PATH
+  pcall(vim.system, { "go", "env", "GOMODCACHE", "GOROOT" }, { text = true }, function(out)
+    local modcache, goroot = unpack(vim.split(vim.trim(out.stdout or ""), "\n"))
+    if out.code == 0 and modcache and modcache ~= "" and goroot and goroot ~= "" then
+      go_lib_dirs = { modcache .. "/", goroot .. "/src/" }
+    end
+  end)
+end
+
 return {
   {
     "neovim/nvim-lspconfig",
@@ -158,9 +177,28 @@ return {
         -- module root (slow enumeration). Root on Go module markers only; fall
         -- back to the file's own directory otherwise. Real Go projects always
         -- have go.mod/go.work, so they root correctly with full module features.
+        --
+        -- Library files: a dependency in the module cache and the stdlib
+        -- ($GOROOT/src) each have their own go.mod, so `gd` into them would root
+        -- a new gopls process per module (Nvim reuses a client only when the
+        -- root is already one of its workspace folders). Like stock lspconfig,
+        -- they join the running gopls instead. Before the first `go env` answer
+        -- (or with no gopls running yet) they root as before.
         gopls = {
           root_dir = function(bufnr, on_dir)
+            load_go_lib_dirs()
             local fname = vim.api.nvim_buf_get_name(bufnr)
+            if go_lib_dirs then
+              for _, dir in ipairs(go_lib_dirs) do
+                if fname:sub(1, #dir) == dir then
+                  local clients = vim.lsp.get_clients({ name = "gopls" })
+                  if #clients > 0 then
+                    return on_dir(clients[#clients].config.root_dir)
+                  end
+                  break
+                end
+              end
+            end
             on_dir(vim.fs.root(fname, { "go.work", "go.mod" }) or vim.fs.dirname(fname))
           end,
         },
@@ -245,17 +283,25 @@ return {
         end,
       })
 
-      -- Restart LSP to refresh type diagnostics after external file changes (e.g., Grug-far)
+      -- Restart LSP to refresh type diagnostics after external file changes (e.g., Grug-far).
+      -- :checktime reloads buffers changed on disk (asks first if a buffer has
+      -- unsaved edits); it replaces the old `:edit!`, which discarded them.
+      -- Only servers started through vim.lsp.enable() are restarted, by name, so
+      -- copilot.lua's own client is left alone.
       vim.keymap.set("n", "<leader>cL", function()
-        local clients = vim.lsp.get_clients()
-        for _, client in ipairs(clients) do
-          client.stop()
+        vim.cmd("checktime")
+        local names = {}
+        for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+          if vim.lsp.is_enabled(client.name) and not vim.tbl_contains(names, client.name) then
+            names[#names + 1] = client.name
+          end
         end
-        vim.notify("LSP stopped, restarting...", vim.log.levels.INFO)
-        vim.defer_fn(function()
-          vim.cmd("edit!")
-          vim.notify("LSP restarted", vim.log.levels.INFO)
-        end, 100)
+        if #names == 0 then
+          vim.notify("No language server attached to this buffer", vim.log.levels.WARN)
+          return
+        end
+        vim.cmd("lsp restart " .. table.concat(names, " "))
+        vim.notify("LSP restarted: " .. table.concat(names, ", "), vim.log.levels.INFO)
       end, { noremap = true, silent = false, desc = "Restart LSP" })
 
       -- Custom gd to filter node_modules (only when LSP is attached)
