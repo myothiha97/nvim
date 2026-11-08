@@ -13,7 +13,8 @@
 --      This file only adds the TS/JS adapters (the typescript extra ships none) and tightens
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
---      Added here: tF rerun failed. Right-click in a test file also has Run Test / Debug Test /
+--      Added here: tF rerun failed · tD discover project tests (full tree in ts).
+--      Right-click in a test file also has Run Test / Debug Test /
 --      Run File Tests / Show Test Output (debugging/menu.lua).
 --
 --   2. nvim-coverage — paints covered/uncovered lines in the sign column from a REPORT your
@@ -23,17 +24,21 @@
 --      then <leader>tcc (or :Coverage) to load + show. lcov/coverprofile parse natively;
 --      no luarocks needed.
 
--- Projects whose whole test tree should appear in the summary (<leader>ts), like a JetBrains
--- test tool window. Opt-in per project because discovery parses every test file of the project
--- with treesitter on first neotest use and keeps watching it; everywhere else the summary lists
--- only files you opened or ran. Use the project root (where go.mod / package.json /
--- pyproject.toml lives). Example: "~/work/payments-api".
-local DISCOVER_PROJECTS = {}
-
-local projects = {}
-for _, root in ipairs(DISCOVER_PROJECTS) do
-  projects[root] = { discovery = { enabled = true } }
-end
+-- Directories never searched for tests by <leader>tD (dependencies and build output). Adapters
+-- skip some of these already; this covers the rest so large repos stay quick.
+local SKIP_DIRS = {
+  [".git"] = true,
+  node_modules = true,
+  vendor = true,
+  dist = true,
+  build = true,
+  target = true,
+  bin = true,
+  obj = true,
+  venv = true,
+  [".venv"] = true,
+  __pycache__ = true,
+}
 
 return {
   -- TS/JS adapter + two safety/perf overrides on the neotest provided by test.core.
@@ -99,7 +104,6 @@ return {
       -- still works; the summary just lists tests from files you've opened or run, not the
       -- whole tree. Flip to { enabled = true } if you want auto-populated project discovery.
       discovery = { enabled = false },
-      projects = projects,
       -- Rerun Failed (<leader>tF): reruns the tests whose last result is failed, one at a time,
       -- in the order neotest returns them. A consumer is neotest's public extension point (the
       -- trouble consumer in LazyVim's test.core is one); it uses only documented Client methods
@@ -107,6 +111,104 @@ return {
       -- pressed. Caveats: each test is its own run (Go compiles each package once, then hits the
       -- cache), and C# is not covered: its tests run in easy-dotnet's runner, not neotest.
       consumers = {
+        -- Discover Tests (<leader>tD): the project-wide test tree, on demand only. Nothing is
+        -- discovered at startup or on first neotest use (discovery = false above); this key
+        -- finds every test file under each adapter's root (skipping SKIP_DIRS), parses them in
+        -- neotest's child process so the UI stays responsive, and shows progress in fidget like
+        -- an LSP: "Discovering tests  N files" → "N tests in M files", or an error. After it, that project stays
+        -- discovered for the session (new test files are picked up).
+        -- WARNING: upstream internals. neotest has no public "discover now" call, so this uses
+        -- Client._adapters (all adapters, not only those with tests already loaded) and
+        -- Client:_update_positions (the method neotest's own discovery runs). Checked on neotest
+        -- 27bf921. If an update renames them, the key reports "needs updating" and does nothing;
+        -- the rest of neotest is unaffected. Rollback: delete this consumer and the tD key.
+        discover = function(client)
+          local handle, files, last = nil, 0, 0
+          -- Live "N files" count while discovering; idle (handle == nil) otherwise. Reports at
+          -- most every 100 ms so a large repo doesn't flood fidget.
+          client.listeners.discover_positions = function(_, tree)
+            if handle and tree:data().type == "file" then
+              files = files + 1
+              local now = vim.uv.now()
+              if now - last > 100 then
+                last = now
+                local h, n = handle, files
+                vim.schedule(function()
+                  h:report({ message = n .. " files" })
+                end)
+              end
+            end
+          end
+          return {
+            run = function()
+              if handle then
+                return -- already discovering
+              end
+              local ok_fidget, progress = pcall(require, "fidget.progress")
+              files = 0
+              handle = ok_fidget
+                and progress.handle.create({
+                  title = "Discovering tests",
+                  message = "searching…",
+                  lsp_client = { name = "neotest" },
+                })
+                or nil
+              local function finish(msg, level)
+                local h = handle
+                handle = nil
+                vim.schedule(function()
+                  if h then
+                    h:report({ message = msg })
+                    if level == vim.log.levels.ERROR then
+                      h:cancel()
+                    else
+                      h:finish()
+                    end
+                  end
+                  if level == vim.log.levels.ERROR or not h then
+                    vim.notify(msg, level, { title = "neotest" })
+                  end
+                end)
+              end
+              local nio = require("nio")
+              nio.run(function()
+                local ok, err = pcall(function()
+                  client:get_adapters() -- public; starts the client if this is the first neotest use
+                  if type(client._adapters) ~= "table" or type(client._update_positions) ~= "function" then
+                    error("neotest internals changed; the <leader>tD helper in testing.lua needs updating")
+                  end
+                  local tests = 0
+                  for adapter_id in pairs(client._adapters) do
+                    local root = adapter_id:match(":(.*)$")
+                    if root then
+                      nio.scheduler()
+                      require("neotest").setup_project(root, {
+                        discovery = {
+                          enabled = true,
+                          filter_dir = function(name)
+                            return not SKIP_DIRS[name]
+                          end,
+                        },
+                      })
+                      client:_update_positions(root, { adapter = adapter_id })
+                      local tree = client:get_position(nil, { adapter = adapter_id })
+                      for _, pos in (tree and tree:iter() or function() end) do
+                        if pos.type == "test" then
+                          tests = tests + 1
+                        end
+                      end
+                    end
+                  end
+                  local msg = tests > 0 and (tests .. " tests in " .. files .. " files") or "No tests found"
+                  finish(msg, vim.log.levels.INFO)
+                end)
+                if not ok then
+                  finish("Test discovery failed: " .. tostring(err), vim.log.levels.ERROR)
+                end
+              end)
+            end,
+          }
+        end,
         rerun_failed = function(client)
           return {
             run = function()
@@ -143,6 +245,7 @@ return {
     -- stylua: ignore
     keys = {
       { "<leader>tF", function() require("neotest").rerun_failed.run() end, desc = "Rerun Failed (Neotest)" },
+      { "<leader>tD", function() require("neotest").discover.run() end, desc = "Discover Project Tests (Neotest)" },
     },
   },
 
