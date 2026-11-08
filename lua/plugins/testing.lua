@@ -60,6 +60,12 @@ return {
         -- rustaceanvim still loads in .rs files. Set back to {} when you do Rust and have
         -- rust-analyzer installed (rustup component add rust-analyzer).
         ["rustaceanvim.neotest"] = false,
+        -- neotest-golang (from LazyVim's go extra) keeps its defaults: `go test -v -race -count=1`.
+        -- CAVEAT (known, not changed): testify suites (`suite.Suite` methods) are not listed or
+        -- runnable as single tests because `testify_enabled` is off; plain testify `assert` /
+        -- `require` calls work. Turning it on scans every Go file in the project when neotest
+        -- starts, so only do it in a codebase that uses suites:
+        --   ["neotest-golang"] = { testify_enabled = true },
         ["neotest-vitest"] = {},
         ["neotest-jest"] = {
           -- Replaces neotest-jest's own check, which also reads the package.json
@@ -68,6 +74,10 @@ return {
           -- neotest run, vitest files included. Same rule, without that read:
           -- a jest dependency (or a "jest" script) in any package.json from the
           -- test file upward, which also covers a monorepo root.
+          -- CAVEAT (perf, known, not fixed): no cache, so every candidate file re-reads its
+          -- package.json chain on the main thread. Unnoticeable per file; <leader>tD in a jest
+          -- monorepo with thousands of test files may stutter briefly. Fix if felt: cache the
+          -- result per package.json path (needs a restart after editing jest deps).
           isTestFile = function(file)
             if not require("neotest-jest.util").defaultTestFileMatcher(file) then
               return false
@@ -134,6 +144,10 @@ return {
       -- (get_adapters, get_position, get_results, run_tree). It runs nothing until the key is
       -- pressed. Caveats: each test is its own run (Go compiles each package once, then hits the
       -- cache), and C# is not covered: its tests run in easy-dotnet's runner, not neotest.
+      -- CAVEAT (perf, known, not fixed): for Vitest/Jest every rerun starts the runner again,
+      -- ~1-3 s each, so 20 failures take about a minute. Running whole files instead would also
+      -- rerun passing tests; neotest has no "run these N tests" call. Use <leader>tt if many
+      -- tests in one file fail.
       consumers = {
         -- A failed test's error shows the way VS Code and JetBrains show it: the message inline at
         -- the failing line, underlined, with no gutter sign (gutter stays as before neotest).
