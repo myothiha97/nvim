@@ -8,7 +8,10 @@
 --                           (VS Code order; with 5 entries max, Edit Log Message
 --                           is the one dropped when all of the above apply)
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
---   test file, idle      -> Debug Test (per language: delve.lua, node.lua, python.lua)
+--   test file, idle      -> Run Test · Debug Test · Run File Tests · Show Test Output
+--                           (Debug Test per language: delve.lua, node.lua,
+--                           python.lua, csharp.lua; the other three are extras,
+--                           see `extra` below)
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
 --                           wg.state, via dap-ui's own `w` action)
 --
@@ -18,7 +21,7 @@
 -- handles "Go to definition". Only the separator is added/removed, because
 -- separators are always shown.
 --
--- Cost: one autocmd per right-click, ~12 :menu commands. Nothing on mouse
+-- Cost: one autocmd per right-click, ~15 :menu commands. Nothing on mouse
 -- moves or keystrokes. nvim-dap is not loaded by a right-click.
 --
 -- Hit count and function breakpoints stay on <leader>dH / <leader>dF.
@@ -27,6 +30,7 @@
 local M = {}
 
 local MAX = 5
+local LAST = 9 -- highest menu priority we use (1.9); LSP entries start at 1.10
 local SEP = [[PopUp.-debugging-]]
 
 local function expr()
@@ -104,7 +108,35 @@ local function test_lang()
   return mod and require(mod) or nil
 end
 
+-- Run / output actions for test files. A language module may define its own
+-- (csharp.lua: easy-dotnet's runner); otherwise neotest, which Go, Python and
+-- vitest/jest already use for <leader>tr / tt / to.
+local NEOTEST = {
+  run_test = function()
+    require("neotest").run.run()
+  end,
+  run_file = function()
+    require("neotest").run.run(vim.api.nvim_buf_get_name(0))
+  end,
+  show_output = function()
+    require("neotest").output.open({ enter = true, auto_close = true })
+  end,
+}
+
+local function test_action(name)
+  local lang = test_lang()
+  if lang then
+    (lang[name] or NEOTEST[name])()
+  end
+end
+
+local function in_test_file(c)
+  return c.test
+end
+
 -- In menu order. `when(ctx)` decides visibility; `run()` is the action.
+-- `extra = true`: not counted in MAX, so the test actions never push a
+-- breakpoint entry out and the debug entries show exactly as before.
 local ITEMS = {
   {
     label = "Run to Cursor",
@@ -186,13 +218,34 @@ local ITEMS = {
     end,
   },
   {
-    label = "Debug Test",
-    when = function(c)
-      local lang = test_lang()
-      return c.idle and lang ~= nil and lang.is_test_file(vim.api.nvim_buf_get_name(0))
+    label = "Run Test",
+    extra = true,
+    when = in_test_file,
+    run = function()
+      test_action("run_test")
     end,
+  },
+  {
+    label = "Debug Test",
+    when = in_test_file,
     run = function()
       test_lang().debug_test()
+    end,
+  },
+  {
+    label = "Run File Tests",
+    extra = true,
+    when = in_test_file,
+    run = function()
+      test_action("run_file")
+    end,
+  },
+  {
+    label = "Show Test Output",
+    extra = true,
+    when = in_test_file,
+    run = function()
+      test_action("show_output")
     end,
   },
 }
@@ -213,7 +266,7 @@ local function on_popup()
 
   if vim.bo.filetype == "dapui_scopes" then
     vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
-    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(#ITEMS, SEP))
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
     return
   end
   if vim.bo.buftype ~= "" then
@@ -226,25 +279,31 @@ local function on_popup()
     bp = has_bp(),
     expr = evaluable() ~= nil,
   }
-  local shown = 0
+  local lang = ctx.idle and test_lang()
+  ctx.test = lang and lang.is_test_file(vim.api.nvim_buf_get_name(0)) or false
+  local shown, any = 0, false
   for _, item in ipairs(ITEMS) do
-    if shown < MAX and item.when(ctx) then
+    if (item.extra or shown < MAX) and item.when(ctx) then
       vim.cmd("amenu enable " .. path(item))
-      shown = shown + 1
+      if not item.extra then
+        shown = shown + 1
+      end
+      any = true
     end
   end
-  if shown > 0 then
+  if any then
     -- Same priority as the last item; Neovim inserts after equal priorities,
     -- so it lands below our entries and above the LSP ones (1.10).
-    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(#ITEMS, SEP))
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
   end
 end
 
 function M.setup()
   -- Priorities 1.1..1.9 sort above the LSP entries at 1.10+ in options.lua.
-  -- Keep #ITEMS <= 9 or they interleave with those.
+  -- Items past the 9th share priority 9 (equal priorities keep insertion
+  -- order), so they never reach the LSP entries at 1.10.
   for i, item in ipairs(ITEMS) do
-    vim.cmd(("anoremenu 1.%d %s <Cmd>lua require('debugging.menu').run(%d)<CR>"):format(i, path(item), i))
+    vim.cmd(("anoremenu 1.%d %s <Cmd>lua require('debugging.menu').run(%d)<CR>"):format(math.min(i, LAST), path(item), i))
   end
   local group = vim.api.nvim_create_augroup("debugging_menu", { clear = true })
   vim.api.nvim_create_autocmd("MenuPopup", { group = group, callback = on_popup })

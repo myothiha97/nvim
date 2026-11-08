@@ -13,6 +13,8 @@
 --      This file only adds the TS/JS adapters (the typescript extra ships none) and tightens
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
+--      Added here: tF rerun failed. Right-click in a test file also has Run Test / Debug Test /
+--      Run File Tests / Show Test Output (debugging/menu.lua).
 --
 --   2. nvim-coverage — paints covered/uncovered lines in the sign column from a REPORT your
 --      test runner produced. It does NOT run anything itself — generate the report first:
@@ -20,6 +22,18 @@
 --          • Go:             go test -coverprofile=cover.out ./...
 --      then <leader>tcc (or :Coverage) to load + show. lcov/coverprofile parse natively;
 --      no luarocks needed.
+
+-- Projects whose whole test tree should appear in the summary (<leader>ts), like a JetBrains
+-- test tool window. Opt-in per project because discovery parses every test file of the project
+-- with treesitter on first neotest use and keeps watching it; everywhere else the summary lists
+-- only files you opened or ran. Use the project root (where go.mod / package.json /
+-- pyproject.toml lives). Example: "~/work/payments-api".
+local DISCOVER_PROJECTS = {}
+
+local projects = {}
+for _, root in ipairs(DISCOVER_PROJECTS) do
+  projects[root] = { discovery = { enabled = true } }
+end
 
 return {
   -- TS/JS adapter + two safety/perf overrides on the neotest provided by test.core.
@@ -79,6 +93,50 @@ return {
       -- still works; the summary just lists tests from files you've opened or run, not the
       -- whole tree. Flip to { enabled = true } if you want auto-populated project discovery.
       discovery = { enabled = false },
+      projects = projects,
+      -- Rerun Failed (<leader>tF): reruns the tests whose last result is failed, one at a time,
+      -- in the order neotest returns them. A consumer is neotest's public extension point (the
+      -- trouble consumer in LazyVim's test.core is one); it uses only documented Client methods
+      -- (get_adapters, get_position, get_results, run_tree). It runs nothing until the key is
+      -- pressed. Caveats: each test is its own run (Go compiles each package once, then hits the
+      -- cache), and C# is not covered: its tests run in easy-dotnet's runner, not neotest.
+      consumers = {
+        rerun_failed = function(client)
+          return {
+            run = function()
+              require("nio").run(function()
+                local count = 0
+                for _, adapter_id in ipairs(client:get_adapters()) do
+                  local tree = client:get_position(nil, { adapter = adapter_id })
+                  local results = tree and client:get_results(adapter_id) or {}
+                  for id, result in pairs(results) do
+                    local node = result.status == "failed" and tree:get_key(id)
+                    -- Tests only (files/namespaces fail with their tests), and a failed Go
+                    -- subtest is skipped when its parent test is rerun anyway.
+                    local parent = node and node:parent()
+                    local parent_failed = parent
+                      and parent:data().type == "test"
+                      and (results[parent:data().id] or {}).status == "failed"
+                    if node and node:data().type == "test" and not parent_failed then
+                      count = count + 1
+                      client:run_tree(node, { adapter = adapter_id })
+                    end
+                  end
+                end
+                if count == 0 then
+                  vim.schedule(function()
+                    vim.notify("No failed tests to rerun", vim.log.levels.INFO)
+                  end)
+                end
+              end)
+            end,
+          }
+        end,
+      },
+    },
+    -- stylua: ignore
+    keys = {
+      { "<leader>tF", function() require("neotest").rerun_failed.run() end, desc = "Rerun Failed (Neotest)" },
     },
   },
 

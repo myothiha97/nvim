@@ -25,7 +25,7 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `controls.lua` | The control bar, built in full (no patching of dap-ui's string) |
 | `layout.lua` | When panels open/close, which panels, titles, fixed sizes |
 | `mouse.lua` | Click the gutter (sign area or line number) to toggle a breakpoint without moving the cursor; fold cells still fold |
-| `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file) |
+| `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file); in test files also Run Test, Run File Tests, Show Test Output (not counted in the 5) |
 | `hover.lua` | While stopped, mouse hover shows the value of the hovered expression (called from `config/mouse-hover.lua`; LSP hover is the fallback) |
 | `list.lua` | Breakpoint list picker (`<leader>dm` file, `<leader>dM` project), same look as `<leader>xd` |
 
