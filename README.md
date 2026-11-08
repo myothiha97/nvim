@@ -135,6 +135,7 @@ language server scan the whole home directory.
 | `<leader>cx`                | Clear quickfix list                                          |
 | `<leader>bu`                | List unsaved buffers (jump / save)                           |
 | `<leader>cd`                | Line diagnostics (focusable)                                 |
+| `<leader>cL`                | Restart the buffer's LSP servers, keeps unsaved edits        |
 
 </details>
 
