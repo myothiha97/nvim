@@ -277,14 +277,6 @@ return {
     -- buffers: oil.nvim owns netrw, is the file explorer on <leader>e, and also
     -- opens `nvim <dir>` as its popup box (lua/plugins/oil.lua).
     explorer = { enabled = true, replace_netrw = false },
-    -- Gutter (LazyVim draws it with snacks.statuscolumn): the left cell shows ONE
-    -- sign, the highest priority. Neotest's test icons use priority 1000 and nvim-dap's
-    -- breakpoints 21 (both hardcoded), so a breakpoint on a test's `func` line was hidden.
-    -- Matching neotest's signs (sign hl NeotestPassed/Failed/Test/…) as "git" moves them
-    -- to the right cell (fold/git), so both show. Display only: clicks are unchanged.
-    -- Caveat: on a test's first line the test icon covers that line's git change bar,
-    -- and a closed fold there shows the fold icon instead of the test icon.
-    statuscolumn = { git = { patterns = { "GitSign", "MiniDiffSign", "^Neotest" } } },
     dashboard = {
       enabled = true,
       -- `col` is deliberately NOT set: nil leaves snacks centring the block in

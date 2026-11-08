@@ -100,6 +100,15 @@ return {
       -- into the saved pins. Results still arrive via virtual text, the output panel, and the
       -- summary, so nothing is lost by turning this off.
       quickfix = { enabled = false },
+      -- Test status only as text at the end of the test's line, not in the gutter: the gutter's
+      -- sign cell shows one sign per line and neotest's (priority 1000, hardcoded) hid
+      -- breakpoints on a test's `func` line. Not-yet-run tests get a play icon in the
+      -- diagnostic info colour (follows the colorscheme) instead of the default grey flask;
+      -- passed / failed / running keep neotest's green / red / yellow. The same highlight
+      -- colours test names in the summary tree.
+      status = { signs = false, virtual_text = true },
+      icons = { test = "\u{f04b}", namespace = "\u{f04b}" },
+      highlights = { test = "DiagnosticInfo", namespace = "DiagnosticInfo" },
       -- PERFORMANCE: skip project-wide discovery / file-watching. Running nearest/file/cwd
       -- still works; the summary just lists tests from files you've opened or run, not the
       -- whole tree. Flip to { enabled = true } if you want auto-populated project discovery.
