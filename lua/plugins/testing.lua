@@ -107,6 +107,16 @@ return {
       -- passed / failed / running keep neotest's green / red / yellow. The same highlight
       -- colours test names in the summary tree.
       status = { signs = false, virtual_text = true },
+      -- Output / attach popups (<leader>to, ta, right-click Show Test Output) look like LSP hover
+      -- docs: same rounded border and the same LspDocFloat surface (config/keymaps.lua,
+      -- colours in the theme), so they stand out from the editor background. Size stays
+      -- neotest's (60% of the editor): test output has long lines.
+      floating = {
+        border = "rounded",
+        options = {
+          winhighlight = "Normal:LspDocFloat,NormalFloat:LspDocFloat,FloatBorder:LspDocBorder,FloatTitle:LspDocTitle",
+        },
+      },
       -- Summary tree (<leader>ts), JetBrains-style: Enter jumps to the test in the code (on any
       -- node: file, test, subtest). Double-click expands / collapses like every other panel;
       -- Tab does the same from the keyboard. Neotest's defaults put Enter on expand, which did
