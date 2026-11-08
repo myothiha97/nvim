@@ -72,15 +72,15 @@ return {
 
   -- REPL completion from the debug adapter (debugging/repl_complete.lua),
   -- in the debug REPL only (blink already enables itself in dap-repl
-  -- buffers). Words from the REPL buffer, what blink offered there before,
-  -- stay as the fallback when the adapter has no completion support (Delve)
-  -- or no match.
+  -- buffers). `inherit_defaults` keeps the sources the REPL had before
+  -- (lsp, path, snippets, buffer); buffer words show when the adapter has no
+  -- completion support (Delve) or no match.
   {
     "saghen/blink.cmp",
     optional = true,
     opts = {
       sources = {
-        per_filetype = { ["dap-repl"] = { "dap", "buffer" } },
+        per_filetype = { ["dap-repl"] = { "dap", inherit_defaults = true } },
         providers = {
           dap = { name = "DAP", module = "debugging.repl_complete", min_keyword_length = 0, fallbacks = { "buffer" } },
         },

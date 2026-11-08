@@ -94,10 +94,10 @@ end
 local function place_disabled(buf, line, bp)
   if vim.tbl_isempty(vim.fn.sign_getdefined(SIGN)) then
     -- Same icon as an enabled breakpoint (LazyVim defines DapBreakpoint when
-    -- nvim-dap loads), greyed. Theme it via the DapBreakpointDisabled group.
+    -- nvim-dap loads), greyed with the built-in Comment group, which every
+    -- colorscheme defines (a custom group would be wiped by :colorscheme).
     local base = vim.fn.sign_getdefined("DapBreakpoint")[1]
-    vim.api.nvim_set_hl(0, SIGN, { link = "Comment", default = true })
-    vim.fn.sign_define(SIGN, { text = base and base.text or "●", texthl = SIGN })
+    vim.fn.sign_define(SIGN, { text = base and base.text or "●", texthl = "Comment" })
   end
   local id = vim.fn.sign_place(0, GROUP, SIGN, buf, { lnum = line, priority = 21 })
   disabled[buf] = disabled[buf] or {}
@@ -117,13 +117,30 @@ local function bp_at(buf, line)
   end
 end
 
+-- Every running session, child sessions included, as nvim-dap's own
+-- breakpoint commands do (its `broadcast`). js-debug runs a Node program in
+-- a child session, so a change sent only to top-level sessions took effect
+-- on the next run. `children` is an nvim-dap Session field (also used by
+-- stacks.lua); Go sessions have none, so for Go this is the old loop.
+local function each_session(fn)
+  local function walk(sessions)
+    for _, session in pairs(sessions) do
+      fn(session)
+      if type(session.children) == "table" then
+        walk(session.children)
+      end
+    end
+  end
+  walk(require("dap").sessions())
+end
+
 -- Send a buffer's breakpoints to running sessions. The key must be present
 -- even when the list is empty, or a removal isn't sent.
 local function push(buf)
   local list = { [buf] = require("dap.breakpoints").get(buf)[buf] or {} }
-  for _, session in pairs(require("dap").sessions()) do
+  each_session(function(session)
     session:set_breakpoints(list)
-  end
+  end)
 end
 
 -- Snapshot breakpoints of every loaded file into the store. Files that are
@@ -208,9 +225,9 @@ local function restore(bufnr)
     end
   end
   -- A session may already be running (file opened mid-debug).
-  for _, session in pairs(require("dap").sessions()) do
+  each_session(function(session)
     session:set_breakpoints(bps.get(bufnr))
-  end
+  end)
 end
 
 -- nvim-dap swaps a breakpoint's sign to DapBreakpointRejected when the
@@ -336,11 +353,11 @@ function M.toggle_mute()
     delve.fn_breakpoints, muted_fns = muted_fns, nil
   end
   muted = not muted
-  for _, session in pairs(require("dap").sessions()) do
+  each_session(function(session)
     if session.capabilities.supportsFunctionBreakpoints and (#delve.fn_breakpoints > 0 or (muted_fns and #muted_fns > 0)) then
       delve.sync_fn_breakpoints(session)
     end
-  end
+  end)
   M.save()
   vim.notify(muted and ("Breakpoints muted (%d)"):format(count) or ("Breakpoints unmuted (%d)"):format(count))
 end
@@ -433,9 +450,9 @@ function M.clear_buffer()
   for _, bp in ipairs(in_buf) do
     bps.remove(bufnr, bp.line)
   end
-  for _, session in pairs(require("dap").sessions()) do
+  each_session(function(session)
     session:set_breakpoints({ [bufnr] = {} })
-  end
+  end)
   M.save()
   local n = #in_buf + #off
   vim.notify(("Cleared %d breakpoint%s"):format(n, n == 1 and "" or "s"))
