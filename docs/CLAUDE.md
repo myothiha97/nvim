@@ -86,6 +86,8 @@ Preserve that reasoning when editing around it.
 - eslint: disabled (TypeScript sufficient)
 - vtsls: TypeScript LSP with 200ms debounce
 - Custom `gd` mapping filters out node_modules
+- gopls: stdlib / module-cache files join the running gopls (no new process per dependency)
+- `<leader>cL` Restart LSP: `:checktime` + `:lsp restart` for `vim.lsp.enable()`d servers; keeps unsaved edits, leaves copilot alone
 
 ## Treesitter
 
