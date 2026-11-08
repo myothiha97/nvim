@@ -147,9 +147,9 @@ end
 -- Window titles + one hint each. Sidebar windows keep their width and the
 -- tray its height when other splits open or close.
 local TITLES = {
-  dapui_scopes = { "VARIABLES", "dbl-click expand · e edit · w watch" },
-  dapui_stacks = { "CALL STACK", "dbl-click expand/open · t internals" },
-  dapui_watches = { "WATCHES", "i add · e edit · d remove" },
+  dapui_scopes = { "VARIABLES", "dbl-click expand · e edit · w watch · y copy" },
+  dapui_stacks = { "CALL STACK", "dbl-click expand/open/switch · t internals" },
+  dapui_watches = { "WATCHES", "i add · e edit · d remove · y copy" },
   dapui_breakpoints = { "BREAKPOINTS", "o open · t enable/disable · d remove" },
   dapui_console = { "TERMINAL", "" },
 }

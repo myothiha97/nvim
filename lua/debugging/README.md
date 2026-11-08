@@ -27,6 +27,8 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `mouse.lua` | Click the gutter (sign area or line number) to toggle a breakpoint without moving the cursor; fold cells still fold |
 | `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file) |
 | `hover.lua` | While stopped, mouse hover shows the value of the hovered expression (called from `config/mouse-hover.lua`; LSP hover is the fallback) |
+| `copy.lua` | Copy Value: `y` or right-click in Variables / Watches copies the full value (adapter's clipboard context) |
+| `repl_complete.lua` | REPL completion: blink source fed by the adapter's `completions` request (dap-repl only) |
 | `list.lua` | Breakpoint list picker (`<leader>dm` file, `<leader>dM` project), same look as `<leader>xd` |
 
 ## How a session looks
@@ -40,7 +42,10 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 4. **Breakpoints list** is never in the layout: `<leader>dp` opens it as a float.
 5. **Terminal pane** joins the tray only if the adapter runs the program in a
    terminal (Python, Rust, C/C++ do; Delve sends output to the REPL instead).
-6. **End**: panels stay; the bar shows `Run Again · Close  exited (code N)`.
+6. **Several sessions** (Node runs the program in a child session): a list of
+   sessions heads the CALL STACK panel; double-click (or `<CR>` / `o`) one to
+   switch to it. With one session (Go always) nothing is added.
+7. **End**: panels stay; the bar shows `Run Again · Close  exited (code N)`.
    Click Close (or `<leader>du`) to close everything.
 
 Run to Cursor is `<leader>dC` (right-click menu in phase 2).
@@ -63,8 +68,14 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>de` | Evaluate the name under the cursor or the selection (keywords, operators, literals are skipped, as in the right-click menu) |
 | `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
 
+In the REPL: completion from the adapter while typing (blink menu). Delve
+has no completion support, so in Go the menu offers words from the REPL
+buffer, as before.
+
 In panels: double-click expands, `e` edits a value, `w` (or right-click →
-Add to Watches) watches a variable, `o` opens a frame,
+Add to Watches) watches a variable, `y` (or right-click → Copy Value) copies
+the full value to the clipboard (Variables, Watches; `v`/`V` then `y` still
+yanks panel text), `o` opens a frame,
 `t` toggles runtime-internal frames (Call Stack) or enables/disables (Breakpoints).
 
 ## Languages
@@ -118,6 +129,8 @@ pinned; check its row after `:Lazy update`):
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
 | `layout.lua` | dap-ui `require("dapui.windows").layouts[i]:is_open()` (no public "is this layout open") | first stop opens the sidebar once; first watch swaps in the Watches variant; `<leader>du` toggles | none short of rewriting the open/close logic; if it breaks, panels may open twice or not swap |
 | `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
+| `copy.lua` | dap-ui's rendering: highlight groups `DapUIVariable` / `DapUIScope` / `DapUIWatchesValue` / `DapUIWatchesError` / `DapUIDecoration` and `dapui.render.canvas`.namespace, to tell which variable a row shows | `y` on a nested variable in Variables and on a watch copies its value | delete `require("debugging.copy").setup()` in `plugins/ui.lua` (if it breaks, `y` only says "Nothing to copy here") |
+| `stacks.lua` (sessions list) | nvim-dap `session.children` (undocumented field; `dap.sessions()` returns top-level sessions only) | Node: Call Stack lists the parent and child session; double-click switches | the list is drawn only with 2+ sessions; delete `render_sessions(canvas)` in `stacks.lua` |
 | `plugins/csharp.lua` | wraps easy-dotnet `terminal.tabline.destroy` (it deletes the global `<LeftMouse>` / `<2-LeftMouse>` maps) | after `:Dotnet run` and closing its panel, a gutter click in a Go file still toggles a breakpoint | delete the `tabline.destroy` block (gutter clicks then stop working after that panel closes, until restart) |
 
 ## Known limits
@@ -127,4 +140,6 @@ and §7 of the plan. In short: no deferred-call view, no set-next-statement,
 no single-click tree expansion, no draggable panels.
 
 - Run to Cursor (nvim-dap) clears all breakpoints until the next stop, then puts them back. Saving is paused in that window (breakpoints.lua), so quitting or closing a buffer then can't persist the cleared state.
+- Copy Value: netcoredbg (C#) has no clipboard context, so it copies the value as the panel shows it (long strings may be shortened by the adapter).
+- REPL completion: none from Delve (Go); buffer words remain.
 - Hover shows a one-line value; nested values are expanded with right-click → Evaluate.
