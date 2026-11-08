@@ -91,8 +91,16 @@ return {
         -- layer that other editors' SQL extensions ship built in. `inherit_defaults`
         -- keeps lsp/path/snippets/buffer, so schema completion still appears on top
         -- once a `postgres-language-server.jsonc` points at a database.
+        --
+        -- `dadbod` (lua/plugins/database.lua) gives table/column names from the
+        -- connection of a DB UI query buffer. Registered per filetype on purpose,
+        -- never in `default`: other filetypes never load or ask it. It answers
+        -- `is_incomplete`, so blink re-asks it (a cached Vimscript lookup) on each
+        -- keystroke -- only in SQL buffers that have a DB attached.
         per_filetype = {
-          sql = { inherit_defaults = true, "sql_keywords" },
+          sql = { inherit_defaults = true, "sql_keywords", "dadbod" },
+          mysql = { inherit_defaults = true, "dadbod" },
+          plsql = { inherit_defaults = true, "dadbod" },
         },
         transform_items = function(_, items)
           return items
@@ -125,6 +133,21 @@ return {
             -- schema names outrank them. Needs 1 typed character -- the source
             -- buckets its word list by first letter and returns only that bucket.
             min_keyword_length = 1,
+          },
+          dadbod = {
+            name = "DB",
+            module = "vim_dadbod_completion.blink",
+            -- In `sql` buffers sql_keywords already lists the keywords; drop
+            -- dadbod's copy (kind Keyword) so SELECT etc. don't show twice.
+            transform_items = function(_, items)
+              if vim.bo.filetype ~= "sql" then
+                return items
+              end
+              local keyword = vim.lsp.protocol.CompletionItemKind.Keyword
+              return vim.tbl_filter(function(item)
+                return item.kind ~= keyword
+              end, items)
+            end,
           },
         },
       },
