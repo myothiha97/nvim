@@ -10,6 +10,10 @@
 --     kept per goroutine id until the session ends
 --   * double-click (or <CR> / o) on a frame jumps to it and repoints Variables
 --   * t toggles runtime-internal ("subtle") frames of that goroutine
+--   * with more than one debug session (Node: js-debug runs your program in
+--     child sessions), a sessions list heads the panel, as in VS Code's Call
+--     Stack; double-click (or <CR> / o) on one switches to it. With a single
+--     session (Go always) nothing is added.
 --
 -- Same factory signature as upstream: function(client, send_ready).
 --
@@ -28,6 +32,31 @@
 
 local config = require("dapui.config")
 local frame_renderer = require("dapui.components.frames")
+
+-- Every live session, parents before their children, with nesting depth.
+-- `children` is an nvim-dap Session field (not in :h dap-session); without
+-- it only top-level sessions are listed.
+local function all_sessions()
+  local list = {}
+  local function add(s, depth)
+    list[#list + 1] = { session = s, depth = depth }
+    local kids = type(s.children) == "table" and vim.tbl_values(s.children) or {}
+    table.sort(kids, function(a, b)
+      return a.id < b.id
+    end)
+    for _, child in ipairs(kids) do
+      add(child, depth + 1)
+    end
+  end
+  local roots = vim.tbl_values(require("dap").sessions())
+  table.sort(roots, function(a, b)
+    return a.id < b.id
+  end)
+  for _, s in ipairs(roots) do
+    add(s, 0)
+  end
+  return list
+end
 
 return function(client, send_ready)
   local _threads = nil
@@ -52,9 +81,51 @@ return function(client, send_ready)
 
   local render_frames = frame_renderer(client, send_ready)
 
+  -- Switch: make it current, fetch its threads (the list above is fed by
+  -- `threads` responses), then focus its frame so Variables follow.
+  local function switch(s)
+    local dap = require("dap")
+    dap.set_session(s)
+    s:request("threads", nil, function()
+      vim.schedule(function()
+        if dap.session() == s and s.current_frame then
+          dap.focus_frame()
+        end
+        send_ready()
+      end)
+    end)
+  end
+
+  ---@param canvas dapui.Canvas
+  local function render_sessions(canvas)
+    local list = package.loaded["dap"] and all_sessions() or {}
+    if #list < 2 then
+      return
+    end
+    local current = require("dap").session()
+    for _, item in ipairs(list) do
+      local s = item.session
+      local line = math.max(canvas:length(), 1)
+      local is_current = current ~= nil and s.id == current.id
+      canvas:write(string.rep(" ", item.depth * config.render.indent))
+      canvas:write(is_current and "▸ " or "  ", { group = "DapUIDecoration" })
+      canvas:write(s.config.name or ("session " .. s.id), { group = is_current and "DapUIStoppedThread" or "DapUIThread" })
+      canvas:write(s.stopped_thread_id and "  paused" or "  running", { group = "DapUIDecoration" })
+      canvas:write("\n")
+      canvas:add_mapping("expand", function()
+        switch(s)
+      end, { line = line })
+      canvas:add_mapping("open", function()
+        switch(s)
+      end, { line = line })
+    end
+    canvas:write("\n")
+  end
+
   return {
     ---@param canvas dapui.Canvas
     render = function(canvas, indent)
+      render_sessions(canvas)
       local threads = _threads -- may be wiped during render
       local session = client.session
       if not threads or not session then

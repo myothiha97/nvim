@@ -47,6 +47,7 @@ return {
       require("dapui").setup(opts)
       require("debugging.controls").setup()
       require("debugging.layout").setup()
+      require("debugging.copy").setup() -- y / right-click Copy Value in Variables, Watches
     end,
   },
 
@@ -66,6 +67,24 @@ return {
         end
         return opts.virt_text_pos == "inline" and (" = " .. value) or (variable.name .. " = " .. value)
       end,
+    },
+  },
+
+  -- REPL completion from the debug adapter (debugging/repl_complete.lua),
+  -- in the debug REPL only (blink already enables itself in dap-repl
+  -- buffers). Words from the REPL buffer, what blink offered there before,
+  -- stay as the fallback when the adapter has no completion support (Delve)
+  -- or no match.
+  {
+    "saghen/blink.cmp",
+    optional = true,
+    opts = {
+      sources = {
+        per_filetype = { ["dap-repl"] = { "dap", "buffer" } },
+        providers = {
+          dap = { name = "DAP", module = "debugging.repl_complete", min_keyword_length = 0, fallbacks = { "buffer" } },
+        },
+      },
     },
   },
 }

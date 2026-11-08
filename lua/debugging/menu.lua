@@ -10,7 +10,8 @@
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
 --   test file, idle      -> Debug Test (per language: delve.lua, node.lua, python.lua)
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
---                           wg.state, via dap-ui's own `w` action)
+--                           wg.state, via dap-ui's own `w` action) · Copy Value
+--   Watches panel        -> Copy Value (debugging/copy.lua)
 --
 -- The entries are defined once. On each right-click a MenuPopup autocmd
 -- enables the ones that apply and disables the rest; Neovim's popup menu
@@ -27,6 +28,7 @@
 local M = {}
 
 local MAX = 5
+local LAST = 9 -- highest menu priority we use (1.9); LSP entries start at 1.10
 local SEP = [[PopUp.-debugging-]]
 
 local function expr()
@@ -195,6 +197,16 @@ local ITEMS = {
       test_lang().debug_test()
     end,
   },
+  {
+    -- Variables / Watches panels only (on_popup enables it there).
+    label = "Copy Value",
+    when = function()
+      return false
+    end,
+    run = function()
+      require("debugging.copy").copy()
+    end,
+  },
 }
 
 local function path(item)
@@ -211,9 +223,13 @@ local function on_popup()
   end
   pcall(vim.cmd, "aunmenu " .. SEP)
 
-  if vim.bo.filetype == "dapui_scopes" then
-    vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
-    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(#ITEMS, SEP))
+  local ft = vim.bo.filetype
+  if ft == "dapui_scopes" or ft == "dapui_watches" then
+    if ft == "dapui_scopes" then
+      vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
+    end
+    vim.cmd("amenu enable PopUp.Copy\\ Value")
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
     return
   end
   if vim.bo.buftype ~= "" then
@@ -236,15 +252,16 @@ local function on_popup()
   if shown > 0 then
     -- Same priority as the last item; Neovim inserts after equal priorities,
     -- so it lands below our entries and above the LSP ones (1.10).
-    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(#ITEMS, SEP))
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
   end
 end
 
 function M.setup()
   -- Priorities 1.1..1.9 sort above the LSP entries at 1.10+ in options.lua.
-  -- Keep #ITEMS <= 9 or they interleave with those.
+  -- Items past the 9th share priority 9 (equal priorities keep insertion
+  -- order), so they never reach the LSP entries at 1.10.
   for i, item in ipairs(ITEMS) do
-    vim.cmd(("anoremenu 1.%d %s <Cmd>lua require('debugging.menu').run(%d)<CR>"):format(i, path(item), i))
+    vim.cmd(("anoremenu 1.%d %s <Cmd>lua require('debugging.menu').run(%d)<CR>"):format(math.min(i, LAST), path(item), i))
   end
   local group = vim.api.nvim_create_augroup("debugging_menu", { clear = true })
   vim.api.nvim_create_autocmd("MenuPopup", { group = group, callback = on_popup })
