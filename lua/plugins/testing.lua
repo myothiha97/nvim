@@ -13,7 +13,7 @@
 --      This file only adds the TS/JS adapters (the typescript extra ships none) and tightens
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
---      Added here: tF rerun failed · tD discover project tests (full tree in ts) · tx hide/show marks.
+--      Added here: tF rerun failed · tD discover project tests (full tree in ts).
 --      Right-click in a test file also has Run Test / Debug Test /
 --      Run File Tests / Show Test Output (debugging/menu.lua).
 --
@@ -42,29 +42,6 @@ local SKIP_DIRS = {
   [".venv"] = true,
   __pycache__ = true,
 }
-
--- <leader>tx: hide / show neotest's end-of-line marks (▶ ✓ ✗) and inline failure messages, to get
--- the plain editor back after testing. Nothing "runs" while they show: they are only labels.
--- Uses neotest.config.status.virtual_text, which the status consumer reads on every redraw
--- (checked on neotest 27bf921); if an update stops reading it, hiding clears the marks once
--- and they come back on the next run. Hidden lasts for the session or until pressed again.
-local marks_hidden = false
-local function toggle_test_marks()
-  marks_hidden = not marks_hidden
-  require("neotest.config").status.virtual_text = not marks_hidden
-  vim.diagnostic.enable(not marks_hidden, { ns_id = vim.api.nvim_create_namespace("neotest") })
-  if marks_hidden then
-    local ns = vim.api.nvim_create_namespace("neotest-status")
-    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-      vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-    end
-  end
-  vim.notify(
-    marks_hidden and "Test marks hidden" or "Test marks on: they show on the next run or when you reopen a test file",
-    vim.log.levels.INFO,
-    { title = "neotest" }
-  )
-end
 
 return {
   -- TS/JS adapter + two safety/perf overrides on the neotest provided by test.core.
@@ -329,7 +306,6 @@ return {
     keys = {
       { "<leader>tF", function() require("neotest").rerun_failed.run() end, desc = "Rerun Failed (Neotest)" },
       { "<leader>tD", function() require("neotest").discover.run() end, desc = "Discover Project Tests (Neotest)" },
-      { "<leader>tx", toggle_test_marks, desc = "Hide/Show Test Marks (Neotest)" },
     },
   },
 
