@@ -495,10 +495,16 @@ Snacks.toggle
   })
   :map("<leader>uv")
 
--- Tab in normal mode: accept NES if pending, else focus float, else native
--- jumplist forward (the built-in <C-i> behavior, since <Tab> and <C-i> share the
--- same byte in the terminal). Hover is on K.
+-- Tab in normal mode: accept a cursortab edit or jump if one is showing, else
+-- accept NES if pending, else focus float, else native jumplist forward (the
+-- built-in <C-i> behavior, since <Tab> and <C-i> share the same byte in the
+-- terminal). Hover is on K. cursortab is only consulted once it is loaded
+-- (plugins/cursortab.lua), so this never loads it.
 vim.keymap.set("n", "<Tab>", function()
+  local cursortab = package.loaded.cursortab
+  if cursortab and cursortab.accept() then
+    return
+  end
   local bufnr = vim.api.nvim_get_current_buf()
   if vim.b[bufnr].nes_state then
     local ok, nes = pcall(require, "copilot-lsp.nes")
@@ -558,6 +564,11 @@ vim.keymap.set({ "n", "t" }, "<C-->", toggle_bottom_term, { desc = "Toggle Termi
 vim.keymap.set({ "n", "t" }, "<C-_>", toggle_bottom_term, { desc = "Toggle Terminal (bottom)" })
 
 vim.keymap.set("i", "<Tab>", function()
+  -- cursortab first (see the normal-mode <Tab> above); accept() is expr-safe.
+  local cursortab = package.loaded.cursortab
+  if cursortab and cursortab.accept() then
+    return ""
+  end
   local bufnr = vim.api.nvim_get_current_buf()
   if vim.b[bufnr].nes_state then
     local ok, nes = pcall(require, "copilot-lsp.nes")
@@ -567,7 +578,7 @@ vim.keymap.set("i", "<Tab>", function()
     end
   end
   return vim.api.nvim_replace_termcodes("<Tab>", true, true, true)
-end, { expr = true, desc = "NES Accept or Indent" })
+end, { expr = true, desc = "Cursortab/NES Accept or Indent" })
 vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent" })
 
 -- Relocated off native `gi` (resume insert at last edit position) to reclaim it.
@@ -994,3 +1005,9 @@ Snacks.toggle.profiler_highlights():map("<leader>uPh")
 vim.keymap.set("n", "<leader>uPs", function()
   Snacks.profiler.scratch()
 end, { desc = "Profiler Scratch Buffer" })
+
+-- Test <-> implementation jump (JetBrains Ctrl+Shift+T), Go / JS/TS / Python. Set here, not
+-- in the neotest spec's `keys`, so pressing it does not load neotest. lua/testing/jump.lua.
+vim.keymap.set("n", "<leader>tj", function()
+  require("testing.jump").jump()
+end, { desc = "Jump Test <-> Implementation" })

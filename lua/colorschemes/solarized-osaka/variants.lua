@@ -41,8 +41,11 @@ local builds = {
   -- The daily selection. Only the roles that differ from the base palette.
 
   --  todo: remaining work with the custom color scheme
-  --  2026-10-01: The main editor background is now set to
-  -- `ui.reference.black_matte_color.second_darkest`.
+  --  2026-10-01: The main editor background was set to
+  -- `ui.reference.black_matte_color.second_darkest` (#131312).
+  --  2026-11-09: moved to `ui.reference.black_matte_color.medium_dark` (#171716),
+  -- one notch lighter for eye comfort. Every text contrast drops ~3.5%; no group
+  -- crosses a threshold except CursorLineNr (4.61 -> 4.45:1).
   --
   -- The current palette in `lua/colorschemes/solarized-osaka/palette.lua`
   -- is acceptable for now, but after the freeze date we need to thoroughly
@@ -58,7 +61,7 @@ local builds = {
   --      - Palette and syntax colors tuned around the teal background.
   --
   --   2. Dark / Black Matte Background
-  --      - `black_matte_color.second_darkest` as the primary editor background.
+  --      - `black_matte_color.medium_dark` as the primary editor background.
   --      - Palette and syntax colors re-adjusted to work optimally with the
   --        darker background.
   --
@@ -190,11 +193,18 @@ local builds = {
       import = palette.variants.keyword.warm_violet,
       -- escape = palette.variants.boolean.tokyonight_dim,
 
-      -- Two stops below `readable`, 2026-09-09: 4.56:1 read as too bright and
-      -- `subtle` (dE 2.8) was not enough of a drop. Gives up AA at 3.96:1,
-      -- knowingly, and the upstream value this config ran for months is lower
-      -- still at 3.48:1. Ladder and the remaining stops are in palette.lua.
-      comment = palette.variants.comment.dimmer,
+      -- Neutral warm grey since 2026-11-08, replacing `dimmer` (#5f767d).
+      -- Measured on the #131312 background: 4.40:1, APCA Lc 31.8 (was 3.87:1,
+      -- Lc 27.7, under APCA's Lc 30 floor for secondary text). Drops the blue-teal
+      -- tint left over from the teal background. Brighter than `dimmer`, yet
+      -- FURTHER from the blue-grey delimiter (dE00 11.4 vs 10.7) because the hue
+      -- moved off the delimiter's axis; every chromatic role stays >= 26.4, and
+      -- body text 21.5 away, so comments still read as secondary.
+      --
+      -- History: `dimmer` was chosen 2026-09-09 on the teal background, where
+      -- `readable` (4.56:1) read as too bright. Ladder and stops in palette.lua.
+      -- comment = palette.variants.comment.dimmer,
+      comment = palette.variants.comment.neutral,
     },
   },
 

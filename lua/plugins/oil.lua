@@ -594,6 +594,11 @@ end
 -- `on_colors` in
 -- lua/colorschemes/solarized-osaka/init.lua points all of them at
 -- `require("config.ui").bg`. Do not re-add per-window background remaps here.
+--
+-- The separators link to NonText. The original reason for not using Comment --
+-- Comment was italic and leaned the marks away from the upright names -- no
+-- longer holds since comments went upright on 2026-11-08. Body-text white
+-- (`Normal`) was tried on 2026-09-04 and reverted the same day.
 local function set_oil_highlights()
   local ok, palette = pcall(require, "colorschemes.solarized-osaka.palette")
   if ok then
@@ -603,24 +608,23 @@ local function set_oil_highlights()
   end
   vim.api.nvim_set_hl(0, "OilPathSeparator", { link = "NonText", default = true })
 
-  -- File and folder NAMES: ONE neutral grey, a step below the editor's body
-  -- text. Same two defects and the same value as `SnacksPickerDirectory` /
-  -- `SnacksPickerFile` in lua/plugins/snacks.lua, so the two browsers read alike.
-  -- Oil linked `OilDir` -> `Directory` (#268bd3 here), the same blue family as
-  -- the folder ICON beside it; `OilFile` has no link at all, so files fell
-  -- through to `Normal` and matched editor body text exactly.
+  -- File and folder NAMES: ONE neutral grey, the same value as
+  -- `SnacksPickerDirectory` / `SnacksPickerFile` in lua/plugins/snacks.lua, so the
+  -- two browsers read alike. Two defects fixed together: oil linked `OilDir` ->
+  -- `Directory` (#268bd3 here), the same blue family as the folder ICON beside it;
+  -- `OilFile` has no link at all, so files fell through to `Normal`.
   --
-  -- `body.tinted` (#a0b6b8) since 2026-09-24, moved up with the editor body
-  -- (now `brighter`) so the step below it stays dE 4.1. The paragraph below is
-  -- the 2026-09-22 choice. Numbers: notes/string-and-member-colours.md.
-  --
-  -- The value is `body.base0` (#9eabac), the theme's own body value, one chroma
-  -- step under the `tinted` white the editor runs -- read by ROLE, never copied
-  -- as a hex, so both browsers follow one edit. `body.faded` was tried first and
-  -- read as too faded; that rung keeps its measurements in palette.lua.
+  -- `body.base1` (#adb7b7) since 2026-11-08, replacing `body.tinted` (#a0b6b8):
+  -- near-neutral (C*3.7 vs 8.0), so names lose the teal cast and match the
+  -- neutral UI. On #131312: 9.06:1, 5.35:1 on the `OilCursorLine` band, dE00 2.1
+  -- from editor body -- names now read at body level rather than one step softer,
+  -- a knowing trade. Read by ROLE, never copied as a hex, so both browsers follow
+  -- one edit. Earlier values (`faded`, `base0`, `tinted`) and their measurements
+  -- are in palette.lua.
   --
   -- Hidden entries are untouched: `OilDirHidden`/`OilFileHidden` link to
-  -- `OilHidden` -> `Comment`, so they stay dimmer and italic.
+  -- `OilHidden` -> `Comment` (the neutral #7d7b77, upright since 2026-11-08), so
+  -- they stay clearly dimmer: dE00 19.5 below the names.
   --
   -- ORDER MATTERS, and this is the trap: oil links `OilDirIcon` -> `OilDir`, so
   -- greying `OilDir` alone greys the folder icon with it and the listing loses the
@@ -633,7 +637,7 @@ local function set_oil_highlights()
   if dir_fg then
     vim.api.nvim_set_hl(0, "OilDirIcon", { fg = dir_fg })
   end
-  local list_fg = ok and palette.variants.body.tinted or nil
+  local list_fg = ok and palette.variants.body.base1 or nil
   if list_fg then
     vim.api.nvim_set_hl(0, "OilDir", { fg = list_fg })
     vim.api.nvim_set_hl(0, "OilFile", { fg = list_fg })

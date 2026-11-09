@@ -67,23 +67,40 @@ function M.rerun()
   end
 end
 
--- Right-click Debug Test (menu.lua): easy-dotnet maps <leader>td in files
--- whose tests its runner has discovered; that mapping debugs the test at the
--- cursor.
-local function test_map()
-  local map = vim.fn.maparg("<leader>td", "n", false, true)
+-- Right-click test entries (menu.lua): easy-dotnet maps <leader>td / tr /
+-- tt / to (plugins/csharp.lua) in files whose tests its runner has
+-- discovered; those mappings debug / run the test at the cursor, run the
+-- file, and peek the failed test's stack trace.
+local function test_map(lhs)
+  local map = vim.fn.maparg(lhs, "n", false, true)
   return map.buffer == 1 and map.callback or nil
 end
 
-function M.is_test_file(_)
-  return test_map() ~= nil
-end
-
-function M.debug_test()
-  local fn = test_map()
+local function call(lhs)
+  local fn = test_map(lhs)
   if fn then
     fn()
   end
+end
+
+function M.is_test_file(_)
+  return test_map("<leader>td") ~= nil
+end
+
+function M.debug_test()
+  call("<leader>td")
+end
+
+function M.run_test()
+  call("<leader>tr")
+end
+
+function M.run_file()
+  call("<leader>tt")
+end
+
+function M.show_output()
+  call("<leader>to")
 end
 
 return M

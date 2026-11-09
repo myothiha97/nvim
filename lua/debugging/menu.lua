@@ -11,7 +11,12 @@
 --                           max the last ones are dropped when all apply)
 --   disabled breakpoint  -> Remove Breakpoint · Enable Breakpoint
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
---   test file, idle      -> Debug Test (per language: delve.lua, node.lua, python.lua)
+--   test file, idle      -> Run Test · Debug Test · Run File Tests · Show Test Output
+--   Go/JS/TS/Python, idle -> Go to Test or Go to Implementation (extra, testing/jump.lua)
+--                           (Debug Test per language: delve.lua, node.lua,
+--                           python.lua, csharp.lua; the other three are extras,
+--                           see `extra` below)
+--   Test Results panel   -> Jump to Code · Show Output · Full Output · Rerun Test · Rerun Failed
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
 --                           wg.state, via dap-ui's own `w` action) · Copy Value
 --   Watches panel        -> Copy Value (debugging/copy.lua)
@@ -27,7 +32,7 @@
 -- handles "Go to definition". Only the separator is added/removed, because
 -- separators are always shown.
 --
--- Cost: one autocmd per right-click, ~12 :menu commands. Nothing on mouse
+-- Cost: one autocmd per right-click, ~15 :menu commands. Nothing on mouse
 -- moves or keystrokes. nvim-dap is not loaded by a right-click.
 --
 -- Hit count and function breakpoints stay on <leader>dH / <leader>dF.
@@ -125,7 +130,35 @@ local function test_lang()
   return mod and require(mod) or nil
 end
 
+-- Run / output actions for test files. A language module may define its own
+-- (csharp.lua: easy-dotnet's runner); otherwise neotest, which Go, Python and
+-- vitest/jest already use for <leader>tr / tt / to.
+local NEOTEST = {
+  run_test = function()
+    require("neotest").run.run()
+  end,
+  run_file = function()
+    require("neotest").run.run(vim.api.nvim_buf_get_name(0))
+  end,
+  show_output = function()
+    require("neotest").output.open({ enter = true, auto_close = true })
+  end,
+}
+
+local function test_action(name)
+  local lang = test_lang()
+  if lang then
+    (lang[name] or NEOTEST[name])()
+  end
+end
+
+local function in_test_file(c)
+  return c.test
+end
+
 -- In menu order. `when(ctx)` decides visibility; `run()` is the action.
+-- `extra = true`: not counted in MAX, so the test actions never push a
+-- breakpoint entry out and the debug entries show exactly as before.
 local ITEMS = {
   {
     label = "Run to Cursor",
@@ -243,13 +276,56 @@ local ITEMS = {
     end,
   },
   {
-    label = "Debug Test",
-    when = function(c)
-      local lang = test_lang()
-      return c.idle and lang ~= nil and lang.is_test_file(vim.api.nvim_buf_get_name(0))
+    label = "Run Test",
+    extra = true,
+    when = in_test_file,
+    run = function()
+      test_action("run_test")
     end,
+  },
+  {
+    label = "Debug Test",
+    when = in_test_file,
     run = function()
       test_lang().debug_test()
+    end,
+  },
+  {
+    label = "Run File Tests",
+    extra = true,
+    when = in_test_file,
+    run = function()
+      test_action("run_file")
+    end,
+  },
+  {
+    label = "Show Test Output",
+    extra = true,
+    when = in_test_file,
+    run = function()
+      test_action("show_output")
+    end,
+  },
+  -- Test <-> implementation jump (testing/jump.lua, also <leader>tj). One entry per direction,
+  -- shown in Go / JS/TS / Python buffers when no debug session runs.
+  {
+    label = "Go to Test",
+    extra = true,
+    when = function(c)
+      return c.goto_test == "test"
+    end,
+    run = function()
+      require("testing.jump").jump()
+    end,
+  },
+  {
+    label = "Go to Implementation",
+    extra = true,
+    when = function(c)
+      return c.goto_test == "impl"
+    end,
+    run = function()
+      require("testing.jump").jump()
     end,
   },
   {
@@ -285,6 +361,28 @@ local ITEMS = {
   },
 }
 
+-- Test Results panel (testing/panel.lua): its own entries, shown only in that panel (see the
+-- `results` branch in on_popup), like Add to Watches in dap-ui's Variables panel.
+for _, entry in ipairs({
+  { "Jump to Code", "jump" },
+  { "Show Output", "output" },
+  { "Full Output", "full_output" },
+  { "Rerun Test", "rerun" },
+  { "Rerun Failed", "rerun_failed" },
+}) do
+  table.insert(ITEMS, {
+    label = entry[1],
+    extra = true,
+    results = true,
+    when = function()
+      return false -- never in code buffers
+    end,
+    run = function()
+      require("testing.panel").actions[entry[2]]()
+    end,
+  })
+end
+
 local function path(item)
   return "PopUp." .. item.label:gsub(" ", "\\ ")
 end
@@ -319,6 +417,15 @@ local function on_popup()
     end
     return
   end
+  if ft == "testing-results" then
+    for _, item in ipairs(ITEMS) do
+      if item.results then
+        vim.cmd("amenu enable " .. path(item))
+      end
+    end
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
+    return
+  end
   if vim.bo.buftype ~= "" then
     return -- other panels, terminals, pickers: no debug entries
   end
@@ -332,14 +439,24 @@ local function on_popup()
     smart = caps(s).supportsStepInTargetsRequest == true and on_current_line(s),
     expr = evaluable() ~= nil,
   }
-  local shown = 0
+  local lang = ctx.idle and test_lang()
+  ctx.test = lang and lang.is_test_file(vim.api.nvim_buf_get_name(0)) or false
+  -- ctx.jump is Jump to Line (above); the test <-> implementation entries use goto_test.
+  local test_jump = ctx.idle and require("testing.jump")
+  if test_jump and test_jump.supported(vim.bo.filetype) then
+    ctx.goto_test = test_jump.is_test(vim.api.nvim_buf_get_name(0), vim.bo.filetype) and "impl" or "test"
+  end
+  local shown, any = 0, false
   for _, item in ipairs(ITEMS) do
-    if shown < MAX and item.when(ctx) then
+    if (item.extra or shown < MAX) and item.when(ctx) then
       vim.cmd("amenu enable " .. path(item))
-      shown = shown + 1
+      if not item.extra then
+        shown = shown + 1
+      end
+      any = true
     end
   end
-  if shown > 0 then
+  if any then
     -- Same priority as the last item; Neovim inserts after equal priorities,
     -- so it lands below our entries and above the LSP ones (1.10).
     vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))

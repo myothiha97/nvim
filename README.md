@@ -81,7 +81,7 @@ What makes this feel less like vanilla Neovim:
 | Language           | Status       | Notes                                                                                                                  |
 | ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | TypeScript / React | Daily driver | `vtsls`, package JSON auto-imports off, tsserver heap cap `3072`, semantic tokens/inlay hints off                      |
-| Go                 | Enabled      | `gopls`, `goimports`, `gofumpt`, `delve`; project roots guarded to `go.mod` / `go.work`                                |
+| Go                 | Enabled      | `gopls`, `goimports`, `gofumpt`, `delve`; roots guarded to `go.mod` / `go.work`; stdlib/deps reuse the running gopls   |
 | Python             | Enabled      | `basedpyright` + `ruff`, `openFilesOnly` diagnostics, safe roots for both servers, `venv-selector.nvim` lazy on Python |
 | JSON               | Enabled      | LazyVim JSON extra + `prettierd`                                                                                       |
 | YAML               | Enabled      | `yamlls`; the daily DevOps filetype                                                                                    |
@@ -135,6 +135,7 @@ language server scan the whole home directory.
 | `<leader>cx`                | Clear quickfix list                                          |
 | `<leader>bu`                | List unsaved buffers (jump / save)                           |
 | `<leader>cd`                | Line diagnostics (focusable)                                 |
+| `<leader>cL`                | Restart the buffer's LSP servers, keeps unsaved edits        |
 
 </details>
 
@@ -168,6 +169,8 @@ language server scan the whole home directory.
 | `<M-k>` · `<leader>ad`         | Toggle Copilot suggestions                                               |
 | `<M-w>` · `<M-l>`              | Accept word · line                                                       |
 | `<M-]>` · `<M-[>`              | Cycle suggestions                                                        |
+| `<leader>an`                   | cursortab next-edit on/off (Cursor-Tab style; `<Tab>` accepts / jumps)   |
+| `<leader>aN`                   | cursortab provider: Mercury (hosted) ⇄ Zeta-2.1 (local llama-server)     |
 | `<leader>ab` · `<C-b>`         | Toggle blink completion menu                                             |
 | `<leader>ai`                   | CodeCompanion — inline ask (line / selection, edits in place)            |
 | `<leader>aa`                   | CodeCompanion — agentic chat (applies edits as accept/reject diffs)      |
