@@ -3,11 +3,13 @@
 -- neotest runs the tests as usual (inline ✓/✗, output, summary), with the adapter's
 -- coverage flag added; when the run ends the report is loaded into nvim-coverage's gutter.
 --
--- Every report is converted to one lcov file with ABSOLUTE paths and loaded with
--- nvim-coverage's filetype-independent load_lcov. That avoids two traps: nvim-coverage's Go
--- parser strips the module name with a plain gsub (on an absolute path that also contains the
--- module name, e.g. ledgerflow/backend, it cuts the path apart), and it matches files relative
--- to nvim's cwd, which is not the Go module root in a monorepo.
+-- Every report is converted to one lcov file and loaded with nvim-coverage's
+-- filetype-independent load_lcov. Paths are first resolved to ABSOLUTE ones (from the adapter
+-- root), which avoids two traps: nvim-coverage's Go parser strips the module name with a plain
+-- gsub (on an absolute path that also contains the module name, e.g. ledgerflow/backend, it
+-- cuts the path apart), and it matches files relative to nvim's cwd, which is not the Go module
+-- root in a monorepo. Only the file written for nvim-coverage then shortens paths under the cwd
+-- to relative ones, for a readable summary (relative_lcov below).
 --
 -- Reports live in stdpath("state")/test-coverage/<project>/, never in the repo. The manual
 -- flow (CLI report, then <leader>tcc) is untouched.
@@ -29,11 +31,12 @@ local uv = vim.uv
 -- what to tell the user when no report appears.
 local ADAPTERS = {
   ["neotest-golang"] = {
-    -- WARNING: neotest-golang's extra go_test_args REPLACE its defaults instead of adding to
-    -- them, so its defaults (-v -race -count=1) are repeated here. Keep them in sync if
-    -- go_test_args is ever configured, or -race silently disappears from coverage runs.
+    -- neotest-golang's extra go_test_args REPLACE its defaults instead of adding to them, so
+    -- its defaults are repeated from the one shared list (project_config.GO_DEFAULT_ARGS).
     args = function(dir)
-      return { go_test_args = { "-v", "-race", "-count=1", "-coverprofile=" .. dir .. "/go.coverprofile" } }
+      local args = vim.deepcopy(require("testing.project_config").GO_DEFAULT_ARGS)
+      args[#args + 1] = "-coverprofile=" .. dir .. "/go.coverprofile"
+      return { go_test_args = args }
     end,
     report = "go.coverprofile",
     missing = "Go wrote no coverage profile; check the test output (<leader>to)",
