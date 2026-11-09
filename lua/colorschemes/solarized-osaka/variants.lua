@@ -41,8 +41,11 @@ local builds = {
   -- The daily selection. Only the roles that differ from the base palette.
 
   --  todo: remaining work with the custom color scheme
-  --  2026-10-01: The main editor background is now set to
-  -- `ui.reference.black_matte_color.second_darkest`.
+  --  2026-10-01: The main editor background was set to
+  -- `ui.reference.black_matte_color.second_darkest` (#131312).
+  --  2026-11-09: moved to `ui.reference.black_matte_color.medium_dark` (#171716),
+  -- one notch lighter for eye comfort. Every text contrast drops ~3.5%; no group
+  -- crosses a threshold except CursorLineNr (4.61 -> 4.45:1).
   --
   -- The current palette in `lua/colorschemes/solarized-osaka/palette.lua`
   -- is acceptable for now, but after the freeze date we need to thoroughly
@@ -58,7 +61,7 @@ local builds = {
   --      - Palette and syntax colors tuned around the teal background.
   --
   --   2. Dark / Black Matte Background
-  --      - `black_matte_color.second_darkest` as the primary editor background.
+  --      - `black_matte_color.medium_dark` as the primary editor background.
   --      - Palette and syntax colors re-adjusted to work optimally with the
   --        darker background.
   --
