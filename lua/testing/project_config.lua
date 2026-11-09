@@ -20,6 +20,8 @@
 -- SAFETY: these come from the repo, so a cloned project could set anything. Each file is
 -- used only after Neovim's own trust prompt (vim.secure.read, as for .nvim.lua): asked the first
 -- time and again whenever the file changes. Deny = nvim defaults for that file.
+-- The answer is remembered per file version for the session: after changing your mind with
+-- :trust, edit the file or restart nvim for it to apply.
 --
 -- Cost: nothing at startup or while typing. On a test run: a few fs_stat calls per folder up to
 -- the git root, and a read + parse only when a file is new or changed (cached by mtime + size).
@@ -348,7 +350,7 @@ local KIND =
   { ["neotest-golang"] = "go", ["neotest-jest"] = "js", ["neotest-vitest"] = "js", ["neotest-python"] = "py" }
 
 -- Same defaults as neotest-golang's go_test_args (extra go_test_args REPLACE them, so they are
--- repeated; keep in sync with coverage.lua).
+-- repeated). The one copy: coverage.lua reads it too. Update it if neotest-golang's defaults change.
 M.GO_DEFAULT_ARGS = { "-v", "-race", "-count=1" }
 
 -- Wraps one adapter's build_spec (neotest's public adapter interface) to apply the settings.

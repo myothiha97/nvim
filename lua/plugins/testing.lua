@@ -14,8 +14,8 @@
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
 --      Added here: tF rerun failed · tD discover project tests (full tree in ts) ·
---      th test history (past runs, across sessions) · tH history of the test at the cursor
---      (lua/testing/history.lua) · tx toggle test UI: hide marks + close panels / show marks again
+--      th test history (past runs, across sessions; <C-x> deletes runs) · tH history of the
+--      test at the cursor · tX clear this project's history (lua/testing/history.lua) · tx toggle test UI: hide marks + close panels / show marks again
 --      (lua/testing/marks.lua) · tO Test Results panel replacing the raw output
 --      stream (lua/testing/panel.lua; P inside it opens the raw one) · tj jump test <->
 --      implementation, also right-click (lua/testing/jump.lua; mapped in config/keymaps.lua so it
