@@ -3,10 +3,13 @@
 -- 'mousemodel' is popup_setpos (config/options.lua), so the cursor is already
 -- on the clicked line and word when these run.
 --
---   stopped in a session -> Run to Cursor · Evaluate · Add to Watches
+--   stopped in a session -> Run to Cursor · Jump to Line (debugpy) · Smart Step
+--                           Into (debugpy, js-debug; on the current line) ·
+--                           Evaluate · Add to Watches
 --   line has breakpoint  -> Remove Breakpoint · Edit Condition… · Edit Log Message…
---                           (VS Code order; with 5 entries max, Edit Log Message
---                           is the one dropped when all of the above apply)
+--                           · Disable Breakpoint (VS Code order; with 5 entries
+--                           max the last ones are dropped when all apply)
+--   disabled breakpoint  -> Remove Breakpoint · Enable Breakpoint
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
 --   test file, idle      -> Run Test · Debug Test · Run File Tests · Show Test Output
 --   Go/JS/TS/Python, idle -> Go to Test or Go to Implementation (extra, testing/jump.lua)
@@ -15,7 +18,13 @@
 --                           see `extra` below)
 --   Test Results panel   -> Jump to Code · Show Output · Full Output · Rerun Test · Rerun Failed
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
---                           wg.state, via dap-ui's own `w` action)
+--                           wg.state, via dap-ui's own `w` action) · Copy Value
+--   Watches panel        -> Copy Value (debugging/copy.lua)
+--   Call Stack panel     -> Copy Stack · Reset Frame (js-debug; the current frame)
+--
+-- Entries that need an adapter feature (Jump to Line, Smart Step Into, Reset
+-- Frame) show only when the session's adapter reports it, so Go's menus
+-- are unchanged (Delve has none of the three).
 --
 -- The entries are defined once. On each right-click a MenuPopup autocmd
 -- enables the ones that apply and disables the rest; Neovim's popup menu
@@ -27,7 +36,7 @@
 -- moves or keystrokes. nvim-dap is not loaded by a right-click.
 --
 -- Hit count and function breakpoints stay on <leader>dH / <leader>dF.
--- There is no "Disable breakpoint": nvim-dap has no disabled state.
+-- Disabled breakpoints: debugging/breakpoints.lua.
 
 local M = {}
 
@@ -78,6 +87,17 @@ local function stopped_session()
   end
   local s = require("dap").session()
   return s and s.stopped_thread_id and s or nil
+end
+
+local function caps(s)
+  return s and s.capabilities or {}
+end
+
+-- The clicked line is where the stopped frame is (Smart Step Into acts there).
+local function on_current_line(s)
+  local f = s and s.current_frame
+  local path = f and f.source and f.source.path
+  return path ~= nil and f.line == vim.fn.line(".") and vim.fs.normalize(path) == vim.fs.normalize(vim.api.nvim_buf_get_name(0))
 end
 
 local function has_bp()
@@ -150,6 +170,24 @@ local ITEMS = {
     end,
   },
   {
+    label = "Jump to Line",
+    when = function(c)
+      return c.jump
+    end,
+    run = function()
+      require("dap").goto_()
+    end,
+  },
+  {
+    label = "Smart Step Into",
+    when = function(c)
+      return c.smart
+    end,
+    run = function()
+      require("dap").step_into({ askForTargets = true })
+    end,
+  },
+  {
     label = "Evaluate",
     when = function(c)
       return c.stopped and c.expr
@@ -177,7 +215,7 @@ local ITEMS = {
   {
     label = "Remove Breakpoint",
     when = function(c)
-      return c.bp
+      return c.bp or c.off
     end,
     run = function()
       require("debugging.breakpoints").toggle(vim.api.nvim_get_current_buf(), vim.fn.line("."))
@@ -202,9 +240,27 @@ local ITEMS = {
     end,
   },
   {
+    label = "Disable Breakpoint",
+    when = function(c)
+      return c.bp
+    end,
+    run = function()
+      require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line("."))
+    end,
+  },
+  {
+    label = "Enable Breakpoint",
+    when = function(c)
+      return c.off
+    end,
+    run = function()
+      require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line("."))
+    end,
+  },
+  {
     label = "Add Conditional Breakpoint…",
     when = function(c)
-      return not c.bp
+      return not c.bp and not c.off
     end,
     run = function()
       require("debugging.prompts").condition()
@@ -213,7 +269,7 @@ local ITEMS = {
   {
     label = "Add Log Point…",
     when = function(c)
-      return not c.bp
+      return not c.bp and not c.off
     end,
     run = function()
       require("debugging.prompts").log_point()
@@ -256,7 +312,7 @@ local ITEMS = {
     label = "Go to Test",
     extra = true,
     when = function(c)
-      return c.jump == "test"
+      return c.goto_test == "test"
     end,
     run = function()
       require("testing.jump").jump()
@@ -266,10 +322,41 @@ local ITEMS = {
     label = "Go to Implementation",
     extra = true,
     when = function(c)
-      return c.jump == "impl"
+      return c.goto_test == "impl"
     end,
     run = function()
       require("testing.jump").jump()
+    end,
+  },
+  {
+    -- Variables / Watches panels only (on_popup enables it there).
+    label = "Copy Value",
+    when = function()
+      return false
+    end,
+    run = function()
+      require("debugging.copy").copy()
+    end,
+  },
+  {
+    -- Call Stack panel only (on_popup).
+    label = "Copy Stack",
+    when = function()
+      return false
+    end,
+    run = function()
+      require("debugging.copy").copy_stack()
+    end,
+  },
+  {
+    -- Call Stack panel only (on_popup); restarts the current frame (double-click
+    -- a frame first to pick another one).
+    label = "Reset Frame",
+    when = function()
+      return false
+    end,
+    run = function()
+      require("dap").restart_frame()
     end,
   },
 }
@@ -310,12 +397,27 @@ local function on_popup()
   end
   pcall(vim.cmd, "aunmenu " .. SEP)
 
-  if vim.bo.filetype == "dapui_scopes" then
-    vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
+  local ft = vim.bo.filetype
+  if ft == "dapui_scopes" or ft == "dapui_watches" then
+    if ft == "dapui_scopes" then
+      vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
+    end
+    vim.cmd("amenu enable PopUp.Copy\\ Value")
     vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
     return
   end
-  if vim.bo.filetype == "testing-results" then
+  if ft == "dapui_stacks" then
+    local s = stopped_session()
+    if s then
+      vim.cmd("amenu enable PopUp.Copy\\ Stack")
+      if caps(s).supportsRestartFrame then
+        vim.cmd("amenu enable PopUp.Reset\\ Frame")
+      end
+      vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
+    end
+    return
+  end
+  if ft == "testing-results" then
     for _, item in ipairs(ITEMS) do
       if item.results then
         vim.cmd("amenu enable " .. path(item))
@@ -332,13 +434,17 @@ local function on_popup()
     stopped = s ~= nil,
     idle = not (package.loaded["dap"] and require("dap").session()),
     bp = has_bp(),
+    off = require("debugging.breakpoints").disabled_bp(vim.api.nvim_get_current_buf(), vim.fn.line(".")) ~= nil,
+    jump = caps(s).supportsGotoTargetsRequest == true,
+    smart = caps(s).supportsStepInTargetsRequest == true and on_current_line(s),
     expr = evaluable() ~= nil,
   }
   local lang = ctx.idle and test_lang()
   ctx.test = lang and lang.is_test_file(vim.api.nvim_buf_get_name(0)) or false
-  local jump = ctx.idle and require("testing.jump")
-  if jump and jump.supported(vim.bo.filetype) then
-    ctx.jump = jump.is_test(vim.api.nvim_buf_get_name(0), vim.bo.filetype) and "impl" or "test"
+  -- ctx.jump is Jump to Line (above); the test <-> implementation entries use goto_test.
+  local test_jump = ctx.idle and require("testing.jump")
+  if test_jump and test_jump.supported(vim.bo.filetype) then
+    ctx.goto_test = test_jump.is_test(vim.api.nvim_buf_get_name(0), vim.bo.filetype) and "impl" or "test"
   end
   local shown, any = 0, false
   for _, item in ipairs(ITEMS) do

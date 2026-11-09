@@ -17,7 +17,8 @@ function M.input(opts, on_confirm)
   end)
 end
 
--- Existing breakpoint on the cursor line, if any.
+-- Existing breakpoint on the cursor line, if any. A disabled one
+-- (breakpoints.lua) counts too; editing it enables it.
 local function current_bp()
   local bufnr = vim.api.nvim_get_current_buf()
   local lnum = vim.api.nvim_win_get_cursor(0)[1]
@@ -26,6 +27,7 @@ local function current_bp()
       return bp
     end
   end
+  return require("debugging.breakpoints").disabled_bp(bufnr, lnum)
 end
 
 -- Set one property of the breakpoint on the cursor line, keeping the others.
@@ -40,6 +42,7 @@ local function edit(field, prompt)
         logMessage = bp.logMessage,
       }
       next_bp[field] = value ~= "" and value or nil
+      require("debugging.breakpoints").remove_disabled(vim.api.nvim_get_current_buf(), vim.fn.line("."))
       require("dap").set_breakpoint(next_bp.condition, next_bp.hitCondition, next_bp.logMessage)
       require("debugging.breakpoints").save()
     end)

@@ -21,6 +21,10 @@ local function focus_element(name)
 end
 
 local function toggle_breakpoint()
+  -- On a disabled breakpoint (breakpoints.lua) this removes it, as a click does.
+  if require("debugging.breakpoints").remove_disabled(vim.api.nvim_get_current_buf(), vim.fn.line(".")) then
+    return
+  end
   require("dap").toggle_breakpoint()
   require("debugging.breakpoints").save()
 end
@@ -66,6 +70,12 @@ return {
       { "<leader>dH", function() require("debugging.prompts").hit_condition() end, desc = "Breakpoint Hit Condition" },
       { "<leader>dL", function() require("debugging.prompts").log_point() end, desc = "Log Point" },
       { "<leader>dF", function() require("debugging.delve").toggle_fn_breakpoint() end, desc = "Toggle Function Breakpoint" },
+      -- JetBrains "Disable breakpoint" / "Mute Breakpoints" (breakpoints.lua).
+      { "<leader>dd", function() require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line(".")) end, desc = "Disable/Enable Breakpoint" },
+      { "<leader>dD", function() require("debugging.breakpoints").toggle_mute() end, desc = "Mute/Unmute All Breakpoints" },
+      -- Smart Step Into: pick which call on the line to step into (debugpy,
+      -- js-debug; elsewhere a plain Step Into). LazyVim's <leader>dg is Jump to Line.
+      { "<leader>dI", function() require("dap").step_into({ askForTargets = true }) end, desc = "Smart Step Into" },
       -- LazyVim ships these the other way round (do = step out, dO = step over).
       { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
       { "<leader>dO", function() require("dap").step_out() end, desc = "Step Out" },

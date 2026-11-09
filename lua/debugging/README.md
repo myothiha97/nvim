@@ -27,6 +27,8 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `mouse.lua` | Click the gutter (sign area or line number) to toggle a breakpoint without moving the cursor; fold cells still fold |
 | `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file); in test files also Run Test, Run File Tests, Show Test Output (not counted in the 5) |
 | `hover.lua` | While stopped, mouse hover shows the value of the hovered expression (called from `config/mouse-hover.lua`; LSP hover is the fallback) |
+| `copy.lua` | Copy Value: `y` or right-click in Variables / Watches copies the full value (adapter's clipboard context) |
+| `repl_complete.lua` | REPL completion: blink source fed by the adapter's `completions` request (dap-repl only) |
 | `list.lua` | Breakpoint list picker (`<leader>dm` file, `<leader>dM` project), same look as `<leader>xd` |
 
 ## How a session looks
@@ -40,7 +42,10 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 4. **Breakpoints list** is never in the layout: `<leader>dp` opens it as a float.
 5. **Terminal pane** joins the tray only if the adapter runs the program in a
    terminal (Python, Rust, C/C++ do; Delve sends output to the REPL instead).
-6. **End**: panels stay; the bar shows `Run Again · Close  exited (code N)`.
+6. **Several sessions** (Node runs the program in a child session): a list of
+   sessions heads the CALL STACK panel; double-click (or `<CR>` / `o`) one to
+   switch to it. With one session (Go always) nothing is added.
+7. **End**: panels stay; the bar shows `Run Again · Close  exited (code N)`.
    Click Close (or `<leader>du`) to close everything.
 
 Run to Cursor is `<leader>dC` (right-click menu in phase 2).
@@ -60,12 +65,30 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
+| `<leader>dd` | Disable / enable the line's breakpoint (kept as a grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>db` on a disabled one removes it |
+| `<leader>dD` | Mute / unmute all breakpoints (line + function). Not saved; breakpoints added while muted are active |
+| `<leader>dI` | Smart Step Into: pick which call on the line to step into (Python, Node; elsewhere a plain Step Into). Also right-click on the current line |
+| `<leader>dg` | Jump to Line (LazyVim's; Python only). Also right-click while stopped |
 | `<leader>de` | Evaluate the name under the cursor or the selection (keywords, operators, literals are skipped, as in the right-click menu) |
 | `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
 
+In the REPL: completion from the adapter while typing (blink menu). Delve
+has no completion support, so in Go the menu offers words from the REPL
+buffer, as before.
+
 In panels: double-click expands, `e` edits a value, `w` (or right-click →
-Add to Watches) watches a variable, `o` opens a frame,
+Add to Watches) watches a variable, `y` (or right-click → Copy Value) copies
+the full value to the clipboard (Variables, Watches; `v`/`V` then `y` still
+yanks panel text), `o` opens a frame,
 `t` toggles runtime-internal frames (Call Stack) or enables/disables (Breakpoints).
+In Call Stack, `y` (or right-click → Copy Stack) copies the stopped thread's
+frames as text; right-click → Reset Frame re-runs the current frame (Node only;
+double-click a frame first to reset another one).
+
+Two kinds of "disabled": `t` in the Breakpoints panel is dap-ui's own,
+kept only in memory (no sign, lost on restart); `<leader>dd` / right-click is
+ours (grey sign, saved, listed as "disabled" in `<leader>dm`), and those do
+not appear in the Breakpoints panel.
 
 ## Languages
 
@@ -120,6 +143,10 @@ pinned; check their rows after `:Lazy update`):
 | `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
 | `plugins/testing.lua` (`discover` consumer, `<leader>tD`) | neotest `Client._adapters`, `Client:_update_positions` (no public "discover now"; checked on neotest 27bf921). neotest is NOT pinned: `:Lazy update` can move it | after updating neotest, press `<leader>tD` in a Go project: fidget shows "N tests in M files". If an update renamed them it says "needs updating" and does nothing; the rest of neotest still works | delete the `discover` consumer and the `<leader>tD` key in `plugins/testing.lua` |
 | `testing/coverage.lua` (`<leader>tcf` / `tca`) | nvim-coverage `require("coverage.signs").is_enabled()` (no public "are signs shown"), used only to repaint a covered file opened after a coverage run. nvim-coverage is NOT pinned | after a coverage run, open a covered source file that was not open: its gutter shows coverage. If an update renamed it, the pcall turns the repaint into a no-op (the rest still works) | delete the `TestingCoverage` autocmd in `testing/coverage.lua` (files opened later then show no coverage until the next run) |
+| `testing/marks.lua` (`<leader>tx`) | neotest `config.status.virtual_text` (read on every redraw; no public "hide marks") and the autocmd group name `neotest.Client` (show replays its BufEnter). Checked on neotest 27bf921 | after updating neotest: run a test, `<leader>tx` hides the ✓/✗ marks, `<leader>tx` again shows them without a rerun | delete the `marks` consumer and the `<leader>tx` key in `plugins/testing.lua` |
+| `plugins/testing.lua` (`ui` consumer, `q` in `<leader>to` raw panel) | neotest's raw output panel buffer name `Neotest Output Panel` (to give a recreated panel buffer its filetype back) | open the raw panel (`P` in Test Results), `q`, run again, open it, `q` closes it again | delete the `BufWinEnter` autocmd in the `ui` consumer (`q` then works only the first time) |
+| `copy.lua` | dap-ui's rendering: highlight groups `DapUIVariable` / `DapUIScope` / `DapUIWatchesValue` / `DapUIWatchesError` / `DapUIDecoration` and `dapui.render.canvas`.namespace, to tell which variable a row shows | `y` on a nested variable in Variables and on a watch copies its value | delete `require("debugging.copy").setup()` in `plugins/ui.lua` (if it breaks, `y` only says "Nothing to copy here") |
+| `stacks.lua` (sessions list), `breakpoints.lua` (`each_session`) | nvim-dap `session.children` (undocumented field; `dap.sessions()` returns top-level sessions only; nvim-dap's own breakpoint commands walk it too) | Node: Call Stack lists the parent and child session; double-click switches | the list is drawn only with 2+ sessions; delete `render_sessions(canvas)` in `stacks.lua` |
 | `plugins/csharp.lua` | wraps easy-dotnet `terminal.tabline.destroy` (it deletes the global `<LeftMouse>` / `<2-LeftMouse>` maps) | after `:Dotnet run` and closing its panel, a gutter click in a Go file still toggles a breakpoint | delete the `tabline.destroy` block (gutter clicks then stop working after that panel closes, until restart) |
 
 ## Known limits
@@ -129,4 +156,7 @@ and §7 of the plan. In short: no deferred-call view, no set-next-statement,
 no single-click tree expansion, no draggable panels.
 
 - Run to Cursor (nvim-dap) clears all breakpoints until the next stop, then puts them back. Saving is paused in that window (breakpoints.lua), so quitting or closing a buffer then can't persist the cleared state.
+- Copy Value: netcoredbg (C#) has no clipboard context, so it copies the value as the panel shows it (long strings may be shortened by the adapter).
+- REPL completion: none from Delve (Go); buffer words remain.
+- Smart Step Into: Python, Node only (Delve's DAP server lacks it, though GoLand has it; netcoredbg too). Reset Frame: Node only. Jump to Line: Python only. Menu entries for them appear only where supported.
 - Hover shows a one-line value; nested values are expanded with right-click → Evaluate.
