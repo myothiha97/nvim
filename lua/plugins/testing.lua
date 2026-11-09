@@ -376,8 +376,10 @@ return {
     keys = {
       { "<leader>tc",  "",                          desc = "+coverage" },
       { "<leader>tcc", "<cmd>Coverage<cr>",         desc = "Coverage: load & show" },
-      { "<leader>tct", "<cmd>CoverageToggle<cr>",   desc = "Coverage: toggle signs" },
-      { "<leader>tcs", "<cmd>CoverageSummary<cr>",  desc = "Coverage: summary" },
+      { "<leader>tct", function() require("testing.coverage").view("CoverageToggle") end,
+        desc = "Coverage: toggle signs" },
+      { "<leader>tcs", function() require("testing.coverage").view("CoverageSummary") end,
+        desc = "Coverage: summary" },
       { "<leader>tcx", "<cmd>CoverageClear<cr>",    desc = "Coverage: clear" },
     },
     -- Minimal setup: signs + summary only, no background watcher. Set `auto_reload = true`

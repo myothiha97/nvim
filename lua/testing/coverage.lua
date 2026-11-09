@@ -133,9 +133,15 @@ local function go_to_lcov(profile, root)
     out[#out + 1] = "SF:" .. name
     local lines = vim.tbl_keys(files[name])
     table.sort(lines)
+    local hit = 0
     for _, l in ipairs(lines) do
       out[#out + 1] = ("DA:%d,%d"):format(l, files[name][l])
+      hit = hit + (files[name][l] > 0 and 1 or 0)
     end
+    -- LF / LH (lines found / hit): nvim-coverage's summary (<leader>tcs) reads its totals from
+    -- these, not from the DA lines. Jest, Vitest and pytest-cov write them themselves.
+    out[#out + 1] = "LH:" .. hit
+    out[#out + 1] = "LF:" .. #lines
     out[#out + 1] = "end_of_record"
   end
   return table.concat(out, "\n") .. "\n"
@@ -171,6 +177,25 @@ local function percent(lcov)
     end
   end
   return found > 0 and (hit / found * 100) or nil
+end
+
+-- <leader>tcs / tct: nvim-coverage's own commands, with a pointer to the run keys when no
+-- report is loaded yet (its own message, "Coverage report not loaded.", is a dead end).
+-- WARNING: coverage.report.is_cached is nvim-coverage's module function, not documented API.
+-- If it moves, the pcall falls back to the plain command.
+function M.view(command)
+  local ok, cached = pcall(function()
+    return require("coverage.report").is_cached()
+  end)
+  if ok and not cached then
+    vim.notify(
+      "No coverage yet. Run <leader>tcf (this file) or <leader>tca (all tests) first.",
+      vim.log.levels.INFO,
+      { title = "Coverage" }
+    )
+    return
+  end
+  vim.cmd(command)
 end
 
 function M.consumer(client)
@@ -243,6 +268,16 @@ function M.consumer(client)
       return
     end
     local lcov = table.concat(merged, "\n")
+    if not lcov:find("SF:", 1, true) then
+      -- The tests ran but no source file was measured. Typical in Go when the code under test
+      -- lives in a _test.go file: Go never measures test files. Keep the previous report.
+      notify(
+        "Tests ran, but the coverage report has no source files. Go only measures non-test .go files"
+          .. " (code kept inside a _test.go file is never counted).",
+        vim.log.levels.WARN
+      )
+      return
+    end
     local file = vim.fs.joinpath(vim.fn.stdpath("state"), "test-coverage", "last.lcov")
     local coverage = require("coverage")
     -- Clear first: load_lcov watches its file until cleared, so writing a new report while the
