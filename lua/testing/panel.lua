@@ -86,6 +86,11 @@ end
 
 local INLINE_MAX = 300 -- output lines shown inline per test; O shows the rest
 
+-- Output files already read, by path. Jest / Vitest give every test of a run the SAME output file
+-- (the whole run's console), so it is read once, not once per test. Weak values: freed with the
+-- runs that use them.
+local files = setmetatable({}, { __mode = "v" })
+
 -- Assertion text, one line per entry, with Go "x = got, want y" / "got X, want Y" split into
 -- aligned got / want lines. Jest (Expected / Received) and pytest (assert, E lines) already
 -- come one value per line and are kept as written.
@@ -123,20 +128,26 @@ local function test_output(t)
   if t.cache then
     return t.cache
   end
-  local text = t.short
-  if t.output then
-    local f = io.open(t.output, "r")
-    if f then
-      text = f:read("*a")
-      f:close()
+  local lines = t.output and files[t.output]
+  if not lines then
+    local text = t.short
+    if t.output then
+      local f = io.open(t.output, "r")
+      if f then
+        text = f:read("*a")
+        f:close()
+      end
     end
-  end
-  local lines = {}
-  for line in strip(text or ""):gmatch("([^\n]*)\n?") do
-    lines[#lines + 1] = line
-  end
-  while #lines > 0 and lines[#lines] == "" do
-    lines[#lines] = nil
+    lines = {}
+    for line in strip(text or ""):gmatch("([^\n]*)\n?") do
+      lines[#lines + 1] = line
+    end
+    while #lines > 0 and lines[#lines] == "" do
+      lines[#lines] = nil
+    end
+    if t.output then
+      files[t.output] = lines
+    end
   end
   t.cache = #lines > 0 and lines or { "(the runner recorded no output for this test; P shows the raw panel)" }
   return t.cache
@@ -156,16 +167,22 @@ local function output_lines(t, max)
   return lines
 end
 
--- Duration from the runner's own line ("--- PASS: TestX (0.12s)"), read when first shown.
+-- Duration from Go's own line ("--- PASS: TestX (0.12s)"), read when first shown. Go only:
+-- other runners print no such line. Streams the test's own output file and stops at that line,
+-- keeping nothing in memory (the full text is read only when o / O asks for it).
 local function duration(t)
   if t.secs == nil then
     t.secs = false
-    for _, line in ipairs(test_output(t)) do
-      local secs = line:match("^%s*%-%-%- %u+: .- %((%d+%.%d+)s%)$")
-      if secs then
-        t.secs = tonumber(secs)
-        break
+    local f = t.go and t.output and io.open(t.output, "r")
+    if f then
+      for line in f:lines() do
+        local secs = strip(line):match("^%s*%-%-%- %u+: .- %((%d+%.%d+)s%)$")
+        if secs then
+          t.secs = tonumber(secs)
+          break
+        end
       end
+      f:close()
     end
   end
   return t.secs or nil
@@ -214,6 +231,7 @@ local function summarise(adapter_id, root_id, results, started)
         line = (pos.range or {})[1] or 0,
         output = result.output,
         short = result.short,
+        go = adapter_id:match("^neotest%-golang:") ~= nil,
       }
       if status == "failed" and not child_failed then
         local ok_err, err = pcall(function()
