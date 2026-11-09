@@ -1,6 +1,6 @@
 # Neovim feature work: index
 
-Everything produced while building Neovim features, in one place. Online docs and reports can't be moved into a folder, so they're linked here.
+One folder per feature area. Reports that only exist online are linked, not copied.
 
 ## Debugging (nvim-dap + dap-ui, lua/debugging/)
 - Plan: [debugging/go-debugger-gui-plan.md](debugging/go-debugger-gui-plan.md)
@@ -9,15 +9,15 @@ Everything produced while building Neovim features, in one place. Online docs an
 - In repo: lua/debugging/README.md, lua/debugging/MAINTENANCE.md
 
 ## Testing (neotest, lua/plugins/testing.lua)
+- Guide: [testing/testing-in-neovim-with-neotest.md](testing/testing-in-neovim-with-neotest.md)
 - Research: [Neovim test running: JetBrains gap report](https://claude.ai/artifact/BPr46onaoWnUAFFBbhZdzn)
-- Guide: [Testing in Neovim with neotest](https://claude.ai/artifact/GaDeCqZvG1bf9jS25t8kmM)
-- In repo: todos/languages/neotest-review-followups.md (Mac, uncommitted)
+- In repo: lua/testing/coverage.lua and lua/testing/history.lua (branch feat/test-coverage-history)
+
+## LSP, completion and search
+- Audit: [Neovim large-repo audit](https://claude.ai/artifact/WwLBKyMjxeEWcc7KKHtRnc)
 
 ## DB tooling (vim-dadbod, lua/plugins/database.lua)
 - Research was delivered in chat; no file. Branch feat/db-tooling, PR #29.
 
 ## Editing
-- Registers and macros guide: [editing/registers-macros/registers-and-macros-guide.md](editing/registers-macros/registers-and-macros-guide.md)
-
-## _sync-bundles
-Git bundles used to move commits to the Mac. Transport only; safe to delete once the branches are merged.
+- Registers and macros guide: [editing/registers-and-macros-guide.md](editing/registers-and-macros-guide.md)
