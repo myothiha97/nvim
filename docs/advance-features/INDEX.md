@@ -11,14 +11,12 @@ Everything produced while building Neovim features, in one place. Online docs an
 ## Testing (neotest, lua/plugins/testing.lua)
 - Research: [Neovim test running: JetBrains gap report](https://claude.ai/artifact/BPr46onaoWnUAFFBbhZdzn)
 - Guide: [Testing in Neovim with neotest](https://claude.ai/artifact/GaDeCqZvG1bf9jS25t8kmM)
-- Practice file: [testing/tmp_test.go](testing/tmp_test.go)
 - In repo: todos/languages/neotest-review-followups.md (Mac, uncommitted)
 
 ## DB tooling (vim-dadbod, lua/plugins/database.lua)
 - Research was delivered in chat; no file. Branch feat/db-tooling, PR #29.
 
 ## Editing
-- Insert-mode navigation research: [editing/insert-mode-keymaps/](editing/insert-mode-keymaps/)
 - Registers and macros guide: [editing/registers-macros/registers-and-macros-guide.md](editing/registers-macros/registers-and-macros-guide.md)
 
 ## _sync-bundles
