@@ -169,6 +169,8 @@ language server scan the whole home directory.
 | `<M-k>` · `<leader>ad`         | Toggle Copilot suggestions                                               |
 | `<M-w>` · `<M-l>`              | Accept word · line                                                       |
 | `<M-]>` · `<M-[>`              | Cycle suggestions                                                        |
+| `<leader>an`                   | cursortab next-edit on/off (Cursor-Tab style; `<Tab>` accepts / jumps)   |
+| `<leader>aN`                   | cursortab provider: Mercury (hosted) ⇄ Zeta-2.1 (local llama-server)     |
 | `<leader>ab` · `<C-b>`         | Toggle blink completion menu                                             |
 | `<leader>ai`                   | CodeCompanion — inline ask (line / selection, edits in place)            |
 | `<leader>aa`                   | CodeCompanion — agentic chat (applies edits as accept/reject diffs)      |
