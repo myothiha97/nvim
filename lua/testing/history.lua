@@ -105,10 +105,40 @@ local function load_runs(cwd)
   for i = #lines, 1, -1 do
     local ok, run = pcall(vim.json.decode, lines[i])
     if ok and type(run) == "table" and run.tests then
+      run._line = i -- position in the file, for delete
       runs[#runs + 1] = run
     end
   end
   return runs
+end
+
+-- Removes `runs` (from load_runs) from the project's history file. Each line is checked against
+-- the run's time before it is dropped, so a line that moved (trimmed meanwhile) is kept.
+-- CAVEAT (accepted): a run finishing during this rewrite (milliseconds) may not be recorded.
+local function remove_runs(cwd, runs)
+  local path = history_file(cwd)
+  local lines, drop = read_lines(path), {}
+  for _, run in ipairs(runs) do
+    local line = run._line and lines[run._line]
+    if line and line:find('"time":' .. run.time, 1, true) then
+      drop[run._line] = true
+    end
+  end
+  local kept = {}
+  for i, line in ipairs(lines) do
+    if not drop[i] then
+      kept[#kept + 1] = line
+    end
+  end
+  local tmp = path .. ".tmp"
+  local f = io.open(tmp, "w")
+  if not f then
+    return 0
+  end
+  f:write(#kept > 0 and (table.concat(kept, "\n") .. "\n") or "")
+  f:close()
+  os.rename(tmp, path)
+  return #lines - #kept
 end
 
 local function test_name(id)
@@ -343,6 +373,10 @@ function M.consumer(client)
       end
       items[#items + 1] = {
         text = when(run.time) .. " " .. run.scope .. " " .. run.root,
+        -- Unique per run: snacks tells selected items apart by text / file / key / id. Without
+        -- it, two runs of the same target in the same minute shared one key, so <Tab> on the
+        -- second un-selected the first.
+        key = run.time .. ":" .. i,
         run = run,
         new = #new,
         failed_ids = vim.tbl_map(function(t)
@@ -384,8 +418,28 @@ function M.consumer(client)
             rerun(item.failed_ids)
           end
         end,
+        -- <C-x>: delete the selected runs (Tab to select several), or the one under the cursor.
+        delete_runs = function(picker)
+          local selected = vim.tbl_map(function(it)
+            return it.run
+          end, picker:selected({ fallback = true }))
+          local n = remove_runs(uv.cwd(), selected)
+          picker:close()
+          vim.notify(("Deleted %d test run%s from history"):format(n, n == 1 and "" or "s"), vim.log.levels.INFO)
+          if #load_runs(uv.cwd()) > 0 then
+            vim.schedule(runs) -- reopen with what is left
+          end
+        end,
       },
-      win = { input = { keys = { ["<c-r>"] = { "rerun_failed", mode = { "n", "i" }, desc = "Rerun failed tests" } } } },
+      win = {
+        input = {
+          keys = {
+            ["<c-r>"] = { "rerun_failed", mode = { "n", "i" }, desc = "Rerun failed tests" },
+            ["<c-x>"] = { "delete_runs", mode = { "n", "i" }, desc = "Delete selected runs" },
+          },
+        },
+        list = { keys = { ["<c-x>"] = { "delete_runs", mode = { "n" }, desc = "Delete selected runs" } } },
+      },
     })
   end
 
@@ -409,6 +463,7 @@ function M.consumer(client)
             n[t.s] = (n[t.s] or 0) + 1
             items[#items + 1] = {
               text = when(run.time) .. " " .. t.s .. " " .. t.id,
+              key = run.time .. ":" .. #items, -- unique per row (see the runs picker)
               test = t,
               run = run,
               id = t.id,
@@ -447,7 +502,22 @@ function M.consumer(client)
     end)
   end
 
-  return { runs = runs, test = test_history }
+  -- <leader>tX: delete this project's whole history, after a confirm.
+  local function clear()
+    local cwd = uv.cwd()
+    local n = #load_runs(cwd)
+    if n == 0 then
+      vim.notify("No test history for this project", vim.log.levels.INFO)
+      return
+    end
+    local name = vim.fn.fnamemodify(cwd, ":~")
+    if vim.fn.confirm(("Delete all %d test runs recorded for %s?"):format(n, name), "&Yes\n&No", 2) == 1 then
+      os.remove(history_file(cwd))
+      vim.notify(("Test history cleared (%d runs)"):format(n), vim.log.levels.INFO)
+    end
+  end
+
+  return { runs = runs, test = test_history, clear = clear }
 end
 
 return M

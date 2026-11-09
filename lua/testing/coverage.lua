@@ -3,11 +3,13 @@
 -- neotest runs the tests as usual (inline ✓/✗, output, summary), with the adapter's
 -- coverage flag added; when the run ends the report is loaded into nvim-coverage's gutter.
 --
--- Every report is converted to one lcov file with ABSOLUTE paths and loaded with
--- nvim-coverage's filetype-independent load_lcov. That avoids two traps: nvim-coverage's Go
--- parser strips the module name with a plain gsub (on an absolute path that also contains the
--- module name, e.g. ledgerflow/backend, it cuts the path apart), and it matches files relative
--- to nvim's cwd, which is not the Go module root in a monorepo.
+-- Every report is converted to one lcov file and loaded with nvim-coverage's
+-- filetype-independent load_lcov. Paths are first resolved to ABSOLUTE ones (from the adapter
+-- root), which avoids two traps: nvim-coverage's Go parser strips the module name with a plain
+-- gsub (on an absolute path that also contains the module name, e.g. ledgerflow/backend, it
+-- cuts the path apart), and it matches files relative to nvim's cwd, which is not the Go module
+-- root in a monorepo. Only the file written for nvim-coverage then shortens paths under the cwd
+-- to relative ones, for a readable summary (relative_lcov below).
 --
 -- Reports live in stdpath("state")/test-coverage/<project>/, never in the repo. The manual
 -- flow (CLI report, then <leader>tcc) is untouched.
@@ -29,11 +31,12 @@ local uv = vim.uv
 -- what to tell the user when no report appears.
 local ADAPTERS = {
   ["neotest-golang"] = {
-    -- WARNING: neotest-golang's extra go_test_args REPLACE its defaults instead of adding to
-    -- them, so its defaults (-v -race -count=1) are repeated here. Keep them in sync if
-    -- go_test_args is ever configured, or -race silently disappears from coverage runs.
+    -- neotest-golang's extra go_test_args REPLACE its defaults instead of adding to them, so
+    -- its defaults are repeated from the one shared list (project_config.GO_DEFAULT_ARGS).
     args = function(dir)
-      return { go_test_args = { "-v", "-race", "-count=1", "-coverprofile=" .. dir .. "/go.coverprofile" } }
+      local args = vim.deepcopy(require("testing.project_config").GO_DEFAULT_ARGS)
+      args[#args + 1] = "-coverprofile=" .. dir .. "/go.coverprofile"
+      return { go_test_args = args }
     end,
     report = "go.coverprofile",
     missing = "Go wrote no coverage profile; check the test output (<leader>to)",
@@ -107,41 +110,55 @@ end
 
 -- Go coverprofile -> lcov with absolute paths. Profile lines are
 -- "<module>/<file>.go:l1.c1,l2.c2 statements count"; the module path comes from root/go.mod.
+-- DA (gutter) marks every line of a block, as Go's own HTML report colours whole blocks.
+-- LF / LH (what the summary shows as Statements and Coverage) are Go STATEMENTS, so the
+-- percentage matches `go test -cover`; counting block lines instead also counted blank lines,
+-- comments and braces (a file at 37.5% read 28.6%). nvim-coverage's "Missing" column still
+-- counts uncovered lines (it is computed from DA; not changeable without patching the plugin).
 local function go_to_lcov(profile, root)
   local gomod = read(vim.fs.joinpath(root, "go.mod")) or ""
   local module = gomod:match("^%s*module%s+(%S+)") or gomod:match("\nmodule%s+(%S+)")
   local files, order = {}, {}
   for line in profile:gmatch("[^\n]+") do
-    local name, l1, l2, count = line:match("^(.+%.go):(%d+)%.%d+,(%d+)%.%d+ %d+ (%d+)$")
+    local name, range, l1, l2, stmts, count = line:match("^(.+%.go):((%d+)%.%d+,(%d+)%.%d+) (%d+) (%d+)$")
     if name then
       if module and name:sub(1, #module + 1) == module .. "/" then
         name = vim.fs.joinpath(root, name:sub(#module + 2))
       end
-      local hits = files[name]
-      if not hits then
-        hits = {}
-        files[name] = hits
+      local file = files[name]
+      if not file then
+        file = { hits = {}, blocks = {} }
+        files[name] = file
         order[#order + 1] = name
       end
       for l = tonumber(l1), tonumber(l2) do
-        hits[l] = (hits[l] or 0) + tonumber(count)
+        file.hits[l] = (file.hits[l] or 0) + tonumber(count)
       end
+      -- A block can appear more than once (several packages' tests, -coverpkg): count it once.
+      local block = file.blocks[range]
+      if not block then
+        block = { stmts = tonumber(stmts), count = 0 }
+        file.blocks[range] = block
+      end
+      block.count = block.count + tonumber(count)
     end
   end
   local out = {}
   for _, name in ipairs(order) do
+    local file = files[name]
     out[#out + 1] = "SF:" .. name
-    local lines = vim.tbl_keys(files[name])
+    local lines = vim.tbl_keys(file.hits)
     table.sort(lines)
-    local hit = 0
     for _, l in ipairs(lines) do
-      out[#out + 1] = ("DA:%d,%d"):format(l, files[name][l])
-      hit = hit + (files[name][l] > 0 and 1 or 0)
+      out[#out + 1] = ("DA:%d,%d"):format(l, file.hits[l])
     end
-    -- LF / LH (lines found / hit): nvim-coverage's summary (<leader>tcs) reads its totals from
-    -- these, not from the DA lines. Jest, Vitest and pytest-cov write them themselves.
+    local found, hit = 0, 0
+    for _, block in pairs(file.blocks) do
+      found = found + block.stmts
+      hit = hit + (block.count > 0 and block.stmts or 0)
+    end
     out[#out + 1] = "LH:" .. hit
-    out[#out + 1] = "LF:" .. #lines
+    out[#out + 1] = "LF:" .. found
     out[#out + 1] = "end_of_record"
   end
   return table.concat(out, "\n") .. "\n"
@@ -167,16 +184,31 @@ local function absolute_lcov(lcov, root)
   )
 end
 
--- Line totals for the end-of-run message.
+-- Totals for the end-of-run message, from LF / LH (same numbers as the summary).
 local function percent(lcov)
   local hit, found = 0, 0
-  for count in lcov:gmatch("\nDA:%d+,(%d+)") do
-    found = found + 1
-    if count ~= "0" then
-      hit = hit + 1
-    end
+  for n in lcov:gmatch("\nLH:(%d+)") do
+    hit = hit + tonumber(n)
+  end
+  for n in lcov:gmatch("\nLF:(%d+)") do
+    found = found + tonumber(n)
   end
   return found > 0 and (hit / found * 100) or nil
+end
+
+-- SF paths relative to nvim's cwd for files under it, so the summary (<leader>tcs) shows
+-- backend/internal/config/config.go instead of a shortened /Users/m/D/p/l/b/... path.
+-- nvim-coverage matches buffers with bufnr(), which resolves relative names against the cwd.
+-- CAVEAT (accepted): after :cd to another folder, files opened later are not painted until the
+-- next coverage run.
+local function relative_lcov(lcov)
+  local cwd = uv.cwd()
+  return (
+    lcov:gsub("SF:([^\n]+)", function(path)
+      local under = cwd and path:sub(1, #cwd + 1) == cwd .. "/"
+      return "SF:" .. (under and path:sub(#cwd + 2) or path)
+    end)
+  )
 end
 
 -- <leader>tcs / tct: nvim-coverage's own commands, with a pointer to the run keys when no
@@ -283,7 +315,7 @@ function M.consumer(client)
     -- Clear first: load_lcov watches its file until cleared, so writing a new report while the
     -- old watcher is live would load it twice.
     coverage.clear()
-    write(file, lcov)
+    write(file, relative_lcov(lcov))
     local pct = percent("\n" .. lcov)
     local covered = {}
     for sf in lcov:gmatch("SF:([^\n]+)") do
@@ -300,7 +332,7 @@ function M.consumer(client)
       vim.api.nvim_create_autocmd("BufReadPost", {
         group = group,
         callback = function(ev)
-          if covered[vim.api.nvim_buf_get_name(ev.buf)] then
+          if covered[vim.api.nvim_buf_get_name(ev.buf)] then -- absolute paths (before relative_lcov)
             local ok, enabled = pcall(function()
               return require("coverage.signs").is_enabled()
             end)
@@ -311,7 +343,7 @@ function M.consumer(client)
         end,
       })
       vim.notify(
-        pct and ("Coverage loaded: %.1f%% of lines covered (<leader>tcs for details)"):format(pct) or "Coverage loaded",
+        pct and ("Coverage loaded: %.1f%% covered (<leader>tcs for details)"):format(pct) or "Coverage loaded",
         vim.log.levels.INFO,
         { title = "Coverage" }
       )

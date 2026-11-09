@@ -8,7 +8,9 @@
 --   Python  foo.py <-> test_foo.py / foo_test.py, same folder, then tests/ folders up to the
 --           project root
 -- JS/TS and Python then search the project (nvim's cwd) by file name, skipping dependency
--- and build folders. Several matches -> a picker. None -> asks, then opens a NEW UNSAVED
+-- and build folders: in the background with ripgrep (`rg --files`, which also skips what
+-- .gitignore lists), so the editor never waits on a large repo; without rg, a plain folder walk.
+-- Several matches -> a picker. None -> asks, then opens a NEW UNSAVED
 -- buffer at the conventional path (Go: with the source's package line); nothing is written
 -- to disk until you :w.
 --
@@ -16,7 +18,7 @@
 -- file picker as before.
 --
 -- Cost: only on the key / menu entry: a few file-existence checks, and for JS/TS/Python a
--- project walk by name when the direct paths miss. Nothing at startup or while typing.
+-- background name search when the direct paths miss. Nothing at startup or while typing.
 
 local M = {}
 
@@ -50,13 +52,40 @@ local function exists(path)
   return stat and stat.type == "file"
 end
 
--- Every file in the project (cwd) whose name is in `names`, skipping SKIP_DIRS.
-local function search(names, exclude)
+-- Every file in the project (cwd) whose name is in `names`, skipping SKIP_DIRS. Calls
+-- done(list) later, on the main loop. With rg: async, so a big repo never blocks the editor.
+-- Without rg: the synchronous walk below (fine for small projects).
+local function search(names, exclude, done)
+  local root = uv.cwd()
+  if vim.fn.executable("rg") == 1 then
+    local cmd = { "rg", "--files", "--hidden", "--no-messages" }
+    for dir in pairs(SKIP_DIRS) do
+      vim.list_extend(cmd, { "-g", "!" .. dir })
+    end
+    for _, n in ipairs(names) do
+      -- No slash: matches the file name at any depth. Glob characters are escaped, so a
+      -- Next.js-style [id].test.ts is taken literally.
+      vim.list_extend(cmd, { "-g", (n:gsub("[%[%]{}*?\\!]", "\\%0")) })
+    end
+    vim.system(cmd, { cwd = root, text = true }, function(r)
+      local found = {}
+      for line in (r.stdout or ""):gmatch("[^\n]+") do
+        local full = vim.fs.normalize(vim.fs.joinpath(root, line))
+        if full ~= exclude then
+          found[#found + 1] = full
+        end
+      end
+      table.sort(found)
+      vim.schedule(function()
+        done(found)
+      end)
+    end)
+    return
+  end
   local wanted, found = {}, {}
   for _, n in ipairs(names) do
     wanted[n] = true
   end
-  local root = uv.cwd()
   for name, type in
     vim.fs.dir(root, {
       depth = math.huge,
@@ -72,7 +101,7 @@ local function search(names, exclude)
       end
     end
   end
-  return found
+  done(found)
 end
 
 -- foo.test.ts / foo.spec.ts, or any file inside a __tests__ folder.
@@ -95,7 +124,8 @@ local function existing(paths, exclude)
   return out
 end
 
--- { is_test, candidates (existing files), create (path offered when none) }
+-- is_test, candidates (existing files), create (path offered when none), and when the direct
+-- paths miss: names to search the project for, plus an optional filter for the results.
 local RULES = {}
 
 function RULES.go(_, dir, name)
@@ -123,8 +153,7 @@ function RULES.js(path, dir, name)
         paths[#paths + 1] = vim.fs.joinpath(d, base .. "." .. e)
       end
     end
-    local found = existing(paths, path)
-    return true, #found > 0 and found or search(names, path), nil
+    return true, existing(paths, path), nil, names
   end
   local ext
   base, ext = name:match("^(.+)%.([%w]+)$")
@@ -139,15 +168,7 @@ function RULES.js(path, dir, name)
     names[#names + 1] = base .. "." .. e -- kept below only when inside a __tests__ folder
     paths[#paths + 1] = vim.fs.joinpath(dir, "__tests__", base .. "." .. e)
   end
-  local found = existing(paths, path)
-  if #found == 0 then
-    for _, p in ipairs(search(names, path)) do
-      if is_js_test(p) then
-        found[#found + 1] = p
-      end
-    end
-  end
-  return false, found, vim.fs.joinpath(dir, ("%s.test.%s"):format(base, ext))
+  return false, existing(paths, path), vim.fs.joinpath(dir, ("%s.test.%s"):format(base, ext)), names, is_js_test
 end
 
 function RULES.python(path, dir, name)
@@ -156,8 +177,7 @@ function RULES.python(path, dir, name)
   if base then
     local src = base .. ".py"
     local paths = { vim.fs.joinpath(dir, src), vim.fs.joinpath(vim.fs.dirname(dir), src) }
-    local found = existing(paths, path)
-    return true, #found > 0 and found or search({ src }, path), nil
+    return true, existing(paths, path), nil, { src }
   end
   base = name:match("^(.+)%.py$")
   local names = { "test_" .. base .. ".py", base .. "_test.py" }
@@ -176,8 +196,7 @@ function RULES.python(path, dir, name)
     end
     d = vim.fs.dirname(d)
   end
-  local found = existing(paths, path)
-  return false, #found > 0 and found or search(names, path), vim.fs.joinpath(dir, names[1])
+  return false, existing(paths, path), vim.fs.joinpath(dir, names[1]), names
 end
 
 -- Go/JS/TS/Python buffer? Used by the right-click menu to decide which entry to show.
@@ -209,7 +228,19 @@ function M.jump()
     vim.notify("Test jump works in Go, JS/TS and Python files", vim.log.levels.INFO)
     return
   end
-  local is_test, found, create = RULES[lang](path, vim.fs.dirname(path), vim.fs.basename(path))
+  local is_test, found, create, names, filter = RULES[lang](path, vim.fs.dirname(path), vim.fs.basename(path))
+  if #found == 0 and names then
+    search(names, path, function(list)
+      list = filter and vim.tbl_filter(filter, list) or list
+      M._finish(is_test, list, create, path)
+    end)
+    return
+  end
+  M._finish(is_test, found, create, path)
+end
+
+-- Opens the one match, offers a picker for several, or offers to create the test file.
+function M._finish(is_test, found, create, path)
   local open = function(p)
     vim.cmd.edit(vim.fn.fnameescape(p))
   end

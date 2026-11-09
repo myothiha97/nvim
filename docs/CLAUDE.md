@@ -152,7 +152,12 @@ real — so keymap probes report "not mapped" and layout measurements can mislea
 - Never edit directly on `main` — branch, verify, merge back
 - Conventional commit prefixes: `feat:`, `fix:`, `perf:`, `refactor:`, `chore:`,
   `docs:`. Keep subjects short, imperative and scoped to one change, e.g.
-  `fix: resolve prettierd fallback`. No `Co-Authored-By` line
+  `fix: resolve prettierd fallback`. No `Co-Authored-By` line and no `Claude-Session` line.
+- Myo is the only author AND committer on every commit. Before committing,
+  set `git config user.name myothiha97` and
+  `git config user.email 47525641+myothiha97@users.noreply.github.com`.
+  Never commit as Claude or any AI identity; a rebase or amend records the
+  current identity as committer. Add co-authors only when Myo asks
 - Pull requests should summarise the behaviour change, list touched modules,
   include manual verification steps, and add screenshots when floats, themes or
   statusline behaviour change

@@ -14,8 +14,8 @@
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
 --      Added here: tF rerun failed · tD discover project tests (full tree in ts) ·
---      th test history (past runs, across sessions) · tH history of the test at the cursor
---      (lua/testing/history.lua) · tx toggle test UI: hide marks + close panels / show marks again
+--      th test history (past runs, across sessions; <C-x> deletes runs) · tH history of the
+--      test at the cursor · tX clear this project's history (lua/testing/history.lua) · tx toggle test UI: hide marks + close panels / show marks again
 --      (lua/testing/marks.lua) · tO Test Results panel replacing the raw output
 --      stream (lua/testing/panel.lua; P inside it opens the raw one) · tj jump test <->
 --      implementation, also right-click (lua/testing/jump.lua; mapped in config/keymaps.lua so it
@@ -334,6 +334,11 @@ return {
         coverage = function(client)
           return require("testing.coverage").consumer(client)
         end,
+        -- Project test settings (.envrc / .env.test env, package.json test script, the Makefile /
+        -- Taskfile / justfile `go test` flags), each used after Neovim's trust prompt.
+        project_config = function(client)
+          return require("testing.project_config").consumer(client)
+        end,
         history = function(client)
           return require("testing.history").consumer(client)
         end,
@@ -358,6 +363,7 @@ return {
       { "<leader>tx", function() require("neotest").marks.toggle() end, desc = "Toggle Test UI (Neotest)" },
       { "<leader>th", function() require("neotest").history.runs() end, desc = "Test History (runs)" },
       { "<leader>tH", function() require("neotest").history.test() end, desc = "Test History (test at cursor)" },
+      { "<leader>tX", function() require("neotest").history.clear() end, desc = "Clear Test History" },
       { "<leader>tF", function() require("neotest").rerun_failed.run() end, desc = "Rerun Failed (Neotest)" },
       { "<leader>tD", function() require("neotest").discover.run() end, desc = "Discover Project Tests (Neotest)" },
     },
