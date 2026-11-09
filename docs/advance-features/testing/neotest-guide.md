@@ -287,6 +287,7 @@ APP_ENV=test
 | `<leader>tj` | Jump test ↔ implementation (creates an unsaved test buffer if none) |
 | `<leader>th` | Test history: past runs |
 | `<leader>tH` | History of the test under the cursor (spot flaky tests) |
+| `<leader>tX` | Clear this project's test history (asks first) |
 | `<leader>tcf` / `tca` | Run file / all with coverage, paint the gutter |
 | `<leader>tcs` | Coverage summary popup |
 | `<leader>tct` | Toggle coverage colours |
@@ -296,6 +297,9 @@ APP_ENV=test
 Test Results panel (`<leader>tO`): `<CR>` jump / fold, `o` inline output, `O` full output,
 `]f` / `[f` next / previous failure, `r` rerun test, `R` rerun failed, `P` raw neotest panel,
 `q` close. Mouse: click arrows, double-click, right-click menu.
+
+Test history picker (`<leader>th`): `<CR>` open a run, `Ctrl-r` rerun its failures, `Tab` select
+several, `Ctrl-x` delete the selected runs.
 
 Summary tree (`<leader>ts`): `<CR>` jump, `<Tab>` / double-click fold, `r` run, `d` debug,
 `o` output, `J` / `K` next / previous failure, `m` mark then `R` run marked, `?` help.
