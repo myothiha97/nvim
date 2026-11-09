@@ -11,7 +11,7 @@ One folder per feature area. Reports that only exist online are linked, not copi
 
 ## Testing (neotest, lua/plugins/testing.lua)
 - Complete guide (setup, config, adjusting it yourself, Go / Node / Python flows): [testing/neotest-guide.md](testing/neotest-guide.md)
-- Beginner guide (testing basics, IDE comparison, practice in tmp_test.go): [testing/testing-in-neovim-with-neotest.md](testing/testing-in-neovim-with-neotest.md)
+- Beginner guide (testing basics, IDE comparison): [testing/testing-in-neovim-with-neotest.md](testing/testing-in-neovim-with-neotest.md)
 - Research: [Neovim test running: JetBrains gap report](https://claude.ai/artifact/BPr46onaoWnUAFFBbhZdzn)
 - In repo: lua/testing/coverage.lua and lua/testing/history.lua (branch feat/test-coverage-history)
 - Follow-ups: [todos/languages/neotest-review-followups.md](../../todos/languages/neotest-review-followups.md) (arrives with the test-coverage-history branch; link resolves once that is merged)
