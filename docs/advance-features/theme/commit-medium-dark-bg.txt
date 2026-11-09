@@ -1,0 +1,11 @@
+feat(colorscheme): medium_dark background with matching statusline
+
+Move the editor background from black_matte second_darkest (#131312) to
+medium_dark (#171716), one notch lighter for eye comfort. Every text
+contrast drops ~3.5%; only CursorLineNr crosses 4.5:1 (4.61 -> 4.45).
+
+The fixed statusline bg (#1e1e1d) fell to 1.075:1 against the new bg and
+matched the Pmenu panel exactly. Add status_line.medium_matte (#212120,
+1.113:1, dE00 3.1, the old separation) and point bg_statusline at it.
+
+Update the stale "what is live" comments in ui.lua and variants.lua.
