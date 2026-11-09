@@ -994,3 +994,9 @@ Snacks.toggle.profiler_highlights():map("<leader>uPh")
 vim.keymap.set("n", "<leader>uPs", function()
   Snacks.profiler.scratch()
 end, { desc = "Profiler Scratch Buffer" })
+
+-- Test <-> implementation jump (JetBrains Ctrl+Shift+T), Go / JS/TS / Python. Set here, not
+-- in the neotest spec's `keys`, so pressing it does not load neotest. lua/testing/jump.lua.
+vim.keymap.set("n", "<leader>tj", function()
+  require("testing.jump").jump()
+end, { desc = "Jump Test <-> Implementation" })

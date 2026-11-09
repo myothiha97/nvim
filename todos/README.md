@@ -103,6 +103,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`multi-language-support.md`](languages/multi-language-support.md)                                       | the live per-language state table (LSP / format / debug). Build-out complete; now tracks verification and deliberately deferred languages | reference   |
 | [`nvim-dap-webstorm-parity-and-enhancements.md`](languages/nvim-dap-webstorm-parity-and-enhancements.md) | Go pass done 2026-08-28 (goroutines, function breakpoints, log points, hit counts). Other languages still at LazyVim defaults             | partly done |
 | [`production-stack-gap-closure.md`](languages/production-stack-gap-closure.md)                           | completed 2026-06-20, reconciled 2026-08-11. No longer an execution plan                                                                  | done        |
+| [`neotest-review-followups.md`](languages/neotest-review-followups.md) | Rerun Failed batching, jest `isTestFile` cache, possible neotest-vitest print (non-blocking, 2026-11-08 review). Run with Coverage done. Deferred: run profiles, benchmarks. Future: C#, Rust, C/C++ test support | open |
 
 ## ai
 

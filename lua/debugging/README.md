@@ -25,7 +25,7 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `controls.lua` | The control bar, built in full (no patching of dap-ui's string) |
 | `layout.lua` | When panels open/close, which panels, titles, fixed sizes |
 | `mouse.lua` | Click the gutter (sign area or line number) to toggle a breakpoint without moving the cursor; fold cells still fold |
-| `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file) |
+| `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file); in test files also Run Test, Run File Tests, Show Test Output (not counted in the 5) |
 | `hover.lua` | While stopped, mouse hover shows the value of the hovered expression (called from `config/mouse-hover.lua`; LSP hover is the fallback) |
 | `copy.lua` | Copy Value: `y` or right-click in Variables / Watches copies the full value (adapter's clipboard context) |
 | `repl_complete.lua` | REPL completion: blink source fed by the adapter's `completions` request (dap-repl only) |
@@ -131,8 +131,8 @@ lookup.
 These use plugin internals, not public APIs. nvim-dap and nvim-dap-ui are
 `pin = true` (plugins/core.lua, plugins/ui.lua), so `:Lazy update` never moves
 them; nothing here changes until you unpin one on purpose. After updating nvim-dap or
-nvim-dap-ui, run one Go debug session and check each item (easy-dotnet is not
-pinned; check its row after `:Lazy update`):
+nvim-dap-ui, run one Go debug session and check each item (easy-dotnet and neotest are not
+pinned; check their rows after `:Lazy update`):
 
 | File | Internal used | Check | Rollback |
 |---|---|---|---|
@@ -141,6 +141,11 @@ pinned; check its row after `:Lazy update`):
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
 | `layout.lua` | dap-ui `require("dapui.windows").layouts[i]:is_open()` (no public "is this layout open") | first stop opens the sidebar once; first watch swaps in the Watches variant; `<leader>du` toggles | none short of rewriting the open/close logic; if it breaks, panels may open twice or not swap |
 | `menu.lua`, `hover.lua` | nvim-dap `session.stopped_thread_id`, `session.current_frame` (fields, not functions; nvim-dap's own `run_to_cursor` uses the first) | right-click while stopped shows Run to Cursor; hovering a variable shows its value | hover: delete the `package.loaded["dap"]` block in `config/mouse-hover.lua`; menu: remove `require("debugging.menu").setup()` in `plugins/core.lua` |
+| `plugins/testing.lua` (`discover` consumer, `<leader>tD`) | neotest `Client._adapters`, `Client:_update_positions` (no public "discover now"; checked on neotest 27bf921). neotest is NOT pinned: `:Lazy update` can move it | after updating neotest, press `<leader>tD` in a Go project: fidget shows "N tests in M files". If an update renamed them it says "needs updating" and does nothing; the rest of neotest still works | delete the `discover` consumer and the `<leader>tD` key in `plugins/testing.lua` |
+| `testing/coverage.lua` (`<leader>tcf` / `tca`) | nvim-coverage `require("coverage.signs").is_enabled()` (no public "are signs shown"), used only to repaint a covered file opened after a coverage run. nvim-coverage is NOT pinned | after a coverage run, open a covered source file that was not open: its gutter shows coverage. If an update renamed it, the pcall turns the repaint into a no-op (the rest still works) | delete the `TestingCoverage` autocmd in `testing/coverage.lua` (files opened later then show no coverage until the next run) |
+| `testing/adapters.lua` (`known_roots` consumer) | wraps neotest's internal `AdapterGroup:adapters_matching_open_bufs` (via the metatable of `require("neotest.adapters")()`) so open test files under an already registered root are not registered again. Checked on neotest 27bf921 | after updating neotest: open a Go test, run it, open a file in another folder (e.g. `docs/…`), `<leader>ts`: one `neotest-golang` tree. If the name changed nothing is wrapped and a duplicate tree can come back | delete the `known_roots` consumer in `plugins/testing.lua` and `testing/adapters.lua` |
+| `testing/marks.lua` (`<leader>tx`) | neotest `config.status.virtual_text` (read on every redraw; no public "hide marks") and the autocmd group name `neotest.Client` (show replays its BufEnter). Checked on neotest 27bf921 | after updating neotest: run a test, `<leader>tx` hides the ✓/✗ marks, `<leader>tx` again shows them without a rerun | delete the `marks` consumer and the `<leader>tx` key in `plugins/testing.lua` |
+| `plugins/testing.lua` (`ui` consumer, `q` in `<leader>to` raw panel) | neotest's raw output panel buffer name `Neotest Output Panel` (to give a recreated panel buffer its filetype back) | open the raw panel (`P` in Test Results), `q`, run again, open it, `q` closes it again | delete the `BufWinEnter` autocmd in the `ui` consumer (`q` then works only the first time) |
 | `copy.lua` | dap-ui's rendering: highlight groups `DapUIVariable` / `DapUIScope` / `DapUIWatchesValue` / `DapUIWatchesError` / `DapUIDecoration` and `dapui.render.canvas`.namespace, to tell which variable a row shows | `y` on a nested variable in Variables and on a watch copies its value | delete `require("debugging.copy").setup()` in `plugins/ui.lua` (if it breaks, `y` only says "Nothing to copy here") |
 | `stacks.lua` (sessions list), `breakpoints.lua` (`each_session`) | nvim-dap `session.children` (undocumented field; `dap.sessions()` returns top-level sessions only; nvim-dap's own breakpoint commands walk it too) | Node: Call Stack lists the parent and child session; double-click switches | the list is drawn only with 2+ sessions; delete `render_sessions(canvas)` in `stacks.lua` |
 | `plugins/csharp.lua` | wraps easy-dotnet `terminal.tabline.destroy` (it deletes the global `<LeftMouse>` / `<2-LeftMouse>` maps) | after `:Dotnet run` and closing its panel, a gutter click in a Go file still toggles a breakpoint | delete the `tabline.destroy` block (gutter clicks then stop working after that panel closes, until restart) |

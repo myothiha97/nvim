@@ -5,9 +5,10 @@
 -- bg_sidebar, and the runtime-derived groups (oil's invisible border, the
 -- explorer's blank/border groups) follow.
 --
--- WHAT IS LIVE RIGHT NOW: `candidates.teal_light` (#001014). Confirmed
--- 2026-09-19 as the value to keep. Verify with
--- `nvim_get_hl(0, {name = "Normal"}).bg`.
+-- WHAT IS LIVE RIGHT NOW: `reference.black_matte_color.medium_dark` (#171716),
+-- since 2026-11-09. History: `candidates.teal_light` (#001014) 2026-09-19 to
+-- 2026-10-01, then `black_matte_color.second_darkest` (#131312) until 2026-11-09.
+-- Verify with `nvim_get_hl(0, {name = "Normal"}).bg`.
 --
 -- This block previously said `reference.ghostty_background` (#031219) was live,
 -- and stayed that way after `bg` moved to the ladder -- so anything quoting
@@ -45,7 +46,7 @@
 local candidates = {
   -- R=0 family -- teal preserved. Green and blue move together, red stays out.
   teal_lightest = "#001116", -- L* 4.14  C* 6.01  113% teal  untried; more teal than the "too teal" mark
-  teal_light = "#001014", ----- L* 3.80  C* 5.28   99% teal  LIVE (bg below); the full original teal, one rung lighter
+  teal_light = "#001014", ----- L* 3.80  C* 5.28   99% teal  live 2026-09-19 to 2026-10-01; the full original teal, one rung lighter
   teal = "#000f13", ---------- L* 3.51  C* 4.91   92% teal  tried; 0.81 L* below the start, just under a JND
   teal_dark = "#000e12", ----- L* 3.23  C* 4.55   85% teal  tried; 1.09 L* below the start, read as "very dark"
   teal_darker = "#000d11", --- L* 2.97  C* 4.21   79% teal  untried; below the floor, so teal starts dropping
@@ -64,7 +65,7 @@ local reference = {
   -- over a dark desktop (measured: flat #031116 across 600/600 px). The first
   -- opaque value matched that, confirmed by transparent rendering #031116 against
   -- opaque #031216 -- one unit apart, so going opaque changed nothing visible.
-  -- NOT LIVE since the move to `candidates.teal_light`. Kept as the reference
+  -- NOT LIVE (the editor bg moved off it to the teal ladder). Kept as the reference
   -- for what the terminal itself uses, which is what this key is named for.
   ghostty_background = "#031219",
 
@@ -95,13 +96,20 @@ local reference = {
 }
 local status_line = {
   light_matte = "#222221",
-  dark_matte = "#1e1e1d",
+  dark_matte = "#1e1e1d", -- live 2026-10-01 to 2026-11-09, paired with bg #131312 (1.114:1, dE00 3.3)
+  -- LIVE since 2026-11-09, paired with bg `medium_dark` #171716: 1.113:1, dE00 3.1,
+  -- the same separation `dark_matte` gave the old bg. `dark_matte` on #171716 fell
+  -- to 1.075:1 / dE00 2.2 and matched the Pmenu panel exactly. Re-tune if bg moves.
+  medium_matte = "#212120",
   darker_matte = "#171716",
 }
 
 local M = {
   -- bg = reference.black_matte_color.darkest,
-  bg = reference.black_matte_color.second_darkest, -- start trialling from 1st Oct 2026
+  -- bg = reference.black_matte_color.second_darkest, -- start trialling from 1st Oct 2026
+  -- above second_darkest color feels not very comfortable for eye due to its higher contrast in darkness
+  -- although difference is not very significant
+  bg = reference.black_matte_color.medium_dark,
   -- bg = candidates.teal, -- current live color,
   status_line = status_line,
   candidates = candidates,

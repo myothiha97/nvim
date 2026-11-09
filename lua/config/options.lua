@@ -3,7 +3,7 @@
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 
 vim.o.number = true
-vim.o.scrolloff = 12
+vim.o.scrolloff = 10 -- use 12 for external display for larger screen and 10 - 8 for smaller screen
 -- smoothscroll only has any effect when a window has `wrap = true`. Our code
 -- editing uses `wrap = false` (see below), so this option is inert there — it
 -- only matters inside wrapped doc/float views (LSP hover, completion docs).

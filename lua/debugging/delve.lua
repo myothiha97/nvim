@@ -54,6 +54,10 @@ function M.sync_fn_breakpoints(session)
 end
 
 -- Right-click Debug Test (menu.lua): Go test files, nvim-dap-go's nearest test.
+-- CAVEAT (known, not changed): nvim-dap-go debugs the whole enclosing `func Test…`, so a
+-- right-click on a table-test row debugs every case, while <leader>td (neotest) debugs only that
+-- row. For one case, use <leader>td, or put a breakpoint inside the loop and Continue past the
+-- cases you don't need.
 function M.is_test_file(name)
   return name:match("_test%.go$") ~= nil
 end
