@@ -363,6 +363,7 @@ return {
       { "<leader>tx", function() require("neotest").marks.toggle() end, desc = "Toggle Test UI (Neotest)" },
       { "<leader>th", function() require("neotest").history.runs() end, desc = "Test History (runs)" },
       { "<leader>tH", function() require("neotest").history.test() end, desc = "Test History (test at cursor)" },
+      { "<leader>tX", function() require("neotest").history.clear() end, desc = "Clear Test History" },
       { "<leader>tF", function() require("neotest").rerun_failed.run() end, desc = "Rerun Failed (Neotest)" },
       { "<leader>tD", function() require("neotest").discover.run() end, desc = "Discover Project Tests (Neotest)" },
     },
