@@ -340,6 +340,11 @@ return {
         marks = function(client)
           return require("testing.marks").consumer(client)
         end,
+        -- Fix for a duplicate adapter tree in the summary (lua/testing/adapters.lua). Not named
+        -- "adapters": neotest skips a consumer whose name is a config key without `enabled`.
+        known_roots = function(client)
+          return require("testing.adapters").consumer(client)
+        end,
         panel = function(client)
           return require("testing.panel").consumer(client)
         end,
