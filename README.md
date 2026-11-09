@@ -81,7 +81,7 @@ What makes this feel less like vanilla Neovim:
 | Language           | Status       | Notes                                                                                                                  |
 | ------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | TypeScript / React | Daily driver | `vtsls`, package JSON auto-imports off, tsserver heap cap `3072`, semantic tokens/inlay hints off                      |
-| Go                 | Enabled      | `gopls`, `goimports`, `gofumpt`, `delve`; project roots guarded to `go.mod` / `go.work`                                |
+| Go                 | Enabled      | `gopls`, `goimports`, `gofumpt`, `delve`; roots guarded to `go.mod` / `go.work`; stdlib/deps reuse the running gopls   |
 | Python             | Enabled      | `basedpyright` + `ruff`, `openFilesOnly` diagnostics, safe roots for both servers, `venv-selector.nvim` lazy on Python |
 | JSON               | Enabled      | LazyVim JSON extra + `prettierd`                                                                                       |
 | YAML               | Enabled      | `yamlls`; the daily DevOps filetype                                                                                    |
@@ -135,6 +135,7 @@ language server scan the whole home directory.
 | `<leader>cx`                | Clear quickfix list                                          |
 | `<leader>bu`                | List unsaved buffers (jump / save)                           |
 | `<leader>cd`                | Line diagnostics (focusable)                                 |
+| `<leader>cL`                | Restart the buffer's LSP servers, keeps unsaved edits        |
 
 </details>
 
