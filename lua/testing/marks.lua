@@ -58,6 +58,7 @@ function M.consumer(client)
     local neotest = require("neotest")
     pcall(neotest.summary.close)
     pcall(neotest.output_panel.close)
+    pcall(require("testing.panel").close)
     for _, win in ipairs(vim.api.nvim_list_wins()) do
       local ft = vim.bo[vim.api.nvim_win_get_buf(win)].filetype
       if ft == "neotest-attach" or ft == "neotest-output" then

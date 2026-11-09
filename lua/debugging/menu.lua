@@ -13,6 +13,7 @@
 --                           (Debug Test per language: delve.lua, node.lua,
 --                           python.lua, csharp.lua; the other three are extras,
 --                           see `extra` below)
+--   Test Results panel   -> Jump to Code · Show Output · Full Output · Rerun Test · Rerun Failed
 --   Variables panel      -> Add to Watches (the row's full expression, e.g.
 --                           wg.state, via dap-ui's own `w` action)
 --
@@ -273,6 +274,28 @@ local ITEMS = {
   },
 }
 
+-- Test Results panel (testing/panel.lua): its own entries, shown only in that panel (see the
+-- `results` branch in on_popup), like Add to Watches in dap-ui's Variables panel.
+for _, entry in ipairs({
+  { "Jump to Code", "jump" },
+  { "Show Output", "output" },
+  { "Full Output", "full_output" },
+  { "Rerun Test", "rerun" },
+  { "Rerun Failed", "rerun_failed" },
+}) do
+  table.insert(ITEMS, {
+    label = entry[1],
+    extra = true,
+    results = true,
+    when = function()
+      return false -- never in code buffers
+    end,
+    run = function()
+      require("testing.panel").actions[entry[2]]()
+    end,
+  })
+end
+
 local function path(item)
   return "PopUp." .. item.label:gsub(" ", "\\ ")
 end
@@ -289,6 +312,15 @@ local function on_popup()
 
   if vim.bo.filetype == "dapui_scopes" then
     vim.cmd("amenu enable PopUp.Add\\ to\\ Watches")
+    vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
+    return
+  end
+  if vim.bo.filetype == "testing-results" then
+    for _, item in ipairs(ITEMS) do
+      if item.results then
+        vim.cmd("amenu enable " .. path(item))
+      end
+    end
     vim.cmd(("anoremenu 1.%d %s <Nop>"):format(LAST, SEP))
     return
   end

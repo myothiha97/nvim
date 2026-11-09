@@ -16,7 +16,8 @@
 --      Added here: tF rerun failed · tD discover project tests (full tree in ts) ·
 --      th test history (past runs, across sessions) · tH history of the test at the cursor
 --      (lua/testing/history.lua) · tx toggle test UI: hide marks + close panels / show marks again
---      (lua/testing/marks.lua) · tj jump test <->
+--      (lua/testing/marks.lua) · tO Test Results panel replacing the raw output
+--      stream (lua/testing/panel.lua; P inside it opens the raw one) · tj jump test <->
 --      implementation, also right-click (lua/testing/jump.lua; mapped in config/keymaps.lua so it
 --      does not load neotest).
 --      Right-click in a test file also has Run Test / Debug Test /
@@ -78,6 +79,15 @@ return {
         --   ["neotest-golang"] = { testify_enabled = true },
         ["neotest-vitest"] = {},
         ["neotest-jest"] = {
+          -- Every Jest run (tr / tt / right-click) failed with E5560 "glob must not be called in
+          -- a fast event context": neotest-jest finds jest.config.{js,ts} with vim.fn.glob while
+          -- building the run, which neotest calls from an async callback. Same lookup (nearest
+          -- folder upward, .ts preferred) with vim.fs.find, which is safe there. Checked on
+          -- neotest-jest 0e7979d.
+          jestConfigFile = function(path)
+            local names = { "jest.config.ts", "jest.config.js" }
+            return vim.fs.find(names, { upward = true, path = vim.fs.dirname(path) })[1]
+          end,
           -- Replaces neotest-jest's own check, which also reads the package.json
           -- of the directory nvim started in and, when there is none, calls
           -- vim.notify from an async context: that error aborts the whole
@@ -171,6 +181,18 @@ return {
             pattern = "neotest-attach",
             callback = function(ev)
               vim.keymap.set("n", "q", "<Cmd>close<CR>", { buffer = ev.buf, desc = "Detach (close window)" })
+            end,
+          })
+          -- `q` in the output panel (<leader>tO) worked only once. neotest sets the panel's
+          -- filetype on its FIRST open only; LazyVim's `q` closes the panel and deletes its
+          -- buffer, and the buffer neotest recreates has no filetype, so LazyVim's FileType
+          -- autocmd never maps `q` again. Give the new buffer its filetype back when shown.
+          vim.api.nvim_create_autocmd("BufWinEnter", {
+            pattern = "*Neotest Output Panel",
+            callback = function(ev)
+              if vim.bo[ev.buf].filetype == "" then
+                vim.bo[ev.buf].filetype = "neotest-output-panel"
+              end
             end,
           })
         end,
@@ -318,12 +340,16 @@ return {
         marks = function(client)
           return require("testing.marks").consumer(client)
         end,
+        panel = function(client)
+          return require("testing.panel").consumer(client)
+        end,
       },
     },
     -- stylua: ignore
     keys = {
       { "<leader>tcf", function() require("neotest").coverage.run("file") end, desc = "Coverage: run file" },
       { "<leader>tca", function() require("neotest").coverage.run("all") end, desc = "Coverage: run all" },
+      { "<leader>tO", function() require("neotest").panel.toggle() end, desc = "Toggle Test Results (Neotest)" },
       { "<leader>tx", function() require("neotest").marks.toggle() end, desc = "Toggle Test UI (Neotest)" },
       { "<leader>th", function() require("neotest").history.runs() end, desc = "Test History (runs)" },
       { "<leader>tH", function() require("neotest").history.test() end, desc = "Test History (test at cursor)" },
