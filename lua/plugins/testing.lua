@@ -334,6 +334,11 @@ return {
         coverage = function(client)
           return require("testing.coverage").consumer(client)
         end,
+        -- Project test settings (.envrc / .env.test env, package.json test script, the Makefile /
+        -- Taskfile / justfile `go test` flags), each used after Neovim's trust prompt.
+        project_config = function(client)
+          return require("testing.project_config").consumer(client)
+        end,
         history = function(client)
           return require("testing.history").consumer(client)
         end,
