@@ -43,7 +43,7 @@ return {
       c.bg_float = ui.bg
       c.bg_sidebar = ui.bg
       -- c.bg_statusline = bg -- current live
-      c.bg_statusline = ui.status_line.dark_matte -- start trialling at 1st Oct 2026,
+      c.bg_statusline = ui.status_line.medium_matte -- tuned for bg medium_dark, 2026-11-09
       c.base04 = ui.surface.panel
       c.base03 = ui.surface.raised
       c.base02 = ui.surface.selection
