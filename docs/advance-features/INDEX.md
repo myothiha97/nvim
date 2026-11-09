@@ -13,7 +13,7 @@ One folder per feature area. Reports that only exist online are linked, not copi
 - Guide: [testing/testing-in-neovim-with-neotest.md](testing/testing-in-neovim-with-neotest.md)
 - Research: [Neovim test running: JetBrains gap report](https://claude.ai/artifact/BPr46onaoWnUAFFBbhZdzn)
 - In repo: lua/testing/coverage.lua and lua/testing/history.lua (branch feat/test-coverage-history)
-- Follow-ups: todos/languages/neotest-review-followups.md (on feat/test-coverage-history, not on main yet, so not linked)
+- Follow-ups: [todos/languages/neotest-review-followups.md](../../todos/languages/neotest-review-followups.md) (arrives with the test-coverage-history branch; link resolves once that is merged)
 
 ## LSP, completion and search
 - Audit: [Neovim large-repo audit](https://claude.ai/artifact/WwLBKyMjxeEWcc7KKHtRnc)
