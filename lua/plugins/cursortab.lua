@@ -9,6 +9,14 @@
 -- press, so a session that never turns it on starts no daemon and adds no
 -- autocmds. Once on, cursortab adds global CursorMoved(I)/TextChanged(I)/BufEnter
 -- autocmds (a few API reads + one async rpcnotify each) and one vim.on_key handler.
+-- Measured headless: ~20us per CursorMoved when on, ~1us when never enabled.
+--
+-- WARNING: turning it off again (<leader>an) keeps those autocmds (cursortab has
+-- no teardown and creates them without an augroup): ~8us per CursorMoved and an
+-- idle daemon remain until nvim restarts. Restart nvim for a full detach.
+-- WARNING: ignore_gitignored (default on) runs a blocking `git check-ignore`
+-- (~3.5 ms measured) the first time each file path is entered, then caches it.
+-- Kept on: it also keeps gitignored local secrets out of the context.
 --
 -- <Tab> stays owned by lua/config/keymaps.lua: both <Tab> handlers call
 -- require("cursortab").accept() first. cursortab's own <Tab>/<S-Tab> maps (insert
@@ -66,6 +74,31 @@ local ignore_paths = {
 
 local state = { setup_done = false, enabled = false }
 
+-- cursortab's own groups use fixed hex colours (default = true). Link them to the
+-- theme's diff/comment groups instead, so overlays follow the active colorscheme.
+-- Re-applied on ColorScheme: a theme's `hi clear` drops plugin groups and
+-- cursortab never re-creates them. Called on first enable only.
+local function link_highlights()
+  local links = {
+    CursorTabAddition = "DiffAdd",
+    CursorTabDeletion = "DiffDelete",
+    CursorTabModification = "DiffChange",
+    CursorTabCompletion = "Comment",
+    CursorTabJumpSymbol = "Comment",
+    CursorTabJumpText = "Comment",
+  }
+  local function apply()
+    for group, target in pairs(links) do
+      vim.api.nvim_set_hl(0, group, { link = target })
+    end
+  end
+  apply()
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    group = vim.api.nvim_create_augroup("CursortabThemeLinks", { clear = true }),
+    callback = apply,
+  })
+end
+
 local function build_opts()
   return {
     enabled = state.enabled,
@@ -101,6 +134,7 @@ local function toggle()
       return
     end
     state.enabled, state.setup_done = true, true
+    link_highlights()
     ct.setup(build_opts())
     return notify_state()
   end
