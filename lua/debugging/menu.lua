@@ -9,6 +9,7 @@
 --                           is the one dropped when all of the above apply)
 --   line has none        -> Add Conditional Breakpoint… · Add Log Point…
 --   test file, idle      -> Run Test · Debug Test · Run File Tests · Show Test Output
+--   Go/JS/TS/Python, idle -> Go to Test or Go to Implementation (extra, testing/jump.lua)
 --                           (Debug Test per language: delve.lua, node.lua,
 --                           python.lua, csharp.lua; the other three are extras,
 --                           see `extra` below)
@@ -248,6 +249,28 @@ local ITEMS = {
       test_action("show_output")
     end,
   },
+  -- Test <-> implementation jump (testing/jump.lua, also <leader>tj). One entry per direction,
+  -- shown in Go / JS/TS / Python buffers when no debug session runs.
+  {
+    label = "Go to Test",
+    extra = true,
+    when = function(c)
+      return c.jump == "test"
+    end,
+    run = function()
+      require("testing.jump").jump()
+    end,
+  },
+  {
+    label = "Go to Implementation",
+    extra = true,
+    when = function(c)
+      return c.jump == "impl"
+    end,
+    run = function()
+      require("testing.jump").jump()
+    end,
+  },
 }
 
 local function path(item)
@@ -281,6 +304,10 @@ local function on_popup()
   }
   local lang = ctx.idle and test_lang()
   ctx.test = lang and lang.is_test_file(vim.api.nvim_buf_get_name(0)) or false
+  local jump = ctx.idle and require("testing.jump")
+  if jump and jump.supported(vim.bo.filetype) then
+    ctx.jump = jump.is_test(vim.api.nvim_buf_get_name(0), vim.bo.filetype) and "impl" or "test"
+  end
   local shown, any = 0, false
   for _, item in ipairs(ITEMS) do
     if (item.extra or shown < MAX) and item.when(ctx) then

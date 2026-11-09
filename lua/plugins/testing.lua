@@ -13,7 +13,12 @@
 --      This file only adds the TS/JS adapters (the typescript extra ships none) and tightens
 --      two defaults below. Core keymaps come from test.core, all under <leader>t:
 --          tr run nearest · tt run file · tT run all · ts summary · to output · tw watch · td debug
---      Added here: tF rerun failed · tD discover project tests (full tree in ts).
+--      Added here: tF rerun failed · tD discover project tests (full tree in ts) ·
+--      th test history (past runs, across sessions) · tH history of the test at the cursor
+--      (lua/testing/history.lua) · tx toggle test UI: hide marks + close panels / show marks again
+--      (lua/testing/marks.lua) · tj jump test <->
+--      implementation, also right-click (lua/testing/jump.lua; mapped in config/keymaps.lua so it
+--      does not load neotest).
 --      Right-click in a test file also has Run Test / Debug Test /
 --      Run File Tests / Show Test Output (debugging/menu.lua).
 --
@@ -26,6 +31,8 @@
 --      Run these from the project root (Neovim's cwd): nvim-coverage looks for exactly those
 --      file names there. Then <leader>tcc (or :Coverage) to load + show. lcov/coverprofile
 --      parse natively; Python needs the `coverage` CLI (comes with pytest-cov) on PATH.
+--      Or skip the CLI: tcf / tca run the file / all tests WITH coverage inside nvim and
+--      show it when the run ends (lua/testing/coverage.lua, Go / Jest / Vitest / Python).
 
 -- Directories never searched for tests by <leader>tD (dependencies and build output). Adapters
 -- skip some of these already; this covers the rest so large repos stay quick.
@@ -203,11 +210,11 @@ return {
               local ok_fidget, progress = pcall(require, "fidget.progress")
               files = 0
               handle = ok_fidget
-                and progress.handle.create({
-                  title = "Discovering tests",
-                  message = "searching…",
-                  lsp_client = { name = "neotest" },
-                })
+                  and progress.handle.create({
+                    title = "Discovering tests",
+                    message = "searching…",
+                    lsp_client = { name = "neotest" },
+                  })
                 or nil
               local function finish(msg, level)
                 local h = handle
@@ -300,10 +307,26 @@ return {
             end,
           }
         end,
+        -- Run with Coverage (<leader>tcf / tca) and Test History (<leader>th / tH): own modules
+        -- in lua/testing/, loaded only when neotest starts.
+        coverage = function(client)
+          return require("testing.coverage").consumer(client)
+        end,
+        history = function(client)
+          return require("testing.history").consumer(client)
+        end,
+        marks = function(client)
+          return require("testing.marks").consumer(client)
+        end,
       },
     },
     -- stylua: ignore
     keys = {
+      { "<leader>tcf", function() require("neotest").coverage.run("file") end, desc = "Coverage: run file" },
+      { "<leader>tca", function() require("neotest").coverage.run("all") end, desc = "Coverage: run all" },
+      { "<leader>tx", function() require("neotest").marks.toggle() end, desc = "Toggle Test UI (Neotest)" },
+      { "<leader>th", function() require("neotest").history.runs() end, desc = "Test History (runs)" },
+      { "<leader>tH", function() require("neotest").history.test() end, desc = "Test History (test at cursor)" },
       { "<leader>tF", function() require("neotest").rerun_failed.run() end, desc = "Rerun Failed (Neotest)" },
       { "<leader>tD", function() require("neotest").discover.run() end, desc = "Discover Project Tests (Neotest)" },
     },
@@ -333,6 +356,8 @@ return {
     },
     -- Minimal setup: signs + summary only, no background watcher. Set `auto_reload = true`
     -- if you want loaded signs to refresh when the report file changes on the next run.
+    -- (<leader>tcf / tca load through load_lcov, which watches its own report file until
+    -- <leader>tcx or the next coverage run clears it: one idle libuv handle, no polling.)
     opts = {},
   },
 }
