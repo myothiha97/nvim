@@ -33,6 +33,14 @@ local providers = {
   mercuryapi = { type = "mercuryapi", api_key_env = "MERCURY_AI_TOKEN" },
   ["zeta-2.1"] = { type = "zeta-2.1", url = "http://localhost:8000" },
 }
+
+-- Idle suggestions: requested when the cursor rests in normal mode, even on code
+-- you have not changed (default 50 ms). Mercury tends to "improve" correct code
+-- there (cursortab benchmark: shows an edit in 31% of no-edit cases, e.g. adds
+-- an HTTP method check to a finished handler), so it gets none (-1) and only
+-- suggests after an edit. Zeta-2.1 stayed quiet in all no-edit cases, so it keeps
+-- them at 300 ms. Both still suggest after edits in insert and normal mode.
+local idle_delay = { mercuryapi = -1, ["zeta-2.1"] = 300 }
 local provider_order = { "mercuryapi", "zeta-2.1" }
 
 -- Credential files never sent as context. Mirrors secret_names / secret_dirs in
@@ -63,9 +71,7 @@ local function build_opts()
     enabled = state.enabled,
     keymaps = { accept = false, partial_accept = false, trigger = false },
     behavior = {
-      -- Normal-mode suggestions after the cursor rests. 300 ms (default 50) cuts
-      -- requests (Mercury bills per token, zeta-2.1 uses local CPU/GPU).
-      idle_completion_delay = 300,
+      idle_completion_delay = idle_delay[vim.g.cursortab_provider],
       enabled_modes = { "insert", "normal" },
       ignore_paths = ignore_paths,
     },
