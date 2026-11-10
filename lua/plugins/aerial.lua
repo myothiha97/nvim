@@ -312,10 +312,20 @@ return {
           statuscolumn = "",
         },
       }
-      -- Nesting shows through indentation alone, without tree-guide lines
-      opts.show_guides = false
+      -- Tree-guide lines, drawn faint (AerialGuide in config below) so they show
+      -- nesting without competing with the symbol names. The `╴` stubs are
+      -- lighter than aerial's default `─` and match the snacks picker tree.
+      opts.show_guides = true
+      opts.guides = {
+        mid_item = "├╴",
+        last_item = "└╴",
+        nested_top = "│ ",
+        whitespace = "  ",
+      }
       opts.backends = { "treesitter", "lsp", "markdown", "man" }
-      opts.filter_kind = {
+      -- JS/TS keep the React-focused list (post_parse_symbol above relies on it).
+      -- Every other language shows all the symbols its backend reports.
+      local react_kinds = {
         "Class",
         "Constructor",
         "Enum",
@@ -327,6 +337,13 @@ return {
         "Variable",
         "Constant",
         "Component",
+      }
+      opts.filter_kind = {
+        ["_"] = false,
+        javascript = react_kinds,
+        javascriptreact = react_kinds,
+        typescript = react_kinds,
+        typescriptreact = react_kinds,
       }
       opts.icons = vim.tbl_deep_extend("force", opts.icons or {}, {
         Component = " ",
@@ -356,6 +373,9 @@ return {
       setup_opts = vim.deepcopy(opts)
       require("aerial").setup(opts)
       vim.api.nvim_set_hl(0, "AerialComponentIcon", { fg = "#61afef" })
+      -- Guide lines take the explorer/picker tree colour (`surface.guide`), not
+      -- aerial's default Comment fg, which reads as text. AerialGuide1..9 link here.
+      vim.api.nvim_set_hl(0, "AerialGuide", { link = "SnacksPickerTree" })
       -- A link, not a new colour: Hook is a custom kind, so aerial defines no group for it
       vim.api.nvim_set_hl(0, "AerialHookIcon", { link = "AerialFunctionIcon" })
       -- Force Aerial's hover highlight to use your theme's grep/search highlight color
