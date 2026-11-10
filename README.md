@@ -33,7 +33,8 @@ quietly regressing speed.
 > proposing or making any change — then the docs under `docs/` as usual. It holds
 > the discipline rules and the active **config-freeze window**, which govern
 > whether a change should happen at all (default answer is _no_ unless it unblocks
-> the current workflow).
+> the current workflow). **The freeze is suspended since 2026-11-11** (see the
+> note in `rules.md`); the performance rules still apply.
 
 ---
 

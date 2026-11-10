@@ -14,6 +14,9 @@
 local M = {}
 
 local FREEZE_END = "2026-12-31"
+-- Freeze suspended 2026-11-11 (Myo) until the open issues and features are done;
+-- see rules.md. No popup and no autocmd while true. Set to false to re-freeze.
+local SUSPENDED = true
 
 local SUMMARY = {
   "This config is a tool for work, not the work.",
@@ -129,7 +132,7 @@ end
 
 function M.setup()
   -- ISO dates compare correctly as strings.
-  if os.date("%Y-%m-%d") > FREEZE_END then
+  if SUSPENDED or os.date("%Y-%m-%d") > FREEZE_END then
     return
   end
   vim.api.nvim_create_autocmd("UIEnter", {
