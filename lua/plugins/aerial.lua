@@ -364,6 +364,9 @@ return {
       opts.keymaps = {
         -- ["<2-LeftMouse>"] = "actions.tree_toggle", -- Double click to expand/collapse node
         ["<RightMouse>"] = "actions.tree_toggle",
+        -- `s` scrolls the code to the symbol and keeps focus here (aerial's default is `p`)
+        ["s"] = "actions.scroll",
+        ["p"] = false,
         ["l"] = { callback = open_or_jump, desc = "Expand the symbol, or jump to it when there is nothing to expand" },
       }
       return opts
