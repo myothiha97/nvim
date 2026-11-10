@@ -6,7 +6,8 @@
 --   Component  PascalCase functions, incl. memo()/forwardRef() (JSX languages only)
 --   Function   other function values, plus useCallback()/useMemo() results
 --   Object     an object literal holding functions, so its methods nest under it
--- Every other variable is hidden.
+-- Every other variable (plain data) is hidden in .jsx/.tsx only; .js/.ts keep
+-- it as a Variable row, like other languages.
 --
 -- Do not go back to matching source text: `text:find("memo")` listed
 -- `const memoryLimit = 5` as a function, and it cost a buffer read per symbol.
@@ -15,6 +16,10 @@ local ECMA_LANGS = { javascript = true, typescript = true, tsx = true }
 -- Plain .ts has no JSX, so a PascalCase function there is a factory or a
 -- decorator (NestJS `Roles()`), not a component. `javascript` also parses .jsx.
 local COMPONENT_LANGS = { javascript = true, tsx = true }
+
+-- Filetypes that hide plain-data variables (keyed by filetype, not treesitter
+-- lang: `javascript` parses .js and .jsx alike)
+local REACT_FILETYPES = { javascriptreact = true, typescriptreact = true }
 
 local FUNCTION_NODES = { arrow_function = true, function_expression = true, generator_function = true }
 -- Calls whose result is still a function or component, so they keep the
@@ -112,7 +117,7 @@ local post_parse_symbol = function(bufnr, item, ctx)
       item.name = callee .. " " .. (item.name:gsub("%s+", " "))
       return true
     end
-    return false
+    return not REACT_FILETYPES[vim.bo[bufnr].filetype]
   end
   if type == "object" and has_function_member(value) then
     item.kind = "Object"
@@ -120,7 +125,7 @@ local post_parse_symbol = function(bufnr, item, ctx)
   end
 
   -- Plain data (selectedVariant, items.find(...), config objects)
-  return false
+  return not REACT_FILETYPES[vim.bo[bufnr].filetype]
 end
 
 -- `l` in the panel: expand a collapsed row, otherwise jump like <CR>. A leaf or
@@ -323,8 +328,9 @@ return {
         whitespace = "  ",
       }
       opts.backends = { "treesitter", "lsp", "markdown", "man" }
-      -- JS/TS keep the React-focused list (post_parse_symbol above relies on it).
-      -- Every other language shows all the symbols its backend reports.
+      -- .jsx/.tsx keep the React-focused list (post_parse_symbol above relies on
+      -- it). Every other filetype, .js/.ts included, shows all the symbols its
+      -- backend reports.
       local react_kinds = {
         "Class",
         "Constructor",
@@ -340,9 +346,7 @@ return {
       }
       opts.filter_kind = {
         ["_"] = false,
-        javascript = react_kinds,
         javascriptreact = react_kinds,
-        typescript = react_kinds,
         typescriptreact = react_kinds,
       }
       opts.icons = vim.tbl_deep_extend("force", opts.icons or {}, {
