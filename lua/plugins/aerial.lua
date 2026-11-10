@@ -7,7 +7,8 @@
 --   Function   other function values, plus useCallback()/useMemo() results
 --   Object     an object literal holding functions, so its methods nest under it
 -- Every other variable (plain data) is hidden in .jsx/.tsx only; .js/.ts keep
--- it as a Variable row, like other languages.
+-- it as a Variable row, like other languages (for .js the extra literal values
+-- in after/queries/javascript/aerial.scm make these rows exist at all).
 --
 -- Do not go back to matching source text: `text:find("memo")` listed
 -- `const memoryLimit = 5` as a function, and it cost a buffer read per symbol.
