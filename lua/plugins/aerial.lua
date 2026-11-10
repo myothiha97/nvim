@@ -134,11 +134,22 @@ end
 -- Stored on the item as `detail` and drawn by draw_details() below.
 --   lsp        the server's own `detail` (gopls: signatures and field types;
 --              its leading `func` is dropped as the icon already says it)
---   treesitter parameters + return type of the function node, any language
---              whose grammar names them `parameters` and `return_type`/`result`
---              (Go, TS/JS, Python, Lua). Arrow-function variables use the value.
--- One node-text read per function symbol, only while aerial runs.
+--   treesitter parameters + return type of the function node (`parameters`,
+--              `return_type`/`result`). Arrow-function variables use the value.
+-- Go and JS/TS only for now (Myo, 2026-11-10); other languages get their own
+-- tuning when needed. One node-text read per function symbol, only while aerial runs.
+local DETAIL_FILETYPES = {
+  go = true,
+  javascript = true,
+  javascriptreact = true,
+  typescript = true,
+  typescriptreact = true,
+}
+
 local function set_detail(bufnr, item, ctx)
+  if not DETAIL_FILETYPES[vim.bo[bufnr].filetype] then
+    return
+  end
   local detail
   if ctx.backend_name == "lsp" then
     detail = ctx.symbol and ctx.symbol.detail
@@ -153,8 +164,8 @@ local function set_detail(bufnr, item, ctx)
       detail = get_node_text(params, bufnr)
       local ret = fn:field("return_type")[1] or fn:field("result")[1]
       if ret then
-        -- TS `: void` carries its own colon; Python's `-> int` arrow is not in the node
-        local sep = ret:type() == "type_annotation" and "" or (ctx.lang == "python" and " -> " or " ")
+        -- TS `: void` carries its own colon; Go's result follows a space
+        local sep = ret:type() == "type_annotation" and "" or " "
         detail = detail .. sep .. get_node_text(ret, bufnr)
       end
     end
