@@ -69,7 +69,7 @@ local function set_function_kind(item, lang)
   end
 end
 
-local post_parse_symbol = function(bufnr, item, ctx)
+local react_post_parse = function(bufnr, item, ctx)
   -- Only the treesitter backend hands over the matched nodes
   if ctx.backend_name ~= "treesitter" or not ECMA_LANGS[ctx.lang] then
     return true
@@ -115,6 +115,7 @@ local post_parse_symbol = function(bufnr, item, ctx)
       -- "useState [count, setCount]": the hook says what it is, the binding says which
       item.kind = "Hook"
       item.name = callee .. " " .. (item.name:gsub("%s+", " "))
+      item.dim_from = #callee + 1 -- byte offset of " [count, setCount]", dimmed by draw_details
       return true
     end
     return not REACT_FILETYPES[vim.bo[bufnr].filetype]
@@ -126,6 +127,49 @@ local post_parse_symbol = function(bufnr, item, ctx)
 
   -- Plain data (selectedVariant, items.find(...), config objects)
   return not REACT_FILETYPES[vim.bo[bufnr].filetype]
+end
+
+-- Signature/type shown dimmed after the name, like the JetBrains Structure view:
+-- `divide (a, b float64) (float64, error)`, `Width float64`, `onClick (e): void`.
+-- Stored on the item as `detail` and drawn by draw_details() below.
+--   lsp        the server's own `detail` (gopls: signatures and field types;
+--              its leading `func` is dropped as the icon already says it)
+--   treesitter parameters + return type of the function node, any language
+--              whose grammar names them `parameters` and `return_type`/`result`
+--              (Go, TS/JS, Python, Lua). Arrow-function variables use the value.
+-- One node-text read per function symbol, only while aerial runs.
+local function set_detail(bufnr, item, ctx)
+  local detail
+  if ctx.backend_name == "lsp" then
+    detail = ctx.symbol and ctx.symbol.detail
+    detail = detail and detail:gsub("^func%s*", "")
+  elseif ctx.backend_name == "treesitter" and ctx.match then
+    local fn = ctx.match.var_type and ctx.match.var_type.node
+    if not (fn and FUNCTION_NODES[fn:type()]) then
+      fn = ctx.match.symbol and ctx.match.symbol.node
+    end
+    local params = fn and (fn:field("parameters")[1] or fn:field("parameter")[1])
+    if params then
+      detail = get_node_text(params, bufnr)
+      local ret = fn:field("return_type")[1] or fn:field("result")[1]
+      if ret then
+        -- TS `: void` carries its own colon; Python's `-> int` arrow is not in the node
+        local sep = ret:type() == "type_annotation" and "" or (ctx.lang == "python" and " -> " or " ")
+        detail = detail .. sep .. get_node_text(ret, bufnr)
+      end
+    end
+  end
+  if detail and detail ~= "" then
+    item.detail = (detail:gsub("%s+", " "))
+  end
+end
+
+local post_parse_symbol = function(bufnr, item, ctx)
+  local keep = react_post_parse(bufnr, item, ctx)
+  if keep ~= false then
+    set_detail(bufnr, item, ctx)
+  end
+  return keep
 end
 
 -- `l` in the panel: expand a collapsed row, otherwise jump like <CR>. A leaf or
@@ -220,6 +264,80 @@ local function stop_aerial()
   end, 50)
 end
 
+-- Dimmed details (set_detail above) drawn into the panel. aerial has no hook for
+-- extra text on a row, so after each of its redraws this adds an end-of-line
+-- virtual text per row, plus a dim highlight over a hook's binding. The row
+-- text itself is untouched, so jump, follow, `s`, `l` and folding are unaffected.
+-- Runs only on aerial redraws (its own debounced re-renders), never on keystrokes
+-- or cursor moves; one pass over the visible rows.
+--
+-- WARN: SILENT FAILURE - relies on aerial internals: `aerial.data`.get() and
+-- BufData:iter({ skip_hidden = true }) yielding items in the same order as the
+-- panel rows (as render.lua does), and panel buffers being created fresh with
+-- filetype "aerial" (bufhidden=wipe). If an update breaks this, the details
+-- just disappear (all calls are pcall'd). After `:Lazy update`, open
+-- <leader>cs on a Go file and check that signatures still show after the names.
+local detail_ns = vim.api.nvim_create_namespace("aerial_detail")
+
+local function draw_details(aer_buf)
+  if not vim.api.nvim_buf_is_valid(aer_buf) then
+    return
+  end
+  vim.api.nvim_buf_clear_namespace(aer_buf, detail_ns, 0, -1)
+  local ok, bufdata = pcall(require("aerial.data").get, aer_buf)
+  if not ok or not bufdata then
+    return
+  end
+  local lines = vim.api.nvim_buf_get_lines(aer_buf, 0, -1, false)
+  pcall(function()
+    for _, item, row in bufdata:iter({ skip_hidden = true }) do
+      local line = lines[row]
+      if not line then
+        break
+      end
+      if item.dim_from then
+        -- The name is the end of the row: guides .. icon .. " " .. name
+        local name_col = #line - #item.name
+        vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, name_col + item.dim_from, {
+          end_col = #line,
+          hl_group = "AerialDetail",
+          priority = 5000, -- above aerial's own name highlight
+        })
+      end
+      if item.detail then
+        vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, 0, {
+          virt_text = { { " " .. item.detail, "AerialDetail" } },
+          virt_text_pos = "eol",
+          hl_mode = "combine",
+        })
+      end
+    end
+  end)
+end
+
+-- Redraw the details after aerial rewrites the panel lines; one scheduled pass
+-- per batch of line changes. Detaches itself once aerial is stopped.
+local function attach_details(aer_buf)
+  local pending = false
+  vim.api.nvim_buf_attach(aer_buf, false, {
+    on_lines = function()
+      if not running then
+        return true
+      end
+      if not pending then
+        pending = true
+        vim.schedule(function()
+          pending = false
+          draw_details(aer_buf)
+        end)
+      end
+    end,
+  })
+  vim.schedule(function()
+    draw_details(aer_buf)
+  end)
+end
+
 local function start_aerial()
   if running then
     return
@@ -228,8 +346,17 @@ local function start_aerial()
   -- On a restart aerial's own setup() re-creates its autocmds and attaches the
   -- current buffer; before the first use it only stores the opts.
   require("aerial").setup(vim.deepcopy(setup_opts))
+  local group = vim.api.nvim_create_augroup(watcher_group, { clear = true })
+  -- Each panel buffer is new (aerial wipes hidden ones), so this sees them all
+  vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    pattern = "aerial",
+    callback = function(args)
+      attach_details(args.buf)
+    end,
+  })
   vim.api.nvim_create_autocmd("WinClosed", {
-    group = vim.api.nvim_create_augroup(watcher_group, { clear = true }),
+    group = group,
     callback = function(args)
       local win = tonumber(args.match)
       if win and vim.api.nvim_win_is_valid(win) and vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "aerial" then
@@ -327,7 +454,12 @@ return {
         nested_top = "│ ",
         whitespace = "  ",
       }
-      opts.backends = { "treesitter", "lsp", "markdown", "man" }
+      -- Go reads gopls first: its symbols carry types, struct fields and
+      -- signatures (`detail`), which aerial's Go treesitter query does not have
+      opts.backends = {
+        ["_"] = { "treesitter", "lsp", "markdown", "man" },
+        go = { "lsp", "treesitter" },
+      }
       -- .jsx/.tsx keep the React-focused list (post_parse_symbol above relies on
       -- it). Every other filetype, .js/.ts included, shows all the symbols its
       -- backend reports.
@@ -380,6 +512,9 @@ return {
       setup_opts = vim.deepcopy(opts)
       require("aerial").setup(opts)
       vim.api.nvim_set_hl(0, "AerialComponentIcon", { fg = "#61afef" })
+      -- Signatures, types and hook bindings: the picker's secondary-text colour
+      -- (path prefix), not Comment, which is italic in this theme
+      vim.api.nvim_set_hl(0, "AerialDetail", { link = "SnacksPickerDir" })
       -- Guide lines take the explorer/picker tree colour (`surface.guide`), not
       -- aerial's default Comment fg, which reads as text. AerialGuide1..9 link here.
       vim.api.nvim_set_hl(0, "AerialGuide", { link = "SnacksPickerTree" })
