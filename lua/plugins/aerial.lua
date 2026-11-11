@@ -180,33 +180,35 @@ end
 -- view: JetBrains' exact dark-theme icon colours (IntelliJ New UI icons,
 -- platform/icons/src/expui/nodes/*_dark.svg), as Myo asked (2026-11-11), so
 -- these are fixed hex values, not theme links. They are muted and sit at the
--- weight of the theme's syntax colours. The icon shapes stay LazyVim's.
+-- weight of the theme's syntax colours. The icon shapes stay LazyVim's, except
+-- methods (see opts.icons).
 -- (The snacks symbol pickers, <leader>ss, keep their own.)
-local JB_RED = "#DB5C5C" -- function, method, lambda
-local JB_ORANGE = "#C77D55" -- field, variable, constant, parameter
+local JB_RED = "#DB5C5C" -- function, lambda
+local JB_ORANGE = "#C77D55" -- variable, constant, parameter
 local JB_BLUE = "#548AF7" -- class, record, type
-local JB_GREEN = "#57965C" -- interface
-local JB_PURPLE = "#B589EC" -- property
+local JB_PURPLE = "#B589EC" -- property; methods here too (Myo: tell them from functions)
 local JB_VIOLET = "#A571E6" -- enum
 local KIND_COLORS = {
   Function = JB_RED,
-  Method = JB_RED,
-  Constructor = JB_RED,
-  Field = JB_ORANGE,
+  Method = JB_PURPLE,
+  Constructor = JB_PURPLE,
   Variable = JB_ORANGE,
   Constant = JB_ORANGE,
   EnumMember = JB_ORANGE,
   Class = JB_BLUE,
   TypeParameter = JB_BLUE,
   Component = JB_BLUE,
-  Interface = JB_GREEN,
+  Interface = JB_BLUE, -- Myo: blue, not JetBrains green
   Property = JB_PURPLE,
   Enum = JB_VIOLET,
 }
--- Theme links: kinds JetBrains has no colour for, and structs, which keep
--- aerial's default yellow (`Type`) as Myo asked (2026-11-11)
+-- Theme links (Myo's picks, 2026-11-11): structs keep aerial's default yellow
+-- (`Type`); struct fields and interface members (Field) are cyan like their
+-- icons in the <leader>ss picker (`@variable.member`); the rest have no
+-- JetBrains colour.
 local KIND_LINKS = {
   Struct = "Type",
+  Field = "@variable.member",
   Hook = "Special",
   Object = "Special",
   Module = "Special",
@@ -659,6 +661,10 @@ return {
       -- state instead of LazyVim's generic "Collapsed" chevron.
       opts.icons = opts.icons or {}
       opts.icons.Component = " "
+      -- Methods get the VS Code method cube (nf-cod-symbol_method): LazyVim gives
+      -- Function and Method the same glyph
+      opts.icons.Method = " "
+      opts.icons.Constructor = " "
       opts.icons.Hook = "󰛢 "
       for kind, icon in pairs(opts.icons) do
         if type(icon) == "string" and not kind:find("Collapsed$") and kind ~= "Collapsed" then
