@@ -134,9 +134,10 @@ already gone mostly into this config. Good enough is the goal, not a compromise.
    Do not configure something the moment the idea appears. Collect ideas and
    handle them in batches — about once a month, or once every 3–4 months.
 
-4. **Never edit the config directly on `main`.**
-   Always switch to a `dev` or feature branch first. Merge back only after the
-   change is reviewed, tested, and confirmed safe.
+4. **Never edit the config directly on `main` or `dev` (updated 2026-11-11).**
+   Every feature, fix or update, by me or by an agent, gets its own new branch
+   cut from `main`. Commit there, push, and open a PR to `main`. Merge only after
+   the change is reviewed, tested, and confirmed safe.
 
 5. **Reserve at least 1–2 hours of focused, uninterrupted time for any change.**
    Do not make config changes in random small breaks. Every change must be
