@@ -409,10 +409,12 @@ local function draw_details(aer_buf)
       if not line then
         break
       end
-      -- Expand arrow before the icon (`›` collapsed, `⌄` open, blank for a
-      -- leaf so icons stay aligned). The icon starts right after the guides,
-      -- which take one 2-cell unit per level.
-      local icon_col = 0
+      -- Icon right after the guide, like the <leader>ss picker tree (`├╴󰊕`).
+      -- The expand arrow (`›` collapsed, `⌄` open) replaces the guide's `╴`
+      -- stub of a nested parent; top-level rows get a one-cell arrow column at
+      -- the left edge (blank for a leaf) so all icons stay aligned. The guides
+      -- take one 2-cell unit per level before the icon.
+      local icon_col, last_unit = 0, nil
       for _ = 1, item.level do
         local unit = GUIDE_UNITS[line:sub(icon_col + 1, icon_col + 6)]
           or GUIDE_UNITS[line:sub(icon_col + 1, icon_col + 4)]
@@ -421,15 +423,25 @@ local function draw_details(aer_buf)
           break
         end
         icon_col = icon_col + unit
+        last_unit = unit
       end
-      local arrow = "  "
+      local arrow
       if item.children and #item.children > 0 then
-        arrow = bufdata:is_collapsed(item) and "› " or "⌄ "
+        arrow = bufdata:is_collapsed(item) and "›" or "⌄"
       end
-      vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, icon_col, {
-        virt_text = { { arrow, "AerialArrow" } },
+      vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, 0, {
+        virt_text = { { (item.level == 0 and arrow) or " ", "AerialArrow" } },
         virt_text_pos = "inline",
       })
+      if arrow and last_unit then
+        -- The stub is the unit's last cell: `╴` (3 bytes), or a space when the
+        -- guides are off
+        local stub = line:sub(icon_col - 2, icon_col) == "╴" and 3 or 1
+        vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, icon_col - stub, {
+          virt_text = { { arrow, "AerialArrow" } },
+          virt_text_pos = "overlay",
+        })
+      end
       if item.exported ~= nil then
         -- Go visibility, like GoLand's lock icons: exported = green open lock,
         -- unexported = dim closed lock. Codicon locks: the thinnest lock glyphs,
@@ -670,11 +682,23 @@ return {
       opts.icons.Method = " "
       opts.icons.Constructor = " "
       opts.icons.Hook = "󰛢 "
+      -- The trailing space LazyVim puts after each icon is dropped: aerial
+      -- already adds one, so the name sits one space after the icon, as in the
+      -- <leader>ss picker. (Built in a new table: adding keys while iterating
+      -- with pairs() is undefined in Lua.)
+      local icons = {}
       for kind, icon in pairs(opts.icons) do
-        if type(icon) == "string" and not kind:find("Collapsed$") and kind ~= "Collapsed" then
-          opts.icons[kind .. "Collapsed"] = icon
+        if type(icon) == "string" then
+          icon = icon:gsub("%s+$", "")
+          icons[kind] = icon
+          if not kind:find("Collapsed$") and kind ~= "Collapsed" then
+            icons[kind .. "Collapsed"] = icon
+          end
+        else
+          icons[kind] = icon -- per-filetype maps (LazyVim's `lua`) as they are
         end
       end
+      opts.icons = icons
       opts.post_parse_symbol = post_parse_symbol
       opts.post_add_all_symbols = post_add_all_symbols
 
