@@ -1,5 +1,11 @@
 # Config Freeze Policy — Detailed
 
+> **⏸ SUSPENDED 2026-11-11 (Myo).** The freeze, the palette closure and the
+> freeze-override traces (rule 10) are off while the open issues and IDE-parity
+> features are worked through. Changes still follow the performance and safety
+> rules. Myo will set a new freeze window when that work is done; until then,
+> treat this policy as history, not as active rules.
+
 The full version of the freeze rule summarized in [`../rules.md`](../rules.md).
 Core setup is stable and already has every feature and plugin needed for a
 standard IDE. From this point the config is **frozen by default** — changes are
