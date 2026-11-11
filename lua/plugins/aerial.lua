@@ -176,61 +176,68 @@ local function set_detail(bufnr, item, ctx)
   end
 end
 
--- Symbol kind icons and colours for the panel, modelled on the GoLand/WebStorm
--- Structure view. (The snacks symbol pickers, <leader>ss, keep their own.)
+-- Symbol kind icons and colours for the panel, copied from the GoLand/WebStorm
+-- Structure view (IntelliJ New UI icons, platform/icons/src/expui/nodes/*_dark.svg).
+-- (The snacks symbol pickers, <leader>ss, keep their own.)
 --
--- Icons: JetBrains-style letter badges, one shape per kind (Nerd Font
--- `nf-md-alpha_*_circle`). React's Component and Hook have no JetBrains icon
--- and keep their own glyphs.
+-- Icons (filetypes other than Go/JS/TS/JSX/TSX, which keep the previous LazyVim
+-- shapes, see opts.icons below): JetBrains draws a coloured letter in a coloured circle outline. The
+-- nearest font glyphs are Nerd Font `nf-md-alpha_*_circle_outline` (uppercase
+-- letters; a terminal cannot draw JetBrains' faint circle fill). Constants use
+-- the square `c` (JetBrains: `c` in a diamond, which has no glyph). GoLand's
+-- own Go icons are not public: structs use `s` in the class blue. React's
+-- Component and Hook have no JetBrains icon and keep their own glyphs.
 --
--- Colours: the GoLand/WebStorm dark icon colours (IntelliJ expui/nodes/*_dark.svg)
---   function, method   red     #DB5C5C   -> @variable.parameter #e06c75
---   field, variable,   orange  #C77D55   -> Number              #ed8e55
---   constant, param
---   class (struct)     blue    #548AF7   -> Directory           #268bd3
---   interface          green   #57965C   -> String              #9ece6a
---   property, enum     purple  #B589EC   -> @keyword.function   #a17bcc
--- Each is the nearest non-italic colour among the theme's own groups, linked
--- (not copied), so it follows the theme at normal strength. Like JetBrains, the
--- letter tells a function (f, red) from a field (f, orange). Hooks are olive.
-
+-- Colours: JetBrains' exact dark-theme icon colours, as Myo asked (2026-11-11),
+-- so these are fixed hex values, not theme links. They are muted and sit at the
+-- weight of the theme's syntax colours. Like JetBrains, the letter tells a
+-- function (f, red) from a field (f, orange).
 local KIND_ICONS = {
-  Class = "󰯲 ", -- c
-  Struct = "󰰢 ", -- s
-  Interface = "󰰄 ", -- I
-  Enum = "󰯸 ", -- e
-  EnumMember = "󰯳 ", -- c (outline, as constants)
-  Method = "󰰐 ", -- m
-  Constructor = "󰰐 ", -- m
-  Function = "󰯻 ", -- f
-  Field = "󰯻 ", -- f
-  Property = "󰰙 ", -- p
-  Variable = "󰰫 ", -- v
-  Constant = "󰯳 ", -- c (outline)
-  TypeParameter = "󰰥 ", -- t
-  Object = "󰰖 ", -- o
-  Module = "󰰓 ", -- n
-  Namespace = "󰰓 ",
-  Package = "󰰓 ",
+  Class = "󰯳 ", -- c
+  Struct = "󰰣 ", -- s
+  Interface = "󰰅 ", -- I
+  Enum = "󰯹 ", -- e
+  EnumMember = "󰯱 ", -- c (square, as constants)
+  Method = "󰰑 ", -- m
+  Constructor = "󰰑 ", -- m
+  Function = "󰯼 ", -- f
+  Field = "󰯼 ", -- f
+  Property = "󰰚 ", -- p
+  Variable = "󰰬 ", -- v
+  Constant = "󰯱 ", -- c (square)
+  TypeParameter = "󰰦 ", -- t
+  Object = "󰰗 ", -- o
+  Module = "󰰔 ", -- n
+  Namespace = "󰰔 ",
+  Package = "󰰔 ",
   Component = " ",
   Hook = "󰛢 ",
 }
 
+local JB_RED = "#DB5C5C" -- function, method, lambda
+local JB_ORANGE = "#C77D55" -- field, variable, constant, parameter
+local JB_BLUE = "#548AF7" -- class, record, type
+local JB_GREEN = "#57965C" -- interface
+local JB_PURPLE = "#B589EC" -- property
+local JB_VIOLET = "#A571E6" -- enum
 local KIND_COLORS = {
-  Function = "@variable.parameter",
-  Method = "@variable.parameter",
-  Constructor = "@variable.parameter",
-  Field = "Number",
-  Variable = "Number",
-  Constant = "Number",
-  EnumMember = "Number",
-  TypeParameter = "Number",
-  Class = "Directory",
-  Struct = "Directory",
-  Component = "Directory",
-  Interface = "String",
-  Property = "@keyword.function",
-  Enum = "@keyword.function",
+  Function = JB_RED,
+  Method = JB_RED,
+  Constructor = JB_RED,
+  Field = JB_ORANGE,
+  Variable = JB_ORANGE,
+  Constant = JB_ORANGE,
+  EnumMember = JB_ORANGE,
+  Class = JB_BLUE,
+  Struct = JB_BLUE,
+  TypeParameter = JB_BLUE,
+  Component = JB_BLUE,
+  Interface = JB_GREEN,
+  Property = JB_PURPLE,
+  Enum = JB_VIOLET,
+}
+-- No JetBrains colour: theme links
+local KIND_LINKS = {
   Hook = "Special",
   Object = "Special",
   Module = "Special",
@@ -239,7 +246,10 @@ local KIND_COLORS = {
 }
 
 local function set_kind_hl()
-  for kind, group in pairs(KIND_COLORS) do
+  for kind, fg in pairs(KIND_COLORS) do
+    vim.api.nvim_set_hl(0, "Aerial" .. kind .. "Icon", { fg = fg })
+  end
+  for kind, group in pairs(KIND_LINKS) do
     vim.api.nvim_set_hl(0, "Aerial" .. kind .. "Icon", { link = group })
   end
 end
@@ -675,15 +685,30 @@ return {
         javascriptreact = react_kinds,
         typescriptreact = react_kinds,
       }
-      -- Letter badges per kind (KIND_ICONS above)
-      local kind_icons = KIND_ICONS
-      -- A collapsed row keeps its kind icon; the `›`/`⌄` arrow (draw_details)
-      -- shows the state instead of LazyVim's generic "Collapsed" chevron
-      local collapsed = {}
-      for kind, icon in pairs(kind_icons) do
-        collapsed[kind .. "Collapsed"] = icon
+      -- Go, JS, TS, JSX, TSX keep the previous (LazyVim) icon shapes, shown in the
+      -- JetBrains colours (Myo, 2026-11-11). Other filetypes get the JetBrains-
+      -- style letter badges (KIND_ICONS above). aerial reads `icons[filetype]`
+      -- before the global map. Note: LazyVim gives Function and Method the same
+      -- glyph, and JetBrains the same red, so in these filetypes only nesting
+      -- tells a method from a function.
+      local previous = opts.icons or {}
+      local ft_icons = {}
+      for kind, icon in pairs(KIND_ICONS) do
+        local prev = previous[kind] or icon
+        ft_icons[kind] = prev
+        -- A collapsed row keeps its kind icon; the `›`/`⌄` arrow (draw_details)
+        -- shows the state instead of LazyVim's generic "Collapsed" chevron
+        ft_icons[kind .. "Collapsed"] = prev
       end
-      opts.icons = vim.tbl_deep_extend("force", opts.icons or {}, kind_icons, collapsed)
+      local letter_icons = {}
+      for kind, icon in pairs(KIND_ICONS) do
+        letter_icons[kind] = icon
+        letter_icons[kind .. "Collapsed"] = icon
+      end
+      opts.icons = vim.tbl_deep_extend("force", previous, letter_icons)
+      for ft in pairs(DETAIL_FILETYPES) do
+        opts.icons[ft] = vim.tbl_extend("force", opts.icons[ft] or {}, ft_icons)
+      end
       opts.post_parse_symbol = post_parse_symbol
       opts.post_add_all_symbols = post_add_all_symbols
 
@@ -715,7 +740,7 @@ return {
       -- Guide lines take the explorer/picker tree colour (`surface.guide`), not
       -- aerial's default Comment fg, which reads as text. AerialGuide1..9 link here.
       vim.api.nvim_set_hl(0, "AerialGuide", { link = "SnacksPickerTree" })
-      -- Icon colour per kind, GoLand/WebStorm hues (KIND_COLORS above)
+      -- Icon colour per kind, JetBrains colours (KIND_COLORS above)
       set_kind_hl()
       -- Expand arrows and the Go exported/unexported lock: secondary text, like
       -- the details, so they read as structure, not content
