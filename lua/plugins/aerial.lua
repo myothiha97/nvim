@@ -183,15 +183,15 @@ end
 -- weight of the theme's syntax colours. The icon shapes stay LazyVim's, except
 -- methods (see opts.icons).
 -- (The snacks symbol pickers, <leader>ss, keep their own.)
-local JB_RED = "#DB5C5C" -- function, lambda
+local JB_RED = "#DB5C5C" -- method (JetBrains: method, lambda)
 local JB_ORANGE = "#C77D55" -- variable, constant, parameter
 local JB_BLUE = "#548AF7" -- class, record, type
-local JB_PURPLE = "#B589EC" -- property; methods here too (Myo: tell them from functions)
+local JB_PURPLE = "#B589EC" -- function (purple ƒ as in GoLand, Myo), property
 local JB_VIOLET = "#A571E6" -- enum
 local KIND_COLORS = {
-  Function = JB_RED,
-  Method = JB_PURPLE,
-  Constructor = JB_PURPLE,
+  Function = JB_PURPLE,
+  Method = JB_RED,
+  Constructor = JB_RED,
   Variable = JB_ORANGE,
   Constant = JB_ORANGE,
   EnumMember = JB_ORANGE,
