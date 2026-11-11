@@ -262,7 +262,10 @@ end
 
 local function mark_exported(items)
   for _, item in ipairs(items) do
-    item.exported = is_exported(item.name)
+    -- No lock on rows that are not identifiers (a constraint's `~int | ~string`)
+    if item.name:match("^[%a_(]") then
+      item.exported = is_exported(item.name)
+    end
     if item.children then
       mark_exported(item.children)
     end
