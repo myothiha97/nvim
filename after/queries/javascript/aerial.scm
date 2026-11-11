@@ -12,6 +12,11 @@
 
 ; const total = useMemo(...) / const Card = memo(...) / const [a, setA] = useState()
 ; const api = { get: () => {} }
+; const LIMIT = 5 / const name = `x` / const list = [] / const c = new Map() ...
+; Plain data is kept as a Variable row in .js and dropped in .jsx by
+; post_parse_symbol. Function values are NOT listed here: the base query already
+; captures them, and a second capture would add a duplicate row. Every node name
+; below must exist in the javascript grammar, or the whole query fails.
 (lexical_declaration
   (variable_declarator
     name: [
@@ -22,6 +27,24 @@
     value: [
       (call_expression)
       (object)
+      (string)
+      (template_string)
+      (number)
+      (true)
+      (false)
+      (null)
+      (undefined)
+      (array)
+      (regex)
+      (new_expression)
+      (identifier)
+      (member_expression)
+      (subscript_expression)
+      (binary_expression)
+      (unary_expression)
+      (ternary_expression)
+      (await_expression)
+      (parenthesized_expression)
     ] @var_type) @symbol
   (#set! "kind" "Variable")) @start
 
