@@ -176,44 +176,12 @@ local function set_detail(bufnr, item, ctx)
   end
 end
 
--- Symbol kind icons and colours for the panel, copied from the GoLand/WebStorm
--- Structure view (IntelliJ New UI icons, platform/icons/src/expui/nodes/*_dark.svg).
+-- Symbol kind colours for the panel, copied from the GoLand/WebStorm Structure
+-- view: JetBrains' exact dark-theme icon colours (IntelliJ New UI icons,
+-- platform/icons/src/expui/nodes/*_dark.svg), as Myo asked (2026-11-11), so
+-- these are fixed hex values, not theme links. They are muted and sit at the
+-- weight of the theme's syntax colours. The icon shapes stay LazyVim's.
 -- (The snacks symbol pickers, <leader>ss, keep their own.)
---
--- Icons (filetypes other than Go/JS/TS/JSX/TSX, which keep the previous LazyVim
--- shapes, see opts.icons below): JetBrains draws a coloured letter in a coloured circle outline. The
--- nearest font glyphs are Nerd Font `nf-md-alpha_*_circle_outline` (uppercase
--- letters; a terminal cannot draw JetBrains' faint circle fill). Constants use
--- the square `c` (JetBrains: `c` in a diamond, which has no glyph). GoLand's
--- own Go icons are not public: structs use `s` in the class blue. React's
--- Component and Hook have no JetBrains icon and keep their own glyphs.
---
--- Colours: JetBrains' exact dark-theme icon colours, as Myo asked (2026-11-11),
--- so these are fixed hex values, not theme links. They are muted and sit at the
--- weight of the theme's syntax colours. Like JetBrains, the letter tells a
--- function (f, red) from a field (f, orange).
-local KIND_ICONS = {
-  Class = "󰯳 ", -- c
-  Struct = "󰰣 ", -- s
-  Interface = "󰰅 ", -- I
-  Enum = "󰯹 ", -- e
-  EnumMember = "󰯱 ", -- c (square, as constants)
-  Method = "󰰑 ", -- m
-  Constructor = "󰰑 ", -- m
-  Function = "󰯼 ", -- f
-  Field = "󰯼 ", -- f
-  Property = "󰰚 ", -- p
-  Variable = "󰰬 ", -- v
-  Constant = "󰯱 ", -- c (square)
-  TypeParameter = "󰰦 ", -- t
-  Object = "󰰗 ", -- o
-  Module = "󰰔 ", -- n
-  Namespace = "󰰔 ",
-  Package = "󰰔 ",
-  Component = " ",
-  Hook = "󰛢 ",
-}
-
 local JB_RED = "#DB5C5C" -- function, method, lambda
 local JB_ORANGE = "#C77D55" -- field, variable, constant, parameter
 local JB_BLUE = "#548AF7" -- class, record, type
@@ -685,29 +653,16 @@ return {
         javascriptreact = react_kinds,
         typescriptreact = react_kinds,
       }
-      -- Go, JS, TS, JSX, TSX keep the previous (LazyVim) icon shapes, shown in the
-      -- JetBrains colours (Myo, 2026-11-11). Other filetypes get the JetBrains-
-      -- style letter badges (KIND_ICONS above). aerial reads `icons[filetype]`
-      -- before the global map. Note: LazyVim gives Function and Method the same
-      -- glyph, and JetBrains the same red, so in these filetypes only nesting
-      -- tells a method from a function.
-      local previous = opts.icons or {}
-      local ft_icons = {}
-      for kind, icon in pairs(KIND_ICONS) do
-        local prev = previous[kind] or icon
-        ft_icons[kind] = prev
-        -- A collapsed row keeps its kind icon; the `›`/`⌄` arrow (draw_details)
-        -- shows the state instead of LazyVim's generic "Collapsed" chevron
-        ft_icons[kind .. "Collapsed"] = prev
-      end
-      local letter_icons = {}
-      for kind, icon in pairs(KIND_ICONS) do
-        letter_icons[kind] = icon
-        letter_icons[kind .. "Collapsed"] = icon
-      end
-      opts.icons = vim.tbl_deep_extend("force", previous, letter_icons)
-      for ft in pairs(DETAIL_FILETYPES) do
-        opts.icons[ft] = vim.tbl_extend("force", opts.icons[ft] or {}, ft_icons)
+      -- React kinds (post_parse_symbol) get their own icons. Every kind keeps
+      -- its icon when collapsed: the `›`/`⌄` arrow (draw_details) shows the
+      -- state instead of LazyVim's generic "Collapsed" chevron.
+      opts.icons = opts.icons or {}
+      opts.icons.Component = " "
+      opts.icons.Hook = "󰛢 "
+      for kind, icon in pairs(opts.icons) do
+        if type(icon) == "string" and not kind:find("Collapsed$") and kind ~= "Collapsed" then
+          opts.icons[kind .. "Collapsed"] = icon
+        end
       end
       opts.post_parse_symbol = post_parse_symbol
       opts.post_add_all_symbols = post_add_all_symbols
