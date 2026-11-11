@@ -176,6 +176,122 @@ local function set_detail(bufnr, item, ctx)
   end
 end
 
+-- Symbol kind icons and colours for the panel, modelled on the GoLand/WebStorm
+-- Structure view. (The snacks symbol pickers, <leader>ss, keep their own.)
+--
+-- Icons: JetBrains-style letter badges, one shape per kind (Nerd Font
+-- `nf-md-alpha_*_circle`). React's Component and Hook have no JetBrains icon
+-- and keep their own glyphs.
+--
+-- Colours: the GoLand/WebStorm dark icon colours (IntelliJ expui/nodes/*_dark.svg)
+--   function, method   red     #DB5C5C   -> @variable.parameter #e06c75
+--   field, variable,   orange  #C77D55   -> Number              #ed8e55
+--   constant, param
+--   class (struct)     blue    #548AF7   -> Directory           #268bd3
+--   interface          green   #57965C   -> String              #9ece6a
+--   property, enum     purple  #B589EC   -> @keyword.function   #a17bcc
+-- Each is the nearest non-italic colour among the theme's own groups, linked
+-- (not copied), so it follows the theme at normal strength. Like JetBrains, the
+-- letter tells a function (f, red) from a field (f, orange). Hooks are olive.
+
+local KIND_ICONS = {
+  Class = "󰯲 ", -- c
+  Struct = "󰰢 ", -- s
+  Interface = "󰰄 ", -- I
+  Enum = "󰯸 ", -- e
+  EnumMember = "󰯳 ", -- c (outline, as constants)
+  Method = "󰰐 ", -- m
+  Constructor = "󰰐 ", -- m
+  Function = "󰯻 ", -- f
+  Field = "󰯻 ", -- f
+  Property = "󰰙 ", -- p
+  Variable = "󰰫 ", -- v
+  Constant = "󰯳 ", -- c (outline)
+  TypeParameter = "󰰥 ", -- t
+  Object = "󰰖 ", -- o
+  Module = "󰰓 ", -- n
+  Namespace = "󰰓 ",
+  Package = "󰰓 ",
+  Component = " ",
+  Hook = "󰛢 ",
+}
+
+local KIND_COLORS = {
+  Function = "@variable.parameter",
+  Method = "@variable.parameter",
+  Constructor = "@variable.parameter",
+  Field = "Number",
+  Variable = "Number",
+  Constant = "Number",
+  EnumMember = "Number",
+  TypeParameter = "Number",
+  Class = "Directory",
+  Struct = "Directory",
+  Component = "Directory",
+  Interface = "String",
+  Property = "@keyword.function",
+  Enum = "@keyword.function",
+  Hook = "Special",
+  Object = "Special",
+  Module = "Special",
+  Namespace = "Special",
+  Package = "Special",
+}
+
+local function set_kind_hl()
+  for kind, group in pairs(KIND_COLORS) do
+    vim.api.nvim_set_hl(0, "Aerial" .. kind .. "Icon", { link = group })
+  end
+end
+
+-- Go, gopls only: methods arrive at the top level as `(*Rectangle).Scale`.
+-- A method declared right after its type (or after that type's other methods)
+-- moves under the type as `Scale`, like the JetBrains Structure view. Every Go
+-- symbol is also flagged exported or not (capitalised name) for the lock marker
+-- drawn by draw_details. Uses aerial's public post_add_all_symbols.
+--
+-- WARN: only methods that directly follow their type are nested. aerial maps the
+-- cursor to a panel row by walking the rows in order (window.get_symbol_position),
+-- so rows must stay in file order. A method declared elsewhere in the file keeps
+-- its flat `(Type).Method` row; nesting it would make the panel highlight the
+-- wrong symbol while the cursor moves, and break aerial's next/prev symbol jumps.
+local function is_exported(name)
+  -- A flat `(Type).Method` row is exported by its method name
+  return (name:match("%)%.(.+)$") or name):match("^%u") ~= nil
+end
+
+local function mark_exported(items)
+  for _, item in ipairs(items) do
+    item.exported = is_exported(item.name)
+    if item.children then
+      mark_exported(item.children)
+    end
+  end
+end
+
+local function post_add_all_symbols(bufnr, items, ctx)
+  if ctx.backend_name ~= "lsp" or vim.bo[bufnr].filetype ~= "go" then
+    return items
+  end
+  local kept = {}
+  for _, item in ipairs(items) do
+    -- `(*List[T]).Push` -> receiver `List`, method `Push`
+    local recv, method = item.name:match("^%(%*?([%w_]+)[^)]*%)%.(.+)$")
+    local owner = kept[#kept]
+    if recv and owner and owner.name == recv and owner.lnum < item.lnum then
+      item.name = method
+      item.parent = owner
+      item.level = owner.level + 1
+      owner.children = owner.children or {}
+      table.insert(owner.children, item)
+    else
+      kept[#kept + 1] = item
+    end
+  end
+  mark_exported(kept)
+  return kept
+end
+
 local post_parse_symbol = function(bufnr, item, ctx)
   local keep = react_post_parse(bufnr, item, ctx)
   if keep ~= false then
@@ -290,6 +406,8 @@ end
 -- just disappear (all calls are pcall'd). After `:Lazy update`, open
 -- <leader>cs on a Go file and check that signatures still show after the names.
 local detail_ns = vim.api.nvim_create_namespace("aerial_detail")
+-- Byte length of each guide unit in opts.guides below (keep in sync)
+local GUIDE_UNITS = { ["├╴"] = #"├╴", ["└╴"] = #"└╴", ["│ "] = #"│ ", ["  "] = 2 }
 
 local function draw_details(aer_buf)
   if not vim.api.nvim_buf_is_valid(aer_buf) then
@@ -306,6 +424,34 @@ local function draw_details(aer_buf)
       local line = lines[row]
       if not line then
         break
+      end
+      -- Expand arrow before the icon (`›` collapsed, `⌄` open, blank for a
+      -- leaf so icons stay aligned). The icon starts right after the guides,
+      -- which take one 2-cell unit per level.
+      local icon_col = 0
+      for _ = 1, item.level do
+        local unit = GUIDE_UNITS[line:sub(icon_col + 1, icon_col + 6)]
+          or GUIDE_UNITS[line:sub(icon_col + 1, icon_col + 4)]
+          or GUIDE_UNITS[line:sub(icon_col + 1, icon_col + 2)]
+        if not unit then
+          break
+        end
+        icon_col = icon_col + unit
+      end
+      local arrow = "  "
+      if item.children and #item.children > 0 then
+        arrow = bufdata:is_collapsed(item) and "› " or "⌄ "
+      end
+      vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, icon_col, {
+        virt_text = { { arrow, "AerialArrow" } },
+        virt_text_pos = "inline",
+      })
+      if item.exported ~= nil then
+        -- Go visibility, like JetBrains' lock icons: open = exported
+        vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, #line - #item.name, {
+          virt_text = { { item.exported and " " or " ", "AerialVisibility" } },
+          virt_text_pos = "inline",
+        })
       end
       if item.dim_from then
         -- The name is the end of the row: guides .. icon .. " " .. name
@@ -365,6 +511,39 @@ local function start_aerial()
     pattern = "aerial",
     callback = function(args)
       attach_details(args.buf)
+    end,
+  })
+  -- Switch a buffer to a better backend once its LSP attaches (Go: gopls).
+  -- aerial's own LspAttach handler is meant to do this, but it picks the backend
+  -- for the *current* buffer (backends.attach -> get_best_backend() without
+  -- bufnr). When <leader>cs is pressed before gopls is ready, the current buffer
+  -- is the panel, so the Go file stays on treesitter until the panel is reopened.
+  -- This re-runs the same choice with the source buffer current. It does nothing
+  -- when the backend is already the best one, and only exists while aerial runs.
+  --
+  -- WARN: SILENT FAILURE - relies on aerial internals `aerial.backends`.attach(buf,
+  -- true) and get_attached_backend(). Remove this once aerial passes bufnr there
+  -- (upstream bug in lua/aerial/backends/init.lua, M.attach). After `:Lazy
+  -- update`, open a .go file, press <leader>cs at once, and check the panel shows
+  -- struct fields (lsp) once gopls is up.
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = group,
+    callback = function(args)
+      local buf = args.buf
+      vim.schedule(function()
+        if not running or not vim.api.nvim_buf_is_valid(buf) then
+          return
+        end
+        pcall(function()
+          local backends = require("aerial.backends")
+          -- A buffer aerial has not attached yet gets the right backend on BufEnter
+          if backends.get_attached_backend(buf) then
+            vim.api.nvim_buf_call(buf, function()
+              backends.attach(buf, true)
+            end)
+          end
+        end)
+      end)
     end,
   })
   vim.api.nvim_create_autocmd("WinClosed", {
@@ -493,13 +672,17 @@ return {
         javascriptreact = react_kinds,
         typescriptreact = react_kinds,
       }
-      opts.icons = vim.tbl_deep_extend("force", opts.icons or {}, {
-        Component = " ",
-        ComponentCollapsed = " ", -- Keeps the React icon when the component node is collapsed
-        Hook = "󰛢 ",
-        HookCollapsed = "󰛢 ",
-      })
+      -- Letter badges per kind (KIND_ICONS above)
+      local kind_icons = KIND_ICONS
+      -- A collapsed row keeps its kind icon; the `›`/`⌄` arrow (draw_details)
+      -- shows the state instead of LazyVim's generic "Collapsed" chevron
+      local collapsed = {}
+      for kind, icon in pairs(kind_icons) do
+        collapsed[kind .. "Collapsed"] = icon
+      end
+      opts.icons = vim.tbl_deep_extend("force", opts.icons or {}, kind_icons, collapsed)
       opts.post_parse_symbol = post_parse_symbol
+      opts.post_add_all_symbols = post_add_all_symbols
 
       opts.manage_folds = false
       -- Block two-way sync between your code folds and the aerial tree
@@ -523,15 +706,18 @@ return {
       -- Only stores the opts (aerial lazy-loads); start_aerial() runs the real setup
       setup_opts = vim.deepcopy(opts)
       require("aerial").setup(opts)
-      vim.api.nvim_set_hl(0, "AerialComponentIcon", { fg = "#61afef" })
       -- Signatures, types and hook bindings: the picker's secondary-text colour
       -- (path prefix), not Comment, which is italic in this theme
       vim.api.nvim_set_hl(0, "AerialDetail", { link = "SnacksPickerDir" })
       -- Guide lines take the explorer/picker tree colour (`surface.guide`), not
       -- aerial's default Comment fg, which reads as text. AerialGuide1..9 link here.
       vim.api.nvim_set_hl(0, "AerialGuide", { link = "SnacksPickerTree" })
-      -- A link, not a new colour: Hook is a custom kind, so aerial defines no group for it
-      vim.api.nvim_set_hl(0, "AerialHookIcon", { link = "AerialFunctionIcon" })
+      -- Icon colour per kind, GoLand/WebStorm hues (KIND_COLORS above)
+      set_kind_hl()
+      -- Expand arrows and the Go exported/unexported lock: secondary text, like
+      -- the details, so they read as structure, not content
+      vim.api.nvim_set_hl(0, "AerialArrow", { link = "SnacksPickerDir" })
+      vim.api.nvim_set_hl(0, "AerialVisibility", { link = "SnacksPickerDir" })
       -- Force Aerial's hover highlight to use your theme's grep/search highlight color
       vim.api.nvim_set_hl(0, "AerialHoverHighlight", { link = "Search" })
     end,
