@@ -208,6 +208,7 @@ local KIND_COLORS = {
 -- JetBrains colour.
 local KIND_LINKS = {
   Struct = "Type",
+  TsType = "Type", -- JS/TS interfaces and type aliases (mark_ts_type), like structs
   Field = "@variable.member",
   Hook = "Special",
   Object = "Special",
@@ -276,7 +277,18 @@ local function post_add_all_symbols(bufnr, items, ctx)
   return kept
 end
 
+-- JS/TS `interface X {}` and `type X = ...` (which aerial's query also reports
+-- as an Interface) take the struct colour, Myo (2026-11-11): a custom TsType
+-- kind with the interface icon, so Go interfaces stay blue. Runs after aerial's
+-- kind filter, so the filter still sees "Interface".
+local function mark_ts_type(item, ctx)
+  if item.kind == "Interface" and ctx.backend_name == "treesitter" and ECMA_LANGS[ctx.lang] then
+    item.kind = "TsType"
+  end
+end
+
 local post_parse_symbol = function(bufnr, item, ctx)
+  mark_ts_type(item, ctx)
   local keep = react_post_parse(bufnr, item, ctx)
   if keep ~= false then
     set_detail(bufnr, item, ctx)
@@ -669,6 +681,7 @@ return {
       -- Function and Method the same glyph
       opts.icons.Method = " "
       opts.icons.Constructor = " "
+      opts.icons.TsType = opts.icons.Interface
       opts.icons.Hook = "󰛢 "
       -- (Collected first: adding keys while iterating with pairs() is undefined in Lua)
       local collapsed = {}
