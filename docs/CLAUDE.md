@@ -151,7 +151,8 @@ real — so keymap probes report "not mapped" and layout measurements can mislea
 
 - When asked to commit, automatically load the `/perf-review` skill to analyse the changes for performance safety
 - Only proceed to commit if the changes pass that check
-- Never edit directly on `main` — branch, verify, merge back
+- Never edit directly on `main` or `dev`. Every feature, fix or update gets its own
+  new branch cut from `main`; commit there, push, and open a PR to `main`
 - Conventional commit prefixes: `feat:`, `fix:`, `perf:`, `refactor:`, `chore:`,
   `docs:`. Keep subjects short, imperative and scoped to one change, e.g.
   `fix: resolve prettierd fallback`. No `Co-Authored-By` line and no `Claude-Session` line.
