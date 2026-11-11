@@ -431,9 +431,13 @@ local function draw_details(aer_buf)
         virt_text_pos = "inline",
       })
       if item.exported ~= nil then
-        -- Go visibility, like JetBrains' lock icons: open = exported
+        -- Go visibility, like GoLand's lock icons: exported = green open lock,
+        -- unexported = dim closed lock. Codicon locks: the thinnest lock glyphs,
+        -- and `lock_small` is drawn smaller than a full lock. A terminal draws
+        -- every glyph in one cell, so they cannot be shrunk below that.
         vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, #line - #item.name, {
-          virt_text = { { item.exported and " " or " ", "AerialVisibility" } },
+          virt_text = item.exported and { { " ", "AerialVisibilityPublic" } }
+            or { { " ", "AerialVisibility" } },
           virt_text_pos = "inline",
         })
       end
@@ -708,6 +712,8 @@ return {
       -- the details, so they read as structure, not content
       vim.api.nvim_set_hl(0, "AerialArrow", { link = "SnacksPickerDir" })
       vim.api.nvim_set_hl(0, "AerialVisibility", { link = "SnacksPickerDir" })
+      -- Exported Go symbols: the green of GoLand's public lock (sampled, dark theme)
+      vim.api.nvim_set_hl(0, "AerialVisibilityPublic", { fg = "#AAD07A" })
       -- Force Aerial's hover highlight to use your theme's grep/search highlight color
       vim.api.nvim_set_hl(0, "AerialHoverHighlight", { link = "Search" })
     end,
