@@ -197,15 +197,16 @@ local KIND_COLORS = {
   Constant = JB_ORANGE,
   EnumMember = JB_ORANGE,
   Class = JB_BLUE,
-  Struct = JB_BLUE,
   TypeParameter = JB_BLUE,
   Component = JB_BLUE,
   Interface = JB_GREEN,
   Property = JB_PURPLE,
   Enum = JB_VIOLET,
 }
--- No JetBrains colour: theme links
+-- Theme links: kinds JetBrains has no colour for, and structs, which keep
+-- aerial's default yellow (`Type`) as Myo asked (2026-11-11)
 local KIND_LINKS = {
+  Struct = "Type",
   Hook = "Special",
   Object = "Special",
   Module = "Special",
