@@ -931,42 +931,9 @@ return {
     {
       "<leader>ss",
       function()
-        Snacks.picker.lsp_symbols({
-          filter = {
-            default = {
-              "Function",
-              "Method",
-              "Class",
-              "Interface",
-              "Enum",
-              "EnumMember",
-              "Constructor",
-              "TypeParameter",
-            },
-            typescript = {
-              "Function",
-              "Method",
-              "Class",
-              "Interface",
-              "Enum",
-              "EnumMember",
-              "Constructor",
-              "TypeParameter",
-            },
-            typescriptreact = {
-              "Function",
-              "Method",
-              "Class",
-              "Interface",
-              "Enum",
-              "EnumMember",
-              "Constructor",
-              "TypeParameter",
-            },
-          },
-        })
+        require("config.symbol-picker").open()
       end,
-      desc = "LSP Symbols (functions/types)",
+      desc = "Symbols (file structure)",
     },
     {
       "<leader>sc",

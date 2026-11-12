@@ -52,6 +52,19 @@ return {
             { "<c-k>", false, mode = "i" },
             { "<leader>cc", false, mode = { "n", "x" } },
             { "<leader>cC", false, mode = "n" },
+            -- WARN: SILENT FAILURE. LazyVim's snacks_picker extra binds
+            -- <leader>ss BUFFER-LOCALLY on every buffer with a language server,
+            -- and a buffer-local map wins over the global one in snacks.lua. So
+            -- the key has to be replaced here; changing only snacks.lua does
+            -- nothing in a real file, and an empty buffer hides the problem.
+            {
+              "<leader>ss",
+              function()
+                require("config.symbol-picker").open()
+              end,
+              desc = "Symbols (file structure)",
+              has = "documentSymbol",
+            },
             -- Override LazyVim's `K → vim.lsp.buf.hover()` (no opts) so popup
             -- size/style is consistent across gopls / pyright / vtsls / etc.
             {
