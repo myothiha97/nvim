@@ -610,6 +610,23 @@ return {
           -- when the edited buffer changes. Runs only while the explorer is
           -- open, and only re-renders when the active file actually changed.
           on_show = function(picker)
+            -- No top gap in the sidebar while the bufferline tab bar is on. The
+            -- 1-row `winbar = " "` gap (config/options.lua) is copied into the
+            -- sidebar's root split when it is created, so "Explorer" sat one row
+            -- below the tab bar. With the tab bar off the gap is the top padding,
+            -- so it stays. Clearing works only because the gap is then a LOCAL
+            -- value; see the WARN in options.lua. Set on the window's own
+            -- `opts.wo` too, so a later layout update re-applies the empty value
+            -- instead of leaving whatever the window inherited.
+            if require("plugins.bufferline")[1].enabled then
+              local root = picker.layout.root
+              root.opts.wo = vim.tbl_extend("force", root.opts.wo or {}, { winbar = "" })
+              if root:valid() then
+                vim.wo[root.win].winbar = ""
+                picker.layout:update()
+              end
+            end
+
             -- Seed the band for the FIRST render, whatever opened the explorer.
             -- `picker.main` is the window the picker attached to, so its buffer is
             -- the file being edited -- `nvim_get_current_buf()` is unreliable here,
