@@ -1,7 +1,9 @@
 # VS Code-style scrollbar in Neovim
 
-Logged 2026-10-16. Not started. Preference, so it waits for the freeze
-checkpoint (`rules.md`).
+Logged 2026-10-16. **Done 2026-11-12:** `lua/plugins/scrollview.lua`
+(nvim-scrollview, position-only bar, no marks, grey `surface.thumb`). The
+measurements and the rejected options (satellite, nvim-scrollbar, a synchronous
+refresh) are recorded in that file's comments.
 
 ## First priority: safety before the feature
 
