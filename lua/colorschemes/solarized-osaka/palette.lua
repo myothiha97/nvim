@@ -103,6 +103,17 @@ local variants = {
     dimmest = "#5a7178", -- L*46.0  3.68:1  (dE 5.9)   one short of upstream
     -- Upstream #576d74 (L*44.6, 3.48:1, dE 7.4) is reached with `comment = false`,
     -- not a key here: `false` means "leave the theme's own ramp alone".
+    --
+    -- NOT a comment colour: an inlay-hint grey (`LspInlayHint`), TRIED AND
+    -- DROPPED 2026-11-12; hints use `subtle` above instead. Kept as a
+    -- measured rung. Same neutral family, one step under `neutral`, exactly
+    -- midway to the gutter grey #5b5a56. On #171716:
+    --   L*44.9  C*2.5  3.32:1   dE 6.8 from `neutral`, dE 6.7 from the gutter
+    -- As DRAWN on screen (thin strokes render darker than the hex) it measured
+    -- 2.82:1 against 3.63:1 for comments and 2.22:1 for the gutter: under the
+    -- 3:1 floor for text you read. There is also no room for a second step:
+    -- comment and gutter are only 13.5 L* apart.
+    hint = "#6c6a66",
   },
 
   -- Body text: `Normal`, `NormalFloat`, `@variable`, one value by design.

@@ -66,7 +66,7 @@ Items 1 and 2 are bugs, so they pass rules.md rule 2 (blocking or degrading the 
 - Go: gopls with staticcheck covers most of what GoLand flags. Repos with a `.golangci.yml` enforce more in CI (errcheck config, gosec, revive). nvim-lint is disabled in performance.lua. If you want it back, run it for Go on `BufWritePost` only: async, no keystroke cost, roughly 1 to 5s per package in the background.
 - TS: lspconfig's eslint root requires an ESLint config file, so enabling it costs nothing in repos without one. Your `run = "onSave"` setting is already there. It also needs `eslint-lsp` removed from the Mason exclude list in formatting.lua.
 
-**Kept on purpose, still worth knowing:** semantic tokens off (no semantic colouring of unused vars, packages vs locals) and inlay hints off. Both are deliberate perf choices, and both are why typing stays fast on big files.
+**Kept on purpose, still worth knowing:** semantic tokens off (no semantic colouring of unused vars, packages vs locals). It is a deliberate perf choice, and part of why typing stays fast on big files. Inlay hints were off for the same reason until 2026-11-12; they are now on, trimmed to parameter names, with `<leader>uh` to turn them off in a file that feels slow.
 
 ## Structure view and symbol search
 

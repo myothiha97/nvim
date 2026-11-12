@@ -162,6 +162,7 @@ join the running gopls instead of starting a new one.
 | `zm` · `zn`                 | Toggle all folds: keep current open · fold all              |
 | `zR` · `zM` · `zv`          | Open all · close all · toggle function folds                |
 | `<leader>uh` · `<leader>ui` | Markdown: raw ⇄ rendered · open in Obsidian                 |
+| `<leader>uh`                | Inlay hints on / off (in any non-markdown buffer)           |
 | `K` · `<M-i>`               | Hover docs · signature help                                 |
 
 </details>
@@ -283,7 +284,8 @@ The whole point. What is tuned, and what is off on purpose.
 - `matchparen` disabled: no per-cursor-move highlight scan
 - Snacks `words` · `scope` · `indent` · `scroll` · `animate` all off
 - treesitter-context off; treesitter highlight stops above 100KB files
-- LSP semantic tokens · `document_color` · inlay hints off; `update_in_insert = false`;
+- LSP semantic tokens · `document_color` off; inlay hints on, trimmed to parameter names
+  (`<leader>uh` toggles); `update_in_insert = false`;
   inline virtual text for errors only
 - lualine statusline throttled to 400ms (tabline/winbar 1000ms); git-diff component removed
 - LSP `debounce_text_changes = 200ms` applied globally through `vim.lsp.config("*", ...)`
