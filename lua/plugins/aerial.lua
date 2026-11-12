@@ -374,7 +374,10 @@ local function stop_aerial()
   running = false
   pcall(vim.api.nvim_del_augroup_by_name, watcher_group)
   if not pcall(vim.api.nvim_del_augroup_by_name, "AerialSetup") then
-    vim.notify("aerial: no 'AerialSetup' group to remove, so it may keep running in the background", vim.log.levels.WARN)
+    vim.notify(
+      "aerial: no 'AerialSetup' group to remove, so it may keep running in the background",
+      vim.log.levels.WARN
+    )
   end
   detach_all()
   -- Closing the panel moves focus, and aerial reacts to that through a 10 ms
@@ -448,8 +451,7 @@ local function draw_details(aer_buf)
         -- and `lock_small` is drawn smaller than a full lock. A terminal draws
         -- every glyph in one cell, so they cannot be shrunk below that.
         vim.api.nvim_buf_set_extmark(aer_buf, detail_ns, row - 1, #line - #item.name, {
-          virt_text = item.exported and { { " ", "AerialVisibilityPublic" } }
-            or { { " ", "AerialVisibility" } },
+          virt_text = item.exported and { { " ", "AerialVisibilityPublic" } } or { { " ", "AerialVisibility" } },
           virt_text_pos = "inline",
         })
       end
