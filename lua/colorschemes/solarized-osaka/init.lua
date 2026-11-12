@@ -8,6 +8,15 @@
 local palette = require("colorschemes.solarized-osaka.palette")
 local ui_color = require("config.ui")
 
+-- Changed-word colours in the `ghp` hunk preview (see the GitSigns block in
+-- on_highlights). Each has its own trade-off; neither is strictly better:
+--   "dark"   = dark bands, syntax colours kept. Calmer, less noise. Chosen and
+--              on trial since 2026-11-13.
+--   "bright" = bright blocks, dark text. Better readability and visibility,
+--              but more glare. The backup if changed words get missed.
+-- Details: notes/git/hunk-preview-colours.md
+local GITSIGNS_WORDS = "dark"
+
 return {
   "craftzdog/solarized-osaka.nvim",
   lazy = false,
@@ -870,6 +879,29 @@ return {
 
       -- grug-far summary. Defaults to Comment, too dim against the panel.
       hl.GrugFarResultsStats = { fg = c.base2 }
+
+      -- Changed words inside a `ghp` hunk preview. gitsigns' default is
+      -- `reverse`, which turns each word's SYNTAX colour into its background,
+      -- so one deletion showed as orange/blue/grey patches. One colour per
+      -- side instead. Every variant tried, with measurements:
+      -- notes/git/hunk-preview-colours.md
+      --
+      -- The PREVIEW's add line band steps down to cyan950: the theme's DiffAdd
+      -- (cyan900, L* 21.8) is far lighter than DiffDelete (L* 8.8) and left no
+      -- room for a word band. DiffAdd itself is untouched.
+      hl.GitSignsAddPreview = { bg = c.cyan950 }
+      if GITSIGNS_WORDS == "bright" then
+        -- Backup: bright blocks, dark text. As visible as gitsigns' default,
+        -- but changed words lose their syntax colours and the blocks glare.
+        hl.GitSignsDeleteInline = { fg = c.bg, bg = "#ff6b6b" }
+        hl.GitSignsAddInline = { fg = c.bg, bg = "#9ece6a" }
+      else
+        -- Primary: dark bands, syntax colours kept. Green, not teal, on the
+        -- add side: teal carries almost no colour this dark and read faded.
+        -- Hard-coded because the theme's green ramp is olive (hue 68).
+        hl.GitSignsDeleteInline = { bg = c.red900 }
+        hl.GitSignsAddInline = { bg = "#0e3606" }
+      end
 
       -- TODO: brighten the snacks picker match highlight (currently a faded
       -- olive band). Setting `hl.SnacksPickerMatch` here does NOT take effect --
