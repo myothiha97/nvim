@@ -7,14 +7,18 @@
 -- in git history if it is ever wanted back. Do NOT add a `config` function here:
 -- lazy.nvim keeps only the last fragment's, and it would replace LazyVim's.
 --
--- ENABLED = false (2026-09-30): measured at ~0.12 ms per open buffer per render,
+-- ENABLED = true again since 2026-11-13, by choice, with the cost below accepted.
+-- It was false from 2026-09-30: measured at ~0.12 ms per open buffer per render,
 -- and the tabline re-renders about twice per typed character, so ~1.4 ms per
 -- keystroke at 5 buffers and ~2.6 ms at 10. Off means Neovim's native tabline
--- (shown only with 2+ tab pages). Flip to true to bring the buffer tabs back;
--- config/keymaps.lua follows the flag on its own. Also restore commit ba8ebbb
--- (explorer top gap): with a tab bar, the global 1-row winbar gap stacks under
--- it and leaves an extra blank row above "Explorer".
-local ENABLED = false
+-- (shown only with 2+ tab pages).
+--
+-- Flipping this is the only step. Three places follow it on their own:
+-- config/keymaps.lua (<S-h>/<S-l>), the top winbar gap in config/options.lua
+-- (per-window under a tab bar, global without one) and the explorer sidebar in
+-- plugins/snacks.lua (drops the gap only under a tab bar). They read the flag
+-- through this module's `[1].enabled`, so keep `enabled = ENABLED` on the spec.
+local ENABLED = true
 
 return {
   {
@@ -34,8 +38,11 @@ return {
       -- Keep the bar visible with a single buffer too, so the current file name
       -- is always on screen.
       opts.options.always_show_bufferline = true
-      -- No indicator bar: the active tab is marked by its bold italic name alone.
+      -- No indicator bar: the active tab is marked by its bold name alone.
       opts.options.indicator = { style = "none" }
+      -- bufferline italicises the active tab (and its diagnostics and duplicate
+      -- path prefixes) by default; this preset turns all of those off at once.
+      opts.options.style_preset = require("bufferline").style_preset.no_italic
       -- Full file names, like VS Code. bufferline cuts names at 18 cells by
       -- default; when the tabs no longer fit, it scrolls the bar instead.
       opts.options.truncate_names = false
@@ -56,7 +63,7 @@ return {
         for _, suffix in ipairs({ "", "_diagnostic" }) do
           opts.highlights[level .. suffix] = { fg = dim }
           opts.highlights[level .. suffix .. "_visible"] = { fg = dim }
-          opts.highlights[level .. suffix .. "_selected"] = { fg = text, bold = true, italic = true }
+          opts.highlights[level .. suffix .. "_selected"] = { fg = text, bold = true }
         end
       end
       -- bufferline paints errors red only on the ACTIVE tab and greys them out
