@@ -32,7 +32,8 @@
 - Silently ensure performance safety — do NOT remind the user about performance checks unless there is an actual issue.
 - Before committing, always review ALL changed files for performance safety (no per-keystroke work, no expensive autocmds, no blocking operations)
 - Prefer in-process solutions (snippets, treesitter) over external LSP servers when possible
-- Disabled plugins for performance: nvim-lint, bufferline, persistence, mini.ai, treesitter-context, flash, harpoon, spectre, avante, sidekick, telescope
+- Disabled plugins for performance: nvim-lint, persistence, mini.ai, treesitter-context, flash, harpoon, spectre, avante, sidekick, telescope
+- bufferline: ENABLED again since 2026-11-13 by choice, accepting ~1.4 ms per keystroke at 5 buffers. Its `ENABLED` flag in `plugins/bufferline.lua` also drives the top winbar gap (`config/options.lua`) and the explorer sidebar gap (`plugins/snacks.lua`), so flipping it is the only step
 - noice: ENABLED but cut back to the cmdline popup only (messages, popupmenu, notify and all LSP handlers off)
 - gitsigns: ENABLED (replaced neogit), `LazyFile`-deferred load, signs/hunks only, `current_line_blame` off for perf
 - Lualine throttled to 400ms statusline refresh (tabline/winbar 1000ms)
