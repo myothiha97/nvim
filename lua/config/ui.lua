@@ -147,6 +147,11 @@ M.surface = {
   -- band, body text 6.09:1. Still easy to find in a list.
   -- list_cursor = "#353845",
   guide = lift(M.bg, 0.19), -- explorer tree lines and indent guides
+  -- Scrollbar thumb (nvim-scrollview). Between `selection` (1.42:1, borders) and
+  -- `guide` (1.81:1): 1.58:1 on #171716. `guide` itself read slightly too bright.
+  thumb = lift(M.bg, 0.15),
+  -- Thumb under the mouse / while dragging: one clear step up (2.19:1).
+  thumb_hover = lift(M.bg, 0.24),
 }
 
 return M
