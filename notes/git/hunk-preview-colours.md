@@ -52,6 +52,22 @@ Considered but not built:
 - Underline or bold on the changed words, bands unchanged: no contrast cost, but
   subtler than a colour band.
 
+## The choice: calm over maximum visibility
+
+Neither kept variant is better on every count. They trade against each other:
+
+| | Dark (primary) | Bright (backup) |
+| --- | --- | --- |
+| Calm, low glare | yes: bands at L* ~19, near the editor | no: blocks at L* 64-78 |
+| Low noise | yes: syntax colours kept, nothing shouts | less: bright blocks pull the eye |
+| Readability of changed words | good (keyword 4.0:1, body 7.1:1) | better (dark text 6.5-9.8:1) |
+| Visibility of changed words | clear | strongest, on par with gitsigns' default |
+
+**Dark was chosen (2026-11-13) because a calm, quiet popup mattered more than
+the extra readability and visibility.** Bright is kept as a real alternative,
+not a leftover: if changed words start getting missed in daily use, switch
+`GITSIGNS_WORDS` to `"bright"`.
+
 ## Why the add side is green, not teal
 
 At the darkness these bands need (L* ~19), teal can carry very little colour:

@@ -9,8 +9,12 @@ local palette = require("colorschemes.solarized-osaka.palette")
 local ui_color = require("config.ui")
 
 -- Changed-word colours in the `ghp` hunk preview (see the GitSigns block in
--- on_highlights). "dark" = dark bands with syntax colours, on trial since
--- 2026-11-13. "bright" = bright blocks with dark text, the backup.
+-- on_highlights). Each has its own trade-off; neither is strictly better:
+--   "dark"   = dark bands, syntax colours kept. Calmer, less noise. Chosen and
+--              on trial since 2026-11-13.
+--   "bright" = bright blocks, dark text. Better readability and visibility,
+--              but more glare. The backup if changed words get missed.
+-- Details: notes/git/hunk-preview-colours.md
 local GITSIGNS_WORDS = "dark"
 
 return {
