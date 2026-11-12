@@ -798,6 +798,15 @@ return {
       hl.PmenuSel = { fg = c.base2, bg = ui_color.surface.list_cursor, bold = true }
       hl.PmenuSbar = { bg = c.bg_highlight }
       hl.PmenuThumb = { bg = c.base01 }
+      -- nvim-scrollview thumb: a neutral grey from the surface ladder, so it reads
+      -- as editor chrome. The plugin's defaults (Visual blue, CurSearch on hover
+      -- and in restricted mode) were too loud. Defined here, the plugin's
+      -- `highlight default link` lines do not override them.
+      -- `Restricted` is the group actually shown: plugins/scrollview.lua forces
+      -- restricted mode for every buffer.
+      hl.ScrollView = { bg = ui_color.surface.thumb }
+      hl.ScrollViewRestricted = { bg = ui_color.surface.thumb }
+      hl.ScrollViewHover = { bg = ui_color.surface.thumb_hover }
       -- Current quickfix entry: the same "selected row" slate as every list.
       -- Was the theme's blue #1a6397 until 2026-10-29.
       hl.QuickFixLine = { bg = ui_color.surface.list_cursor, bold = true }
