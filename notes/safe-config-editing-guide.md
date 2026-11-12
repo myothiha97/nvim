@@ -132,7 +132,7 @@ consistently — keep it up.
 | `foldmethod = "expr"` **globally** | **Avoid** | Triggers a synchronous per-line treesitter scan on every buffer open, blocking render. UFO handles folds async/per-buffer instead — see the long comment in `options.lua:161`. |
 | `updatetime` very low (<300ms) | Careful | Drives `CursorHold` frequency. 400ms here is a deliberate balance. Lowering it multiplies all CursorHold work. |
 | LSP `semantic tokens` | Keep disabled | Computes/sends token payloads per change. Nil'd at `LspAttach` in `lsp.lua`. |
-| LSP `inlay_hints` | Off by default here | Extra per-change rendering. Enable per-project if wanted, not globally. |
+| LSP `inlay_hints` | On since 2026-11-12 (was off) | A whole-buffer hint request after every change. Kept cheap by sending parameter names only; `<leader>uh` turns them off per buffer. Measured cost is in `lsp.lua`. |
 | `diagnostics.update_in_insert` | Keep `false` | Recomputing diagnostics on every insert keystroke is brutal. |
 | `vim.lsp.document_color` (0.12+) | Disabled here | Polls colors; `enable` is stubbed in `lsp.lua:140`. |
 | `synmaxcol` high / unset | Keep low (300) | Syntax-highlighting very long lines is expensive. |

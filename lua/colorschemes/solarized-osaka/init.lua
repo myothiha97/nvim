@@ -810,6 +810,47 @@ return {
       hl.DiagnosticVirtualTextInfo = { bg = c.none }
       hl.DiagnosticVirtualTextHint = { fg = "#1abc9c", bg = c.none }
 
+      -- Inlay hints: the types and parameter names the LSP draws inline. The
+      -- theme ships a violet badge (fg `violet500` on bg `violet900`), which
+      -- read as a blue highlight competing with the code beside it.
+      --
+      -- PLAIN FADED TEXT, NO BADGE, by preference (2026-11-12). A badge only
+      -- works in an IDE because the hint is also set in a smaller font inside a
+      -- rounded box; a terminal has neither, so a badge here is just a grey
+      -- block per hint.
+      --
+      -- The colour is `comment.subtle` (#637981), a rung of the old teal comment
+      -- ladder. It separates a hint from BOTH neighbours: from a comment by hue
+      -- (teal vs the neutral grey, dE 11.5), and from the bracket beside it by
+      -- lightness (dE 9.9 from #7f9195).
+      --
+      -- Measured as DRAWN in a screenshot, where thin strokes render darker
+      -- than the hex:
+      --
+      --   brackets / operators  4.70:1
+      --   comments              3.63:1
+      --   `comment.dimmer`      3.14:1   one rung down, tried first
+      --   line numbers          2.22:1
+      --
+      -- `subtle` itself was not measured on screen. By value it is 3.91:1
+      -- against 3.74:1 for `dimmer`, and only dE 1.5 from it, so expect about
+      -- 3.3:1 drawn. The two are near enough to be one colour; `subtle` was
+      -- picked by eye.
+      --
+      -- THE LADDER HAS A LIMIT AT BOTH ENDS. Dimmer rungs fall to the 3:1 floor
+      -- for text you read (`dimmest`). Brighter rungs move toward the bracket
+      -- grey (`readable` is only dE 7.3 from it) and start to read as code.
+      --
+      -- Tried the same day and dropped:
+      --   the comment colour        readable (3.63:1), but one colour with comments
+      --   `comment.hint` #6c6a66    a neutral step under comments; 2.82:1, too faint
+      --   `body.faded` on a badge   GoLand's own look (5.06:1 on `surface.raised`)
+      --
+      -- hl.LspInlayHint = { fg = palette.comment or c.base01, bg = c.none }
+      -- hl.LspInlayHint = { fg = palette.variants.comment.hint, bg = c.none }
+      -- hl.LspInlayHint = { fg = palette.variants.comment.dimmer, bg = c.none }
+      hl.LspInlayHint = { fg = palette.variants.comment.subtle, bg = c.none }
+
       hl.Folded = { bg = "NONE" }
       hl.UfoFoldedBg = { bg = "NONE" }
 

@@ -19,12 +19,18 @@ return {
     -- flips the plugin OFF for the buffer so EVERY mode (normal + visual) shows raw
     -- text; press again to restore rendering. Buffer-local, so it never touches other
     -- .md buffers or the hover/Avante popups. Lazy-loaded as a keymap = zero hot-path cost.
+    --
+    -- WARN: SILENT FAILURE. Keep `ft` on the key. Without it lazy.nvim maps the key
+    -- GLOBALLY once this plugin loads (the first markdown buffer or LSP hover
+    -- popup), which replaced LazyVim's own `<leader>uh` inlay-hint toggle in
+    -- every code buffer. With `ft` the map is buffer-local to these filetypes.
     keys = {
       {
         "<leader>uh",
         function()
           require("render-markdown").buf_toggle()
         end,
+        ft = { "markdown", "Avante" },
         mode = { "n", "x" },
         desc = "Toggle Markdown render (raw/rendered)",
       },

@@ -30,8 +30,19 @@ return {
   {
     "neovim/nvim-lspconfig",
     opts = {
+      -- On by default since 2026-11-12 (off before, for performance);
+      -- `<leader>uh` toggles them per buffer. Which kinds each server sends is
+      -- trimmed to match JetBrains, in the gopls / basedpyright / vtsls blocks.
+      --
+      -- ACCEPTED COST: Nvim re-requests hints for the WHOLE buffer after every
+      -- (debounced) change, so the cost follows the number of hints in the
+      -- file, not what is on screen. Measured 2026-11-12 on a worst case, a
+      -- 1,500-line Go file returning 3,002 hints: 1.6 ms mean / 5.2 ms max on
+      -- the main thread per response, and the longest event-loop stall went
+      -- from 17 ms to 36 ms. A normal file returns tens of hints. If a huge
+      -- file ever feels slow to type in, `<leader>uh` first.
       inlay_hints = {
-        enabled = false,
+        enabled = true,
       },
       -- Performance: Don't update diagnostics in insert mode
       diagnostics = {
@@ -155,6 +166,16 @@ return {
             basedpyright = {
               analysis = {
                 diagnosticMode = "openFilesOnly",
+                -- Inlay hints, matched to PyCharm (2026-11-12): parameter
+                -- names only. PyCharm's one default type hint is the argument
+                -- of `reveal_type()`, which basedpyright reports as a
+                -- diagnostic instead. basedpyright defaults the first two to on.
+                inlayHints = {
+                  variableTypes = false,
+                  functionReturnTypes = false,
+                  genericTypes = false,
+                  callArgumentNames = true,
+                },
               },
             },
           },
@@ -204,6 +225,34 @@ return {
             end
             on_dir(vim.fs.root(fname, { "go.work", "go.mod" }) or vim.fs.dirname(fname))
           end,
+          -- Inlay hints, matched to GoLand 2026.1 (defaults read out of the
+          -- installed IDE, 2026-11-12). GoLand has exactly two Go hint
+          -- providers, parameter names and constant values, and NO type hints.
+          --
+          --   parameterNames          on   GoLand: parameter names
+          --   compositeLiteralFields  on   GoLand: "unnamed fields in structure values"
+          --   constantValues          on   GoLand: "values of constant definitions"
+          --   assignVariableTypes     off  a type after every `:=` (`cfg Config, err error`)
+          --   rangeVariableTypes      off  a type after every `range` variable
+          --   compositeLiteralTypes   off  the element type before each `{` in a literal
+          --   functionTypeParameters  off  generic type arguments at a call
+          --
+          -- Two gaps gopls cannot close: GoLand names LITERAL arguments only
+          -- (gopls also names `s: err.Error()`), and GoLand names the results in
+          -- a `return` statement (gopls has no such hint).
+          --
+          -- LazyVim's Go extra turns all seven on. This table is merged into the
+          -- extra's `settings.gopls`, so everything else there is kept.
+          settings = {
+            gopls = {
+              hints = {
+                assignVariableTypes = false,
+                rangeVariableTypes = false,
+                compositeLiteralTypes = false,
+                functionTypeParameters = false,
+              },
+            },
+          },
         },
         -- TypeScript LSP optimization (React/TSX focused). Genuinely
         -- TS-specific tuning only; shared behavior (debounce, keys) is global.
@@ -216,6 +265,25 @@ return {
               preferences = {
                 -- Don't scan package.json for auto-imports (big perf win for large React projects)
                 includePackageJsonAutoImports = "off",
+              },
+              -- Inlay hints, matched to MY WebStorm 2026.1 settings (read from
+              -- its options on 2026-11-12), not to its factory defaults: every
+              -- type hint is switched off there, which leaves parameter names
+              -- for literal arguments and enum member values.
+              --
+              -- LazyVim's extra turns the three type kinds below on. It also
+              -- copies this whole `typescript` table into `javascript`, so one
+              -- block covers both languages.
+              --
+              -- Gap: WebStorm also shows return types down a multi-line method
+              -- chain. tsserver has no such hint.
+              inlayHints = {
+                parameterNames = { enabled = "literals" },
+                enumMemberValues = { enabled = true },
+                parameterTypes = { enabled = false },
+                variableTypes = { enabled = false },
+                propertyDeclarationTypes = { enabled = false },
+                functionLikeReturnTypes = { enabled = false },
               },
               tsserver = {
                 -- Balanced tsserver heap cap: more React/TS headroom than the
