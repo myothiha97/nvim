@@ -46,6 +46,14 @@ return {
       -- Full file names, like VS Code. bufferline cuts names at 18 cells by
       -- default; when the tabs no longer fit, it scrolls the bar instead.
       opts.options.truncate_names = false
+      -- Transparent theme (Normal has no bg): bufferline colours the thin
+      -- separators from Normal's bg, so with none they fall back to
+      -- TabLineFill's fg and draw as bright bars between tabs. Spaces hide them
+      -- and keep every tab's width. Read once here: transparency is a theme
+      -- setup option and only changes with a restart.
+      if not vim.api.nvim_get_hl(0, { name = "Normal" }).bg then
+        opts.options.separator_style = { " ", " " }
+      end
 
       -- ERRORS ONLY. The indicator drops LazyVim's warning count, and the
       -- warning/info/hint name colours are pointed back at the plain ones

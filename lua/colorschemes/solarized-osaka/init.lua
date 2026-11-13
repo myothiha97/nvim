@@ -17,6 +17,10 @@ local ui_color = require("config.ui")
 -- Details: notes/git/hunk-preview-colours.md
 local GITSIGNS_WORDS = "dark"
 
+-- Terminal background shows through the editor when true. Read by `transparent`
+-- below and by the TabLineFill pin in on_highlights.
+local TRANSPARENT = true
+
 return {
   "craftzdog/solarized-osaka.nvim",
   lazy = false,
@@ -30,10 +34,11 @@ return {
       },
     },
 
-    -- WARN: SILENT FAILURE. Must be an explicit `false`. The plugin defaults
-    -- `transparent` to `true`, so deleting or commenting this line re-enables
-    -- transparency rather than disabling it. Opaque since 2026-09-04.
-    transparent = false,
+    -- WARN: SILENT FAILURE. Must be set explicitly (via TRANSPARENT). The plugin
+    -- defaults `transparent` to `true`, so deleting or commenting this line
+    -- re-enables transparency rather than disabling it. Opaque from 2026-09-04,
+    -- transparent again since 2026-11-13.
+    transparent = TRANSPARENT,
     -- ONE background for the whole editor, from lua/config/ui.lua. The ONE
     -- legitimate `on_colors` -- it does not reopen the syntax-ramp ban below.
     -- All three keys, or floats and sidebars show as panels that do not match.
@@ -901,6 +906,17 @@ return {
         -- Hard-coded because the theme's green ramp is olive (hue 68).
         hl.GitSignsDeleteInline = { bg = c.red900 }
         hl.GitSignsAddInline = { bg = "#0e3606" }
+      end
+
+      -- Tab bar fill under transparency. The theme sets TabLineFill twice (grey
+      -- in groups/editor.lua, colourless in groups/bufferline.lua) and merges
+      -- its groups in an unordered pairs() loop, so the winner changes between
+      -- starts (measured 2026-11-13: grey in 4 of 5). Opaque, bufferline paints
+      -- every cell itself and the grey never shows. Transparent, bufferline has
+      -- no Normal bg to derive from, leaves its cells empty, and they fall
+      -- through to this group: the grey became a band behind the tabs.
+      if TRANSPARENT then
+        hl.TabLineFill = { fg = c.base0, bg = c.none }
       end
 
       -- TODO: brighten the snacks picker match highlight (currently a faded
