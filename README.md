@@ -1,8 +1,8 @@
 <div align="center">
 
-# Neovim PDE
+# Neovim PDE - Personal Development Environment
 
-**A personal development environment, written in Lua on top of [LazyVim](https://github.com/LazyVim/LazyVim).**
+**An IDE layer built in Lua on top of [LazyVim](https://github.com/LazyVim/LazyVim).**
 
 _Debugger, test runner, database client, structure view and AI next edits in one terminal editor.
 Built to do the job of a full GUI IDE on large production codebases, and still start in ~50 ms._
