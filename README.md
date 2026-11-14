@@ -1,81 +1,185 @@
 <div align="center">
 
-# Full-Stack Neovim Setup
+# Neovim PDE - Personal Development Environment
 
-**Built on [LazyVim](https://github.com/LazyVim/LazyVim), customized for everyday coding and tuned to stay fast.**
+**An IDE layer built in Lua on top of [LazyVim](https://github.com/LazyVim/LazyVim).**
 
-_Reads, tests and debugs large codebases like an IDE, and keeps every keystroke instant._
+_Debugger, test runner, database client, structure view and AI next edits in one terminal editor.
+Built to do the job of a full GUI IDE on large production codebases._
 
-`~50ms cold start` · `solarized-osaka` · `version-frozen`
+`~50ms cold start` · `Go · TypeScript/Node · Python · C#` · `Neovim 0.12+` · `pinned plugins`
 
 </div>
 
 ---
 
-## Philosophy
+## Why a PDE, not a dotfile
+
+This started as a LazyVim config. It has grown into roughly 22,000 lines of Lua
+under `lua/`, including a ~3,000-line debugger GUI and ~2,500 lines of test
+tooling, plus written rules, maintenance guides and design notes for every
+non-obvious decision. LazyVim is the base layer and plugin manager; the IDE
+layer on top is built here.
+
+The target is IDE parity for professional work: the full
+**edit → navigate → test → debug → inspect** loop that popular GUI IDEs
+give you, without leaving the terminal and without giving up Neovim's
+speed. Go comes first, TypeScript/Node second; Python and C# are supported.
+
+### Why not just use an IDE?
+
+Because adding IDE features here does not cost what makes Neovim worth using:
+**it is still keyboard-driven at its core.** Every feature here (stepping
+through a debugger, rerunning failed tests, browsing test history, opening the
+structure view, querying a database, accepting an AI edit) has a key, and is
+operated with the same modal editing, motions, text objects, registers and
+macros as the code itself. Your hands never have to leave the keyboard.
+
+Mouse support exists (clicking the gutter, right-click menus, double-click to
+expand panels), but it is an optional layer on top, never the only way in.
+
+What that buys over a GUI IDE:
+
+- **One editing model everywhere.** Panels, pickers and file trees are buffers,
+  so the motions you use for code also work in the debugger, test results and
+  file browser. No Vim-emulation plugin with gaps.
+- **Speed.** ~50 ms to start, and nothing heavy runs until you use it.
+- **Full ownership.** Every behaviour is Lua in this repo: readable, changeable,
+  and documented where it is non-obvious, instead of a settings screen.
+- **Lives in the terminal.** It runs alongside tmux, shells and CLI agents,
+  locally or over SSH.
+
+---
+
+## What's inside
+
+### 🐞 Debugger: `lua/debugging/`
+
+One debugging workflow for **Go** (Delve), **Node/JS/TS** (js-debug),
+**Python** (debugpy) and **C#** (easy-dotnet, native arm64 netcoredbg), on
+nvim-dap + nvim-dap-ui with a custom GUI:
+
+- VS Code-style control bar: Continue/Pause · Step Over · Step Into · Step Out ·
+  Restart · Stop, then Run Again with the exit code once the program ends.
+- A stable layout: the console tray opens on start, Variables and Call Stack
+  (goroutines) open on the first stop, and nothing moves after that.
+- Click the gutter to toggle a breakpoint. Conditions, hit counts, log points
+  and function breakpoints persist per project.
+- A right-click menu that adapts to the debugger state, value-on-hover while
+  stopped, copy value, and adapter-driven completion in the debug REPL.
+- Launch helpers: npm scripts and attach to `9229` (Node), `python -m` and
+  Django `runserver` (Python), `launchSettings.json` profiles (.NET), and
+  Debug Test from the test runner.
+
+Reference: [`lua/debugging/README.md`](lua/debugging/README.md) ·
+upkeep: [`lua/debugging/MAINTENANCE.md`](lua/debugging/MAINTENANCE.md)
+
+### 🧪 Test runner and coverage: `lua/testing/`
+
+neotest for **Go**, **Vitest**, **Jest**, **pytest** and **.NET**, extended with:
+
+- Pass/fail marks at the end of the test line (no gutter signs).
+- A JetBrains-style **Test Results panel**: newest run on top, failures with
+  their got/want output, per-test durations, mouse support.
+- Rerun failed, **test history** across sessions per project, and jump
+  test ⇄ implementation.
+- **Coverage** in the gutter, read from your runner's own report.
+- **Project test settings**: env from `.env.test` / `.envrc`, the Jest/Vitest
+  command from `package.json`, and `go test` flags from a Makefile, Taskfile or
+  justfile, so tests run with the project's own setup.
+
+Guide: [`docs/advance-features/testing/neotest-guide.md`](docs/advance-features/testing/neotest-guide.md)
+
+### 🧠 Code intelligence
+
+- LSP per language (see [Language Support](#language-support)), tuned for big
+  repos: dependency files join the running gopls, `$HOME/.git` is never taken as
+  a workspace root, edits are debounced at 200 ms, and tsserver's heap is capped.
+- **blink.cmp** completion: LSP, local snippets, path and buffer, plus dadbod in
+  SQL buffers and adapter completion in the debug REPL.
+- Docs on mouse hover, inlay hints trimmed to parameter names, error-only inline
+  diagnostics, and `<leader>cL` to restart LSP without losing unsaved edits.
+- Format on save through **conform.nvim** (prettierd, goimports/gofumpt, shfmt).
+
+### 🧭 Navigation, structure and search
+
+- **Structure view** (`<leader>cs`): an aerial pane with JetBrains-style kind
+  icons and colours, Go methods nested under their types, and React-aware rows
+  in JSX/TSX. It runs only while the pane is open.
+- **Snacks picker**: smart finder, files, grep and LSP symbols. **Snacks
+  explorer** as a tree sidebar, and **oil.nvim** to rename, create and delete
+  files by editing a buffer.
+- **grug-far** for project search-and-replace, **Trouble** for quickfix views,
+  quickfix marks that survive restarts, and treesitter textobjects.
+
+### 🗄️ Database
+
+vim-dadbod UI on `<leader>D`, with SQL completion in SQL buffers only. Nothing
+loads until you open it.
+
+### 🤖 AI in the editor
+
+- **copilot.lua** ghost text and **copilot-lsp** next edit suggestions
+  (`<Tab>` jumps to and applies multi-line edits).
+- **cursortab**: Cursor-Tab-style next edits on hosted Mercury or a local
+  Zeta-2.1 model.
+- A **prompt-copy system** (`<leader>ac…`) that copies context-aware prompts
+  (commit, codebase analysis, explain, refactor, review) for an external CLI agent.
+
+All AI features are off until toggled and load on first use.
+
+### 🔀 Git and editing
+
+- gitsigns hunks, diffview and compact or full blame floats, plus `gn` / `gN`
+  to jump between changed files.
+- Markdown rendered in the buffer, async folding (nvim-ufo), multi-cursor,
+  surround, and VSCode-format snippets.
+
+---
+
+## Engineering principles
 
 One rule governs everything here: **nothing expensive runs on the hot path.**
 A feature earns its place only if it costs effectively `0ms` per keystroke,
-cursor move, and redraw. Heavy tools (debugger, test runner, database UI, AI
-next-edit) load only when you first use them.
+cursor move and redraw. The debugger, test runner, database UI and AI tools
+load only when first used, so a session that never touches them pays nothing.
 
-The principle is enforced, not just intended: `:Lazy update/sync/restore` is
-blocked at the Lua level, and a written editing policy keeps future changes from
-quietly regressing speed.
+The rules are enforced, not just intended: plugin versions are pinned and
+`:Lazy update/sync/restore` is blocked at the Lua level, every change is
+reviewed for performance before it is committed, and known caveats are marked
+in code comments where they live.
 
 > See [`rules.md`](rules.md) for the discipline rules,
-> [`notes/config-freeze-policy.md`](notes/config-freeze-policy.md) for the freeze
-> policy in full, and
 > [`notes/safe-config-editing-guide.md`](notes/safe-config-editing-guide.md) for
-> the performance rules every change is held to.
+> the performance rules every change is held to, and
+> [`docs/maintenance/config-maintenance-guide.md`](docs/maintenance/config-maintenance-guide.md)
+> for keeping the whole thing healthy.
 
 > **For Claude Code / AI agents:** read [`rules.md`](rules.md) **first**, before
-> proposing or making any change, then the docs under `docs/` as usual. It holds
-> the discipline rules and the **config-freeze window**, which decide whether a
-> change should happen at all. **The freeze is suspended since 2026-11-11** (see
-> the note in `rules.md`); the performance rules still apply.
+> proposing or making any change, then [`docs/CLAUDE.md`](docs/CLAUDE.md). The
+> config freeze is suspended while IDE-parity work continues (see the note in
+> `rules.md`); the performance rules still apply.
 
 ---
 
-## Highlights
-
-What makes this feel less like vanilla Neovim:
-
-|                                         |                                                                                                                                                                                                                                                             |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🧪 **Test runner + coverage**           | neotest for Go, Vitest/Jest, pytest and .NET: inline ✓/✗, a JetBrains-style Test Results panel, rerun failed, test history across sessions, jump test ⇄ implementation, and gutter coverage from your runner's report.                                       |
-| 🗄️ **Database UI**                      | vim-dadbod UI on `<leader>D` with SQL completion in SQL buffers only. Nothing loads until you open it.                                                                                                                                                      |
-| 🐞 **Extensive debugger setup**         | One debugging workflow for Go, Node/JS/TS, Python and C#: a stable panel layout, breakpoints with conditions and log points that persist per project, and full step control. |
-| 🤖 **AI next edits**                    | `copilot.lua` ghost text plus `copilot-lsp` NES (`<Tab>` jumps and applies multi-line edits), and **cursortab** Cursor-Tab-style next edits on hosted Mercury or local Zeta-2.1. Both are off until you toggle them, and load only on first use.            |
-| 📋 **AI prompt-copy system**            | `<leader>ac…` copies a context-aware prompt (commit, codebase analysis, explain, refactor, review) to the clipboard for an external CLI agent, or `<leader>aci` to pick a template or ask freeform.                                                          |
-| 🗂️ **Symbols outline**                  | `<leader>cs` opens an **aerial** structure pane with JetBrains-style kind icons and colours, dimmed signatures, and React-aware rows in JSX/TSX (components, `useState [a, setA]`, `useEffect`). Aerial runs only while the pane is open.                 |
-| 🖱️ **Hover docs on mouse-over**         | LSP documentation appears when the pointer rests on a symbol, behind a throttled handler that is free while you type. While the debugger is stopped, hover shows values instead.                                                                           |
-| 📌 **Persistent quickfix curation**     | Mark lines with `<leader>m` while reading code; the list survives restarts, scoped per project.                                                                                                                                                              |
-| 📂 **Edit-the-filesystem file browser** | `<leader>e` opens **oil.nvim** as a centred popup with the path in its border. Rename, create and delete by editing the buffer and `:w`. Oil owns netrw, so `:e <dir>` lands in the same place.                                                             |
-| 🚀 **Startup screen**                   | Bare `nvim` shows the dashboard (a plain greeting plus the current folder). `nvim <dir>` opens oil in the same box and position as `<leader>e`.                                                                                                             |
-| 🔍 **Git without leaving the file**     | `gn` / `gN` jump between changed files, `ghs` / `ghr` / `ghp` stage, reset and preview hunks, and `<leader>gw` / `<leader>gb` show compact and full blame as floats.                                                                                       |
-| 📝 **Rendered markdown in-buffer**      | `.md` files render inline with flat styling; `<leader>uh` flips back to raw, `<leader>ui` opens the file in Obsidian. The same renderer polishes LSP hover popups.                                                                                         |
-
----
-
-## Core Stack
+## Under the hood
 
 | Category         | Plugin                                                                                                                                             |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Completion**   | blink.cmp: LSP · local snippets · path · buffer (+ dadbod in SQL, adapter completion in the debug REPL)                                            |
-| **AI**           | copilot.lua + copilot-lsp (NES) · cursortab.nvim (Mercury / Zeta-2.1) · prompt-copy system. CodeCompanion is installed but disabled until 2027.   |
+| **AI**           | copilot.lua + copilot-lsp (NES) · cursortab.nvim (Mercury / Zeta-2.1) · prompt-copy system. CodeCompanion is installed but disabled.              |
 | **Debugging**    | nvim-dap + nvim-dap-ui with a custom GUI in `lua/debugging/` · Delve · js-debug · debugpy · easy-dotnet (native arm64 netcoredbg)                   |
 | **Testing**      | neotest (golang · vitest · jest · python · easy-dotnet) + custom panel, history and marks in `lua/testing/` · nvim-coverage                         |
 | **Database**     | vim-dadbod · vim-dadbod-ui · vim-dadbod-completion                                                                                                 |
 | **File nav**     | oil.nvim (`<leader>e`, owns netrw) · Snacks: picker · explorer (`<leader>r` sidebar) · dashboard · terminal                                         |
-| **Code nav**     | aerial (symbols outline) · Snacks LSP symbol picker · Trouble (quickfix views) · treesitter textobjects                                            |
+| **Code nav**     | aerial (structure view) · Snacks LSP symbol picker · Trouble (quickfix views) · treesitter textobjects                                             |
 | **Git**          | gitsigns (hunks) + diffview.nvim + custom blame floats                                                                                             |
 | **Search**       | grug-far: project/file search-replace and rename                                                                                                   |
 | **Multi-cursor** | vim-visual-multi                                                                                                                                   |
 | **Folding**      | nvim-ufo: treesitter + indent, async                                                                                                               |
 | **Formatting**   | conform.nvim: prettierd for web/JSON/Markdown, goimports/gofumpt for Go, shfmt for shell, mbake for Makefiles                                      |
 | **Markdown**     | render-markdown.nvim (`.md` files and LSP hovers) · Obsidian on `<leader>ui` · markdown-preview.nvim (`:MarkdownPreview`)                          |
-| **UI**           | lualine · noice (cmdline only) · fidget · which-key                                                                                                |
+| **UI**           | lualine · bufferline · noice (cmdline only) · fidget · which-key                                                                                   |
 | **Theme**        | solarized-osaka, customized. `solarized-osaka-custom-latest` is the live build; see [Theme](#theme).                                              |
 
 ---
@@ -297,8 +401,12 @@ The whole point. What is tuned, and what is off on purpose.
 
 **Disabled by decision** (do not re-add without a reason):
 
-> bufferline · flash · harpoon · spectre · avante · sidekick · codecompanion ·
+> flash · harpoon · spectre · avante · sidekick · codecompanion ·
 > telescope · treesitter-context · nvim-lint · persistence · mini.\* · friendly-snippets
+
+**Accepted on purpose**: bufferline is on by choice, at a measured ~1.4 ms per
+keystroke with 5 buffers open. Its `ENABLED` flag in `lua/plugins/bufferline.lua`
+is the only switch.
 
 **Version freeze**: `:Lazy update/sync/restore` is blocked at the Lua level
 (`lua/config/lazy-freeze.lua`). Unlock one session with `NVIM_LAZY_UNLOCK=1 nvim`.
@@ -361,8 +469,20 @@ snippets/           VSCode-format snippets
 rules.md            the discipline rules I follow when changing the config
 notes/              guides: safe-editing · freeze policy · maintenance · reading codebases · silent failures · palette
 todos/              backlog, grouped by subject (see todos/README.md)
-docs/               agent instructions (docs/CLAUDE.md is canonical) · advance-features guides (debugging, testing, ...)
+docs/               agent instructions (docs/CLAUDE.md is canonical) · advance-features guides · maintenance guide
 ```
+
+---
+
+## Documentation
+
+The config documents itself as it grows:
+
+- [`docs/advance-features/INDEX.md`](docs/advance-features/INDEX.md): guides and design reports per feature area (debugging, testing, LSP and search, editing)
+- [`docs/maintenance/config-maintenance-guide.md`](docs/maintenance/config-maintenance-guide.md): how the config is kept healthy over time
+- [`lua/debugging/README.md`](lua/debugging/README.md) and [`MAINTENANCE.md`](lua/debugging/MAINTENANCE.md): the debugger, file by file, and how to fix it after an update
+- [`notes/`](notes/): workflow guides (reading codebases, safe editing, silent failures) and theme history
+- [`todos/`](todos/README.md): the backlog, grouped by subject
 
 ---
 
