@@ -387,7 +387,7 @@ The whole point. What is tuned, and what is off on purpose.
 
 - `matchparen` disabled: no per-cursor-move highlight scan
 - Snacks `words` · `scope` · `indent` · `scroll` · `animate` all off
-- treesitter-context off; treesitter highlight stops above 100KB files
+- treesitter-context off; treesitter stays on up to snacks' bigfile cutoff (1.5MB); see `notes/large-file-performance.md`
 - LSP semantic tokens · `document_color` off; inlay hints on, trimmed to parameter names
   (`<leader>uh` toggles); `update_in_insert = false`;
   inline virtual text for errors only

@@ -61,7 +61,7 @@ These events fire on the hot path. **Attaching synchronous work to them is the
 | `<MouseMove>` (`mousemoveevent`) | every pixel of mouse motion | **Extreme** | Throttle to ~60Hz + position dedup + one reused `uv` timer. Pattern already in `lua/config/mouse-hover.lua`. |
 | `BufEnter` / `WinEnter` | every buffer/window switch | High | Keep O(1). Don't loop all windows/buffers. Don't re-read files. |
 | `CursorHold` / `CursorHoldI` | after `updatetime` (400ms here) idle | Medium | Fine for *light* idle work (e.g. `checktime`). Don't stack many — they all fire together. Keep each cheap. |
-| `BufReadPost` | every file open | Medium | OK for setup, but guard large files (`getfsize`) before treesitter/regex work — see `large_file` group in `autocmds.lua`. |
+| `BufReadPost` | every file open | Medium | OK for setup, but guard large files (`getfsize`) before your own regex or full-buffer work. Do not stop treesitter by size: see `notes/large-file-performance.md`. |
 | `ColorScheme` | every theme switch | Low (rare) | Fine, but keep idempotent — fires again on every `:colorscheme`. |
 | `InsertCharPre` | every typed character | **Extreme** | Almost never justified. Avoid. |
 
@@ -137,7 +137,7 @@ consistently — keep it up.
 | `vim.lsp.document_color` (0.12+) | Disabled here | Polls colors; `enable` is stubbed in `lsp.lua:140`. |
 | `synmaxcol` high / unset | Keep low (300) | Syntax-highlighting very long lines is expensive. |
 | `relativenumber` + huge files | Minor | Renders line-number column each move; fine normally, can matter on 10k+ line files. |
-| Tree-sitter `highlight`/`indent` on giant files | Guard it | Stop treesitter above a byte threshold — `large_file` guard (100KB) in `autocmds.lua`, fold guard (200KB) in `folding.lua`. |
+| Tree-sitter `highlight`/`indent` on giant files | snacks bigfile | Only snacks' bigfile (1.5MB) turns treesitter off. A 100KB guard was measured slower (regex `syntax` fallback) and removed: `notes/large-file-performance.md`. Fold guard (200KB) stays in `folding.lua`. |
 
 When adding an LSP server: set `flags.debounce_text_changes` (300ms convention
 here) and disable features you don't use (the `vtsls` block disables
@@ -237,8 +237,9 @@ Copy these proven patterns instead of inventing new ones:
   `loaded_matchparen = 1` (kills ~1200 calls/session).
 - **Throttle + dedup + reuse timer** for `MouseMove` — `lua/config/mouse-hover.lua`
   (the reference implementation for any high-frequency handler).
-- **Large-file guards** — `autocmds.lua` (`large_file`, 100KB → stop
-  treesitter) and `folding.lua` (200KB → fall back to `indent`).
+- **Large-file guards** — snacks bigfile (1.5MB → treesitter, LSP and folds
+  off) and `folding.lua` (200KB → fall back to `indent`). See
+  `notes/large-file-performance.md`.
 - **Async folds, not global `foldexpr`** — UFO on the manual/async path; see
   the rationale comment in `options.lua`.
 - **LSP trimming** — semantic tokens nil'd, `document_color` stubbed,
