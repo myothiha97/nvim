@@ -5,7 +5,7 @@
 **A personal development environment, written in Lua on top of [LazyVim](https://github.com/LazyVim/LazyVim).**
 
 _Debugger, test runner, database client, structure view and AI next edits in one terminal editor.
-Built to do the job of GoLand, WebStorm and VS Code on large production codebases, and still start in ~50 ms._
+Built to do the job of a full GUI IDE on large production codebases, and still start in ~50 ms._
 
 `~50ms cold start` · `Go · TypeScript/Node · Python · C#` · `Neovim 0.12+` · `pinned plugins`
 
@@ -22,8 +22,8 @@ non-obvious decision. LazyVim is the base layer and plugin manager; the IDE
 layer on top is built here.
 
 The target is IDE parity for professional work: the full
-**edit → navigate → test → debug → inspect** loop that a JetBrains IDE or
-VS Code gives you, without leaving the terminal and without giving up Neovim's
+**edit → navigate → test → debug → inspect** loop that popular GUI IDEs
+give you, without leaving the terminal and without giving up Neovim's
 speed. Go comes first, TypeScript/Node second; Python and C# are supported.
 
 ### Why not just use an IDE?
@@ -38,7 +38,7 @@ macros as the code itself. Your hands never have to leave the keyboard.
 Mouse support exists (clicking the gutter, right-click menus, double-click to
 expand panels), but it is an optional layer on top, never the only way in.
 
-What that buys over GoLand, WebStorm or VS Code:
+What that buys over a GUI IDE:
 
 - **One editing model everywhere.** Panels, pickers and file trees are buffers,
   so the motions you use for code also work in the debugger, test results and
