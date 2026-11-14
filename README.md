@@ -5,7 +5,7 @@
 **An IDE layer built in Lua on top of [LazyVim](https://github.com/LazyVim/LazyVim).**
 
 _Debugger, test runner, database client, structure view and AI next edits in one terminal editor.
-Built to do the job of a full GUI IDE on large production codebases, and still start in ~50 ms._
+Built to do the job of a full GUI IDE on large production codebases._
 
 `~50ms cold start` · `Go · TypeScript/Node · Python · C#` · `Neovim 0.12+` · `pinned plugins`
 
@@ -28,8 +28,8 @@ speed. Go comes first, TypeScript/Node second; Python and C# are supported.
 
 ### Why not just use an IDE?
 
-Because the IDE features are added without giving up what makes Neovim worth
-using: **it is still keyboard-driven at its core.** Every feature here (stepping
+Because adding IDE features here does not cost what makes Neovim worth using:
+**it is still keyboard-driven at its core.** Every feature here (stepping
 through a debugger, rerunning failed tests, browsing test history, opening the
 structure view, querying a database, accepting an AI edit) has a key, and is
 operated with the same modal editing, motions, text objects, registers and
@@ -46,7 +46,7 @@ What that buys over a GUI IDE:
 - **Speed.** ~50 ms to start, and nothing heavy runs until you use it.
 - **Full ownership.** Every behaviour is Lua in this repo: readable, changeable,
   and documented where it is non-obvious, instead of a settings screen.
-- **The terminal stays home.** It runs alongside tmux, shells and CLI agents,
+- **Lives in the terminal.** It runs alongside tmux, shells and CLI agents,
   locally or over SSH.
 
 ---
@@ -65,8 +65,8 @@ nvim-dap + nvim-dap-ui with a custom GUI:
   (goroutines) open on the first stop, and nothing moves after that.
 - Click the gutter to toggle a breakpoint. Conditions, hit counts, log points
   and function breakpoints persist per project.
-- Right-click menu chosen by state, value-on-hover while stopped, copy value,
-  and adapter-driven completion in the debug REPL.
+- A right-click menu that adapts to the debugger state, value-on-hover while
+  stopped, copy value, and adapter-driven completion in the debug REPL.
 - Launch helpers: npm scripts and attach to `9229` (Node), `python -m` and
   Django `runserver` (Python), `launchSettings.json` profiles (.NET), and
   Debug Test from the test runner.
