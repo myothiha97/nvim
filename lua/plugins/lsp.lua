@@ -30,8 +30,8 @@ return {
   {
     "neovim/nvim-lspconfig",
     opts = {
-      -- On by default since 2026-11-12 (off before, for performance);
-      -- `<leader>uh` toggles them per buffer. Which kinds each server sends is
+      -- Off by default again since 2026-11-13 (on for one day from 2026-11-12);
+      -- `<leader>uh` turns them on per buffer. Which kinds each server sends is
       -- trimmed to match JetBrains, in the gopls / basedpyright / vtsls blocks.
       --
       -- ACCEPTED COST: Nvim re-requests hints for the WHOLE buffer after every
@@ -42,7 +42,7 @@ return {
       -- from 17 ms to 36 ms. A normal file returns tens of hints. If a huge
       -- file ever feels slow to type in, `<leader>uh` first.
       inlay_hints = {
-        enabled = true,
+        enabled = false,
       },
       -- Performance: Don't update diagnostics in insert mode
       diagnostics = {
