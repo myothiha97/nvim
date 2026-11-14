@@ -26,6 +26,29 @@ The target is IDE parity for professional work: the full
 VS Code gives you, without leaving the terminal and without giving up Neovim's
 speed. Go comes first, TypeScript/Node second; Python and C# are supported.
 
+### Why not just use an IDE?
+
+Because the IDE features are added without giving up what makes Neovim worth
+using: **it is still keyboard-driven at its core.** Every feature here (stepping
+through a debugger, rerunning failed tests, browsing test history, opening the
+structure view, querying a database, accepting an AI edit) has a key, and is
+operated with the same modal editing, motions, text objects, registers and
+macros as the code itself. Your hands never have to leave the keyboard.
+
+Mouse support exists (clicking the gutter, right-click menus, double-click to
+expand panels), but it is an optional layer on top, never the only way in.
+
+What that buys over GoLand, WebStorm or VS Code:
+
+- **One editing model everywhere.** Panels, pickers and file trees are buffers,
+  so the motions you use for code also work in the debugger, test results and
+  file browser. No Vim-emulation plugin with gaps.
+- **Speed.** ~50 ms to start, and nothing heavy runs until you use it.
+- **Full ownership.** Every behaviour is Lua in this repo: readable, changeable,
+  and documented where it is non-obvious, instead of a settings screen.
+- **The terminal stays home.** It runs alongside tmux, shells and CLI agents,
+  locally or over SSH.
+
 ---
 
 ## What's inside
