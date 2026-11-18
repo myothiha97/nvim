@@ -786,12 +786,22 @@ return {
       hl.LspDocBorder = "FloatBorder"
       hl.LspDocTitle = { fg = palette.keyword, bg = c.bg_float, bold = true }
 
-      -- Inline code chips in a hover doc. The theme's yellow-on-dark-green fill
-      -- reads as amber boxes in a float with no other background. Same colour
-      -- CodeCompanion uses, so chips match between chat and LSP doc. Scoped via
-      -- winhighlight in config/keymaps.lua, because that capture is also every
-      -- inline span in a real .md file.
-      hl.LspDocInlineCode = { fg = "#8ab4d8", bg = "NONE" }
+      -- Inline `code` spans, everywhere markdown is shown: .md files, LSP hover
+      -- docs and anything else render-markdown attaches to. The theme paints them
+      -- gold on a dark-olive fill (#b28500 on #2c3300), which turns a doc dense
+      -- with paths and names into a row of amber boxes. Global since 2026-11-19;
+      -- before that it was scoped to hover floats only, through winhighlight.
+      --
+      -- Same low-chroma blue CodeCompanion uses for the same job (measured there:
+      -- 8.7:1 on the bg, 13 L* from prose). `bg = "NONE"` drops the box, the
+      -- colour alone marks the span as code.
+      --
+      -- WARN: SILENT FAILURE. render-markdown paints its OWN extmark over the
+      -- span with `RenderMarkdownCodeInline`, which links to `ColorColumn` and
+      -- brings a background back. It is linked here too; render-markdown defines
+      -- its groups with `default = true`, so this definition wins.
+      hl["@markup.raw.markdown_inline"] = { fg = "#8ab4d8", bg = "NONE" }
+      hl.RenderMarkdownCodeInline = "@markup.raw.markdown_inline"
 
       -- Completion doc: the same background and border as the menu beside it, so
       -- the pair reads as one popup. Was teal `bg_popup` with a `palette.type`
