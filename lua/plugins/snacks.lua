@@ -918,7 +918,17 @@ return {
         )
       end,
     },
+    -- LazyVim's "diff vs origin" picker; <leader>gD is the Diffview toggle
+    -- (plugins/git.lua).
     { "<leader>gD", false },
+    -- Replaces LazyVim's hunk picker on this key. Logic in config/lazygit-file.lua.
+    {
+      "<leader>gd",
+      function()
+        require("config.lazygit-file").open()
+      end,
+      desc = "Lazygit (current file diff)",
+    },
     { "<leader>dps", false }, -- moved to <leader>uPs (config/keymaps.lua)
     {
       "<leader>xd",

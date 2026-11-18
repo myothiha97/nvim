@@ -448,9 +448,10 @@ return {
     "sindrets/diffview.nvim",
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
     keys = {
-      -- Toggle diff view (same key opens and closes)
+      -- Toggle diff view (same key opens and closes). On <leader>gD since
+      -- 2026-11-19; <leader>gd opens lazygit on the current file instead.
       {
-        "<leader>gd",
+        "<leader>gD",
         function()
           local view = require("diffview.lib").get_current_view()
           if view then
