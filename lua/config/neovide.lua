@@ -2,12 +2,16 @@ if not vim.g.neovide then
   return
 end
 
--- Matches Ghostty (dotfiles ghostty/config): JetBrains Mono at 14.2. Ghostty draws
--- Nerd Font icons from its own built-in copy, Neovide needs a fallback font for them.
-vim.o.guifont = "JetBrains Mono,JetBrainsMono Nerd Font:h14.2"
--- Ghostty's `adjust-cell-height = 35%`. Neovide takes extra pixels per line, so this
--- is an eyeballed match, not a computed one.
-vim.o.linespace = 6
+-- Matches Ghostty (dotfiles ghostty/config: JetBrains Mono, font-size 14.2,
+-- adjust-cell-height 35%) on the 4K monitor at 2x. Ghostty sizes fonts by the
+-- display's real density, so its 14.2 renders like 13.33 here: 16 x 47 physical-px
+-- cells, a 239x44 grid. Neovide sizes in macOS points, so 14.2 drew ~6% larger.
+-- Measured 2026-11-19: h13.33 gives 16px cells; rows are the font height rounded
+-- up (36px) plus `linespace` in PHYSICAL px, so 11 gives 47. Grid: 240x44.
+-- Will not match on another display density (e.g. the built-in Retina screen).
+-- Ghostty draws Nerd Font icons from a built-in copy; Neovide needs the fallback.
+vim.o.guifont = "JetBrains Mono,JetBrainsMono Nerd Font:h13.33"
+vim.o.linespace = 11
 vim.g.neovide_cursor_vfx_mode = ""
 vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_size = 0
