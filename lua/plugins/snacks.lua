@@ -369,6 +369,12 @@ return {
     indent = { enabled = false }, -- decoration provider + scope listener on hot paths
     scope = { enabled = false }, -- treesitter scope tracking on every cursor move
     dim = { enabled = false },
+    -- Ctrl+L reaches the shell in a split terminal, where zsh binds it to accept
+    -- the autosuggestion (dotfiles zshrc). LazyVim maps it there to "go to right
+    -- window" (`nav_l`, lazyvim/plugins/util.lua); a floating terminal already
+    -- passed it through. The terminal opens as a full-width bottom split, so there
+    -- is no window to its right anyway. <C-h>/<C-j>/<C-k> navigation stays.
+    terminal = { win = { keys = { nav_l = false } } },
     lazygit = {
       theme = {
         -- FloatBorder can be invisible by design in another panel. Match
