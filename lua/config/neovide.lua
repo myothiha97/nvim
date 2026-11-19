@@ -11,9 +11,18 @@ vim.o.linespace = 6
 vim.g.neovide_cursor_vfx_mode = ""
 vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_size = 0
--- Scroll animation, in seconds. Neovide's default 0.3 made held <C-e>/<C-y> lag
--- behind the key. 0.12 is close to VS Code's smooth scrolling (~125 ms).
+-- Short cursor moves (a character or a line) animate separately, default 0.04s.
+vim.g.neovide_cursor_short_animation_length = 0
+-- Scroll animation, in seconds, for EVERY scroll: <C-e>/<C-y>, <C-d>/<C-u>, the
+-- mouse wheel, gg/G, zz and search jumps. Neovide's default 0.3 made held keys lag
+-- behind. 0.12 is close to VS Code's smooth scrolling (~125 ms). Long jumps stay
+-- quick on their own: `neovide_scroll_animation_far_lines` (default 1) animates
+-- only the last line. snacks.scroll is off (plugins/snacks.lua), so nothing
+-- stacks a second animation on top.
 vim.g.neovide_scroll_animation_length = 0.12
+-- Splits and floats slide when they open, move or resize (default 0.15s). Off, as
+-- in Ghostty and VS Code.
+vim.g.neovide_position_animation_length = 0
 
 -- See-through editor background, like Ghostty's `background-opacity = 0.9` and
 -- `background-blur`. Needs a solid `Normal` background to apply to, which is why
