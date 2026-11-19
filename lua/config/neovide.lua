@@ -59,25 +59,43 @@ vim.keymap.set("v", "<D-d>", "<Plug>(VM-Find-Subword-Under)", { desc = "Multi-cu
 -- vim.g.neovide_scrollbar_mode = "scroll"
 -- vim.opt.guioptions:append("r")
 
--- Cmd+K: toggle Copilot suggestions in insert mode (Ghostty sends this as <M-k>).
--- Forwards to the <M-k> handler in plugins/copilot.lua rather than duplicating the
--- toggle, which lives in that file's config closure and is not exported.
+-- Cmd keys that Ghostty turns into Meta keys (its `esc:` keybinds), sent on to the
+-- same <M-> mapping so each works in Neovide too, without duplicating the handler.
 --
--- The forward is CHECKED AT PRESS TIME, not registered conditionally. copilot.lua
--- loads on InsertEnter, long after this file runs, so a load-time check would
--- always see the mapping missing. Checking here also means the key starts working
--- again by itself if copilot is re-enabled -- it is `enabled = false` while the
--- subscription is inactive, and without this guard `remap = true` fell through to
--- an unmapped <M-k> and inserted a stray character instead of toggling.
+-- The forward is CHECKED AT PRESS TIME, not registered conditionally. Some targets
+-- load late (copilot.lua on InsertEnter, vim-visual-multi's buffer-local maps only
+-- while it is active), so a load-time check would see them missing. Checking at
+-- press time also means a key starts working again by itself if copilot is
+-- re-enabled -- it is `enabled = false` while the subscription is inactive, and a
+-- plain `remap = true` fell through to an unmapped <M-k> and inserted a stray
+-- character instead of toggling.
 --
 -- The DICT form of `maparg` is the documented existence check. The string form
 -- happens to work too -- it renders a Lua callback as "<Lua 414>", measured, so it
 -- is non-empty -- but that is how Neovim stringifies a callback, not a contract.
-vim.keymap.set("i", "<D-k>", function()
-  if not vim.tbl_isempty(vim.fn.maparg("<M-k>", "i", false, true)) then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<M-k>", true, true, true), "m", false)
-  end
-end, { desc = "Copilot: Toggle Suggestions" })
+local function forward_cmd_key(mode, cmd_key, meta_key, desc)
+  vim.keymap.set(mode, cmd_key, function()
+    if not vim.tbl_isempty(vim.fn.maparg(meta_key, mode, false, true)) then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(meta_key, true, true, true), "m", false)
+    end
+  end, { desc = desc })
+end
+
+-- Cmd+H/J/K/L: window moves in normal mode (config/keymaps.lua). In insert mode
+-- they land on the <Nop> maps there, and Cmd+K/L on Copilot's toggle/accept line.
+for _, key in ipairs({ "h", "j", "k", "l" }) do
+  forward_cmd_key("n", "<D-" .. key .. ">", "<M-" .. key .. ">", "Go to window (Cmd+" .. key:upper() .. ")")
+end
+forward_cmd_key("i", "<D-h>", "<M-h>", "Nothing (Cmd+H is a window move)")
+forward_cmd_key("i", "<D-j>", "<M-j>", "Nothing (Cmd+J is a window move)")
+forward_cmd_key("i", "<D-k>", "<M-k>", "Copilot: Toggle Suggestions")
+forward_cmd_key("i", "<D-l>", "<M-l>", "Copilot: Accept Line")
+forward_cmd_key("i", "<D-w>", "<M-w>", "Copilot: Accept Word")
+forward_cmd_key("i", "<D-]>", "<M-]>", "Copilot: Next Suggestion")
+forward_cmd_key("i", "<D-[>", "<M-[>", "Copilot: Prev Suggestion")
+-- vim-visual-multi (plugins/vim-visual-multi.lua)
+forward_cmd_key("n", "<D-L>", "<M-L>", "Multi-cursor: select all")
+forward_cmd_key("n", "<D-]>", "<M-]>", "Multi-cursor: skip region")
 
 -- Clipboard: copy/paste with system clipboard
 vim.keymap.set({ "n", "v" }, "<D-c>", '"+y', { desc = "Copy to clipboard" })
