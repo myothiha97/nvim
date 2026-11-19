@@ -2,15 +2,23 @@ if not vim.g.neovide then
   return
 end
 
--- vim.o.guifont = "Liga SFMono Nerd Font:h14"
--- SF Mono has no Nerd Font icons, so Maple Mono NF fills in the missing glyphs
-vim.o.guifont = "SF Mono,Maple Mono NF:h14"
+-- Matches Ghostty (dotfiles ghostty/config): JetBrains Mono at 14.2. Ghostty draws
+-- Nerd Font icons from its own built-in copy, Neovide needs a fallback font for them.
+vim.o.guifont = "JetBrains Mono,JetBrainsMono Nerd Font:h14.2"
+-- Ghostty's `adjust-cell-height = 35%`. Neovide takes extra pixels per line, so this
+-- is an eyeballed match, not a computed one.
+vim.o.linespace = 6
 vim.g.neovide_cursor_vfx_mode = ""
 vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_size = 0
 
--- Window transparency (matches Ghostty's background-opacity = 0.93)
--- vim.g.neovide_transparency = 0.93
+-- See-through editor background, like Ghostty's `background-opacity = 0.9` and
+-- `background-blur`. Needs a solid `Normal` background to apply to, which is why
+-- the theme turns transparency off in Neovide (TRANSPARENT in
+-- colorschemes/solarized-osaka/init.lua): with no background colour Neovide draws
+-- black. Only `Normal` is see-through; floats stay solid, as in Ghostty.
+vim.g.neovide_normal_opacity = 0.9
+vim.g.neovide_window_blurred = true
 
 -- Enable macOS Cmd key (<D->) mappings in Neovide
 vim.g.neovide_input_use_logo = true

@@ -37,6 +37,11 @@ return {
       -- (AddBooking.tsx, keymaps.lua, a 19k-line file). Trade-off: the bar
       -- ignores closed folds and wrapped lines when sizing itself.
       line_limit = 0,
+      -- Neovide only: a right-half block, coloured by fg (see ScrollView in
+      -- colorschemes/solarized-osaka/init.lua). Neovide paints the leftover strip
+      -- past the last column in that column's background, so a solid cell bar
+      -- looked up to twice as wide and changed width with the window size.
+      symbol = vim.g.neovide and "▐" or nil,
     },
   },
 }

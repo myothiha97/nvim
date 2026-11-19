@@ -19,7 +19,12 @@ local GITSIGNS_WORDS = "dark"
 
 -- Terminal background shows through the editor when true. Read by `transparent`
 -- below and by the TabLineFill pin in on_highlights.
-local TRANSPARENT = true
+--
+-- Always false in Neovide: it has no terminal behind it, so a colourless `Normal`
+-- renders BLACK, and so does every cell without a background (the blank winbar row
+-- in the oil popup was one). Neovide makes the solid background see-through itself
+-- (`neovide_normal_opacity` in config/neovide.lua).
+local TRANSPARENT = not vim.g.neovide
 
 return {
   "craftzdog/solarized-osaka.nvim",
@@ -828,9 +833,15 @@ return {
       -- `highlight default link` lines do not override them.
       -- `Restricted` is the group actually shown: plugins/scrollview.lua forces
       -- restricted mode for every buffer.
-      hl.ScrollView = { bg = ui_color.surface.thumb }
-      hl.ScrollViewRestricted = { bg = ui_color.surface.thumb }
-      hl.ScrollViewHover = { bg = ui_color.surface.thumb_hover }
+      --
+      -- In Neovide the thumb is a `▐` glyph instead (plugins/scrollview.lua), so it
+      -- is coloured by fg over the editor background. A bg-coloured cell in the
+      -- last column also tints the leftover strip Neovide fills at the window's
+      -- right edge, which made the bar read about twice as wide.
+      local thumb_key = vim.g.neovide and "fg" or "bg"
+      hl.ScrollView = { [thumb_key] = ui_color.surface.thumb }
+      hl.ScrollViewRestricted = { [thumb_key] = ui_color.surface.thumb }
+      hl.ScrollViewHover = { [thumb_key] = ui_color.surface.thumb_hover }
       -- Current quickfix entry: the same "selected row" slate as every list.
       -- Was the theme's blue #1a6397 until 2026-10-29.
       hl.QuickFixLine = { bg = ui_color.surface.list_cursor, bold = true }
