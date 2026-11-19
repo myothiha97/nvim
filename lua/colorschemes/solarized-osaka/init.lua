@@ -834,7 +834,7 @@ return {
       -- `Restricted` is the group actually shown: plugins/scrollview.lua forces
       -- restricted mode for every buffer.
       --
-      -- In Neovide the thumb is a `▐` glyph instead (plugins/scrollview.lua), so it
+      -- In Neovide the thumb is a `█` glyph instead (plugins/scrollview.lua), so it
       -- is coloured by fg over the editor background. A bg-coloured cell in the
       -- last column also tints the leftover strip Neovide fills at the window's
       -- right edge, which made the bar read about twice as wide.
