@@ -11,6 +11,9 @@ vim.o.linespace = 6
 vim.g.neovide_cursor_vfx_mode = ""
 vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_size = 0
+-- Scroll animation, in seconds. Neovide's default 0.3 made held <C-e>/<C-y> lag
+-- behind the key. 0.12 is close to VS Code's smooth scrolling (~125 ms).
+vim.g.neovide_scroll_animation_length = 0.12
 
 -- See-through editor background, like Ghostty's `background-opacity = 0.9` and
 -- `background-blur`. Needs a solid `Normal` background to apply to, which is why
