@@ -147,6 +147,11 @@ M.surface = {
   -- band, body text 6.09:1. Still easy to find in a list.
   -- list_cursor = "#353845",
   guide = lift(M.bg, 0.19), -- explorer tree lines and indent guides
+  -- Active indent scope (ibl's IblScope). 0.19 read too faint beside the idle
+  -- guides (2026-11-20). 0.26 = 2.33:1, L* 35 vs 18 for idle guides. Ceiling
+  -- 0.30 (L* 39.5): keep it at least ~9 L* under comments (48) so the line
+  -- never competes with text.
+  guide_active = lift(M.bg, 0.26),
   -- Scrollbar thumb (nvim-scrollview). Between `selection` (1.42:1, borders) and
   -- `guide` (1.81:1): 1.58:1 on #171716. `guide` itself read slightly too bright.
   thumb = lift(M.bg, 0.15),
