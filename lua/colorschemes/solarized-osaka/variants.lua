@@ -90,8 +90,11 @@ local builds = {
       -- the blue band, carrying the third-highest contrast in the palette on its
       -- least meaningful ink. Measured over Go/bash/devops/js-ts/jsx-tsx/python:
       -- worst chromatic pair 14.2 -> 16.5, tightest colour-blind pair 2.3 -> 4.8.
-      delimiter = palette.variants.delimiter.mid_high,
-      bracket = palette.variants.delimiter.mid_high,
+      --
+      -- Back on `kanagawa_mid` since 2026-11-20, by preference. The grey rung was
+      -- `mid_high`; switch both lines back to it to undo.
+      delimiter = palette.variants.delimiter.kanagawa_mid,
+      bracket = palette.variants.delimiter.kanagawa_mid,
       -- Body text: `brighter` since 2026-09-24, replacing `tinted`. The 09-09
       -- "too bright" verdict below was made while strings sat 12 L* under body;
       -- the green strings rose to body level, and `tinted` then read dimmer than
