@@ -32,6 +32,10 @@ return {
         -- external monitor, and the lightness gap to body already marks comments.
         italic = false,
       },
+      -- Upright keywords (`const`, `return`, `if`) too, since 2026-11-20. This
+      -- covers `Keyword` and `@keyword`; the TSX/JS groups that hardcode italic
+      -- are cleared in on_highlights.
+      keywords = { italic = false },
     },
 
     -- WARN: SILENT FAILURE. Must be set explicitly (via TRANSPARENT). The plugin
@@ -131,6 +135,14 @@ return {
         "@keyword.javascript",
         "@keyword.return.javascript",
       }, palette.keyword)
+
+      -- The theme hardcodes `italic = true` on these four, ignoring
+      -- `styles.keywords`, so they are cleared by hand.
+      for _, g in ipairs({ "@keyword.tsx", "@keyword.return.tsx", "@keyword.javascript", "@keyword.return.javascript" }) do
+        if type(hl[g]) == "table" then
+          hl[g].italic = false
+        end
+      end
 
       paint({
         "Special",
