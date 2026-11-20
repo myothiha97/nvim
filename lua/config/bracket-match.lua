@@ -1,12 +1,15 @@
 -- Matching-bracket highlight, VS Code style: with the cursor ON a bracket, that
--- bracket and its pair get `MatchParen`. Press `%` to jump between them.
+-- bracket and its pair get `MatchParen`. Anywhere else, the nearest pair AROUND
+-- the cursor gets it, so you see which block or call you are in. Press `%` on a
+-- bracket to jump between the two.
 --
 -- WHY NOT THE BUILT-IN matchparen: init.lua turns it off (`loaded_matchparen`)
 -- because it runs a Vimscript `searchpairpos()` on EVERY cursor move. This one
--- costs one byte compare per move and does real work only when the cursor sits
--- on a bracket. The pair comes from treesitter, not a text search: a bracket's
+-- asks the treesitter tree instead: one node lookup per move, then a short walk
+-- up its parents. The pair comes from treesitter, not a text search: a bracket's
 -- pair is a sibling under the same parent node. That also skips brackets inside
--- strings and comments for free, since those are not bracket nodes.
+-- strings and comments for free, since those are not bracket nodes. The pair
+-- around the cursor is the first parent node that starts and ends with one.
 --
 -- Uses the tree the highlighter already keeps. It never parses: right after an
 -- edit the tree can be one change behind, which only costs a missed highlight.
@@ -59,20 +62,48 @@ local function find_pair(buf, row, col, char)
   end
 end
 
+-- Returns the open and close {row, col} of the nearest pair around the cursor
+-- node, or nil: the first parent whose first and last children are a pair
+-- (`{ ... }` block, `( ... )` arguments, `[ ... ]` list).
+local function find_enclosing(buf, row, col)
+  -- No active highlighter means no tree to read. Without this check, every move
+  -- in a parserless buffer (text, oil) searched the runtimepath for a parser:
+  -- measured ~140 us per move, against ~0 with it.
+  if not vim.treesitter.highlighter.active[buf] then
+    return nil
+  end
+  local ok, node = pcall(vim.treesitter.get_node, { bufnr = buf, pos = { row, col }, include_anonymous = true })
+  node = ok and node or nil
+  while node do
+    local first = node:child(0)
+    if first and OPENERS[first:type()] then
+      local last = node:child(node:child_count() - 1)
+      if last and last:type() == PAIRS[first:type()] then
+        return { first:start() }, { last:start() }
+      end
+    end
+    node = node:parent()
+  end
+end
+
 local function update()
   local buf = vim.api.nvim_get_current_buf()
   local pos = vim.api.nvim_win_get_cursor(0)
   local row, col = pos[1] - 1, pos[2]
   local char = vim.api.nvim_get_current_line():sub(col + 1, col + 1)
   clear()
-  if not PAIRS[char] then
+  local pair = PAIRS[char] and find_pair(buf, row, col, char)
+  local open, close
+  if pair then
+    open, close = { row, col }, pair
+  else
+    -- Also covers a bracket that is only text (inside a string or comment).
+    open, close = find_enclosing(buf, row, col)
+  end
+  if not open then
     return
   end
-  local pair = find_pair(buf, row, col, char)
-  if not pair then
-    return
-  end
-  for _, p in ipairs({ { row, col }, pair }) do
+  for _, p in ipairs({ open, close }) do
     vim.api.nvim_buf_set_extmark(buf, ns, p[1], p[2], { end_col = p[2] + 1, hl_group = "MatchParen", priority = 1000 })
   end
   marked_buf = buf
