@@ -112,6 +112,8 @@ return {
   -- MatchParen (config/bracket-match.lua) is a box, not a colour: `guide` grey
   -- behind the bracket, syntax colour kept, bold. The theme's own is white on
   -- red, the same alarm red as errors.
+  --
+  -- Every value tried, with measurements: notes/indent-and-bracket-colours.md
   init = function()
     vim.api.nvim_create_autocmd("ColorScheme", {
       callback = function()
