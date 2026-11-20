@@ -815,6 +815,31 @@ vim.keymap.set("n", "<leader>gf", function()
   })
 end, { desc = "Git File History (diff on enter)" })
 
+-- Git conflicts: ]x / [x jump to the next / previous `<<<<<<<` marker in any
+-- buffer. Diffview's merge view and Avante map ]x / [x buffer-locally, and those
+-- still win in their own buffers. Wraps around the file when 'wrapscan' is on.
+local function jump_to_conflict(backward)
+  local found = false
+  for _ = 1, vim.v.count1 do
+    -- "s" sets the ' mark, so <C-o> returns to where the jump started.
+    if vim.fn.search("^<<<<<<<", backward and "bs" or "s") == 0 then
+      break
+    end
+    found = true
+  end
+  if found then
+    vim.cmd("normal! zv") -- open a fold hiding the marker, as / does
+  else
+    vim.notify("No conflict markers found", vim.log.levels.INFO)
+  end
+end
+vim.keymap.set("n", "]x", function()
+  jump_to_conflict(false)
+end, { desc = "Next Conflict" })
+vim.keymap.set("n", "[x", function()
+  jump_to_conflict(true)
+end, { desc = "Prev Conflict" })
+
 -- Snacks picker: grep within current file
 vim.keymap.set("n", "<leader>sl", function()
   Snacks.picker.grep({
