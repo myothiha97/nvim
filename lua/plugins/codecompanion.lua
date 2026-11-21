@@ -96,26 +96,10 @@ return {
       -- "thinks" is decided model-side, and you steer it -- not CodeCompanion.
       --
       --   Claude Code (claude_code, ACP):
-      --     * No low/medium/high enum (unlike Codex/OpenAI `reasoning_effort`).
-      --     * The Claude Code AGENT auto-decides a thinking budget from task
-      --       complexity. Good default -- usually leave it alone.
-      --     * Per-prompt override: include a thinking keyword in your message,
-      --       escalating: `think` < `think hard` < `think harder` < `ultrathink`.
-      --       The AGENT (not CodeCompanion) interprets these.
-      --     * Global ceiling: `MAX_THINKING_TOKENS` env (read by the bridge + Claude
-      --       Code SDK). Higher = more reasoning. Simplest is a shell export in
-      --       ~/.zshrc (the spawned claude-agent-acp child inherits it):
-      --         export MAX_THINKING_TOKENS=10000      # ~4000 light · 10000 heavy
-      --       Or set it from this config by re-introducing an adapter extend:
-      --         adapters = {
-      --           acp = {
-      --             claude_code = function()
-      --               return require("codecompanion.adapters").extend("claude_code", {
-      --                 env = { MAX_THINKING_TOKENS = "10000" },
-      --               })
-      --             end,
-      --           },
-      --         },
+      --     * The agent exposes an effort session option (ACP category
+      --       `thought_level`): default | low | medium | high | xhigh | max.
+      --       Our default is set in `adapters.acp.claude_code` below. Per chat:
+      --       type `/acp_session_options` in the chat (`ga` only switches model).
       --
       --   Copilot (copilot, HTTP):
       --     * No reasoning-effort knob exposed either. "Effort" is just whichever
@@ -123,8 +107,6 @@ return {
       --       adapter). A stronger model = more capability; there is no separate
       --       effort dial. Reasoning-capable models reason on their own.
       --
-      -- TL;DR: choose effort via MODEL (both providers) + thinking KEYWORDS or
-      -- MAX_THINKING_TOKENS (Claude Code only). CodeCompanion adds nothing automatic.
       adapters = {
         acp = {
           -- Claude Code with the CLI's own login (subscription), not a token.
@@ -139,6 +121,15 @@ return {
           -- Drop this override once lazy-lock.json is past upstream 9284190b.
           claude_code = function()
             return require("codecompanion.adapters").extend("claude_code", {
+              -- Default model + effort for NEW chats (Myo, 2026-11-21). Keys are
+              -- ACP categories; CodeCompanion sets `model` first, then the rest.
+              -- An unknown value only logs a warning and keeps the agent default.
+              defaults = {
+                session_config_options = {
+                  model = "sonnet",
+                  thought_level = "medium",
+                },
+              },
               env = {
                 CLAUDE_CODE_OAUTH_TOKEN = function()
                   return vim.env.CLAUDE_CODE_OAUTH_TOKEN
@@ -180,10 +171,9 @@ return {
       interactions = {
         chat = {
           -- Chat provider: "claude_code" (active), "codex" or "copilot".
-          -- String form uses the account's default model; the table form pins one,
-          -- e.g. { name = "claude_code", model = "sonnet" }. Model ids the ACP bridge
-          -- accepts: "default" | "opus" | "sonnet" | "haiku" (plus full ids; `ga`
-          -- in a chat lists them). (Copilot form: { name = "copilot", model = .. }.)
+          -- Claude model/effort defaults live in `adapters.acp.claude_code` above.
+          -- Model ids the ACP bridge accepts: "default" | "opus" | "sonnet" |
+          -- "haiku" | "fable" (plus full ids; `ga` in a chat lists them).
           adapter = "claude_code",
           -- adapter = { name = "codex" },
           -- adapter = {
