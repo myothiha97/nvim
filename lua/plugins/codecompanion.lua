@@ -67,9 +67,9 @@ return {
     ---@module 'codecompanion'
     ---@type CodeCompanion.Config
     opts = {
-      -- Inline (<leader>ai) runs on CodeCompanion's defaults, unmodified (Myo,
-      -- 2026-11-21): default adapter is Copilot (HTTP; inline cannot use ACP
-      -- adapters such as claude_code). No inline overrides live in this file.
+      -- Inline (<leader>ai) runs on CodeCompanion's defaults (Myo, 2026-11-21):
+      -- Copilot adapter (HTTP; inline cannot use ACP adapters such as
+      -- claude_code). The only override is the model, see `interactions.inline`.
       -- Plain chats stay tool-free (conversational). The agentic chat gets its
       -- edit tools injected per-keymap instead (see <leader>aa below), so we don't
       -- make every chat agentic globally.
@@ -169,6 +169,14 @@ return {
       },
 
       interactions = {
+        -- Copilot's default model `auto` is rejected on this account (400
+        -- model_not_supported, measured 2026-11-21), and CodeCompanion then
+        -- crashes in openai.lua inline_output (indexes `choices` on the error
+        -- body), which also leaves the fidget spinner stuck. gpt-4.1 is
+        -- enabled on the account and answers inline in ~3 s.
+        inline = {
+          adapter = { name = "copilot", model = "gpt-4.1" },
+        },
         chat = {
           -- Chat provider: "claude_code" (active), "codex" or "copilot".
           -- Claude model/effort defaults live in `adapters.acp.claude_code` above.
@@ -599,15 +607,15 @@ return {
       end
 
       -- "AI is working" feedback via fidget (Cursor/VSCode-style indicator).
-      -- Driven off the request lifecycle with a refcount: the inline assistant
-      -- fires two requests (a hidden classification call, then generation), so
-      -- we keep one handle alive while any request is in flight and close it
-      -- once the count returns to zero. The deferred close bridges the brief gap
+      -- Driven off the request lifecycle, keyed by request id: the inline
+      -- assistant fires two requests (a hidden classification call, then
+      -- generation), so we keep one handle alive while any request is in flight
+      -- and close it once none is left. The deferred close bridges the brief gap
       -- between the two calls so the spinner doesn't flicker; accept/reject fires
       -- no request, so the spinner is always gone before you act on the diff.
       local group = vim.api.nvim_create_augroup("CodeCompanionFidget", { clear = true })
       local handle = nil
-      local count = 0
+      local active = {} -- request id -> true
 
       local function open()
         if handle then
@@ -632,27 +640,49 @@ return {
         end
       end
 
+      local function finish(id)
+        active[id] = nil
+        if next(active) == nil then
+          -- Defer so a follow-up request (classify -> generate) reuses the
+          -- same handle instead of closing and reopening it.
+          vim.defer_fn(function()
+            if next(active) == nil then
+              close()
+            end
+          end, 200)
+        end
+      end
+
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "CodeCompanionRequestStarted",
-        callback = function()
-          count = count + 1
+        callback = function(args)
+          local data = args.data or {}
+          local id = data.id or {}
+          active[id] = true
           open()
+          -- WARNING (upstream bug, pinned 9af12c15): if an HTTP response handler
+          -- throws (e.g. inline_output on an error body), http.lua never fires
+          -- RequestFinished and the spinner would spin until restart. HTTP
+          -- requests time out at 120 s in http.lua, so drop one still open at
+          -- 125 s. ACP (Claude Code) turns can run longer and always finish, so
+          -- they get no timeout. Remove once upstream fires Finished on errors.
+          if not (data.adapter and data.adapter.type == "acp") then
+            vim.defer_fn(function()
+              if active[id] then
+                finish(id)
+              end
+            end, 125000)
+          end
         end,
       })
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "CodeCompanionRequestFinished",
-        callback = function()
-          count = math.max(0, count - 1)
-          if count == 0 then
-            -- Defer so a follow-up request (classify -> generate) reuses the
-            -- same handle instead of closing and reopening it.
-            vim.defer_fn(function()
-              if count == 0 then
-                close()
-              end
-            end, 200)
+        callback = function(args)
+          local id = args.data and args.data.id
+          if id ~= nil and active[id] then
+            finish(id)
           end
         end,
       })
