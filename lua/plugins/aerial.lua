@@ -309,15 +309,18 @@ local function open_or_jump()
   end
 end
 
--- The lualine breadcrumb is hidden by default. While it is drawn, aerial is
--- loaded at startup, attached to every buffer, and re-reads symbols after each
--- edit, even with the panel closed. Hidden, aerial does nothing until <leader>cs.
+-- The lualine breadcrumb is on by default, but only from the first file opened
+-- (BREADCRUMB_AUTO_GROUP below), so startup and the dashboard never load aerial.
+-- While it is drawn, aerial is attached to every buffer and re-reads symbols
+-- after each edit (debounced), even with the panel closed. Hidden (<leader>uB),
+-- aerial does nothing until <leader>cs.
 --
 -- It is hidden by swapping in an empty component rather than removed, so it
 -- keeps its slot, and lualine never `require`s the aerial component (which
 -- would load the plugin). The key marks the slot, because lualine.get_config()
 -- returns a deep copy and a table reference would not survive.
 local BREADCRUMB_KEY = "aerial_breadcrumb"
+local BREADCRUMB_AUTO_GROUP = "aerial_breadcrumb_default"
 
 local function hide_breadcrumb(component)
   component[1] = function()
@@ -560,12 +563,15 @@ local function start_aerial()
   })
 end
 
-local function toggle_breadcrumb()
+local function set_breadcrumb(show)
+  if show == breadcrumb_shown then
+    return
+  end
   local lualine = require("lualine")
   local config = lualine.get_config()
   for _, component in ipairs(config.sections.lualine_c) do
     if type(component) == "table" and component[BREADCRUMB_KEY] then
-      breadcrumb_shown = component[1] ~= "aerial"
+      breadcrumb_shown = show
       if breadcrumb_shown then
         start_aerial()
         component[1] = "aerial"
@@ -577,10 +583,16 @@ local function toggle_breadcrumb()
       if not breadcrumb_shown then
         stop_aerial()
       end
-      vim.notify("Aerial breadcrumb " .. (breadcrumb_shown and "on" or "off"))
       return
     end
   end
+end
+
+local function toggle_breadcrumb()
+  -- A manual choice wins over the default-on below, even before the first file
+  pcall(vim.api.nvim_del_augroup_by_name, BREADCRUMB_AUTO_GROUP)
+  set_breadcrumb(not breadcrumb_shown)
+  vim.notify("Aerial breadcrumb " .. (breadcrumb_shown and "on" or "off"))
 end
 
 return {
@@ -590,6 +602,31 @@ return {
     -- the only way to drop it: lazy.nvim merges list keys across fragments.
     event = function()
       return {}
+    end,
+    -- Breadcrumb on by default: shown once the first file is read, never at
+    -- startup. Before VeryLazy lualine is not loaded yet (`nvim file.go`), so it
+    -- waits for it; lazy.nvim's own VeryLazy handler is registered first, so
+    -- lualine and its opts (the breadcrumb slot) are ready when this runs.
+    -- Costs one autocmd until the first file, then nothing.
+    init = function()
+      local group = vim.api.nvim_create_augroup(BREADCRUMB_AUTO_GROUP, { clear = true })
+      local function show()
+        vim.schedule(function()
+          pcall(vim.api.nvim_del_augroup_by_name, BREADCRUMB_AUTO_GROUP)
+          set_breadcrumb(true)
+        end)
+      end
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+        group = group,
+        once = true,
+        callback = function()
+          if package.loaded.lualine then
+            show()
+          else
+            vim.api.nvim_create_autocmd("User", { group = group, pattern = "VeryLazy", once = true, callback = show })
+          end
+        end,
+      })
     end,
     keys = {
       {
@@ -739,7 +776,8 @@ return {
     end,
   },
 
-  -- Hide the breadcrumb LazyVim's aerial extra adds; <leader>uB brings it back
+  -- Mark the breadcrumb LazyVim's aerial extra adds and start it hidden; the
+  -- aerial spec's init shows it on the first file, <leader>uB toggles it
   {
     "nvim-lualine/lualine.nvim",
     optional = true,
@@ -747,6 +785,21 @@ return {
       for _, component in ipairs(opts.sections and opts.sections.lualine_c or {}) do
         if type(component) == "table" and component[1] == "aerial" then
           component[BREADCRUMB_KEY] = true
+          -- One arrow between every symbol, and before the first one (the
+          -- filename has separator = ""); none after the last one. An empty
+          -- sep_highlight keeps the arrows in the section's own colour instead
+          -- of aerial's default NonText.
+          -- No leading arrow when the breadcrumb is empty, or while a tabline is
+          -- drawn: the filename is hidden then (plugins/performance.lua), so the
+          -- arrow would point from nothing.
+          local arrow = ">"
+          component.sep = " " .. arrow .. " "
+          component.sep_highlight = ""
+          local tabline = require("config.tabline-visibility")
+          component.fmt = function(str)
+            return (str ~= "" and tabline.hidden()) and (arrow .. " " .. str) or str
+          end
+          component.separator = ""
           hide_breadcrumb(component)
           break
         end

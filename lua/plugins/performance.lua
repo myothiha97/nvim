@@ -116,6 +116,7 @@ return {
       })
 
       local lualine_c = opts.sections.lualine_c or {}
+      local filename_shown = require("config.tabline-visibility").hidden
       for i, component in ipairs(lualine_c) do
         if component == "diagnostics" or (type(component) == "table" and component[1] == "diagnostics") then
           table.insert(lualine_c, i + 1, {
@@ -131,6 +132,9 @@ return {
       for _, component in ipairs(lualine_c) do
         if type(component) == "table" and component[1] == "filetype" then
           component.padding = { left = 0, right = 0 }
+          -- Icon and filename show only with no tabline drawn: bufferline
+          -- already names the file at the top.
+          component.cond = filename_shown
           break
         end
       end
@@ -150,6 +154,7 @@ return {
             padding = { left = 0, right = 0 },
             separator = "", -- no thin arrow between filename and the git markers
             file_status = false, -- suppress built-in [+]/[-]; we render our own green [+]
+            cond = filename_shown,
           }
           filename_index = i
           break
