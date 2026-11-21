@@ -67,9 +67,9 @@ return {
     ---@module 'codecompanion'
     ---@type CodeCompanion.Config
     opts = {
-      -- Inline (<leader>ai) runs on CodeCompanion's defaults, unmodified (Myo,
-      -- 2026-11-21): default adapter is Copilot (HTTP; inline cannot use ACP
-      -- adapters such as claude_code). No inline overrides live in this file.
+      -- Inline (<leader>ai) runs on CodeCompanion's defaults (Myo, 2026-11-21),
+      -- except the adapter, see `interactions.inline`. Since v20 inline edits via
+      -- the `edit_file` tool and shows a diff to accept (ga/gr/g1-g3, `?`).
       -- Plain chats stay tool-free (conversational). The agentic chat gets its
       -- edit tools injected per-keymap instead (see <leader>aa below), so we don't
       -- make every chat agentic globally.
@@ -109,16 +109,7 @@ return {
       --
       adapters = {
         acp = {
-          -- Claude Code with the CLI's own login (subscription), not a token.
-          -- ROOT CAUSE this fixes: the built-in adapter has
-          -- `env = { CLAUDE_CODE_OAUTH_TOKEN = "CLAUDE_CODE_OAUTH_TOKEN" }`. When that
-          -- variable is NOT exported, CodeCompanion keeps the literal string
-          -- "CLAUDE_CODE_OAUTH_TOKEN" as the value, and the auth hook passes it to
-          -- claude-agent-acp as the token, so every request fails auth (fixed
-          -- upstream in 9284190b, after our pinned commit). Reading the variable
-          -- ourselves gives nil when unset, so the bridge falls back to the login
-          -- stored for the active CLAUDE_CONFIG_DIR. An exported token still wins.
-          -- Drop this override once lazy-lock.json is past upstream 9284190b.
+          -- Claude Code signs in with the `claude` CLI login (subscription).
           claude_code = function()
             return require("codecompanion.adapters").extend("claude_code", {
               -- Default model + effort for NEW chats (Myo, 2026-11-21). Keys are
@@ -129,11 +120,6 @@ return {
                   model = "sonnet",
                   thought_level = "medium",
                 },
-              },
-              env = {
-                CLAUDE_CODE_OAUTH_TOKEN = function()
-                  return vim.env.CLAUDE_CODE_OAUTH_TOKEN
-                end,
               },
             })
           end,
@@ -169,6 +155,16 @@ return {
       },
 
       interactions = {
+        -- Inline on Claude Code (Myo, 2026-11-21): same subscription, account
+        -- toggle and Sonnet/medium defaults as chat.
+        -- WARNING if switching inline back to Copilot: this account rejects the
+        -- default model `auto`, and v20 inline needs tool calls, which the copilot
+        -- adapter turns off for models missing from its list (all of them here,
+        -- model_picker_enabled = false). A model pin alone is not enough; the
+        -- copilot adapter also needs gpt-4.1 declared with can_use_tools = true.
+        inline = {
+          adapter = "claude_code",
+        },
         chat = {
           -- Chat provider: "claude_code" (active), "codex" or "copilot".
           -- Claude model/effort defaults live in `adapters.acp.claude_code` above.
@@ -200,7 +196,7 @@ return {
             --   false = the tool runs immediately, no prompt.
             -- We set it false for read_file specifically because it is READ-ONLY --
             -- it cannot change your code, so there's nothing to guard against. The
-            -- edit tool (insert_edit_into_file) keeps its own separate confirmation,
+            -- edit tool (edit_file) keeps its own separate confirmation,
             -- so your buffers are still never written without review.
             ["read_file"] = {
               opts = {
@@ -484,7 +480,9 @@ return {
                 -- Scope c1/c2/c3/c4 to post-edit confirmation prompts only.
                 -- Do not mutate `interactions.shared.keymaps`: other
                 -- CodeCompanion UI reads that table too.
-                if request_opts.title and request_opts.title:match("^Proposed edits") then
+                -- "Proposed edits" = ACP agents, "Proposed changes" = HTTP tools.
+                local title = request_opts.title or ""
+                if title:match("^Proposed edits") or title:match("^Proposed changes") then
                   if c.label == labels.accept then
                     c.keymap = "c1"
                   elseif c.label == labels.reject then
@@ -522,7 +520,7 @@ return {
         local orig_show = diff_ui.show
         diff_ui.show = function(diff, show_opts)
           show_opts = show_opts or {}
-          local is_agent_edit = show_opts.tool_name == "insert_edit_into_file"
+          local is_agent_edit = show_opts.tool_name == "edit_file"
           local is_acp_confirmation = show_opts.skip_default_keymaps == true
             and show_opts.chat_bufnr
             and show_opts.keymaps
@@ -712,10 +710,9 @@ return {
             if not ok then
               return
             end
-            -- Returns ONE table { content, id, filename } at the pinned commit (it
-            -- used to return content, id). Reading it the old way stored a context
-            -- item with a nil id, and the next submit crashed in check_context
-            -- ("table index is nil").
+            -- Returns ONE table { content, id, filename }; since v20 add_context
+            -- takes (data, opts) with source/id inside opts. Both changed
+            -- silently before, so re-check this block on every plugin bump.
             local got, buffer = pcall(helpers.format_buffer_for_llm, origin, path, {
               message = "Here is the content from a file (including line numbers)",
             })
@@ -723,7 +720,9 @@ return {
               return
             end
             pcall(function()
-              chat:add_context({ content = buffer.content }, "buffer", buffer.id, {
+              chat:add_context({ content = buffer.content }, {
+                source = "buffer",
+                id = buffer.id,
                 bufnr = origin,
                 path = path,
                 visible = false,
@@ -765,7 +764,7 @@ return {
           local chat = require("codecompanion").chat()
           if chat and chat.tool_registry then
             pcall(function()
-              chat.tool_registry:add("insert_edit_into_file")
+              chat.tool_registry:add("edit_file")
             end)
             pcall(function()
               chat.tool_registry:add("read_file")
