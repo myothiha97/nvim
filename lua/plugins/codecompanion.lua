@@ -98,8 +98,8 @@ return {
       --   Claude Code (claude_code, ACP):
       --     * The agent exposes an effort session option (ACP category
       --       `thought_level`): default | low | medium | high | xhigh | max.
-      --       Our default is set in `adapters.acp.claude_code` below; change it
-      --       per chat with `ga` like the model.
+      --       Our default is set in `adapters.acp.claude_code` below. Per chat:
+      --       type `/acp_session_options` in the chat (`ga` only switches model).
       --
       --   Copilot (copilot, HTTP):
       --     * No reasoning-effort knob exposed either. "Effort" is just whichever
