@@ -87,6 +87,17 @@ vim.api.nvim_create_autocmd("FileType", {
 
 require("config.mouse-hover").setup()
 
+-- ── CodeCompanion chat: Mermaid preview (<leader>am) ─────────────────────
+-- Buffer-local keymap only; the module loads when a chat opens. See the header
+-- of lua/config/mermaid-chat.lua for why this is on demand, not automatic.
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("mermaid_chat", { clear = true }),
+  pattern = "codecompanion",
+  callback = function(args)
+    require("config.mermaid-chat").attach(args.buf)
+  end,
+})
+
 -- ── Markdown: no spell check ─────────────────────────────────────────────
 -- LazyVim's `wrap_spell` autocmd turns `wrap` AND `spell` on for text, plaintex,
 -- typst, gitcommit and markdown. In a .md file spell squiggles every file name,
