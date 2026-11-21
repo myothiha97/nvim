@@ -167,7 +167,7 @@ in code comments where they live.
 | Category         | Plugin                                                                                                                                             |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Completion**   | blink.cmp: LSP · local snippets · path · buffer (+ dadbod in SQL, adapter completion in the debug REPL)                                            |
-| **AI**           | copilot.lua + copilot-lsp (NES) · cursortab.nvim (Mercury / Zeta-2.1) · prompt-copy system. CodeCompanion is installed but disabled.              |
+| **AI**           | copilot.lua + copilot-lsp (NES) · cursortab.nvim (Mercury / Zeta-2.1) · prompt-copy system · CodeCompanion chat on Claude Code                     |
 | **Debugging**    | nvim-dap + nvim-dap-ui with a custom GUI in `lua/debugging/` · Delve · js-debug · debugpy · easy-dotnet (native arm64 netcoredbg)                   |
 | **Testing**      | neotest (golang · vitest · jest · python · easy-dotnet) + custom panel, history and marks in `lua/testing/` · nvim-coverage                         |
 | **Database**     | vim-dadbod · vim-dadbod-ui · vim-dadbod-completion                                                                                                 |

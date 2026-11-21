@@ -4,7 +4,6 @@ local base_width = 0.35
 return {
   {
     "olimorris/codecompanion.nvim",
-    enabled = false,
     -- Lazy-load only on its commands/keymaps so there is zero startup cost.
     -- The `keys` trigger loads the plugin before feeding the mapping; `cmd`
     -- covers typing `:CodeCompanion ...` directly at the cmdline.
@@ -12,38 +11,84 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
     },
+    -- Claude account switch (personal ~/.claude <-> work ~/.claude-work), same
+    -- rule as tmux `prefix + Y` in ~/.dotfiles/tmux/.tmux.conf: work sets
+    -- CLAUDE_CONFIG_DIR, personal UNSETS it (so Claude reads ~/.claude.json like
+    -- `cl`). Neovim starts with whatever tmux gave the pane.
+    -- Defined in `init` so switching never loads CodeCompanion; it only edits
+    -- Neovim's own environment, which every later child process inherits.
+    -- CAVEAT: applies to NEW chats only (each chat keeps the claude-agent-acp
+    -- process it started with), and to anything else Neovim spawns afterwards,
+    -- e.g. `claude` in a :terminal. An exported CLAUDE_CODE_OAUTH_TOKEN
+    -- overrides both accounts, so the switch warns when it is set.
+    init = function()
+      local work_dir = vim.fn.expand("~/.claude-work")
+
+      local function is_work()
+        local dir = vim.env.CLAUDE_CONFIG_DIR
+        return dir ~= nil and dir ~= ""
+      end
+
+      local function notify()
+        local msg = is_work() and ("Claude account: work (" .. vim.env.CLAUDE_CONFIG_DIR .. ")")
+          or "Claude account: personal (~/.claude)"
+        local level = vim.log.levels.INFO
+        if vim.env.CLAUDE_CODE_OAUTH_TOKEN then
+          msg = msg .. "\nCLAUDE_CODE_OAUTH_TOKEN is set and overrides this choice."
+          level = vim.log.levels.WARN
+        end
+        vim.notify(msg .. "\nApplies to new chats.", level, { title = "CodeCompanion" })
+      end
+
+      vim.api.nvim_create_user_command("ClaudeAccount", function(cmd)
+        local want = cmd.args
+        if want == "" then
+          want = is_work() and "personal" or "work"
+        end
+        if want == "work" then
+          vim.env.CLAUDE_CONFIG_DIR = work_dir
+        elseif want == "personal" then
+          vim.env.CLAUDE_CONFIG_DIR = nil
+        elseif want ~= "status" then
+          vim.notify("Usage: :ClaudeAccount [work|personal|status]", vim.log.levels.ERROR)
+          return
+        end
+        notify()
+      end, {
+        nargs = "?",
+        desc = "Claude account for new CodeCompanion chats (no arg = toggle)",
+        complete = function()
+          return { "work", "personal", "status" }
+        end,
+      })
+
+      vim.keymap.set("n", "<leader>aA", "<cmd>ClaudeAccount<cr>", { desc = "Claude: Toggle account (work/personal)" })
+    end,
     ---@module 'codecompanion'
     ---@type CodeCompanion.Config
     opts = {
-      -- Inline-only usage: ask the AI to write/complete/edit code in place.
-      -- Reuses the GitHub Copilot OAuth token that copilot.lua already
-      -- provisions, so there is no extra API key or billing.
-      --
-      -- MODEL: left unset = Copilot's default model. To pin one, e.g.:
-      --   inline = { adapter = { name = "copilot", model = "claude-sonnet-4" } }
-      -- Discover the exact model ids your Copilot sub exposes by opening a chat
-      -- (<leader>aC) and pressing `ga` (Select Adapter -> Select Model).
+      -- Inline (<leader>ai) runs on CodeCompanion's defaults, unmodified (Myo,
+      -- 2026-11-21): default adapter is Copilot (HTTP; inline cannot use ACP
+      -- adapters such as claude_code). No inline overrides live in this file.
       -- Plain chats stay tool-free (conversational). The agentic chat gets its
       -- edit tools injected per-keymap instead (see <leader>aa below), so we don't
-      -- make every chat agentic globally. (Chat adapter already defaults to copilot.)
+      -- make every chat agentic globally.
       -- ── Switching the CHAT provider: Copilot <-> Claude Code ──────────────────
       -- Both are key-free (no paid API key). Pick one on `interactions.chat.adapter`
       -- below:
-      --   "copilot"      Copilot subscription. Default. Nothing to install.
-      --   "claude_code"  Claude *subscription* via the ACP bridge. One-time shell
-      --                  setup first:
+      --   "copilot"      Copilot subscription. Nothing to install.
+      --   "claude_code"  Claude *subscription* via the ACP bridge. One-time setup:
       --                    npm install -g @agentclientprotocol/claude-agent-acp
-      --                    claude setup-token
-      --                    export CLAUDE_CODE_OAUTH_TOKEN="<token>"   # in ~/.zshrc
-      --                  Neovim must inherit CLAUDE_CODE_OAUTH_TOKEN (restart tmux/
-      --                  shell so the adapter's auth, which requires it, can see it).
+      --                  It signs in with the same login as the `claude` CLI (no
+      --                  `claude setup-token` needed). Which account: see
+      --                  :ClaudeAccount / <leader>aA in `init` below.
       -- To switch: set `interactions.chat.adapter` below to "copilot" (string) or
       -- claude_code (string for its default model, or a table to pin one -- see the
       -- model note there). Restart Neovim after. Inline always stays on Copilot.
       --
       -- The claude_code adapter's default command is already `claude-agent-acp`
       -- (the binary the package above installs), so no command override is needed --
-      -- the built-in adapter works as-is once the binary + token are in place.
+      -- the built-in adapter works as-is once the binary is installed.
       --
       -- ── Thinking / reasoning "effort" (REFERENCE) ─────────────────────────────
       -- CodeCompanion does NOT manage or auto-tune reasoning effort. It's a pass-
@@ -82,6 +127,25 @@ return {
       -- MAX_THINKING_TOKENS (Claude Code only). CodeCompanion adds nothing automatic.
       adapters = {
         acp = {
+          -- Claude Code with the CLI's own login (subscription), not a token.
+          -- ROOT CAUSE this fixes: the built-in adapter has
+          -- `env = { CLAUDE_CODE_OAUTH_TOKEN = "CLAUDE_CODE_OAUTH_TOKEN" }`. When that
+          -- variable is NOT exported, CodeCompanion keeps the literal string
+          -- "CLAUDE_CODE_OAUTH_TOKEN" as the value, and the auth hook passes it to
+          -- claude-agent-acp as the token, so every request fails auth (fixed
+          -- upstream in 9284190b, after our pinned commit). Reading the variable
+          -- ourselves gives nil when unset, so the bridge falls back to the login
+          -- stored for the active CLAUDE_CONFIG_DIR. An exported token still wins.
+          -- Drop this override once lazy-lock.json is past upstream 9284190b.
+          claude_code = function()
+            return require("codecompanion.adapters").extend("claude_code", {
+              env = {
+                CLAUDE_CODE_OAUTH_TOKEN = function()
+                  return vim.env.CLAUDE_CODE_OAUTH_TOKEN
+                end,
+              },
+            })
+          end,
           -- Optional Codex ACP adapter. Chat still defaults to Claude Code below;
           -- this only affects choosing "codex" from `ga`.
           --
@@ -101,7 +165,9 @@ return {
               --   },
               -- },
               defaults = {
-                auth_method = "chatgpt",
+                -- "chat-gpt" since codex-acp 1.x (was "chatgpt"); see
+                -- todos/ai/codecompanion-codex-acp-fix.md.
+                auth_method = "chat-gpt",
                 session_config_options = {
                   model = "gpt-5.5",
                 },
@@ -112,18 +178,14 @@ return {
       },
 
       interactions = {
-        -- Inline stays on Copilot (HTTP) -- ACP adapters aren't suited to inline.
-        inline = {
-          adapter = "copilot",
-        },
         chat = {
-          -- Chat provider: "copilot" (active) or "claude_code" (see notes above).
-          -- String form uses the adapter's default model; the table form pins a
-          -- model. Here claude_code is pinned to Sonnet (currently 4.6). Model ids
-          -- the ACP bridge accepts: "default" | "sonnet" | "sonnet[1m]" (1M context)
-          -- | "opus" | "haiku". (Copilot form would be { name = "copilot", model = .. }.)
-          -- adapter = { name = "claude_code", model = "opus" },
-          adapter = { name = "codex" },
+          -- Chat provider: "claude_code" (active), "codex" or "copilot".
+          -- String form uses the account's default model; the table form pins one,
+          -- e.g. { name = "claude_code", model = "sonnet" }. Model ids the ACP bridge
+          -- accepts: "default" | "opus" | "sonnet" | "haiku" (plus full ids; `ga`
+          -- in a chat lists them). (Copilot form: { name = "copilot", model = .. }.)
+          adapter = "claude_code",
+          -- adapter = { name = "codex" },
           -- adapter = {
           -- name = "copilot", -- currently having error when open the chat panel with leader aa
           -- },
@@ -461,16 +523,9 @@ return {
         end
       end
 
-      local ok_inline, inline = pcall(require, "codecompanion.interactions.inline")
-      if ok_inline and type(inline.build_diff_banner) == "function" then
-        inline.build_diff_banner = function()
-          return "c1 Accept | c2 Reject | c4 Always Accept"
-        end
-      end
-
       -- Same scoped mapping for post-edit diff UIs: agent preview diff popups and
-      -- inline assistant confirmations. We remove only the buffer-local
-      -- accept/reject/always maps in those confirmation buffers, not the shared
+      -- ACP edit confirmations (inline diffs are left untouched). We remove only
+      -- the buffer-local accept/reject/always maps in those confirmation buffers, not the shared
       -- CodeCompanion keymap table or unrelated UI maps.
       local ok_dui, diff_ui = pcall(require, "codecompanion.diff.ui")
       if ok_dui and type(diff_ui.show) == "function" then
@@ -478,23 +533,16 @@ return {
         diff_ui.show = function(diff, show_opts)
           show_opts = show_opts or {}
           local is_agent_edit = show_opts.tool_name == "insert_edit_into_file"
-          local is_inline_confirmation = show_opts.keymaps
-            and show_opts.keymaps.on_accept
-            and show_opts.keymaps.on_reject
-            and show_opts.keymaps.on_always_accept
-            and not is_agent_edit
           local is_acp_confirmation = show_opts.skip_default_keymaps == true
             and show_opts.chat_bufnr
             and show_opts.keymaps
             and show_opts.keymaps.on_reject
             and type(show_opts.banner) == "string"
             and show_opts.banner:find("Accept", 1, true)
-          local is_confirmation = is_agent_edit or is_inline_confirmation or is_acp_confirmation
+          local is_confirmation = is_agent_edit or is_acp_confirmation
           if is_confirmation then
             local sk = require("codecompanion.config").interactions.shared.keymaps
-            if show_opts.inline then
-              show_opts.banner = "c1 Accept | c2 Reject | c4 Always Accept"
-            elseif is_acp_confirmation then
+            if is_acp_confirmation then
               show_opts.banner = string.format(
                 "c4 Always Accept | c1 Accept | c2 Reject | %s/%s Next/Prev | q Close",
                 sk.next_hunk.modes.n,
@@ -570,14 +618,6 @@ return {
       local group = vim.api.nvim_create_augroup("CodeCompanionFidget", { clear = true })
       local handle = nil
       local count = 0
-      local track_au = nil
-
-      local function stop_tracking()
-        if track_au then
-          pcall(vim.api.nvim_del_autocmd, track_au)
-          track_au = nil
-        end
-      end
 
       local function open()
         if handle then
@@ -613,12 +653,7 @@ return {
       vim.api.nvim_create_autocmd("User", {
         group = group,
         pattern = "CodeCompanionRequestFinished",
-        callback = function(args)
-          -- InlineFinished is success-only. RequestFinished also covers errors
-          -- and cancellation, so the cursor tracker cannot leak into the session.
-          if args.data and args.data.interaction == "inline" then
-            stop_tracking()
-          end
+        callback = function()
           count = math.max(0, count - 1)
           if count == 0 then
             -- Defer so a follow-up request (classify -> generate) reuses the
@@ -642,62 +677,6 @@ return {
         pattern = "codecompanion",
         callback = function()
           vim.opt_local.concealcursor = "nvic"
-        end,
-      })
-
-      -- Inline cursor preservation. The inline assistant deliberately refocuses
-      -- the edit buffer and jumps the cursor to the diff (inline/init.lua:166-175)
-      -- so you can accept with c1/c2/c4 -- but if you've moved on to keep coding,
-      -- that yank-back interrupts you. We track your real position ONLY while an
-      -- inline op is in flight and restore it once the diff lands.
-      --
-      -- Timing: the CursorMoved fired by the plugin's own jump is deferred to the
-      -- main loop, so at InlineFinished `user_pos` is still your pre-jump position.
-      -- We read it, stop tracking (so the deferred jump can't overwrite it), then
-      -- schedule the restore. The tracker autocmd exists only during generation,
-      -- so there is no steady-state hot-path cost.
-      local user_pos = nil
-
-      local function record()
-        user_pos = {
-          win = vim.api.nvim_get_current_win(),
-          cursor = vim.api.nvim_win_get_cursor(0),
-          view = vim.fn.winsaveview(),
-        }
-      end
-
-      vim.api.nvim_create_autocmd("User", {
-        group = group,
-        pattern = "CodeCompanionInlineStarted",
-        callback = function()
-          record()
-          stop_tracking() -- clear any leaked tracker from a prior op
-          track_au = vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "WinEnter" }, {
-            group = group,
-            callback = record,
-          })
-        end,
-      })
-
-      vim.api.nvim_create_autocmd("User", {
-        group = group,
-        pattern = "CodeCompanionInlineFinished",
-        callback = function()
-          local pos = user_pos
-          stop_tracking()
-          if not pos or not vim.api.nvim_win_is_valid(pos.win) then
-            return
-          end
-          vim.schedule(function()
-            if not vim.api.nvim_win_is_valid(pos.win) then
-              return
-            end
-            vim.api.nvim_set_current_win(pos.win)
-            local lines = vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(pos.win))
-            if pos.cursor[1] <= lines then
-              pcall(vim.fn.winrestview, pos.view)
-            end
-          end)
         end,
       })
 
@@ -743,14 +722,18 @@ return {
             if not ok then
               return
             end
-            local got, content, id = pcall(helpers.format_buffer_for_llm, origin, path, {
+            -- Returns ONE table { content, id, filename } at the pinned commit (it
+            -- used to return content, id). Reading it the old way stored a context
+            -- item with a nil id, and the next submit crashed in check_context
+            -- ("table index is nil").
+            local got, buffer = pcall(helpers.format_buffer_for_llm, origin, path, {
               message = "Here is the content from a file (including line numbers)",
             })
-            if not got then
+            if not got or type(buffer) ~= "table" or not buffer.id then
               return
             end
             pcall(function()
-              chat:add_context({ content = content }, "buffer", id, {
+              chat:add_context({ content = buffer.content }, "buffer", buffer.id, {
                 bufnr = origin,
                 path = path,
                 visible = false,
