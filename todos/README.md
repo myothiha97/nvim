@@ -94,6 +94,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`symbol-outline-split.md`](ui/symbol-outline-split.md)                         | LOW. Move the outline out of `trouble.lua` into `lua/config/symbol-outline/` with one module per language. Do it at the first real need for a second language's rules                                                                   | open     |
 | [`treesitter-outline-locals.md`](ui/treesitter-outline-locals.md)               | LOW. The outline cannot show symbols inside a Go func because gopls never reports them (measured). Needs a treesitter source. Answer "is it worth it" before starting                                                                   | open     |
 | [`vscode-style-scrollbar.md`](ui/vscode-style-scrollbar.md) | scrollbar in terminal Neovim with diagnostic/git/search marks, via a plugin (none built in). Adds the first `WinScrolled` handler | done 2026-11-12 (nvim-scrollview, position only) |
+| [`conflict-marker-navigation.md`](ui/conflict-marker-navigation.md) | `]x` / `[x` jump between git conflict markers in any buffer; made by choice on request | done 2026-11-20 |
 | [`unstable-static-tabline.md`](ui/unstable-static-tabline.md)                   | HIGH, parked 2026-07-20. `lua/config/_unstable_tabline.lua` retained but not required. Blank strip at the top, design too basic                                                                                                         | parked   |
 
 ## languages
