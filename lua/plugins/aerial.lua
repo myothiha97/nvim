@@ -792,7 +792,7 @@ return {
           -- No leading arrow when the breadcrumb is empty, or while a tabline is
           -- drawn: the filename is hidden then (plugins/performance.lua), so the
           -- arrow would point from nothing.
-          local arrow = ">"
+          local arrow = "\u{f105}" -- nf-fa-angle_right (Nerd Font chevron)
           component.sep = " " .. arrow .. " "
           component.sep_highlight = ""
           local tabline = require("config.tabline-visibility")
