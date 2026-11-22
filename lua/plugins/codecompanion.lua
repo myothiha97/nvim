@@ -186,16 +186,16 @@ return {
           --   stop = { modes = { n = "<C-c>" } },
           -- },
           keymaps = {
-            -- `gE` in a Claude Code chat: pick the reasoning effort for THIS chat
+            -- `gC` in a Claude Code chat: pick the reasoning effort for THIS chat
             -- (low | medium | high | xhigh | max). Same as `/acp_session_options`
             -- -> effort, minus the first picker. Runs only on the keypress.
             -- WARNING: uses CodeCompanion internals (v20.2, 14b4993): the
             -- `acp_session_options` slash command module and its `show_values`
             -- method, plus `chat.acp_connection:get_config_options()`. Re-check
-            -- on every plugin bump; if renamed, `gE` errors on press only (no
+            -- on every plugin bump; if renamed, `gC` errors on press only (no
             -- startup effect). Fallback: type `/acp_session_options`.
             acp_effort = {
-              modes = { n = "gE" },
+              modes = { n = "gC" },
               description = "Change reasoning effort (Claude Code)",
               callback = function(chat)
                 local conn = chat.acp_connection
