@@ -380,7 +380,7 @@ return {
       -- (overrides.filetype.codecompanion in plugins/render-markdown.lua); these
       -- groups give it VS Code Copilot Chat's look, chat window only:
       --   * headings + **bold**: a terminal has no font sizes, so colour gives the
-      --     two levels Copilot gets from size (option D of four, 2026-11-22;
+      --     two levels Copilot gets from size (Myo picked option D, 2026-11-22;
       --     A neutral #c4c4c4 and B brighter #dcdcdc read as "same white").
       --       headings  #c48956  palette.variants.boolean.orange_mid (muted orange)
       --       **bold**  #cfcea7  palette.variants.delimiter.pale_yellow (soft sand)
