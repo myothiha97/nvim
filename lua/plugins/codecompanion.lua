@@ -234,16 +234,16 @@ return {
             },
           },
         },
-        -- Floating "CodeCompanion Prompt" input (<leader>ai): styled like the Noice
-        -- cmdline popup it replaces (rounded border, DiagnosticInfo border/title,
-        -- editor bg), instead of the default dim single border, cream title and
-        -- darker float bg. Theme groups only, so it follows a colorscheme change.
-        -- Window-local (winhighlight), so other floats are untouched.
+        -- Floating "CodeCompanion Prompt" input (<leader>ai), Myo 2026-11-22:
+        -- rounded border in the hover-doc border colour (LspDocBorder), title in
+        -- the chat heading orange (CodeCompanionPromptTitle, defined in config()
+        -- below), float bg like hover docs. Replaces the default square border and
+        -- cream title. Window-local (winhighlight), so other floats are untouched.
         input = {
           window = {
             border = "rounded",
             opts = {
-              winhighlight = "NormalFloat:Normal,FloatBorder:DiagnosticInfo,FloatTitle:DiagnosticInfo",
+              winhighlight = "FloatBorder:LspDocBorder,FloatTitle:CodeCompanionPromptTitle",
             },
           },
         },
@@ -425,6 +425,18 @@ return {
       end
       vim.list_extend(chat_highlights, {
         { name = "CodeCompanionChatHeading", from = heading_from, opts = { fg = "#c48956", bold = true } },
+        -- Floating prompt title (display.input above): the heading orange on the
+        -- float bg. FloatTitle needs its own bg, or the title cells show the editor
+        -- bg as a band across the border. No `from`: applied by that float only.
+        {
+          name = "CodeCompanionPromptTitle",
+          from = {},
+          opts = {
+            fg = "#c48956",
+            bg = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false }).bg,
+            bold = true,
+          },
+        },
         { name = "CodeCompanionChatStrong", from = { "@markup.strong" }, opts = { fg = "#cfcea7", bold = true } },
         { name = "CodeCompanionChatCode", from = { "RenderMarkdownCode" }, opts = { bg = surface.panel } },
         {
