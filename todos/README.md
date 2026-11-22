@@ -116,7 +116,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`cursor-tab-level-suggestions.md`](ai/cursor-tab-level-suggestions.md) | GOAL: Cursor Tab-quality suggestions in nvim. Research-first, checkpoint item. NES `<Tab>` chaining dropped 2026-10-13 (low ROI) | open   |
 | [`avante-ui-optimization.md`](ai/avante-ui-optimization.md)           | Avante disabled since 2026-05-26; CodeCompanion is the active workflow. Do no UI work unless Avante is deliberately re-enabled               | parked |
 | [`codecompanion-mermaid-viewer.md`](ai/codecompanion-mermaid-viewer.md) | GOAL: VS Code-quality Mermaid diagrams in CodeCompanion chat. Inline + zoom viewer shipped (#71, #73) but not readable enough; needs dedicated time | open |
-| [`dwight-nvim-workflow.md`](ai/dwight-nvim-workflow.md) | GOAL: a loading indicator per chat and per prompt, and start new prompts while others run (dwight.nvim-style). Research done; CodeCompanion ACP inline allows only one prompt at a time | open |
+| [`dwight-nvim-workflow.md`](ai/dwight-nvim-workflow.md) | GOAL: inline prompts and chats run at the same time without blocking, each with its own loading indicator (dwight.nvim-style). CodeCompanion ACP inline allows only one prompt at a time today | open |
 | [`copilot-load-on-toggle.md`](ai/copilot-load-on-toggle.md) | start Copilot on first use instead of every file open; saves one Node server per idle nvim. Done 2026-10-24 by override | done |
 
 ## phase 2

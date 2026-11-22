@@ -5,10 +5,16 @@ nothing here is in the config. Needs dedicated time, do not start piecemeal.
 
 ## Goal
 
-Main goal (Myo, 2026-11-22): **every chat session and every prompt gets its
-own loading indicator, and new prompts or tasks can be started while others
-are still running**, without waiting for one to finish. Today CodeCompanion
-shows one global spinner at the bottom of the editor for everything.
+**Headline feature (Myo, 2026-11-22): inline prompts and chats both run at
+the same time, async, without blocking each other, each with its own loading
+indicator.** Both halves are required:
+
+1. **Non-blocking:** start a new inline prompt or chat task while others are
+   still running, in any mix (inline + inline, inline + chat, chat + chat).
+   Parallel inline prompts are a must-have, not a "maybe upstream later".
+2. **Own indicator:** every running inline prompt shows a spinner on its own
+   lines; every running chat shows its own spinner. Today CodeCompanion shows
+   one global spinner at the bottom of the editor for everything.
 
 In practice, like dwight.nvim: fire an inline prompt at a piece of code, see a
 loading indicator right on those lines, keep working, and fire more prompts at
@@ -165,7 +171,7 @@ Requirements: Neovim 0.10+, plenary.nvim, nvim-treesitter, git, a CLI agent
 | dwight part | verdict | why |
 | --- | --- | --- |
 | Per-range inline indicator | **layer on** | Small and self-contained. Could be driven by CodeCompanion's `InlineStarted`/`InlineFinished` events (they carry `id` and `bufnr`). Use an extmark range so it follows edits |
-| Parallel inline prompts | **conflicts** with CodeCompanion ACP inline | Blocked upstream by the single shared connection. Options: ask/PR upstream for a connection per prompt, or a small separate "quick edit" path that spawns `claude -p` per job like dwight (no tools, no diff, cold start each time) |
+| Parallel inline prompts | **required; blocked today** by CodeCompanion ACP inline | Single shared connection refuses a 2nd prompt. Routes in "Suggested plan" step 2 |
 | Inline modes (`/refactor`, `/fix`, ...) | **overlap** | CodeCompanion prompt library already does preset prompts |
 | Agent / Auto / Swarm | **overlap** | Claude Code itself (terminal, tmux) and the CodeCompanion agentic chat already cover this. Auto mode's test gate + git checkpoint per step is the novel part |
 | Skills / lessons | **overlap** | Claude Code has `CLAUDE.md`, skills and memory natively |
@@ -189,7 +195,7 @@ inline paths, two sets of commands and two auth flows. Not recommended.
 - **Cost:** each parallel inline job is a full `claude -p` start on the
   subscription and counts toward the 5-hour limit, same pool as chat.
 
-## Suggested first step (when there is time)
+## Suggested plan (when there is time)
 
 1. Build only the **per-range indicator** on top of CodeCompanion inline:
    on `InlineStarted` place an extmark range over the target lines with an
@@ -199,10 +205,16 @@ inline paths, two sets of commands and two auth flows. Not recommended.
    For chats, the same idea per chat: a spinner in each chat's winbar/title
    while its request runs (key it on the chat's id from the request events),
    so several running chats are visible at once.
-2. Then decide on parallel prompts: check upstream CodeCompanion for a
-   per-prompt ACP session option first (an issue/PR is cheaper than owning a
-   fork). Only if that is a dead end, prototype a minimal `claude -p` quick-edit
-   command (one file, extmark-tracked ranges, diff before apply) and compare.
+2. Make parallel inline prompts work (required). Pick the route by cost:
+   a. Check upstream CodeCompanion for a per-prompt ACP connection/session
+      option, and open an issue/PR if there is none (cheapest to maintain).
+   b. If upstream won't do it soon, a local override that gives each inline
+      prompt its own ACP connection (like chats already have). Costs one
+      `claude-agent-acp` process per running prompt; mark it with a WARNING
+      comment since it touches plugin internals.
+   c. Fallback: a minimal `claude -p` quick-edit command like dwight's (one
+      file, extmark-tracked ranges, overlap check, diff before apply).
+   Whatever the route: a max-concurrency cap with a queue (see risks above).
 3. Read the Reddit thread from a normal browser for any extra details.
 
 Related: [`codecompanion-mermaid-viewer.md`](codecompanion-mermaid-viewer.md),
