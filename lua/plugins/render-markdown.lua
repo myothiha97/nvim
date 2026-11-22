@@ -14,6 +14,14 @@ return {
     "MeanderingProgrammer/render-markdown.nvim",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     ft = { "markdown", "Avante", "codecompanion" },
+    -- Also load just BEFORE the first .md file is read, not on its FileType.
+    -- WARN: SILENT FAILURE. On setup render-markdown disables the markdown
+    -- query's `conceal_lines` patterns (settings.lua `patterns`), so the ```
+    -- fence lines stay on screen for the code block padding and language label.
+    -- Loaded on FileType, the first .md buffer's highlighter was already running
+    -- and kept hiding its fence lines; only later .md buffers showed them.
+    -- Same cost as before: it loads when a .md file opens either way.
+    event = { "BufReadPre *.md", "BufReadPre *.markdown" },
     -- Full raw/rendered toggle for the current buffer. The `render_modes` allowlist
     -- above keeps normal/visual rendered and only insert raw — handy for reading, but
     -- it hides backtick/asterisk symbols you need for vim motions while editing. This
@@ -109,6 +117,38 @@ return {
             code = { language = false, sign = false, disable_background = true, border = "hide" },
           },
         },
+        -- Real .md files (listed buffers) get the CodeCompanion chat look (Myo,
+        -- 2026-11-22: "the right side look better"). LSP hover, Avante and the
+        -- chat are unlisted, so they never see this block. Snacks previews are
+        -- unlisted too and keep the old look. Colours: md_doc_groups below.
+        -- Two deliberate differences from the chat, because .md files are edited,
+        -- not only read:
+        --   * a per-level H1..H6 glyph in the sign column (the chat gives every
+        --     level one colour and hides `##`, so the level is otherwise lost);
+        --   * the code block language label (` ts`, ` go`) is kept.
+        buflisted = {
+          [true] = {
+            heading = {
+              position = "inline",
+              icons = { "" },
+              foregrounds = { "MarkdownDocHeading" },
+              backgrounds = {},
+              sign = true,
+              signs = { "\u{F026B}", "\u{F026C}", "\u{F026D}", "\u{F026E}", "\u{F026F}", "\u{F0270}" },
+            },
+            code = {
+              disable_background = { "diff" }, -- plugin default: diffs keep their own colours
+              highlight = "MarkdownDocCode",
+              highlight_border = "MarkdownDocCode",
+              border = "thick",
+              width = "full",
+              left_pad = 2,
+            },
+            bullet = { icons = { "•", "◦", "▪", "▫" }, highlight = "Normal" },
+            quote = { highlight = "MarkdownDocRule" },
+            dash = { highlight = "MarkdownDocRule" },
+          },
+        },
         -- CodeCompanion chat, styled after VS Code Copilot Chat. Nothing here
         -- reaches .md files, hover or Avante: it is a filetype override.
         --
@@ -161,5 +201,51 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require("render-markdown").setup(opts)
+
+      -- Colours for the .md file look (overrides.buflisted above). Same values as
+      -- the CodeCompanion chat (plugins/codecompanion.lua, chat_highlights): if
+      -- you retune one, retune both. Defined here, not in the theme, so they
+      -- survive a colorscheme switch (re-applied on ColorScheme).
+      local surface = require("config.ui").surface
+      local function md_doc_groups()
+        local set = vim.api.nvim_set_hl
+        set(0, "MarkdownDocHeading", { fg = "#c48956", bold = true }) -- muted orange
+        set(0, "MarkdownDocStrong", { fg = "#cfcea7", bold = true }) -- soft sand
+        set(0, "MarkdownDocCode", { bg = surface.panel })
+        set(0, "MarkdownDocRule", { fg = surface.guide_active })
+      end
+      md_doc_groups()
+      local group = vim.api.nvim_create_augroup("MarkdownDocStyle", { clear = true })
+      vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = md_doc_groups })
+
+      -- Heading text and **bold** are painted by treesitter, not render-markdown
+      -- (its `foregrounds` only colour the sign), so both are remapped per window,
+      -- as the chat does. `vim.wo[win][0]` is `:setlocal`: the remap belongs to
+      -- this buffer in this window, and other buffers shown in the same window
+      -- later do not inherit it. Cost: one check per BufWinEnter.
+      local remaps = { "@markup.strong:MarkdownDocStrong" }
+      for level = 1, 6 do
+        remaps[#remaps + 1] = "@markup.heading." .. level .. ".markdown:MarkdownDocHeading"
+      end
+      local remap = table.concat(remaps, ",")
+      vim.api.nvim_create_autocmd("BufWinEnter", {
+        group = group,
+        callback = function(args)
+          if vim.bo[args.buf].filetype ~= "markdown" or not vim.bo[args.buf].buflisted then
+            return
+          end
+          local win = vim.api.nvim_get_current_win()
+          if vim.api.nvim_win_get_buf(win) ~= args.buf then
+            return
+          end
+          local wh = vim.wo[win][0].winhighlight
+          if not wh:find(remap, 1, true) then
+            vim.wo[win][0].winhighlight = (wh ~= "" and wh .. "," or "") .. remap
+          end
+        end,
+      })
+    end,
   },
 }
