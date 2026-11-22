@@ -376,6 +376,47 @@ return {
         },
       }
 
+      -- Copilot Chat style markdown (2026-11-22). render-markdown draws the chat
+      -- (overrides.filetype.codecompanion in plugins/render-markdown.lua); these
+      -- groups give it VS Code Copilot Chat's look, chat window only:
+      --   * headings: semibold, same neutral as prose but one step up. A terminal
+      --     can't enlarge the font, so weight + #c4c4c4 (the "bracket top" value
+      --     from the prose table above) is the hierarchy. Replaces the theme's
+      --     green heading text, which read as a coloured label.
+      --   * inline `code`: a chip, like textPreformat.background (#ffffff1a on
+      --     the sidebar bg). NOT the theme's olive green900 block that the note
+      --     above removed: a neutral `surface.raised` step (#2c2c2b on #171716).
+      --     The #8ab4d8 text stays as tuned.
+      --   * code blocks: one `surface.panel` step above the chat bg (#1e1e1d), the
+      --     same small lift VS Code gives blocks over the chat panel. Mirrors Pmenu.
+      --   * bullets: prose colour, not the theme's bold orange list marker.
+      --   * quote bar + horizontal rule: a quiet grey line.
+      -- `surface` is derived from the editor bg in config/ui.lua, so these follow
+      -- a bg change. Colours are read at define time (startup + ColorScheme only).
+      local surface = require("config.ui").surface
+      local md_text = chat_highlights[2].opts.fg
+      local heading_from = {}
+      for level = 1, 6 do
+        heading_from[level] = "@markup.heading." .. level .. ".markdown"
+      end
+      vim.list_extend(chat_highlights, {
+        { name = "CodeCompanionChatHeading", from = heading_from, opts = { fg = "#c4c4c4", bold = true } },
+        { name = "CodeCompanionChatCode", from = { "RenderMarkdownCode" }, opts = { bg = surface.panel } },
+        {
+          name = "CodeCompanionChatCodeInline",
+          from = { "RenderMarkdownCodeInline" },
+          opts = { fg = "#8ab4d8", bg = surface.raised },
+        },
+        { name = "CodeCompanionChatBullet", from = { "RenderMarkdownBullet" }, opts = { fg = md_text } },
+        -- Quote bar and `---` rule: quiet grey lines like textBlockQuote.border,
+        -- not the bright default bar. `guide_active` = the active indent guide.
+        {
+          name = "CodeCompanionChatRule",
+          from = { "RenderMarkdownQuote", "RenderMarkdownDash" },
+          opts = { fg = surface.guide_active },
+        },
+      })
+
       -- Built once from the table above, in order, so the value is deterministic.
       local chat_winhighlight
       do
@@ -665,6 +706,33 @@ return {
         pattern = "codecompanion",
         callback = function()
           vim.opt_local.concealcursor = "nvic"
+        end,
+      })
+
+      -- One full markdown render when a reply finishes. render-markdown's debounce
+      -- is leading-edge only (lib/decorator.lua: it renders on the first event,
+      -- then ignores events until 100 ms pass with none), and CodeCompanion writes
+      -- every 25 ms while streaming. So a fast reply could end with its last lines
+      -- still raw until you moved the cursor, and always did when the chat was not
+      -- the focused window. One forced render per reply, ~7 ms for 350 lines.
+      -- CAVEAT: mid-stream, the newest lines can still show raw until the stream
+      -- pauses; this only guarantees the finished reply. pcall: no-op if
+      -- render-markdown is missing or disabled for the buffer.
+      vim.api.nvim_create_autocmd("User", {
+        group = group,
+        pattern = "CodeCompanionChatDone",
+        callback = function(args)
+          local bufnr = args.data and args.data.bufnr
+          if type(bufnr) ~= "number" then
+            return
+          end
+          vim.schedule(function()
+            if vim.api.nvim_buf_is_valid(bufnr) then
+              pcall(function()
+                require("render-markdown").render({ buf = bufnr, event = "CodeCompanionChatDone" })
+              end)
+            end
+          end)
         end,
       })
 
