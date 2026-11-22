@@ -115,6 +115,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`codecompanion-codex-acp-fix.md`](ai/codecompanion-codex-acp-fix.md) | Codex ACP adapter broken since the codex-acp 1.6.2 upgrade. Root cause known, values measured, the edit is ~4 lines. Nothing here is a guess | open   |
 | [`cursor-tab-level-suggestions.md`](ai/cursor-tab-level-suggestions.md) | GOAL: Cursor Tab-quality suggestions in nvim. Research-first, checkpoint item. NES `<Tab>` chaining dropped 2026-10-13 (low ROI) | open   |
 | [`avante-ui-optimization.md`](ai/avante-ui-optimization.md)           | Avante disabled since 2026-05-26; CodeCompanion is the active workflow. Do no UI work unless Avante is deliberately re-enabled               | parked |
+| [`codecompanion-mermaid-viewer.md`](ai/codecompanion-mermaid-viewer.md) | GOAL: VS Code-quality Mermaid diagrams in CodeCompanion chat. Inline + zoom viewer shipped (#71, #73) but not readable enough; needs dedicated time | open |
 | [`copilot-load-on-toggle.md`](ai/copilot-load-on-toggle.md) | start Copilot on first use instead of every file open; saves one Node server per idle nvim. Done 2026-10-24 by override | done |
 
 ## phase 2
