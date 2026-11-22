@@ -87,9 +87,11 @@ vim.api.nvim_create_autocmd("FileType", {
 
 require("config.mouse-hover").setup()
 
--- ── CodeCompanion chat: Mermaid preview (<leader>am) ─────────────────────
--- Buffer-local keymap only; the module loads when a chat opens. See the header
--- of lua/config/mermaid-chat.lua for why this is on demand, not automatic.
+-- ── CodeCompanion chat: Mermaid diagrams ─────────────────────────────────
+-- Inline image under each ```mermaid block once a reply finishes, and
+-- <leader>am for a zoomable view. The module loads when a chat opens;
+-- see the header of lua/config/mermaid-chat.lua for why it never renders while
+-- a reply is streaming.
 vim.api.nvim_create_autocmd("FileType", {
   group = vim.api.nvim_create_augroup("mermaid_chat", { clear = true }),
   pattern = "codecompanion",
