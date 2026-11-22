@@ -45,7 +45,6 @@ local cache = vim.fn.stdpath("cache") .. "/mermaid-chat"
 local RENDERERS = { "mmdr", "mmdc" }
 local FONT = "-apple-system, 'Helvetica Neue', Inter, Arial, sans-serif"
 local FONT_SIZE = 16 -- px in the PNG at 100%
-local INLINE_MAX_HEIGHT = 24 -- rows
 -- Inline hint when fitted text would be smaller than this share of FONT_SIZE.
 local INLINE_MIN_SCALE = 0.6
 local ZOOM_STEP = 1.5
@@ -267,7 +266,9 @@ function M.render_inline(buf)
       end
       local line = lines[#lines]
       local win = vim.fn.bufwinid(buf)
+      -- Copilot-Chat style: full chat width, up to one screen of the chat high
       local width = win ~= -1 and vim.api.nvim_win_get_width(win) or 80
+      local height = math.max(10, (win ~= -1 and vim.api.nvim_win_get_height(win) or 30) - 2)
       local p = Snacks.image.placement.new(
         buf,
         png,
@@ -278,7 +279,7 @@ function M.render_inline(buf)
           -- the last code line: the image goes in virtual lines right under it
           range = { b.last + 1, 0, b.last + 1, #line },
           max_width = width,
-          max_height = INLINE_MAX_HEIGHT,
+          max_height = height,
         })
       )
       placed[buf] = placed[buf] or {}
@@ -286,7 +287,7 @@ function M.render_inline(buf)
       -- Hint when the fitted image would be too small to read.
       local w, h = png_size(png)
       local cw, ch = cell_px()
-      if w and h and math.min(width * cw / w, INLINE_MAX_HEIGHT * ch / h) < INLINE_MIN_SCALE then
+      if w and h and math.min(width * cw / w, height * ch / h) < INLINE_MIN_SCALE then
         vim.api.nvim_buf_set_extmark(buf, ns, b.first, 0, {
           virt_lines_above = true,
           virt_lines = { { { "  󰈈 large diagram: <leader>am to zoom", "Comment" } } },
