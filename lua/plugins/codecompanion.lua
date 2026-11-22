@@ -210,6 +210,14 @@ return {
       display = {
         chat = {
           fold_context = true,
+          -- Write streamed text every 100 ms instead of the default 25 ms. Each
+          -- write redraws the chat, and with render-markdown on (#72) that redraw
+          -- blocks the editor ~9 ms. Measured on a 272-line reply (cloud, Neovim
+          -- 0.12): 25 ms = 10.9-11.5 s CPU, 100 ms = 4.6-4.9 s, less than 25 ms
+          -- with rendering OFF (8.7-9.1 s). Text still appears 10 times a second.
+          -- Rejected: pausing render-markdown while streaming (the whole chat,
+          -- older replies included, flips to raw markdown on every request).
+          stream_interval = 100,
           window = {
             -- Keep the base config numeric. We clamp the real split width in a
             -- ChatOpened autocmd below because CodeCompanion still assumes this
