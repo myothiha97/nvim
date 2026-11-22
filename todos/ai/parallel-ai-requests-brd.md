@@ -51,9 +51,13 @@ first, Claude Code subscription (work and personal accounts).
 
 ### FR1 Non-blocking execution
 
-- FR1.1 Several inline prompts can run at once, across **any number of files
+- FR1.1 Several inline prompts run **simultaneously** (truly at the same
+  time, not one after another), across **any number of files
   and buffers** (fire in file A, switch to file B and fire, and so on), and
   also in the same buffer on non-overlapping ranges. Not limited to one file.
+- FR1.1c The only thing that ever makes a job wait is the concurrency cap
+  (FR5, default 3, open question Q1). Below the cap, every job starts the
+  moment it is fired, whatever file or buffer it is in.
 - FR1.1a Each job stays tied to its own buffer: its indicator and result land
   in that buffer even when it is hidden, in another window/tab, or not focused.
   Switching buffers never cancels, moves or blocks a job.
@@ -151,7 +155,8 @@ first, Claude Code subscription (work and personal accounts).
 - AC1 Four inline prompts in two buffers started within 10 s all run; spinners
   show on the right lines; all four diffs can be reviewed and applied.
 - AC1a Fire in file A, switch to file B and fire, switch to file C and fire:
-  all three run; A and B finish while hidden and their diffs are waiting
+  all three run simultaneously (all three spinners active at once, none
+  queued under the default cap); A and B finish while hidden and their diffs are waiting
   when you return; nothing lands in the wrong buffer.
 - AC2 Adding 20 lines above a running inline job: its spinner and its result
   move with the code.
