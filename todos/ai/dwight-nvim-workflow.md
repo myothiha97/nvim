@@ -5,9 +5,24 @@ nothing here is in the config. Needs dedicated time, do not start piecemeal.
 
 ## Goal
 
-Make in-editor AI feel like dwight.nvim: fire an inline prompt at a piece of
-code, see a loading indicator right on those lines, keep working, and fire
-more prompts at other places while the first ones are still running.
+Main goal (Myo, 2026-11-22): **every chat session and every prompt gets its
+own loading indicator, and new prompts or tasks can be started while others
+are still running**, without waiting for one to finish. Today CodeCompanion
+shows one global spinner at the bottom of the editor for everything.
+
+In practice, like dwight.nvim: fire an inline prompt at a piece of code, see a
+loading indicator right on those lines, keep working, and fire more prompts at
+other places (or in other chats) while the first ones are still running.
+
+Where we stand today (from reading CodeCompanion v20.2 source, not tested):
+
+| | own indicator | runs in parallel |
+| --- | --- | --- |
+| Chats | no, one global fidget spinner | **yes**: each chat opens its own ACP connection (`chat.acp_connection`), so two chats can work at once. Cost: one `claude-agent-acp` process per active chat |
+| Inline prompts | no, same global spinner | **no**: one shared ACP connection, second prompt refused (see below) |
+
+So the gap is: per-chat and per-inline indicators (both), and parallel inline
+prompts.
 
 Sources (read 2026-11-22):
 
@@ -137,6 +152,9 @@ inline paths, two sets of commands and two auth flows. Not recommended.
    end-of-line spinner (no signs), clear it on `InlineFinished`. One timer
    shared by all active jobs. Measure: startup unchanged, no redraw cost when
    idle. Keep the fidget spinner or drop it.
+   For chats, the same idea per chat: a spinner in each chat's winbar/title
+   while its request runs (key it on the chat's id from the request events),
+   so several running chats are visible at once.
 2. Then decide on parallel prompts: check upstream CodeCompanion for a
    per-prompt ACP session option first (an issue/PR is cheaper than owning a
    fork). Only if that is a dead end, prototype a minimal `claude -p` quick-edit
