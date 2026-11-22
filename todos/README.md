@@ -117,6 +117,7 @@ Live colour values and the reasoning behind them are **not** here. See
 | [`avante-ui-optimization.md`](ai/avante-ui-optimization.md)           | Avante disabled since 2026-05-26; CodeCompanion is the active workflow. Do no UI work unless Avante is deliberately re-enabled               | parked |
 | [`codecompanion-mermaid-viewer.md`](ai/codecompanion-mermaid-viewer.md) | GOAL: VS Code-quality Mermaid diagrams in CodeCompanion chat. Inline + zoom viewer shipped (#71, #73) but not readable enough; needs dedicated time | open |
 | [`dwight-nvim-workflow.md`](ai/dwight-nvim-workflow.md) | GOAL: inline prompts and chats run at the same time without blocking, each with its own loading indicator (dwight.nvim-style). CodeCompanion ACP inline allows only one prompt at a time today | open |
+| [`parallel-ai-requests-brd.md`](ai/parallel-ai-requests-brd.md) | BRD for the dwight-style goal: requirements, acceptance criteria, test plan, phases, open questions | open |
 | [`copilot-load-on-toggle.md`](ai/copilot-load-on-toggle.md) | start Copilot on first use instead of every file open; saves one Node server per idle nvim. Done 2026-10-24 by override | done |
 
 ## phase 2
