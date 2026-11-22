@@ -1,5 +1,7 @@
 ## Goal
 
+Status: **done**. Live with Cmd+H/J/K/L (Ghostty `<M-h..l>`) in `lua/config/keymaps.lua`, not `Ctrl+Space`. Marked 2026-11-22.
+
 - `Ctrl+Space` then `h/j/k/l` moves focus across nvim splits AND tmux panes as
   one grid, so the same keys work everywhere.
 - Filed 2026-09-30. Estimate: 30-45 min including a live test.

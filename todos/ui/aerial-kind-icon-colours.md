@@ -1,5 +1,7 @@
 # Aerial panel: distinct icon colours per symbol kind
 
+Status: **done** 2026-11-11 (PR #44, `KIND_COLORS` in `lua/plugins/aerial.lua`). Marked in todos/README.md 2026-11-22.
+
 Requested 2026-11-11, deferred (palette closed until 2026-12-31).
 
 Goal: make `<leader>cs` read like the JetBrains Structure view, where each kind

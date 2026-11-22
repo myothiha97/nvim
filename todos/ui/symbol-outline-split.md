@@ -1,5 +1,7 @@
 # Split the symbol outline into per-language modules
 
+Status: **done (superseded)** 2026-11-22. `<leader>cs` moved to aerial.nvim (PR #40, #44); the Trouble outline is no longer the structure view.
+
 Status: **open** (LOW). Added 2026-09-23.
 
 ## Why

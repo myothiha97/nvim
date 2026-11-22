@@ -1,5 +1,7 @@
 # Fix the Codex ACP adapter after the codex-acp 1.6.2 upgrade
 
+Status: **done**. `auth_method = "chat-gpt"` applied in `lua/plugins/codecompanion.lua` (model pinned to `gpt-5.5`). Marked 2026-11-22.
+
 Diagnosed 2026-08-22. Root cause is known, the values are measured, the edit is
 ~4 lines. Nothing here is a guess. Apply when convenient.
 

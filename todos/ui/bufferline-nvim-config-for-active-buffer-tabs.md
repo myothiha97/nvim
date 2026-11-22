@@ -1,5 +1,7 @@
 ## Plugins link
 
+Status: **done**. Live in `lua/plugins/bufferline.lua`. Marked 2026-11-22.
+
 - https://github.com/akinsho/bufferline.nvim
 
 ## Objectives
