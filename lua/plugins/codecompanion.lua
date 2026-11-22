@@ -383,10 +383,11 @@ return {
       --     can't enlarge the font, so weight + #c4c4c4 (the "bracket top" value
       --     from the prose table above) is the hierarchy. Replaces the theme's
       --     green heading text, which read as a coloured label.
-      --   * inline `code`: a chip, like textPreformat.background (#ffffff1a on
-      --     the sidebar bg). NOT the theme's olive green900 block that the note
-      --     above removed: a neutral `surface.raised` step (#2c2c2b on #171716).
-      --     The #8ab4d8 text stays as tuned.
+      --   * inline `code`: colour only, NO background. A Copilot-style chip
+      --     (surface.raised) shipped in #72 and Myo rejected it the same day
+      --     (2026-11-22): dense answers turn into a row of boxes. Keep bg unset;
+      --     the group must still exist, or RenderMarkdownCodeInline falls back to
+      --     RenderMarkdownCode, which is remapped to the code-BLOCK panel below.
       --   * code blocks: one `surface.panel` step above the chat bg (#1e1e1d), the
       --     same small lift VS Code gives blocks over the chat panel. Mirrors Pmenu.
       --   * bullets: prose colour, not the theme's bold orange list marker.
@@ -405,7 +406,7 @@ return {
         {
           name = "CodeCompanionChatCodeInline",
           from = { "RenderMarkdownCodeInline" },
-          opts = { fg = "#8ab4d8", bg = surface.raised },
+          opts = { fg = "#8ab4d8" },
         },
         { name = "CodeCompanionChatBullet", from = { "RenderMarkdownBullet" }, opts = { fg = md_text } },
         -- Quote bar and `---` rule: quiet grey lines like textBlockQuote.border,
