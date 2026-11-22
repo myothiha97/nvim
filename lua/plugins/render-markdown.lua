@@ -1,4 +1,5 @@
--- Markdown rendering for real `.md` files plus LSP hover popups and Avante windows.
+-- Markdown rendering for real `.md` files, LSP hover popups, Avante windows and
+-- the CodeCompanion chat (its own Copilot Chat style, see overrides.filetype).
 -- Scope is controlled purely by `file_types` / `ft` below — never attaches to
 -- code buffers (lua, ts, go, etc.), the blink.cmp menu, or the blink doc window.
 
@@ -12,7 +13,7 @@ return {
   {
     "MeanderingProgrammer/render-markdown.nvim",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
-    ft = { "markdown", "Avante" },
+    ft = { "markdown", "Avante", "codecompanion" },
     -- Full raw/rendered toggle for the current buffer. The `render_modes` allowlist
     -- above keeps normal/visual rendered and only insert raw — handy for reading, but
     -- it hides backtick/asterisk symbols you need for vim motions while editing. This
@@ -30,13 +31,15 @@ return {
         function()
           require("render-markdown").buf_toggle()
         end,
-        ft = { "markdown", "Avante" },
+        ft = { "markdown", "Avante", "codecompanion" },
         mode = { "n", "x" },
         desc = "Toggle Markdown render (raw/rendered)",
       },
     },
     opts = {
-      file_types = { "markdown", "Avante" },
+      -- `codecompanion` is the chat buffer only. Its input split
+      -- (`codecompanion_chat_input`) stays raw on purpose: you type there.
+      file_types = { "markdown", "Avante", "codecompanion" },
       -- We don't want render-markdown providing blink.cmp/cmp sources.
       completions = { lsp = { enabled = false } },
       -- Strip ALL heading color: `backgrounds = {}` drops the full-width line
@@ -104,6 +107,56 @@ return {
             -- "thin" border so hover docs don't get the rule lines, just
             -- concealed fences + treesitter colors.
             code = { language = false, sign = false, disable_background = true, border = "hide" },
+          },
+        },
+        -- CodeCompanion chat, styled after VS Code Copilot Chat. Nothing here
+        -- reaches .md files, hover or Avante: it is a filetype override.
+        --
+        -- WARN: SILENT FAILURE. The chat buffer is ALSO buftype=nofile, so it
+        -- gets the hover block above first; render-markdown applies buftype and
+        -- THEN filetype overrides (lib/config.lua, deep-extend "force"). Any key
+        -- the hover block sets that this block does not re-set leaks into the
+        -- chat. That is why `code` below spells out every hover key.
+        --
+        -- Colours live with the other chat colours in plugins/codecompanion.lua
+        -- (winhighlight remaps RenderMarkdownCode/CodeInline/Bullet and the
+        -- heading groups in the chat window only).
+        filetype = {
+          codecompanion = {
+            -- Stay rendered in insert mode too, matching the chat's own
+            -- concealcursor = "nvic" (plugins/codecompanion.lua); otherwise the
+            -- whole reply flips to raw markdown when you press `i`.
+            render_modes = true,
+            win_options = { concealcursor = { rendered = "nvic" } },
+            sign = { enabled = false },
+            -- The hover block pads with NormalFloat; the chat pads with its own
+            -- prose group (Normal is remapped in the chat window).
+            padding = { highlight = "Normal" },
+            -- Headings: plain semibold text, `##` hidden, no icon, no bar.
+            -- `icons = { "" }` + inline position conceals the marker; with no
+            -- icon render-markdown would leave the raw `##` showing.
+            heading = {
+              position = "inline",
+              icons = { "" },
+              foregrounds = { "CodeCompanionChatHeading" },
+              backgrounds = {},
+              sign = false,
+            },
+            -- Code blocks: a slightly raised panel, no language header and no
+            -- border line. `thick` turns the hidden fence lines into one row of
+            -- block background above and below, the padding VS Code gives.
+            code = {
+              language = false,
+              sign = false,
+              disable_background = { "diff" }, -- plugin default: diffs keep their own colours
+              border = "thick",
+              width = "full",
+              left_pad = 2,
+              -- Inline `code` chip: one cell of chip colour on each side.
+              inline_pad = 1,
+            },
+            -- Small round bullets like Copilot Chat, instead of ● ○ ◆ ◇.
+            bullet = { icons = { "•", "◦", "▪", "▫" } },
           },
         },
       },
