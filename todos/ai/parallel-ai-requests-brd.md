@@ -34,7 +34,7 @@ first, Claude Code subscription (work and personal accounts).
 
 - **S1** As Myo, I select a Go function, `<leader>ai` "add error wrapping",
   then jump to another function and `<leader>ai` "write table tests", without
-  waiting for the first.
+  waiting for the first, then switch to another file and fire a third.
 - **S2** I keep typing elsewhere in the same file while an inline job runs, and
   its result still replaces exactly the code I selected.
 - **S3** I ask a long question in chat A, switch to chat B for something else,
@@ -51,8 +51,14 @@ first, Claude Code subscription (work and personal accounts).
 
 ### FR1 Non-blocking execution
 
-- FR1.1 Several inline prompts can run at once: in different buffers, and in
-  the same buffer on non-overlapping ranges.
+- FR1.1 Several inline prompts can run at once, across **any number of files
+  and buffers** (fire in file A, switch to file B and fire, and so on), and
+  also in the same buffer on non-overlapping ranges. Not limited to one file.
+- FR1.1a Each job stays tied to its own buffer: its indicator and result land
+  in that buffer even when it is hidden, in another window/tab, or not focused.
+  Switching buffers never cancels, moves or blocks a job.
+- FR1.1b A finished job in a buffer you are not looking at waits for review
+  there and tells you which file is ready (one notify line naming the file).
 - FR1.2 Several chats can run at once (already true upstream, must stay true).
 - FR1.3 Inline and chat jobs run at the same time in any mix.
 - FR1.4 Starting a job never freezes the editor (no sync waits on the UI
@@ -144,6 +150,9 @@ first, Claude Code subscription (work and personal accounts).
 
 - AC1 Four inline prompts in two buffers started within 10 s all run; spinners
   show on the right lines; all four diffs can be reviewed and applied.
+- AC1a Fire in file A, switch to file B and fire, switch to file C and fire:
+  all three run; A and B finish while hidden and their diffs are waiting
+  when you return; nothing lands in the wrong buffer.
 - AC2 Adding 20 lines above a running inline job: its spinner and its result
   move with the code.
 - AC3 Two chats plus one inline job run together, each with its own spinner.
