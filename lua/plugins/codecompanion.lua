@@ -185,6 +185,36 @@ return {
           --   close = { modes = { n = "q", i = "<C-c>" } },
           --   stop = { modes = { n = "<C-c>" } },
           -- },
+          keymaps = {
+            -- `gC` in a Claude Code chat: pick the reasoning effort for THIS chat
+            -- (low | medium | high | xhigh | max). Same as `/acp_session_options`
+            -- -> effort, minus the first picker. Runs only on the keypress.
+            -- WARNING: uses CodeCompanion internals (v20.2, 14b4993): the
+            -- `acp_session_options` slash command module and its `show_values`
+            -- method, plus `chat.acp_connection:get_config_options()`. Re-check
+            -- on every plugin bump; if renamed, `gC` errors on press only (no
+            -- startup effect). Fallback: type `/acp_session_options`.
+            acp_effort = {
+              modes = { n = "gC" },
+              description = "Change reasoning effort (Claude Code)",
+              callback = function(chat)
+                local conn = chat.acp_connection
+                if not conn then
+                  return vim.notify("Effort: chat is not connected to Claude Code yet", vim.log.levels.WARN)
+                end
+                local cmd =
+                  require("codecompanion.interactions.chat.slash_commands.builtin.acp_session_options").new({
+                    Chat = chat,
+                  })
+                for _, opt in ipairs(conn:get_config_options()) do
+                  if opt.category == "thought_level" then
+                    return cmd:show_values(opt)
+                  end
+                end
+                cmd:execute() -- agent sent no effort option: show the full list
+              end,
+            },
+          },
           tools = {
             -- `require_approval_before` decides whether the agent PAUSES and waits
             -- for your go-ahead BEFORE this tool runs -- the "Approval Required:
