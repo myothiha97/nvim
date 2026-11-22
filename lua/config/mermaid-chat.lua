@@ -269,6 +269,14 @@ function M.render_inline(buf)
       -- Copilot-Chat style: full chat width, up to one screen of the chat high
       local width = win ~= -1 and vim.api.nvim_win_get_width(win) or 80
       local height = math.max(10, (win ~= -1 and vim.api.nvim_win_get_height(win) or 30) - 2)
+      -- Never draw bigger than the PNG's own pixels: snacks would scale a small
+      -- diagram up (PNG 72 dpi metadata x terminal scale), ~2.7x for 4 nodes.
+      local w, h = png_size(png)
+      local cw, ch = cell_px()
+      if w and h then
+        width = math.min(width, math.ceil(w / cw))
+        height = math.min(height, math.ceil(h / ch))
+      end
       local p = Snacks.image.placement.new(
         buf,
         png,
@@ -285,8 +293,6 @@ function M.render_inline(buf)
       placed[buf] = placed[buf] or {}
       table.insert(placed[buf], p)
       -- Hint when the fitted image would be too small to read.
-      local w, h = png_size(png)
-      local cw, ch = cell_px()
       if w and h and math.min(width * cw / w, height * ch / h) < INLINE_MIN_SCALE then
         vim.api.nvim_buf_set_extmark(buf, ns, b.first, 0, {
           virt_lines_above = true,
@@ -339,7 +345,8 @@ local function draw(v)
 
   local out = ("%s.%dx%d+%d+%d@%dx%d.png"):format((v.src:gsub("%.png$", "")), crop_w, crop_h, x, y, out_w, out_h)
   local function show()
-    if view ~= v or not v.win:valid() then
+    -- buf_valid, not valid(): valid() also needs the window, which may not exist yet
+    if view ~= v or not v.win:buf_valid() then
       return
     end
     local old = v.img
@@ -347,13 +354,6 @@ local function draw(v)
       inline = false,
       max_width = cols,
       max_height = rows,
-      on_update_pre = function(p)
-        if not v.win:win_valid() then
-          local loc = p:state().loc
-          v.win.opts.width, v.win.opts.height = loc.width, loc.height
-          v.win:show()
-        end
-      end,
     })
     if old then
       pcall(old.close, old)
@@ -362,18 +362,15 @@ local function draw(v)
   if uv.fs_stat(out) then
     return show()
   end
-  run({
-    "magick",
-    v.src,
-    "-crop",
-    ("%dx%d+%d+%d"):format(crop_w, crop_h, x, y),
-    "+repage",
-    "-filter",
-    "Lanczos",
-    "-resize",
-    ("%dx%d!"):format(out_w, out_h),
-    out,
-  }, function(r)
+  -- `-scale` (box filter): ~0.75 s on a 4600 px render vs ~1.2 s for Lanczos,
+  -- with no visible difference on flat diagram art. At 100% only crop (~0.4 s).
+  -- WARN: cost grows with the render's size; a 4600 px PNG is the slow case.
+  local cmd = { "magick", v.src, "-crop", ("%dx%d+%d+%d"):format(crop_w, crop_h, x, y), "+repage" }
+  if out_w ~= crop_w or out_h ~= crop_h then
+    vim.list_extend(cmd, { "-scale", ("%dx%d!"):format(out_w, out_h) })
+  end
+  cmd[#cmd + 1] = out
+  run(cmd, function(r)
     if r.code ~= 0 then
       return vim.notify("Mermaid viewer: magick failed\n" .. vim.trim(r.stderr or ""), vim.log.levels.ERROR)
     end
@@ -460,7 +457,11 @@ local function open_view(png, text)
       close_view()
     end,
   })
+  -- full view size from the start: the window must not shrink to the fit image,
+  -- or every zoomed crop gets scaled back down into it
+  win.opts.width, win.opts.height = view_cells()
   win:open_buf()
+  win:show()
   v = { src = png, svg_text = text, w = w, h = h, zoom = 1, cx = w / 2, cy = h / 2, win = win }
   view = v
   vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave" }, { buffer = win.buf, once = true, callback = close_view })
