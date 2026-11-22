@@ -87,6 +87,50 @@ commit `14b4993`, `interactions/inline/adapters/acp.lua`):
 - Not checked: whether inline on an HTTP adapter (Copilot, Anthropic API)
   allows parallel prompts. We don't use HTTP for inline anyway.
 
+## Risks of running several tasks at once
+
+Myo's view (2026-11-22): with Neovim keybindings this workflow would raise AI
+leverage in nvim a lot. These are the costs to design around.
+
+### Parallel edits clashing in the same buffer or file
+
+How dwight handles it:
+
+- **Same buffer, inline:** refuses a new job whose line range overlaps a
+  running one. Non-overlapping jobs are allowed; when one finishes and changes
+  the line count, later jobs' stored ranges are shifted. Gap: ranges are plain
+  line numbers, so *your own* typing during a job is not tracked (results can
+  land on the wrong lines). Also no check across buffers or against multi-file
+  `/stub`/`/code` jobs touching a file another job is editing.
+- **Agents:** `:DwightAgent` runs in the working tree with no lock, so two
+  agents (or an agent plus your edits) can overwrite each other. Only Swarm
+  mode isolates agents, each in its own git worktree (`max_parallel = 3`), and
+  merges afterwards.
+
+What we would need: extmark-tracked ranges (follow your edits), an overlap
+check like dwight's, a diff before apply, and for parallel *chats/agents* on
+the same repo either one-task-per-area discipline or worktrees.
+
+### Claude subscription usage and rate limits
+
+How dwight handles it:
+
+- **No cap on parallel inline jobs.** Each one is a full `claude -p` start.
+  It only prints "Job #N started (K parallel)".
+- **Agents:** a rate-limit / 429 / network error is retried once by default
+  (backoff 30 s, then 60 s, `max_retries`). Swarm caps agents per wave at 3.
+- **Cost limits** (`cost_limits.per_session`, `per_day`, `warn_threshold`):
+  dollar estimates from token pricing, checked before Auto/Swarm tasks and
+  agent starts, not for inline. On a flat subscription the dollar figure is
+  not what runs out; the 5-hour usage window is.
+
+For us: inline, chat and Claude Code in the terminal all share the same
+subscription window (and the work/personal account toggle splits it). Running
+3-4 things at once burns it 3-4x faster. A design should have a small max
+number of concurrent requests (queue the rest, show "queued" in the
+indicator), and surface a limit error on the job's own indicator instead of a
+global notify.
+
 ## Full feature list (from docs + code)
 
 | area | commands | what it is |
