@@ -234,6 +234,19 @@ return {
             },
           },
         },
+        -- Floating "CodeCompanion Prompt" input (<leader>ai): styled like the Noice
+        -- cmdline popup it replaces (rounded border, DiagnosticInfo border/title,
+        -- editor bg), instead of the default dim single border, cream title and
+        -- darker float bg. Theme groups only, so it follows a colorscheme change.
+        -- Window-local (winhighlight), so other floats are untouched.
+        input = {
+          window = {
+            border = "rounded",
+            opts = {
+              winhighlight = "NormalFloat:Normal,FloatBorder:DiagnosticInfo,FloatTitle:DiagnosticInfo",
+            },
+          },
+        },
       },
 
       -- Diff rendering REFERENCE (not used at runtime -- the present_diff override
@@ -876,21 +889,22 @@ return {
       })
     end,
     keys = {
-      -- Normal mode: select the current line first (`V`) so the inline assistant
-      -- has a selection to anchor to. Without a selection the classifier often
-      -- routes the response to a chat buffer instead of editing in place; with
-      -- one it reliably picks `replace`/`add`. `:` in visual mode auto-inserts
-      -- the `'<,'>` range, leaving `:'<,'>CodeCompanion ` prefilled for your prompt.
+      -- Inline ask. Run with NO prompt text, :CodeCompanion opens v20's floating
+      -- "CodeCompanion Prompt" input at the cursor (send: <C-s>, or <CR> in normal
+      -- mode; q/<Esc> closes). Typing the prompt after the command instead skips
+      -- the float and uses the cmdline. `:` in visual mode adds the `'<,'>` range.
+      -- Normal mode selects the current line first (`V`) so the edit stays
+      -- anchored to it, as before.
       {
         "<leader>ai",
-        "V:CodeCompanion ",
+        "V:CodeCompanion<cr>",
         mode = "n",
         desc = "CodeCompanion: Inline ask (current line)",
       },
-      -- Visual mode: the existing selection is the target; `:` adds the range.
+      -- Visual mode: the existing selection is the target.
       {
         "<leader>ai",
-        ":CodeCompanion ",
+        ":CodeCompanion<cr>",
         mode = "x",
         desc = "CodeCompanion: Inline ask (selection)",
       },
