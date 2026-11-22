@@ -195,6 +195,32 @@ inline paths, two sets of commands and two auth flows. Not recommended.
 - **Cost:** each parallel inline job is a full `claude -p` start on the
   subscription and counts toward the 5-hour limit, same pool as chat.
 
+## Timeline estimate (safe build + thorough testing)
+
+Estimate made 2026-11-22, before any prototype. Based on how long similar
+CodeCompanion work took in this repo (styling, fold, mermaid). "Thread days" =
+Claude working days; "Myo" = your hands-on time.
+
+| phase | what | thread days | Myo |
+| --- | --- | --- | --- |
+| 1 | Per-inline (extmark range, end-of-line spinner) + per-chat spinners, shared timer, headless checks, perf measure | 1-1.5 | ~30 min real-use check |
+| 2a | Parallel inline via upstream: issue/PR to CodeCompanion | 0.5 of our work; upstream wait unknown (days to never) | ~10 min to OK posting upstream |
+| 2b | Parallel inline via local per-prompt ACP connection (touches plugin internals, WARNING comments, re-check on bumps) | 2-3 | 30-60 min |
+| 2c | Parallel inline via own `claude -p` quick-edit (range tracking, overlap check, diff before apply, cancel) | 3-4 | ~1 h |
+| 3 | Concurrency cap + queue ("queued" in spinner), errors/limits shown on the job's own spinner | 0.5-1 | ~15 min |
+| 4 | Thorough testing: headless suite with a fake ACP agent (3-4 parallel prompts, typing during a run, overlapping ranges, cancel, errors, limit hit, chat + inline mixed), a short real `claude-agent-acp` run, startup/idle/streaming perf vs main | 1.5-2 | none for this part |
+| 5 | Real use on your projects, fix what turns up | 0.5-1 of fixes | ~1 week of normal use, 2-3 short reports |
+
+Totals with the recommended route (try 2a, build 2b meanwhile):
+**about 6-9 thread days, 1.5-2 weeks calendar including your real-use week,
+and roughly 2-3 hours of your own active time.** Route 2c instead of 2b adds
+about 1-2 thread days. Each phase ships as its own PR, so phase 1 is useful on
+its own even if parallel inline slips.
+
+Risks that could stretch it: CodeCompanion internals changing on the next
+plugin bump (2b), ACP agent behaviour with several sessions at once (only
+learnable by testing), and real-use bugs around edits landing while you type.
+
 ## Comparison: ThePrimeagen's 99
 
 Myo (2026-11-22): the workflow is very similar to 99. Repo:
