@@ -1,3 +1,5 @@
+Status: **done**. Live as visual-mode `<leader>p` = `"_dP` in `lua/config/keymaps.lua`. Marked 2026-11-22.
+
 
 # Paste Without Losing Clipboard Content
 
