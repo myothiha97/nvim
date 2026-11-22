@@ -152,8 +152,8 @@ return {
               border = "thick",
               width = "full",
               left_pad = 2,
-              -- Inline `code` chip: one cell of chip colour on each side.
-              inline_pad = 1,
+              -- No inline_pad: inline code has no chip (see codecompanion.lua),
+              -- so padding cells would only show as stray spaces.
             },
             -- Small round bullets like Copilot Chat, instead of ● ○ ◆ ◇.
             bullet = { icons = { "•", "◦", "▪", "▫" } },
