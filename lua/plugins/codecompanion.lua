@@ -713,6 +713,68 @@ return {
         end,
       })
 
+      -- Fold each run of 2+ consecutive tool-call lines ("Read ...", "Execute ...")
+      -- into one closed line, "  7 tool calls", once a reply finishes (Myo,
+      -- 2026-11-22). `za` opens a run; `K` on a line still shows its details.
+      -- Runs while the reply streams stay open, so progress stays visible.
+      -- Cost: one extmark query + a few `:fold` per reply, nothing per keystroke.
+      --
+      -- WARNING: plugin internals (CodeCompanion v20.2), no public API for this:
+      --   * tool-call lines are found by the "CodeCompanion-tool_calls" extmark
+      --     namespace (ui/tool_calls.lua ToolCalls.mark);
+      --   * the fold label goes into ui/folds.lua `Folds.fold_summaries` as type
+      --     "reasoning", so the plugin's own foldtext draws it.
+      -- If either is renamed on a plugin bump, this silently does nothing (pcall);
+      -- re-check both after every CodeCompanion update.
+      local function fold_tool_calls(bufnr)
+        local ns = vim.api.nvim_get_namespaces()["CodeCompanion-tool_calls"]
+        local winnr = vim.fn.bufwinid(bufnr)
+        if not ns or winnr == -1 then
+          return
+        end
+        local rows = {}
+        for _, mark in ipairs(vim.api.nvim_buf_get_extmarks(bufnr, ns, 0, -1, {})) do
+          rows[#rows + 1] = mark[2]
+        end
+        table.sort(rows)
+
+        local folds = require("codecompanion.interactions.chat.ui.folds")
+        local function fold(first, last, count)
+          if
+            count < 2
+            or vim.api.nvim_win_call(winnr, function()
+                return vim.fn.foldlevel(first + 1)
+              end)
+              > 0
+          then
+            return -- single call, or already folded on an earlier reply
+          end
+          folds.fold_summaries[bufnr] = folds.fold_summaries[bufnr] or {}
+          folds.fold_summaries[bufnr][first] = { content = "  " .. count .. " tool calls", type = "reasoning" }
+          vim.api.nvim_win_call(winnr, function()
+            vim.cmd(string.format("%d,%dfold", first + 1, last + 1))
+          end)
+        end
+
+        -- A run continues across blank lines only.
+        local first, last, count = nil, nil, 0
+        for _, row in ipairs(rows) do
+          local joined = last
+            and vim.trim(table.concat(vim.api.nvim_buf_get_lines(bufnr, last + 1, row, false), "")) == ""
+          if joined then
+            last, count = row, count + 1
+          else
+            if first then
+              fold(first, last, count)
+            end
+            first, last, count = row, row, 1
+          end
+        end
+        if first then
+          fold(first, last, count)
+        end
+      end
+
       -- One full markdown render when a reply finishes. render-markdown's debounce
       -- is leading-edge only (lib/decorator.lua: it renders on the first event,
       -- then ignores events until 100 ms pass with none), and CodeCompanion writes
@@ -735,6 +797,7 @@ return {
               pcall(function()
                 require("render-markdown").render({ buf = bufnr, event = "CodeCompanionChatDone" })
               end)
+              pcall(fold_tool_calls, bufnr)
             end
           end)
         end,
