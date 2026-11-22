@@ -195,11 +195,47 @@ inline paths, two sets of commands and two auth flows. Not recommended.
 - **Cost:** each parallel inline job is a full `claude -p` start on the
   subscription and counts toward the 5-hour limit, same pool as chat.
 
+## Comparison: ThePrimeagen's 99
+
+Myo (2026-11-22): the workflow is very similar to 99. Repo:
+<https://github.com/ThePrimeagen/99>, read at `c174224` (2026-06-11).
+
+- **What it is:** a small (~10k lines incl. tests, 317 commits since
+  2025-12-24) "AI + hand-coding" client. Visual-selection replace (`visual`),
+  project `search` into the quickfix list, `vibe`, and a `Worker` extension.
+  The README says BETA, APIs may still change, and the author now steers it
+  towards `search`/`work` rather than inline replace.
+- **Parallel inline requests:** yes. Each request is its own `vim.system` CLI
+  process (OpenCode by default; Claude Code and cursor-agent providers). The
+  agent writes its answer to a temp file, which then replaces the range.
+  `stop_all_requests()` kills them all. No overlap check and no concurrency
+  cap found.
+- **Loading indicators:** better than dwight. The range is held by **extmarks**
+  above and below the selection (`ops/marks.lua`), so it follows your edits;
+  a spinner virtual line ("⠋ Implementing", 250 ms) sits on each mark and can
+  show the agent's last stdout lines. If you delete the original selection,
+  the result is dropped with an error instead of landing in the wrong place.
+  There is also a floating status window that lists in-flight requests.
+- **Maintenance:** last commit 2026-06-11 (5 months), community PRs merged
+  until May. More active than dwight, still beta.
+- **Safety:** the Claude Code provider runs `claude --dangerously-skip-permissions
+  --print`, same problem as dwight's agents. Its temp dir must be inside the
+  project (`tmp_dir = "./tmp"`).
+- **Perf note:** after `setup()` the status window loop re-arms a 1 s
+  `defer_fn` for the whole session, even when idle. Cheap, but not zero.
+
+**Verdict:** 99 is the better *reference* for our goal: small, readable, and
+its extmark range + per-request spinner is the right design (dwight's plain
+line numbers are not). Neither should be installed as a base: both overlap
+CodeCompanion, both run Claude with permissions turned off, and 99 is still
+changing APIs. Copy the idea, not the plugin.
+
 ## Suggested plan (when there is time)
 
 1. Build only the **per-range indicator** on top of CodeCompanion inline:
    on `InlineStarted` place an extmark range over the target lines with an
-   end-of-line spinner (no signs), clear it on `InlineFinished`. One timer
+   end-of-line spinner (no signs), clear it on `InlineFinished`. Model it on 99's
+   `ops/marks.lua` + `ops/request_status.lua` (marks above/below the range). One timer
    shared by all active jobs. Measure: startup unchanged, no redraw cost when
    idle. Keep the fidget spinner or drop it.
    For chats, the same idea per chat: a spinner in each chat's winbar/title
