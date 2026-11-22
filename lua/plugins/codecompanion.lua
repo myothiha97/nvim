@@ -379,10 +379,12 @@ return {
       -- Copilot Chat style markdown (2026-11-22). render-markdown draws the chat
       -- (overrides.filetype.codecompanion in plugins/render-markdown.lua); these
       -- groups give it VS Code Copilot Chat's look, chat window only:
-      --   * headings: semibold, same neutral as prose but one step up. A terminal
-      --     can't enlarge the font, so weight + #c4c4c4 (the "bracket top" value
-      --     from the prose table above) is the hierarchy. Replaces the theme's
-      --     green heading text, which read as a coloured label.
+      --   * headings + **bold**: a terminal has no font sizes, so colour gives the
+      --     two levels Copilot gets from size (Myo picked option D, 2026-11-22;
+      --     A neutral #c4c4c4 and B brighter #dcdcdc read as "same white").
+      --       headings  #c48956  palette.variants.boolean.orange_mid (muted orange)
+      --       **bold**  #cfcea7  palette.variants.delimiter.pale_yellow (soft sand)
+      --     Both low-chroma theme candidates, clear of the blue inline code.
       --   * inline `code`: colour only, NO background. A Copilot-style chip
       --     (surface.raised) shipped in #72 and Myo rejected it the same day
       --     (2026-11-22): dense answers turn into a row of boxes. Keep bg unset;
@@ -401,7 +403,8 @@ return {
         heading_from[level] = "@markup.heading." .. level .. ".markdown"
       end
       vim.list_extend(chat_highlights, {
-        { name = "CodeCompanionChatHeading", from = heading_from, opts = { fg = "#c4c4c4", bold = true } },
+        { name = "CodeCompanionChatHeading", from = heading_from, opts = { fg = "#c48956", bold = true } },
+        { name = "CodeCompanionChatStrong", from = { "@markup.strong" }, opts = { fg = "#cfcea7", bold = true } },
         { name = "CodeCompanionChatCode", from = { "RenderMarkdownCode" }, opts = { bg = surface.panel } },
         {
           name = "CodeCompanionChatCodeInline",
