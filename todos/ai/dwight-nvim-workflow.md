@@ -270,10 +270,11 @@ changing APIs. Copy the idea, not the plugin.
 2. Make parallel inline prompts work (required). Pick the route by cost:
    a. Check upstream CodeCompanion for a per-prompt ACP connection/session
       option, and open an issue/PR if there is none (cheapest to maintain).
-   b. If upstream won't do it soon, a local override that gives each inline
-      prompt its own ACP connection (like chats already have). Costs one
-      `claude-agent-acp` process per running prompt; mark it with a WARNING
-      comment since it touches plugin internals.
+   b. Until upstream merges it, carry the same change as one commit on a
+      pinned CodeCompanion fork (each inline prompt gets its own ACP
+      connection, like chats). Costs one `claude-agent-acp` process per running
+      prompt; rebase the commit on each plugin bump. Decision and reasoning:
+      [`parallel-ai-requests-brd.md`](parallel-ai-requests-brd.md) section 9.
    c. Fallback: a minimal `claude -p` quick-edit command like dwight's (one
       file, extmark-tracked ranges, overlap check, diff before apply).
    Whatever the route: a max-concurrency cap with a queue (see risks above).

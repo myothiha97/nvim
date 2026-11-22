@@ -183,14 +183,46 @@ first, Claude Code subscription (work and personal accounts).
   job vs main.
 - Myo's real-use week (AC9), with short reports.
 
-## 9. Phases and timeline
+## 9. Decision: build on CodeCompanion or write our own plugin?
+
+**Recommendation: build on CodeCompanion.** Write our own inline plugin only
+if upstream refuses the change *and* carrying the patch becomes painful.
+
+What blocks parallel inline today (CodeCompanion v20.2, `14b4993`):
+`lua/codecompanion/interactions/inline/adapters/acp.lua` (369 lines) keeps the
+connection and the running prompt in module-level locals (`_connection`,
+`_running`, `_connecting`). `ACP:submit` refuses when `_running` is set. Chats
+don't have this limit because each chat owns its own `acp_connection`. So the
+fix is contained: give each inline prompt its own connection, the way chats
+already work.
+
+| | build on CodeCompanion | own inline plugin (99-style, `claude -p` per job, keep CodeCompanion for chat) |
+| --- | --- | --- |
+| Indicators (phase 1) | Public events only (`InlineStarted`/`InlineFinished`, request events). No internals | Built in, our own code |
+| Parallel inline | Upstream PR to make the connection per prompt. Until merged, carry it as one commit on a pinned fork (as with easy-dotnet.nvim), not by shadowing the module | Native: one process per job |
+| Reused for free | Diff review (`ga`/`gr`), edits on a buffer copy, permission handling, follow-up prompts in the same session, context, account toggle, model/effort settings | Must rebuild diff review, range tracking, prompt/context building, account handling. No follow-up conversation |
+| Safety | Unchanged: the agent only edits a copy of the buffer, permission checks stay | Fine only if run read-only (text answer, no tools, never `--dangerously-skip-permissions`). Both dwight and 99 get this wrong |
+| Perf | One `claude-agent-acp` process per running prompt, reused for follow-ups; nothing idle | One cold `claude` CLI start per job (seconds each); nothing idle |
+| Maintenance | Low if merged upstream. Fork commit needs a rebase on each bump until then | We own all of it (~1-2k lines). Two AI stacks in one config |
+| Timeline | ~6-9 thread days (section 10) | ~9-13 thread days (+3-4 for diff, ranges, context, cancel) |
+
+Why: the hard parts (safe edits, diff review, sessions, accounts) already
+exist and work in CodeCompanion, and the blocker is one small, well-located
+design choice that upstream has already solved for chats. A separate plugin
+would mean a second AI stack to maintain forever, for a feature that is
+mostly a concurrency change.
+
+Fallback trigger: switch to our own plugin if upstream declines and the fork
+commit conflicts on two plugin bumps in a row.
+
+## 10. Phases and timeline
 
 Estimate from [`dwight-nvim-workflow.md`](dwight-nvim-workflow.md#timeline-estimate-safe-build--thorough-testing):
 
 | phase | scope | thread days | Myo |
 | --- | --- | --- | --- |
 | 1 | FR2 indicators (inline + chat) | 1-1.5 | ~30 min |
-| 2 | FR1 parallel inline: upstream ask (needs Myo's OK) + local per-prompt ACP connection; `claude -p` fallback only if needed | 2-3 (fallback 3-4) | 30-60 min |
+| 2 | FR1 parallel inline: upstream PR (needs Myo's OK) + same change carried on a pinned fork until merged; own plugin only per section 9 fallback trigger | 2-3 | 30-60 min |
 | 3 | FR4 cancel, FR5 cap + queue, FR6 errors | 0.5-1 | ~15 min |
 | 4 | Test suite + perf (section 8) | 1.5-2 | none |
 | 5 | Real-use week + fixes | 0.5-1 | 1 week of use |
@@ -198,7 +230,7 @@ Estimate from [`dwight-nvim-workflow.md`](dwight-nvim-workflow.md#timeline-estim
 Total about 6-9 thread days, 1.5-2 weeks calendar, 2-3 hours of Myo's time.
 One PR per phase; phase 1 is useful alone.
 
-## 10. Risks
+## 11. Risks
 
 - CodeCompanion internals change on a plugin bump (phase 2 local route).
 - ACP agent behaviour with several sessions at once is unknown until tested.
@@ -208,7 +240,7 @@ One PR per phase; phase 1 is useful alone.
 - Parallel agents editing the same file on disk (chat tools) can clash; only
   inline is range-guarded by this design.
 
-## 11. Open questions
+## 12. Open questions
 
 - Q1 Default concurrency cap: 3? Separate caps for inline and chat?
 - Q2 OK to open an issue/PR on CodeCompanion upstream (public post)?
