@@ -89,7 +89,7 @@ require("config.mouse-hover").setup()
 
 -- ── CodeCompanion chat: Mermaid diagrams ─────────────────────────────────
 -- Inline image under each ```mermaid block once a reply finishes, and
--- <leader>am to open one in the browser. The module loads when a chat opens;
+-- <leader>am for a zoomable view. The module loads when a chat opens;
 -- see the header of lua/config/mermaid-chat.lua for why it never renders while
 -- a reply is streaming.
 vim.api.nvim_create_autocmd("FileType", {
