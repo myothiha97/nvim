@@ -659,7 +659,11 @@ return {
             end
 
             -- Pin the folders above the top rows (VS Code sticky scroll).
-            require("config.explorer-sticky").attach(picker)
+            -- DISABLED 2026-11-23 (Myo): the pinned rows float at zindex 45,
+            -- above the <leader>e oil backdrop (40, plugins/oil.lua), so they
+            -- stayed lit over the blanked sidebar. To restore, uncomment the
+            -- line and set its float zindex below 40 (list zindex + 1 = 34).
+            -- require("config.explorer-sticky").attach(picker)
 
             local ref = picker:ref()
             picker.list.win:on({ "WinEnter", "BufEnter" }, function()
