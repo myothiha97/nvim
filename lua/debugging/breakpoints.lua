@@ -4,7 +4,7 @@
 --   { files = { [abs path] = { {line, condition, hitCondition, logMessage, disabled?} } },
 --     functions = { "main.worker", ... } }
 --
--- Disabled breakpoints (JetBrains "Disable", <leader>dd / right-click): nvim-dap
+-- Disabled breakpoints (JetBrains "Disable", <leader>db / right-click): nvim-dap
 -- has no disabled state, so a disabled breakpoint is removed from nvim-dap
 -- (never sent to the adapter) and kept here as a grey sign in our own sign
 -- group, which moves with edits like nvim-dap's own signs. Mute All
@@ -255,7 +255,7 @@ function M.reset_signs()
 end
 
 -- Remove a disabled breakpoint on the line; true if there was one.
--- (A click or <leader>db on a disabled breakpoint removes it, as in JetBrains.)
+-- (A click or <leader>dd on a disabled breakpoint removes it, as in JetBrains.)
 function M.remove_disabled(buf, line)
   local d = disabled_at(buf, line)
   if d then

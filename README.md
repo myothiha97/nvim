@@ -298,9 +298,9 @@ join the running gopls instead of starting a new one.
 | Key                                       | Action                                                        |
 | ----------------------------------------- | ------------------------------------------------------------- |
 | `<leader>dc`                              | Start / continue                                              |
-| `<leader>db` · click the gutter           | Toggle breakpoint (saved per project)                         |
+| `<leader>dd` · click the gutter           | Toggle breakpoint (saved per project)                         |
 | `<leader>dN` · `<leader>dH` · `<leader>dL` | Breakpoint condition · hit count · log point                 |
-| `<leader>dd` · `<leader>dD`               | Disable this breakpoint · mute all                            |
+| `<leader>db` · `<leader>dD`               | Disable this breakpoint · mute all                            |
 | `<leader>dm` · `<leader>dM`               | Breakpoint list: file · project                               |
 | `<leader>dB` · `<leader>dX`               | Clear breakpoints: file · project                             |
 | `<leader>do` · `<leader>dO` · `<leader>dI` | Step over · step out · smart step into                       |

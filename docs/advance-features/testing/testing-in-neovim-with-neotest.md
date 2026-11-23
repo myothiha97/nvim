@@ -79,7 +79,7 @@ Neotest doesn't test anything itself. It runs your real tool (`go test`, Vitest,
 3. **Read the result.** ✓ green = passed, ✗ red = failed. The failure message appears in red at the failing line. `]d` / `[d` jump between failures.
 4. **See the details.** `<leader>to` opens the output popup (got/want, stack trace). Press `q` or move the cursor to close it.
 5. **Fix and rerun.** Edit the code, then `<leader>tl` reruns the last test without moving the cursor back.
-6. **Still stuck? Debug it.** Set a breakpoint (click the gutter or `<leader>db`), then `<leader>td` or right-click Debug Test. Your usual dap-ui opens.
+6. **Still stuck? Debug it.** Set a breakpoint (click the gutter or `<leader>dd`), then `<leader>td` or right-click Debug Test. Your usual dap-ui opens.
 7. **Before committing.** `<leader>tt` runs the file, `<leader>tT` runs all tests. Then `<leader>tF` reruns only what failed.
 
 **All test keys**

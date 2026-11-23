@@ -60,7 +60,7 @@ disabled one in `breakpoints.lua`; colours link to diagnostic groups so they fol
 | red dot | breakpoint |
 | red `?` dot | condition or hit count |
 | yellow dot | log point (doesn't stop) |
-| hollow grey dot | disabled (`<leader>dd`) or muted (`<leader>dD`) |
+| hollow grey dot | disabled (`<leader>db`) or muted (`<leader>dD`) |
 | hollow red dot | rejected by the adapter during a session |
 | yellow arrow + line highlight | stopped here (LazyVim's) |
 
@@ -69,7 +69,7 @@ disabled one in `breakpoints.lua`; colours link to diagnostic groups so they fol
 | Key | Action |
 |---|---|
 | `<leader>du` | Toggle debug panels (tray + sidebar) |
-| `<leader>db` | Toggle breakpoint (saved immediately) |
+| `<leader>dd` | Toggle breakpoint (saved immediately). LazyVim has this on `<leader>db` |
 | `<leader>dB` | Clear breakpoints in this file |
 | `<leader>dX` | Clear all breakpoints in this project (incl. function breakpoints) |
 | `<leader>dm` / `dM` | Breakpoint list (current file / project) in a picker with preview; `<CR>` jumps |
@@ -79,7 +79,7 @@ disabled one in `breakpoints.lua`; colours link to diagnostic groups so they fol
 | `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
-| `<leader>dd` | Disable / enable the line's breakpoint (kept as a hollow grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>db` on a disabled one removes it |
+| `<leader>db` | Disable / enable the line's breakpoint (kept as a hollow grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>dd` on a disabled one removes it |
 | `<leader>dD` | Mute / unmute all breakpoints (line + function). Not saved; breakpoints added while muted are active |
 | `<leader>dI` | Smart Step Into: pick which call on the line to step into (Python, Node; elsewhere a plain Step Into). Also right-click on the current line |
 | `<leader>dg` | Jump to Line (LazyVim's; Python only). Also right-click while stopped |
@@ -100,7 +100,7 @@ frames as text; right-click → Reset Frame re-runs the current frame (Node only
 double-click a frame first to reset another one).
 
 Two kinds of "disabled": `t` in the Breakpoints panel is dap-ui's own,
-kept only in memory (no sign, lost on restart); `<leader>dd` / right-click is
+kept only in memory (no sign, lost on restart); `<leader>db` / right-click is
 ours (grey sign, saved, listed as "disabled" in `<leader>dm`), and those do
 not appear in the Breakpoints panel.
 

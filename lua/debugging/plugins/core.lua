@@ -70,7 +70,8 @@ return {
     -- stylua: ignore
     keys = {
       -- Same action as LazyVim's, plus an immediate save so a crash can't lose it.
-      { "<leader>db", toggle_breakpoint, desc = "Toggle Breakpoint" },
+      -- dd = set / remove, db = disable / enable (Myo's choice 2026-11-23; LazyVim has db = toggle).
+      { "<leader>dd", toggle_breakpoint, desc = "Toggle Breakpoint" },
       -- Panels. In Call Stack: `o` on a frame jumps to it and repoints
       -- Variables at that frame, `t` toggles runtime-internal frames.
       { "<leader>dG", focus_element("stacks"), desc = "Goroutines / Call Stack" },
@@ -90,7 +91,7 @@ return {
       { "<leader>dL", function() require("debugging.prompts").log_point() end, desc = "Log Point" },
       { "<leader>dF", function() require("debugging.delve").toggle_fn_breakpoint() end, desc = "Toggle Function Breakpoint" },
       -- JetBrains "Disable breakpoint" / "Mute Breakpoints" (breakpoints.lua).
-      { "<leader>dd", function() require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line(".")) end, desc = "Disable/Enable Breakpoint" },
+      { "<leader>db", function() require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line(".")) end, desc = "Disable/Enable Breakpoint" },
       { "<leader>dD", function() require("debugging.breakpoints").toggle_mute() end, desc = "Mute/Unmute All Breakpoints" },
       -- Smart Step Into: pick which call on the line to step into (debugpy,
       -- js-debug; elsewhere a plain Step Into). LazyVim's <leader>dg is Jump to Line.
