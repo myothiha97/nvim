@@ -30,6 +30,25 @@ local function toggle_breakpoint()
 end
 
 return {
+  -- Breakpoint signs, JetBrains-style and kept quiet: one shape (a dot), the colour says
+  -- what it is. Red = breakpoint, red with ? = condition / hit count, yellow = log point
+  -- (doesn't stop), hollow red = rejected by the adapter. Disabled / muted ones are a hollow
+  -- grey dot (debugging/breakpoints.lua). Stopped keeps LazyVim's arrow. LazyVim's dap.core
+  -- defines the signs from these icons when nvim-dap loads; colours link to diagnostic groups,
+  -- so they follow the theme. Nerd Font glyphs, all the same width.
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      icons = {
+        dap = {
+          Breakpoint = { "\u{f111} ", "DiagnosticError" },
+          BreakpointCondition = { "\u{f059} ", "DiagnosticError" },
+          LogPoint = { "\u{f111} ", "DiagnosticWarn" },
+          BreakpointRejected = { "\u{f10c} ", "DiagnosticError" },
+        },
+      },
+    },
+  },
   {
     "mfussenegger/nvim-dap",
     -- Pinned: :Lazy update skips it (README "Upstream internals"). To update on

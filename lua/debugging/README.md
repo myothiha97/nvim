@@ -50,6 +50,20 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 
 Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 
+## Breakpoint signs
+
+JetBrains-style, one shape, colour carries the meaning (icons in `plugins/core.lua`, the
+disabled one in `breakpoints.lua`; colours link to diagnostic groups so they follow the theme):
+
+| Sign | Meaning |
+|---|---|
+| red dot | breakpoint |
+| red `?` dot | condition or hit count |
+| yellow dot | log point (doesn't stop) |
+| hollow grey dot | disabled (`<leader>dd`) or muted (`<leader>dD`) |
+| hollow red dot | rejected by the adapter during a session |
+| yellow arrow + line highlight | stopped here (LazyVim's) |
+
 ## Keys (changed or added vs LazyVim)
 
 | Key | Action |
@@ -65,7 +79,7 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
-| `<leader>dd` | Disable / enable the line's breakpoint (kept as a grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>db` on a disabled one removes it |
+| `<leader>dd` | Disable / enable the line's breakpoint (kept as a hollow grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>db` on a disabled one removes it |
 | `<leader>dD` | Mute / unmute all breakpoints (line + function). Not saved; breakpoints added while muted are active |
 | `<leader>dI` | Smart Step Into: pick which call on the line to step into (Python, Node; elsewhere a plain Step Into). Also right-click on the current line |
 | `<leader>dg` | Jump to Line (LazyVim's; Python only). Also right-click while stopped |

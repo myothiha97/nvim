@@ -93,11 +93,10 @@ end
 
 local function place_disabled(buf, line, bp)
   if vim.tbl_isempty(vim.fn.sign_getdefined(SIGN)) then
-    -- Same icon as an enabled breakpoint (LazyVim defines DapBreakpoint when
-    -- nvim-dap loads), greyed with the built-in Comment group, which every
+    -- A hollow dot (JetBrains' disabled breakpoint) beside the filled breakpoint
+    -- dot (plugins/core.lua), greyed with the built-in Comment group, which every
     -- colorscheme defines (a custom group would be wiped by :colorscheme).
-    local base = vim.fn.sign_getdefined("DapBreakpoint")[1]
-    vim.fn.sign_define(SIGN, { text = base and base.text or "●", texthl = "Comment" })
+    vim.fn.sign_define(SIGN, { text = "\u{f10c} ", texthl = "Comment" })
   end
   local id = vim.fn.sign_place(0, GROUP, SIGN, buf, { lnum = line, priority = 21 })
   disabled[buf] = disabled[buf] or {}
