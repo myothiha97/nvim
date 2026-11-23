@@ -41,5 +41,7 @@ Checks marked `[known Fn]` fail on purpose. Each one is an open issue in
 `docs/advance-features/testing/e2e-report-2026-11-23.md`. When one of them starts
 passing, the issue is fixed.
 
+Workflow (how to ask Claude, the loop, limits): `docs/advance-features/e2e-testing/e2e-workflow.md`.
+
 Use it after `:Lazy update`, and after unpinning nvim-dap or nvim-dap-ui: a green run covers
 every row of the "Upstream internals" table in `lua/debugging/README.md` that has a scenario.
