@@ -166,6 +166,11 @@ M.surface = {
   thumb = lift(M.bg, 0.15),
   -- Thumb under the mouse / while dragging: one clear step up (2.19:1).
   thumb_hover = lift(M.bg, 0.24),
+  -- Band behind the explorer's pinned folders (config/explorer-sticky.lua).
+  -- #232322 on #171716: +6.0 L*, dE00 3.8, the same step as VS Code's sticky
+  -- band (+6.1 L*). Measured on screen 2026-11-23: dE00 4.1 from the list,
+  -- names 7.00:1. 0.06 sits within dE00 3.9 of `active_file`; keep below it.
+  sticky = lift(M.bg, 0.05),
 }
 
 return M
