@@ -4,7 +4,7 @@
 --   { files = { [abs path] = { {line, condition, hitCondition, logMessage, disabled?} } },
 --     functions = { "main.worker", ... } }
 --
--- Disabled breakpoints (JetBrains "Disable", <leader>dd / right-click): nvim-dap
+-- Disabled breakpoints (JetBrains "Disable", <leader>db / right-click): nvim-dap
 -- has no disabled state, so a disabled breakpoint is removed from nvim-dap
 -- (never sent to the adapter) and kept here as a grey sign in our own sign
 -- group, which moves with edits like nvim-dap's own signs. Mute All
@@ -93,11 +93,10 @@ end
 
 local function place_disabled(buf, line, bp)
   if vim.tbl_isempty(vim.fn.sign_getdefined(SIGN)) then
-    -- Same icon as an enabled breakpoint (LazyVim defines DapBreakpoint when
-    -- nvim-dap loads), greyed with the built-in Comment group, which every
+    -- A hollow dot (JetBrains' disabled breakpoint) beside the filled breakpoint
+    -- dot (plugins/core.lua), greyed with the built-in Comment group, which every
     -- colorscheme defines (a custom group would be wiped by :colorscheme).
-    local base = vim.fn.sign_getdefined("DapBreakpoint")[1]
-    vim.fn.sign_define(SIGN, { text = base and base.text or "●", texthl = "Comment" })
+    vim.fn.sign_define(SIGN, { text = "\u{f4c3} ", texthl = "Comment" })
   end
   local id = vim.fn.sign_place(0, GROUP, SIGN, buf, { lnum = line, priority = 21 })
   disabled[buf] = disabled[buf] or {}
@@ -256,7 +255,7 @@ function M.reset_signs()
 end
 
 -- Remove a disabled breakpoint on the line; true if there was one.
--- (A click or <leader>db on a disabled breakpoint removes it, as in JetBrains.)
+-- (A click or <leader>dd on a disabled breakpoint removes it, as in JetBrains.)
 function M.remove_disabled(buf, line)
   local d = disabled_at(buf, line)
   if d then

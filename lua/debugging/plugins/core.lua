@@ -30,6 +30,27 @@ local function toggle_breakpoint()
 end
 
 return {
+  -- Breakpoint signs, JetBrains-style and kept quiet: one shape (a dot), the colour says
+  -- what it is. Red = breakpoint, red ◉ = condition (a hit count alone stays a plain dot), yellow = log point
+  -- (doesn't stop), hollow red = rejected by the adapter. Disabled / muted ones are a hollow
+  -- grey dot (debugging/breakpoints.lua). Stopped keeps LazyVim's arrow. LazyVim's dap.core
+  -- defines the signs from these icons when nvim-dap loads; colours link to diagnostic groups,
+  -- so they follow the theme. Small dots (Octicons dot-fill / dot, ~half a cell, like VS Code's
+  -- gutter dot): Font Awesome's circle filled the whole cell and looked heavy. The conditional
+  -- one is the text fisheye ◉ at the same size (no small "dot with ?" glyph exists).
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      icons = {
+        dap = {
+          Breakpoint = { "\u{f444} ", "DiagnosticError" },
+          BreakpointCondition = { "\u{25c9} ", "DiagnosticError" },
+          LogPoint = { "\u{f444} ", "DiagnosticWarn" },
+          BreakpointRejected = { "\u{f4c3} ", "DiagnosticError" },
+        },
+      },
+    },
+  },
   {
     "mfussenegger/nvim-dap",
     -- Pinned: :Lazy update skips it (README "Upstream internals"). To update on
@@ -51,7 +72,8 @@ return {
     -- stylua: ignore
     keys = {
       -- Same action as LazyVim's, plus an immediate save so a crash can't lose it.
-      { "<leader>db", toggle_breakpoint, desc = "Toggle Breakpoint" },
+      -- dd = set / remove, db = disable / enable (Myo's choice 2026-11-23; LazyVim has db = toggle).
+      { "<leader>dd", toggle_breakpoint, desc = "Toggle Breakpoint" },
       -- Panels. In Call Stack: `o` on a frame jumps to it and repoints
       -- Variables at that frame, `t` toggles runtime-internal frames.
       { "<leader>dG", focus_element("stacks"), desc = "Goroutines / Call Stack" },
@@ -63,15 +85,16 @@ return {
       { "<leader>dm", function() require("debugging.list").open("file") end, desc = "Breakpoints (current file)" },
       { "<leader>dM", function() require("debugging.list").open("project") end, desc = "Breakpoints (project)" },
       -- LazyVim: dB = condition. Clearing a file is more frequent, so dB clears
-      -- and the condition prompt moves to dN.
+      -- and the condition prompt moves to dn. Condition / hit count are lowercase (dn / dh, no
+      -- Shift); the log point stays dL because dl is Run Last, used far more often.
       { "<leader>dB", function() require("debugging.breakpoints").clear_buffer() end, desc = "Clear Breakpoints (File)" },
       { "<leader>dX", function() require("debugging.breakpoints").clear_all() end, desc = "Clear Breakpoints (Project)" },
-      { "<leader>dN", function() require("debugging.prompts").condition() end, desc = "Breakpoint Condition" },
-      { "<leader>dH", function() require("debugging.prompts").hit_condition() end, desc = "Breakpoint Hit Condition" },
+      { "<leader>dn", function() require("debugging.prompts").condition() end, desc = "Breakpoint Condition" },
+      { "<leader>dh", function() require("debugging.prompts").hit_condition() end, desc = "Breakpoint Hit Condition" },
       { "<leader>dL", function() require("debugging.prompts").log_point() end, desc = "Log Point" },
       { "<leader>dF", function() require("debugging.delve").toggle_fn_breakpoint() end, desc = "Toggle Function Breakpoint" },
       -- JetBrains "Disable breakpoint" / "Mute Breakpoints" (breakpoints.lua).
-      { "<leader>dd", function() require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line(".")) end, desc = "Disable/Enable Breakpoint" },
+      { "<leader>db", function() require("debugging.breakpoints").toggle_enabled(vim.api.nvim_get_current_buf(), vim.fn.line(".")) end, desc = "Disable/Enable Breakpoint" },
       { "<leader>dD", function() require("debugging.breakpoints").toggle_mute() end, desc = "Mute/Unmute All Breakpoints" },
       -- Smart Step Into: pick which call on the line to step into (debugpy,
       -- js-debug; elsewhere a plain Step Into). LazyVim's <leader>dg is Jump to Line.

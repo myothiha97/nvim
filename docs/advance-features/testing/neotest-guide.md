@@ -261,7 +261,7 @@ APP_ENV=test
 4. `<leader>tO` opens the Test Results panel: failures first with got / want, skips with reason.
    `<leader>to` shows the raw output of the test under the cursor.
 5. Fix the code, then `<leader>tl` reruns the last run from anywhere.
-6. Still stuck: set a breakpoint (click the gutter or `<leader>db`) and `<leader>td`.
+6. Still stuck: set a breakpoint (click the gutter or `<leader>dd`) and `<leader>td`.
 7. Before committing: `<leader>tt` (file) or `<leader>tT` (everything), then `<leader>tF` to
    rerun only what failed.
 8. `<leader>tx` hides all marks and closes test panels when you are done.

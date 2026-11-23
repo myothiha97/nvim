@@ -35,7 +35,7 @@
 -- Cost: one autocmd per right-click, ~15 :menu commands. Nothing on mouse
 -- moves or keystrokes. nvim-dap is not loaded by a right-click.
 --
--- Hit count and function breakpoints stay on <leader>dH / <leader>dF.
+-- Hit count and function breakpoints stay on <leader>dh / <leader>dF.
 -- Disabled breakpoints: debugging/breakpoints.lua.
 
 local M = {}
