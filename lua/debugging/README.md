@@ -71,6 +71,7 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dg` | Jump to Line (LazyVim's; Python only). Also right-click while stopped |
 | `<leader>de` | Evaluate the name under the cursor or the selection (keywords, operators, literals are skipped, as in the right-click menu) |
 | `<leader>dv` `dG` `dW` `dp` | Focus Variables / Call Stack / Watches / Breakpoints |
+| `<leader>dr` | Jump to the tray's REPL (opens the tray if closed); again jumps back. LazyVim's `dap.repl.toggle()` opened a second REPL split |
 
 In the REPL: completion from the adapter while typing (blink menu). Delve
 has no completion support, so in Go the menu offers words from the REPL

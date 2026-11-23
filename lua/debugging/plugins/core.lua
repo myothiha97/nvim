@@ -87,6 +87,9 @@ return {
       -- buffer; ours reruns the file you originally debugged (controls.lua).
       { "<leader>dl", function() require("debugging.controls").run_again() end, desc = "Run Last" },
       { "<leader>dx", function() require("dap").set_exception_breakpoints() end, desc = "Exception Breakpoints" },
+      -- LazyVim's dr = dap.repl.toggle(), which opened a second REPL split beside the tray's.
+      -- Ours jumps to the tray's REPL (opening the tray if needed) and back (layout.lua).
+      { "<leader>dr", function() require("debugging.layout").focus_repl() end, desc = "REPL (focus / back)" },
     },
     opts = function()
       local dap = require("dap")

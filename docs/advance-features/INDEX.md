@@ -16,6 +16,11 @@ One folder per feature area. Everything is stored locally as markdown.
 - In repo: lua/testing/coverage.lua and lua/testing/history.lua (branch feat/test-coverage-history)
 - Follow-ups: [todos/languages/neotest-review-followups.md](../../todos/languages/neotest-review-followups.md) (arrives with the test-coverage-history branch; link resolves once that is merged)
 
+## E2E testing (Claude skill `nvim-e2e`, scripts/e2e/)
+- Workflow: how to ask, what the loop does, limits: [e2e-testing/e2e-workflow.md](e2e-testing/e2e-workflow.md)
+- Harness: [scripts/e2e/README.md](../../scripts/e2e/README.md)
+- Reports: [testing/e2e-report-2026-11-23.md](testing/e2e-report-2026-11-23.md) (debugger + test runner, PR #88)
+
 ## LSP, completion and search
 - Audit: [lsp-and-search/large-repo-audit.md](lsp-and-search/large-repo-audit.md)
 
