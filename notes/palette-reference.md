@@ -1088,7 +1088,7 @@ snacks picker only.
 
 ---
 
-### Explorer sticky folders band (measured 2026-11-23, not yet chosen)
+### Explorer sticky folders band (chosen 2026-11-23: `surface.sticky`, `#232322`)
 
 Background for the pinned folder rows at the top of the `<leader>r` explorer
 (`SnacksExplorerSticky`, `lua/config/explorer-sticky.lua`). Reference is VS Code's
@@ -1106,10 +1106,15 @@ Candidates are `lift(bg, a)` on `#171716`, scored by `scripts/palette/palette.py
 | 0.07 | `#272726` | 7.9 | 5.0 | 3.4 | 11.1 | 7.29:1 | 1.51:1 |
 | 0.09 | `#2c2c2b` | 10.3 | 6.6 | 2.3 | 10.1 | 6.81:1 | 1.41:1 |
 
-Proposed: **0.05**, the same lightness step as VS Code (+6.0 vs +6.1 L\*) while
-staying 4.4 dE00 from the active-file band. 0.06 matches VS Code's dE00 exactly
-but drops to 3.9 from the active-file band; 0.09 (`surface.raised`) is 2.3 from
-it, too close. Not yet checked on screen.
+Chosen: **0.05** (`surface.sticky` in `lua/config/ui.lua`), the same lightness
+step as VS Code (+6.0 vs +6.1 L\*) while staying 4.4 dE00 from the active-file
+band. 0.06 matches VS Code's dE00 exactly but drops to 3.9 from the active-file
+band; 0.09 (`surface.raised`) is 2.3 from it, too close.
+
+Checked on screen (Ghostty, 90% opacity, screenshot 2026-11-23): the band emits
+`#232323` over the list's `#181916`, **+5.2 L\*, dE00 4.1** (VS Code 4.4), and
+file names `#aaaeac` read **7.00:1** on it (7.87:1 on the plain list). The bottom
+edge fades over about 2px with no seam. Authored vs emitted band: dE00 0.8.
 
 Other values measured from the same two screenshots (emitted pixels, not
 authored hex):
