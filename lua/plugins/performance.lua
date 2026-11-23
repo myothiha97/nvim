@@ -138,7 +138,6 @@ return {
           break
         end
       end
-      local filename_index
       for i = #lualine_c, 1, -1 do
         local component = lualine_c[i]
         if
@@ -156,16 +155,13 @@ return {
             file_status = false, -- suppress built-in [+]/[-]; we render our own green [+]
             cond = filename_shown,
           }
-          filename_index = i
           break
         end
       end
 
-      -- Git change markers after the filename: a "[+]" dirty flag plus the hunk
-      -- count. Both hidden on a clean file, green to stay clear of diagnostic red.
-      -- The dirty check reads `b:gitsigns_status_dict` (zero-cost buffer var). The
-      -- hunk count calls gitsigns.get_hunks() — only when the file is dirty and
-      -- only on lualine's throttled 400ms refresh, so it's not a hot path.
+      -- Git change markers: a "[+]" dirty flag plus the hunk count. Both hidden on
+      -- a clean file, green to stay clear of diagnostic red. Placed after the
+      -- scroll percentage, see the insertion at the end of lualine_c below.
       -- The THEME's green, not the syntax palette's. This marker means "added"
       -- and has to stay green whatever the keyword colour is doing.
       --
@@ -174,19 +170,36 @@ return {
       -- override is gone (see the note atop solarized-osaka/init.lua), so the two are
       -- decoupled at the source and this tracks the theme again.
       local green = palette.green or "#849900"
-      local function git_is_dirty()
-        local gs = vim.b.gitsigns_status_dict
-        if not gs then
-          return false
-        end
-        return ((gs.added or 0) + (gs.changed or 0) + (gs.removed or 0)) > 0
-      end
+
+      -- Counts unstaged AND staged hunks, the same set the sign column shows and
+      -- gn/gN walk (target = "all"). gitsigns.get_hunks() returns the unstaged
+      -- list only, so the badge read low (3 where the gutter had 5) whenever part
+      -- of the file was staged, and a fully staged file showed no marker at all.
+      --
+      -- Cheap: two table lengths, no copies (get_hunks() built patch text for
+      -- every hunk), and only on lualine's throttled 400ms refresh.
+      --
+      -- The package.loaded guard keeps a statusline draw from force-loading the
+      -- LazyFile-deferred gitsigns (lazy.nvim loads a plugin on require).
+      --
+      -- WARN: SILENT FAILURE — `gitsigns.cache` is internal API (gitsigns is
+      -- pinned in lazy-lock.json). If an update renames it, this falls back to the
+      -- public get_hunks(), which undercounts staged files again without erroring.
       local function git_hunk_count()
-        if not vim.b.gitsigns_status_dict then
+        if not package.loaded.gitsigns then
           return 0
         end
-        local hunks = require("gitsigns").get_hunks()
+        local buf = vim.api.nvim_get_current_buf()
+        local ok, gs_cache = pcall(require, "gitsigns.cache")
+        if ok and type(gs_cache.cache) == "table" then
+          local entry = gs_cache.cache[buf]
+          return entry and (#(entry.hunks or {}) + #(entry.hunks_staged or {})) or 0
+        end
+        local hunks = require("gitsigns").get_hunks(buf)
         return hunks and #hunks or 0
+      end
+      local function git_is_dirty()
+        return git_hunk_count() > 0
       end
 
       local dirty_marker = {
@@ -196,7 +209,8 @@ return {
         cond = git_is_dirty,
         color = { fg = green, gui = "bold" },
         separator = "",
-        padding = { left = 1, right = 0 },
+        -- Two cells: a group gap after the scroll percentage it follows.
+        padding = { left = 2, right = 0 },
       }
       local hunk_badge = {
         function()
@@ -207,14 +221,6 @@ return {
         separator = "",
         padding = { left = 1, right = 0 },
       }
-      if filename_index then
-        -- Insert at the same index in reverse so final order is: filename [+] hunks
-        table.insert(lualine_c, filename_index + 1, hunk_badge)
-        table.insert(lualine_c, filename_index + 1, dirty_marker)
-      else
-        table.insert(lualine_c, dirty_marker)
-        table.insert(lualine_c, hunk_badge)
-      end
       opts.sections.lualine_c = lualine_c
 
       -- Custom percent badge styling: a Solarized Osaka accent for the text.
@@ -245,19 +251,21 @@ return {
         },
       }
 
-      -- Scroll progress sits at the right-hand end of lualine_c, after the
-      -- filename and the git markers, rather than over on the right with the
-      -- line counter.
+      -- Scroll progress, then the git markers, then the aerial breadcrumb:
+      --   [filename] 29%  [+] 4  Symbol › child
+      -- All three go in front of the breadcrumb, which LazyVim's aerial extra
+      -- appends to lualine_c. plugins/aerial.lua (sorted earlier) has already
+      -- swapped its [1] for a placeholder by now, so it is matched by its
+      -- `aerial_breadcrumb` marker as well as by name. Without aerial they are
+      -- appended at the end, which still lands them after the filename.
       --
-      -- dirty_marker and hunk_badge both carry `cond`, so on a clean file they
-      -- render nothing and the percentage lands directly beside the filename;
-      -- on a dirty file it follows the git markers. Appending covers both cases
-      -- without branching on git state.
+      -- dirty_marker and hunk_badge carry `cond`, so on a clean file they render
+      -- nothing and the breadcrumb follows the percentage directly.
       --
-      -- separator = "" suppresses lualine's thin divider, matching the filename
-      -- and git markers ahead of it. The left padding of 2 is the visual gap
-      -- that keeps it from crowding the hunk count.
-      table.insert(opts.sections.lualine_c, {
+      -- separator = "" suppresses lualine's thin divider. Groups are two cells
+      -- apart (percentage, git markers, breadcrumb), so the hunk count never
+      -- reads as part of its neighbours; "[+]" and its count stay one apart.
+      local scroll_percent = {
         function()
           local current = vim.fn.line(".")
           local total = vim.api.nvim_buf_line_count(0)
@@ -266,8 +274,19 @@ return {
         end,
         color = percent_color,
         separator = "",
-        padding = { left = 2, right = 1 },
-      })
+        padding = { left = 1, right = 0 },
+      }
+      local insert_at = #lualine_c + 1
+      for i, component in ipairs(lualine_c) do
+        if type(component) == "table" and (component.aerial_breadcrumb or component[1] == "aerial") then
+          insert_at = i
+          component.padding = { left = 2, right = 1 }
+          break
+        end
+      end
+      for offset, component in ipairs({ scroll_percent, dirty_marker, hunk_badge }) do
+        table.insert(lualine_c, insert_at + offset - 1, component)
+      end
 
       -- Copilot status indicator (LSP status + autocomplete toggle state)
       -- Color reflects vim.g.copilot_enabled (toggled via <leader>ad / <M-k>):
