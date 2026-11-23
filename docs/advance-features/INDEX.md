@@ -19,7 +19,7 @@ One folder per feature area. Everything is stored locally as markdown.
 ## E2E testing (Claude skill `nvim-e2e`, scripts/e2e/)
 - Workflow: how to ask, what the loop does, limits: [e2e-testing/e2e-workflow.md](e2e-testing/e2e-workflow.md)
 - Harness: [scripts/e2e/README.md](../../scripts/e2e/README.md)
-- Reports: [testing/e2e-report-2026-11-23.md](testing/e2e-report-2026-11-23.md) (debugger + test runner, PR #88)
+- Reports: [testing/e2e-report-2026-11-23.md](testing/e2e-report-2026-11-23.md) (debugger + test runner, PR #88); [testing/e2e-perf-report-2026-11-23.md](testing/e2e-perf-report-2026-11-23.md) (runtime performance + large files)
 
 ## LSP, completion and search
 - Audit: [lsp-and-search/large-repo-audit.md](lsp-and-search/large-repo-audit.md)

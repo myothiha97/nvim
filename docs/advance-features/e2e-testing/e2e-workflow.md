@@ -16,6 +16,7 @@ The trigger is the Claude skill **`nvim-e2e`** (saved in claude.ai). One line is
 | `nvim e2e <feature>`, e.g. `nvim e2e codecompanion` | A feature with no suite yet. Claude writes new scenarios first, then runs the loop |
 | `nvim e2e debugger — only Go, no PR` | Extra instructions. They override the skill's defaults where they conflict |
 | `nvim e2e — follow todos/e2e/<feature>.md` | A plan file (scenarios, acceptance criteria), committed or attached |
+| `nvim e2e perf` / "performance test" | Runtime cost per key on big Go/TS/TSX/Python files (`perf.py`, config vs `nvim --clean`, one-feature-off A/B) plus the large-file UI suite (`suite_bigfile.py`). Second run 2026-11-23, [report](../testing/e2e-perf-report-2026-11-23.md) |
 
 To test the **local, unpushed** config instead of GitHub `main`, connect `~/.config/nvim` with
 "Add folder" in the Claude desktop app first. If an extra instruction keeps repeating, ask Claude
