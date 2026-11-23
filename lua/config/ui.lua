@@ -148,14 +148,11 @@ M.surface = {
   -- list_cursor = "#353845",
   -- Other uses of the symbol under the cursor (LspReference*, snacks words).
   -- Same cool-slate family as `list_cursor` ("cursor here"), far quieter: it sits
-  -- under code, so the word keeps its syntax colour. Measured on screen
-  -- (2026-11-23): dE00 10.3 from bg, between the explorer active row (7.8) and
-  -- `list_cursor` (15.6); body 7.5:1, red parameter 4.5:1 (AA, just).
-  -- Tried one step quieter, `#24282f` (screen dE00 8.6, parameter 4.6:1): read
-  -- as too faded by eye. One value for read AND write: a `#2b313a` write step
-  -- was only dE00 2.0 away (invisible), and a visible step would drop red
-  -- parameters under AA.
-  reference = "#262b33",
+  -- under code, so the word keeps its syntax colour. Same value for read AND
+  -- write. dE00 7.5 from bg, red parameter 4.63:1 (AA). `#262b33` was clearer
+  -- on one word but noisy with many matches on screen. Every tested value and
+  -- its numbers: notes/palette-reference.md, "Reference highlight".
+  reference = "#24282f",
   guide = lift(M.bg, 0.19), -- explorer tree lines and indent guides
   -- Active indent scope (ibl's IblScope). 0.19 read too faint beside the idle
   -- guides (2026-11-20). 0.26 = 2.33:1, L* 35 vs 18 for idle guides. Ceiling

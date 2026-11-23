@@ -634,8 +634,9 @@ return {
       -- documentHighlight). A cue, not a colour: VS Code and JetBrains both use a
       -- near-neutral band here, and the theme's own `#541131` was a saturated wine
       -- (C* 33.5, red hue) that read as an error and clashed with the red
-      -- parameters. Value and numbers: `surface.reference` in lua/config/ui.lua.
-      -- Cool slate, dE00 13.9 from the indigo of `Visual` (`#24275a`), so a
+      -- parameters. Value: `surface.reference` in lua/config/ui.lua. Every tested
+      -- value: notes/palette-reference.md, "Reference highlight".
+      -- Cool slate, dE00 15.4 from the indigo of `Visual` (`#24275a`), so a
       -- reference never looks like a selection. Read and write share it.
       for _, group in ipairs({ "LspReferenceText", "LspReferenceRead", "LspReferenceWrite" }) do
         hl[group] = { bg = ui_color.surface.reference }
