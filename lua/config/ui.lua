@@ -149,10 +149,12 @@ M.surface = {
   -- Other uses of the symbol under the cursor (LspReference*, snacks words).
   -- Same cool-slate family as `list_cursor` ("cursor here"), far quieter: it sits
   -- under code, so the word keeps its syntax colour. Same value for read AND
-  -- write. dE00 7.5 from bg, red parameter 4.63:1 (AA). `#262b33` was clearer
-  -- on one word but noisy with many matches on screen. Every tested value and
-  -- its numbers: notes/palette-reference.md, "Reference highlight".
-  reference = "#24282f",
+  -- write. dE00 8.6 from bg, red parameter 4.45:1. Chosen for readability: the
+  -- band stands out more, so matches are easier to find. Noisier with many
+  -- matches on screen. Step down if that bites: `#24282f`
+  -- (dE00 7.5, red parameter 4.63:1 AA). Every tested value and its numbers:
+  -- notes/palette-reference.md, "Reference highlight".
+  reference = "#262b33",
   guide = lift(M.bg, 0.19), -- explorer tree lines and indent guides
   -- Active indent scope (ibl's IblScope). 0.19 read too faint beside the idle
   -- guides (2026-11-20). 0.26 = 2.33:1, L* 35 vs 18 for idle guides. Ceiling
