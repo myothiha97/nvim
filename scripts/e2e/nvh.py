@@ -209,7 +209,8 @@ def reset_fixture(cwd, file):
     """Undo leftovers of an aborted run on a fixture file: its swap file (else the next start
     stops at the E325 ATTENTION prompt) and uncommitted edits. Only that one file is touched."""
     path = os.path.realpath(os.path.join(cwd, file))
-    swap = os.path.expanduser("~/.local/state/nvim/swap/") + path.replace("/", "%")
+    app = os.environ.get("NVIM_APPNAME") or "nvim"  # compare.py runs other configs side by side
+    swap = os.path.expanduser(f"~/.local/state/{app}/swap/") + path.replace("/", "%")
     for ext in (".swp", ".swo", ".swn"):
         if os.path.exists(swap + ext):
             os.remove(swap + ext)

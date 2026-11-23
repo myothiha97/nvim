@@ -1,5 +1,5 @@
 {
-  "_comment": "Large real-world files used by perf.py and suite_bigfile.py. cwd = project root (LSP root), file relative to it. anchor/anchor2 = Vim search patterns: the cursor goes to anchor, then to anchor2 after it, and `o` + `type` is typed there. Stand-ins cloned by setup_bigfile.sh. gd_from: pattern whose match start is the symbol gd is pressed on; gd_to_file/gd_to_line: where it must land. func: enclosing function shown in the statusline breadcrumb at the anchor. complete/complete_label: typed prefix and the completion item expected. lsp: client that must attach. refs_from: a symbol with many uses, for gr and the reference highlights.",
+  "_comment": "Large real-world files used by perf.py and suite_bigfile.py. cwd = project root (LSP root), file relative to it. anchor/anchor2 = Vim search patterns: the cursor goes to anchor, then to anchor2 after it, and `o` + `type` is typed there. Stand-ins cloned by setup_bigfile.sh. gd_from: pattern whose match start is the symbol gd is pressed on; gd_to_file/gd_to_line: where it must land. func: enclosing function shown in the statusline breadcrumb at the anchor. complete/complete_label: typed prefix and the completion item expected. lsp: client that must attach. refs_from: a symbol with many uses, for gr and the reference highlights. *-mid targets: typical-size files (0.9-1.2k lines) for perf.py only (no gd/complete keys).",
   "go": {
     "cwd": "/tmp/nvim-e2e-big/gotools/gopls",
     "file": "internal/golang/completion/completion.go",
@@ -58,5 +58,33 @@
     "complete_label": "model",
     "lsp": "basedpyright",
     "refs_from": "self\\.\\zsmodel\\>"
+  },
+  "go-mid": {
+    "cwd": "/tmp/nvim-e2e-big/gotools/gopls",
+    "file": "internal/golang/codeaction.go",
+    "anchor": "^func (req \\*codeActionsRequest) addAction",
+    "type": "n := strings.TrimSpace(fmt.Sprintf(\"%d\", len(req.actions)))",
+    "lsp": "gopls"
+  },
+  "ts-mid": {
+    "cwd": "/tmp/nvim-e2e-big/excalidraw",
+    "file": "packages/element/src/transform.ts",
+    "anchor": "=> {$",
+    "type": "const count = Array.from(elementsMap.values()).filter((el) => el.isDeleted).length;",
+    "lsp": "vtsls"
+  },
+  "tsx-mid": {
+    "cwd": "/tmp/nvim-e2e-big/excalidraw",
+    "file": "packages/excalidraw/components/SearchMenu.tsx",
+    "anchor": "const goToNextItem = () => {",
+    "type": "const count = searchMatches.items.filter((item) => item.index > 0).length;",
+    "lsp": "vtsls"
+  },
+  "py-mid": {
+    "cwd": "/tmp/nvim-e2e-big/django",
+    "file": "django/db/models/options.py",
+    "anchor": "^    def setup_pk(self, field):",
+    "type": "total = len([f for f in self.local_fields if f.primary_key])",
+    "lsp": "basedpyright"
   }
 }

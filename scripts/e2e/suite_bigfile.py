@@ -14,7 +14,8 @@ from nvh import Nvim, sh, reset_fixture
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 T = json.load(open(os.environ.get("E2E_TARGETS", os.path.join(HERE, "targets.json"))))
-TARGETS = [k for k in T if not k.startswith("_")]
+# targets without UI test data (the *-mid perf-only files) are skipped here
+TARGETS = [k for k in T if not k.startswith("_") and "gd_from" in T[k]]
 
 VERYLAZY = "local c=require('lazy.core.config').plugins['which-key.nvim']; return c and c._.loaded ~= nil"
 LSP_READY = r"""

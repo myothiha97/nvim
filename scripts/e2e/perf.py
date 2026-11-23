@@ -43,13 +43,16 @@ AB_VARIANTS = {
     "no-lualine": {"lua": "require('lualine').hide({ unhide = false })"},  # statusline incl. breadcrumb
     "no-ufo": {"lua": "require('ufo').disable()"},
     "no-semantic-tokens": {"lua": "vim.lsp.semantic_tokens.enable(false)"},
-    # instrument self-test: 5 ms of busy work on every cursor move must show up as ~+5 ms per key
-    "selftest-5ms": {"lua": "vim.api.nvim_create_autocmd('CursorMoved', { callback = function() local t = vim.uv.hrtime() while vim.uv.hrtime() - t < 5e6 do end end })"},
+}
+# instrument self-test: N ms of busy work on every cursor move / typed key must show up as ~+N ms
+for _ms in (1, 2, 5, 10):
+    AB_VARIANTS[f"selftest-{_ms}ms"] = {"lua": "vim.api.nvim_create_autocmd({ 'CursorMoved', 'TextChangedI' }, { callback = function() local t = vim.uv.hrtime() while vim.uv.hrtime() - t < %de6 do end end })" % _ms}
+AB_VARIANTS.update({
     # Vim's own indent instead of nvim-treesitter's indentexpr (which walks the whole file's indent
     # captures once per new tree, i.e. on the first o/O/<CR> after every edit)
     "no-ts-indent": {"lua": "vim.bo.indentexpr = ''"},
     "pyright-standard": {"spec": '{ "neovim/nvim-lspconfig", opts = { servers = { basedpyright = { settings = { basedpyright = { analysis = { typeCheckingMode = "standard" } } } } } } }'},
-}
+})
 AB_SPEC = os.path.join(HERE, "..", "..", "lua", "plugins", "zz_perf_ab.lua")
 MODE = os.environ.get("MODE", "config")
 REPEAT = int(os.environ.get("REPEAT", "1"))
@@ -224,7 +227,9 @@ class Run:
         if ab.get("spec"):
             open(AB_SPEC, "w").write("-- temporary, written by scripts/e2e/perf.py AB=" + AB + "\nreturn { " + ab["spec"] + " }\n")
         t0 = time.time()
-        self.n = Nvim(t["cwd"], args + [t["file"]], name="perf")
+        # NVIM_APPNAME selects another config side by side (compare.py: older versions of this one)
+        env = {"NVIM_APPNAME": os.environ["NVIM_APPNAME"]} if os.environ.get("NVIM_APPNAME") else None
+        self.n = Nvim(t["cwd"], args + [t["file"]], name="perf", env=env)
         self.pid = self.n._rpc(lambda: self.n.nv.call("getpid"))
         self.open = {}
         if mode == "config":
