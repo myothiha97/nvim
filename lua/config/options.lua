@@ -114,6 +114,15 @@ end
 -- the global", so the gap comes straight back.
 if require("plugins.bufferline")[1].enabled then
   vim.opt_local.winbar = " "
+  -- The tab bar row exists from the first frame. bufferline only turns it on
+  -- when it loads (VeryLazy), after `nvim <file>` has already drawn the file;
+  -- the window then loses its top row, LazyVim's `splitkeep = "screen"` scrolls
+  -- the text up a line to keep it in place, and `scrolloff` drags the cursor
+  -- down: every file opened from the shell started on line 12 with line 1
+  -- hidden. With the row already there, bufferline's own `showtabline = 2` is a
+  -- no-op. The blank `tabline` shows only until bufferline replaces it.
+  vim.o.showtabline = 2
+  vim.o.tabline = " "
 else
   vim.opt.winbar = " "
 end
