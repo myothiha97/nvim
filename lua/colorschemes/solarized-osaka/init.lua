@@ -630,6 +630,17 @@ return {
       -- via winhighlight.
       hl.OilCursorLine = { bg = ui_color.surface.list_cursor }
 
+      -- Other uses of the symbol under the cursor (snacks words / LSP
+      -- documentHighlight). A cue, not a colour: VS Code and JetBrains both use a
+      -- near-neutral band here, and the theme's own `#541131` was a saturated wine
+      -- (C* 33.5, red hue) that read as an error and clashed with the red
+      -- parameters. Value and numbers: `surface.reference` in lua/config/ui.lua.
+      -- Cool slate, dE00 13.9 from the indigo of `Visual` (`#24275a`), so a
+      -- reference never looks like a selection. Read and write share it.
+      for _, group in ipairs({ "LspReferenceText", "LspReferenceRead", "LspReferenceWrite" }) do
+        hl[group] = { bg = ui_color.surface.reference }
+      end
+
       -- The focused row of a LIST panel -- picker, picker preview, and the outline
       -- panel, which remaps its CursorLine here (lua/plugins/trouble.lua).
       --
