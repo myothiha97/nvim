@@ -38,7 +38,8 @@ def run_all(configs, targets, reps, actions, seed, log):
     rng = random.Random(seed)
     T = perf.load_targets()
     perf.ACTIONS[:] = actions
-    out = [json.loads(l) for l in open(log)] if os.path.exists(log) else []
+    # failed runs are dropped here, so they are retried
+    out = [r for r in (json.loads(l) for l in open(log)) if not r.get("error")] if os.path.exists(log) else []
     done = {(r["run"], r["target"], r["label"]) for r in out}
     for rep in range(1, reps + 1):
         for tk in targets:

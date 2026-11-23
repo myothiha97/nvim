@@ -31,6 +31,8 @@ AB = os.environ.get("AB", "")
 ACTIONS = [a for a in os.environ.get("ACTIONS", "").split(",") if a]  # run only these actions
 # One feature off at a time. `spec` is written to lua/plugins/zz_perf_ab.lua for the run (lazy.nvim
 # merges it last) and deleted afterwards; `lua` runs over RPC once VeryLazy has fired.
+NO_BREADCRUMB = ("for _, m in ipairs(vim.api.nvim_get_keymap('n')) do"
+                 " if m.desc == 'Toggle Aerial Breadcrumb' and m.callback then m.callback() end end")
 AB_VARIANTS = {
     "no-bufferline": {"spec": '{ "akinsho/bufferline.nvim", enabled = false }'},
     "no-bufferline-diagnostics": {"spec": '{ "akinsho/bufferline.nvim", opts = function(_, o) o.options.diagnostics = false end }'},
@@ -42,7 +44,12 @@ AB_VARIANTS = {
     "no-gitsigns": {"lua": "require('gitsigns').detach_all()"},
     "no-lualine": {"lua": "require('lualine').hide({ unhide = false })"},  # statusline incl. breadcrumb
     "no-ufo": {"lua": "require('ufo').disable()"},
-    "no-semantic-tokens": {"lua": "vim.lsp.semantic_tokens.enable(false)"},
+    "no-semantic-tokens": {"lua": "vim.lsp.semantic_tokens.enable(false)"},  # already off in lsp.lua: a no-change control
+    # the statusline breadcrumb (aerial, on by default since 2026-11-21), via its own toggle key
+    "no-breadcrumb": {"lua": NO_BREADCRUMB},
+    # every hot-path feature added after 2026-10-26 off at once: should land near the October config
+    "no-nov-features": {"spec": '{ "akinsho/bufferline.nvim", enabled = false }',
+                        "lua": "vim.cmd('ScrollViewDisable'); vim.cmd('IBLDisable'); pcall(vim.api.nvim_del_augroup_by_name, 'bracket_match'); Snacks.words.disable(); " + NO_BREADCRUMB},
 }
 # instrument self-test: N ms of busy work on every cursor move / typed key must show up as ~+N ms
 for _ms in (1, 2, 5, 10):
@@ -225,11 +232,17 @@ class Run:
         reset_fixture(t["cwd"], t["file"])
         ab = AB_VARIANTS.get(AB, {}) if mode == "config" else {}
         if ab.get("spec"):
+            # the spec file is visible to EVERY Nvim that starts while it exists (it lives in the shared
+            # config): refuse while any other harness session runs, or that run is silently altered
+            others = [x for x in sh(TMUX + ["ls", "-F", "#S"]).stdout.split() if x != os.environ.get("PERF_SESSION", "perf")]
+            if others:
+                raise RuntimeError(f"AB spec variant refused: other test sessions are running ({others})")
             open(AB_SPEC, "w").write("-- temporary, written by scripts/e2e/perf.py AB=" + AB + "\nreturn { " + ab["spec"] + " }\n")
         t0 = time.time()
         # NVIM_APPNAME selects another config side by side (compare.py: older versions of this one)
         env = {"NVIM_APPNAME": os.environ["NVIM_APPNAME"]} if os.environ.get("NVIM_APPNAME") else None
-        self.n = Nvim(t["cwd"], args + [t["file"]], name="perf", env=env)
+        # PERF_SESSION: tmux session name; a second harness must not reuse a running batch's name
+        self.n = Nvim(t["cwd"], args + [t["file"]], name=os.environ.get("PERF_SESSION", "perf"), env=env)
         self.pid = self.n._rpc(lambda: self.n.nv.call("getpid"))
         self.open = {}
         if mode == "config":
@@ -238,7 +251,12 @@ class Run:
         if os.path.exists(AB_SPEC):
             os.remove(AB_SPEC)
         if ab.get("lua"):
-            time.sleep(1.5)  # LazyFile plugins (gitsigns, ibl) attach after VeryLazy
+            # LazyFile plugins (ibl + bracket-match, scrollview, gitsigns) can load after VeryLazy;
+            # a variant applied before them silently switches nothing off
+            self.n.wait("local c = require('lazy.core.config').plugins; for _, p in ipairs({ 'indent-blankline.nvim', "
+                        "'nvim-scrollview', 'gitsigns.nvim' }) do if c[p] and not c[p]._.loaded then return false end end; return true",
+                        30, "LazyFile plugins loaded")
+            time.sleep(1.0)
             self.n.lua(ab["lua"])
         self.n.lua(PROBE)
         if mode == "config":
