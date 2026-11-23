@@ -1,0 +1,62 @@
+{
+  "_comment": "Large real-world files used by perf.py and suite_bigfile.py. cwd = project root (LSP root), file relative to it. anchor/anchor2 = Vim search patterns: the cursor goes to anchor, then to anchor2 after it, and `o` + `type` is typed there. Stand-ins cloned by setup_bigfile.sh. gd_from: pattern whose match start is the symbol gd is pressed on; gd_to_file/gd_to_line: where it must land. func: enclosing function shown in the statusline breadcrumb at the anchor. complete/complete_label: typed prefix and the completion item expected. lsp: client that must attach. refs_from: a symbol with many uses, for gr and the reference highlights.",
+  "go": {
+    "cwd": "/tmp/nvim-e2e-big/gotools/gopls",
+    "file": "internal/golang/completion/completion.go",
+    "anchor": "^func (c \\*completer) collectCompletions",
+    "type": "n := strings.TrimSpace(fmt.Sprintf(\"%d\", len(c.items)))",
+    "gd_from": "err = c\\.\\zscollectCompletions(",
+    "gd_to_file": "completion.go",
+    "gd_to_line": "^func (c \\*completer) collectCompletions",
+    "func": "collectCompletions",
+    "complete": "fmt.Sprin",
+    "complete_label": "Sprintf",
+    "lsp": "gopls",
+    "refs_from": "c\\.\\zsdeepState"
+  },
+  "ts": {
+    "cwd": "/tmp/nvim-e2e-big/excalidraw",
+    "file": "packages/element/src/binding.ts",
+    "anchor": "^export const updateBoundElements",
+    "anchor2": "=> {$",
+    "type": "const count = Array.from(elementsMap.values()).filter((el) => el.isDeleted).length;",
+    "gd_from": "const hit = \\zsgetHoveredElementForBinding(point",
+    "gd_to_file": "collision.ts",
+    "gd_to_line": "^export const getHoveredElementForBinding",
+    "func": "updateBoundElements",
+    "complete": "elementsMap.ha",
+    "complete_label": "has",
+    "lsp": "vtsls",
+    "refs_from": "\\zselementsMap"
+  },
+  "tsx": {
+    "cwd": "/tmp/nvim-e2e-big/excalidraw",
+    "file": "packages/excalidraw/components/App.tsx",
+    "anchor": "private handleCanvasPointerMove = (",
+    "anchor2": "=> {$",
+    "type": "const pointer = viewportCoordsToSceneCoords(event, this.state);",
+    "gd_from": "onPointerMove={this\\.\\zshandleCanvasPointerMove",
+    "gd_to_file": "App.tsx",
+    "gd_to_line": "private handleCanvasPointerMove = (",
+    "func": "handleCanvasPointerMove",
+    "complete": "this.sta",
+    "complete_label": "state",
+    "lsp": "vtsls",
+    "refs_from": "this\\.\\zsstate\\>"
+  },
+  "py": {
+    "cwd": "/tmp/nvim-e2e-big/django",
+    "file": "django/db/models/query.py",
+    "anchor": "^    def bulk_create(",
+    "anchor2": "):$",
+    "type": "total = len([obj for obj in objs if obj.pk is None])",
+    "gd_from": "return self\\.\\zs_filter_or_exclude(False",
+    "gd_to_file": "query.py",
+    "gd_to_line": "^    def _filter_or_exclude(self",
+    "func": "bulk_create",
+    "complete": "self.mod",
+    "complete_label": "model",
+    "lsp": "basedpyright",
+    "refs_from": "self\\.\\zsmodel\\>"
+  }
+}
