@@ -985,6 +985,62 @@ so at this lightness C\* is already at the ceiling on this hue: every attempt to
 raise it clipped and came back as extra *lightness*. Same geometry as the hard
 floor documented in `lua/config/ui.lua`. Lightness is the only axis.
 
+### Reference highlight (word under cursor)
+
+**LIVE at `#24282f` since 2026-11-23** (`surface.reference` in
+`lua/config/ui.lua`), used by `LspReferenceText`, `LspReferenceRead` and
+`LspReferenceWrite`. It paints the other uses of the symbol under the cursor
+(snacks words, LSP `documentHighlight`). The goal is a cue, not noise: the word
+keeps its own syntax colour and only gets a soft band behind it, which is what
+VS Code (translucent grey) and JetBrains (dark low-chroma tints) both do.
+
+Measured against the live bg `#171716` with `scripts/palette/palette.py`
+(dE2000, WCAG). "screen" is the band sampled from real Ghostty screenshots
+(transparent nvim, 90% opacity), against the sampled bg `#171815`.
+
+| band | dE vs bg | C\* | hue | body | red param | violet keyword | screen | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `#541131` | 24.5 | 33.5 | 355 | 7.32 | 4.38 | 4.14 | `#5d0833`, dE 28.1 | theme default. Saturated wine: reads as an error, same hue family as red parameters |
+| `#3a3a38` | 11.1 | 1.3 | 110 | 5.96 | 3.57 | 3.38 | | VS Code-like grey. Too loud, text loses most contrast |
+| `#344134` | 15.9 | 10.4 | 143 | 5.63 | 3.37 | 3.19 | | Darcula-like green. Loudest of the quiet set |
+| `#2f2f2d` | 7.6 | 1.4 | 110 | 7.02 | 4.20 | 3.97 | | neutral grey. dE 1.6 from the explorer's active-file row `#312f2b`: reads as the same mark |
+| `#25333a` | 11.1 | 7.3 | 239 | 6.81 | 4.07 | 3.86 | | teal-slate. Drifts toward the member cyan |
+| `#2b313a` | 10.3 | 6.6 | 269 | 6.85 | 4.10 | 3.88 | | tried as a separate WRITE step: only dE 2.0 from `#262b33`, invisible |
+| `#262b33` | 8.6 | 5.9 | 270 | 7.45 | 4.45 | 4.22 | `#252a34`, dE 10.3 | first live value. Clearest single word, but a screen full of matches got noisy |
+| **`#24282f`** | 7.5 | 5.2 | 271 | 7.74 | 4.63 | 4.38 | `#212930`, dE 8.1 to 8.9 | **live.** Quieter with many matches; red parameters pass AA |
+| `#22262d` | 7.1 | 5.2 | 271 | 7.94 | 4.75 | 4.50 | | measured only. dE 0.6 from live: not a real step |
+| `#20242a` | 6.3 | 4.6 | 268 | 8.16 | 4.88 | 4.62 | | measured only. Starts to disappear |
+
+For scale, on the same screen: status line dE 3.1, explorer active row 7.8,
+`list_cursor` 15.6. The live band sits just above the active row, so it is
+clearly visible but always weaker than a selected row.
+
+Rules this table settled:
+
+- **One colour for read and write.** A visible write step needs a brighter band,
+  and write spots are often parameters (`membership =>`), which would drop under
+  AA. A step small enough to keep AA (`#2b313a`) is too small to see.
+- **Cool slate, not indigo.** Live is dE 15.4 from `Visual` (`#24275a`), so a
+  matched word never looks like a selection. Same hue family as `list_cursor`,
+  which already means "cursor is here".
+- **The violet keyword under AA does not matter here.** The band lands on
+  identifiers, never on keywords.
+
+**The final pick was between two good values, and it is a trade-off, not a
+winner.** Both were tested on screen in `ClassAddBookingDrawer.tsx`:
+
+| | `#262b33` | `#24282f` (live) |
+| --- | --- | --- |
+| pro | clearest single match (screen dE 10.3) | quiet when 20+ matches fill the screen |
+| pro | | every text colour reads better on it; red parameters pass AA (4.63:1) |
+| con | noisy when many matches are on screen at once | a single match is fainter (screen dE 8.1 to 8.9) |
+| con | red parameters only just reach AA (4.45:1 authored) | |
+
+Chosen by Myo on 2026-11-23: matches usually come in groups (an object built
+from one variable, a long callback), so the quieter value wins in real files.
+If the band ever feels too faint, `#262b33` is the step back up; there is no
+useful value between them.
+
 ### Named constants
 
 `@constant` (SCREAMING_SNAKE names like `EMPTY_GUID`) shared the theme's

@@ -365,7 +365,12 @@ return {
       },
     },
     animate = { enabled = false },
-    words = { enabled = false }, -- CursorMoved buffer-wide search on every j/k
+    -- Highlight other uses of the symbol under the cursor (LSP documentHighlight),
+    -- like WebStorm. Per cursor move: a timer restart and a read of this
+    -- plugin's own few extmarks, +0.04 ms measured on a 1,626-line TSX file
+    -- (2026-11-23). The LSP request only fires after 200 ms idle (vtsls: 2-3 ms).
+    -- Normal mode only, so typing in insert mode stays off this path.
+    words = { enabled = true, modes = { "n" } },
     indent = { enabled = false }, -- decoration provider + scope listener on hot paths
     scope = { enabled = false }, -- treesitter scope tracking on every cursor move
     dim = { enabled = false },
