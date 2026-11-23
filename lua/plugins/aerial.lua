@@ -574,7 +574,8 @@ local function set_breadcrumb(show)
       breadcrumb_shown = show
       if breadcrumb_shown then
         start_aerial()
-        component[1] = "aerial"
+        -- aerial's component, with hook bindings trimmed (lua/lualine/components)
+        component[1] = "aerial_breadcrumb"
         component.cond = nil
       else
         hide_breadcrumb(component)
