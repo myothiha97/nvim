@@ -58,7 +58,7 @@ disabled one in `breakpoints.lua`; colours link to diagnostic groups so they fol
 | Sign | Meaning |
 |---|---|
 | red dot | breakpoint |
-| red ◉ (dot in a ring) | condition or hit count |
+| red ◉ (dot in a ring) | condition (a hit count alone keeps the plain red dot: nvim-dap picks the sign from condition, then log message) |
 | yellow dot | log point (doesn't stop) |
 | hollow grey dot | disabled (`<leader>db`) or muted (`<leader>dD`) |
 | hollow red dot | rejected by the adapter during a session |

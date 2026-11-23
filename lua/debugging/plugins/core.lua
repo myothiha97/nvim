@@ -31,7 +31,7 @@ end
 
 return {
   -- Breakpoint signs, JetBrains-style and kept quiet: one shape (a dot), the colour says
-  -- what it is. Red = breakpoint, red ◉ = condition / hit count, yellow = log point
+  -- what it is. Red = breakpoint, red ◉ = condition (a hit count alone stays a plain dot), yellow = log point
   -- (doesn't stop), hollow red = rejected by the adapter. Disabled / muted ones are a hollow
   -- grey dot (debugging/breakpoints.lua). Stopped keeps LazyVim's arrow. LazyVim's dap.core
   -- defines the signs from these icons when nvim-dap loads; colours link to diagnostic groups,
