@@ -219,7 +219,7 @@ def _(c):
 @test("go/conditional-hit-log-disable-mute")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>dN")
+    n.keys(":38<CR><BPC>")
     n.wait_screen("Breakpoint condition", 5)
     c.shot("condition_prompt")
     n.keys("i == 3<CR>")
@@ -227,14 +227,14 @@ def _(c):
     bp = [b for b in st(n)["bps"] if b["line"] == 38]
     c.check(bp and bp[0].get("condition") == "i == 3", "condition saved on bp", bp)
     # Esc cancel on prompt must not alter bp
-    n.keys("<leader>dN")
+    n.keys("<BPC>")
     n.wait_screen("Breakpoint condition", 5)
     n.keys("<Esc><Esc>")
     time.sleep(0.3)
     bp = [b for b in st(n)["bps"] if b["line"] == 38]
     c.check(bp and bp[0].get("condition") == "i == 3", "Esc cancels without change", bp)
     # log point on line 41
-    n.keys(":41<CR><leader>dL")
+    n.keys(":41<CR><BPL>")
     n.wait_screen("Log message", 5)
     n.keys("LOGPOINT total={total}<CR>")
     time.sleep(0.3)
@@ -248,11 +248,11 @@ def _(c):
     out = repl_text(n)
     c.check("LOGPOINT total=" in out, "log point message printed, no stop", out[-600:])
     # hit count
-    n.keys(":38<CR><leader>dN")
+    n.keys(":38<CR><BPC>")
     n.wait_screen("Breakpoint condition", 5)
     n.keys("<C-u><CR>")  # clear condition
     time.sleep(0.2)
-    n.keys("<leader>dH")
+    n.keys("<BPH>")
     n.wait_screen("Hit condition", 5)
     n.keys("2<CR>")
     time.sleep(0.3)

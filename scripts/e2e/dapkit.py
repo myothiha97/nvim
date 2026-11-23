@@ -85,7 +85,8 @@ def open_nvim(cwd, args, **kw):
 
 
 # Keys looked up by their which-key description, so remapping a feature doesn't break tests.
-ALIASES = {"<BP>": "Toggle Breakpoint", "<BPD>": "Disable/Enable Breakpoint"}
+ALIASES = {"<BP>": "Toggle Breakpoint", "<BPD>": "Disable/Enable Breakpoint", "<BPC>": "Breakpoint Condition",
+           "<BPH>": "Breakpoint Hit Condition", "<BPL>": "Log Point"}
 
 
 def resolve_aliases(n):
