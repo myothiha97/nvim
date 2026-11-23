@@ -65,6 +65,7 @@ Run to Cursor is `<leader>dC` (right-click menu in phase 2).
 | `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |
 | `<leader>dl` | Run last: reruns the file you originally debugged (the bar's Run Again does the same) |
 | `<leader>dx` | Exception breakpoint filters |
+| `<leader>dr` | Jump to the tray's REPL (opens the tray if closed); again jumps back. LazyVim's `dap.repl.toggle()` opened a second REPL split |
 | `<leader>dd` | Disable / enable the line's breakpoint (kept as a grey sign, saved; condition/hit/log kept). Also right-click → Disable / Enable Breakpoint. A click or `<leader>db` on a disabled one removes it |
 | `<leader>dD` | Mute / unmute all breakpoints (line + function). Not saved; breakpoints added while muted are active |
 | `<leader>dI` | Smart Step Into: pick which call on the line to step into (Python, Node; elsewhere a plain Step Into). Also right-click on the current line |

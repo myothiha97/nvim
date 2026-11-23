@@ -135,6 +135,32 @@ function M.close_all()
   release_layout()
 end
 
+-- <leader>dr: go to the REPL in the tray (open the tray first if needed); from
+-- the REPL, go back. LazyVim's dap.repl.toggle() opened a SECOND REPL split
+-- next to the tray's, shrinking the editor to a third of its height.
+function M.focus_repl()
+  local function repl_win()
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      local buf = vim.api.nvim_win_get_buf(win)
+      if vim.bo[buf].filetype == "dap-repl" and vim.api.nvim_win_get_config(win).relative == "" then
+        return win
+      end
+    end
+  end
+  local win = repl_win()
+  if win and win == vim.api.nvim_get_current_win() then
+    vim.cmd("wincmd p")
+    return
+  end
+  if not win then
+    M.open_tray()
+    win = repl_win()
+  end
+  if win then
+    vim.api.nvim_set_current_win(win)
+  end
+end
+
 function M.toggle()
   if any_open() then
     M.close_all()
