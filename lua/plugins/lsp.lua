@@ -63,6 +63,14 @@ return {
             { "<c-k>", false, mode = "i" },
             { "<leader>cc", false, mode = { "n", "x" } },
             { "<leader>cC", false, mode = "n" },
+            -- snacks words is on (plugins/snacks.lua), which enables LazyVim's
+            -- reference jumps. `]]`/`[[` stay (native section motions are near
+            -- useless in TS/Go). <A-n>/<A-p> go: Ghostty sends Cmd+n/p to tmux as
+            -- Meta n/p, and outside the prefix the key leaks into nvim, where it
+            -- would move the cursor. ~/.config/ghostty/config relies on nvim
+            -- mapping neither.
+            { "<a-n>", false },
+            { "<a-p>", false },
             -- Override LazyVim's `K → vim.lsp.buf.hover()` (no opts) so popup
             -- size/style is consistent across gopls / pyright / vtsls / etc.
             {

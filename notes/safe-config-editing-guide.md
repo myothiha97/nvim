@@ -232,9 +232,10 @@ Before committing any config change, confirm:
 
 Copy these proven patterns instead of inventing new ones:
 
-- **Disable hot-path features wholesale** — `snacks` `words`/`scope`/`indent`/
+- **Disable hot-path features wholesale** — `snacks` `scope`/`indent`/
   `scroll`/`animate` off; `treesitter-context` off; lualine git-diff stripped;
-  `loaded_matchparen = 1` (kills ~1200 calls/session).
+  `loaded_matchparen = 1` (kills ~1200 calls/session). `snacks` `words` is ON
+  since 2026-11-23, normal mode only: +0.04 ms per cursor move, measured.
 - **Throttle + dedup + reuse timer** for `MouseMove` — `lua/config/mouse-hover.lua`
   (the reference implementation for any high-frequency handler).
 - **Large-file guards** — snacks bigfile (1.5MB → treesitter, LSP and folds
