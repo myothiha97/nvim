@@ -30,8 +30,7 @@
 -- with no error. Re-check after every snacks update: open `<leader>r`, scroll
 -- deep into a folder, and confirm its parents stay pinned.
 --
--- The band colour `SnacksExplorerSticky` (plugins/snacks.lua) is unused for
--- now: the pinned rows take the list background (see `draw`).
+-- The band colour is `SnacksExplorerSticky`, defined in plugins/snacks.lua.
 
 local M = {}
 
@@ -135,10 +134,7 @@ local function draw(list, state, items)
   else
     config.noautocmd = true
     state.win = vim.api.nvim_open_win(buf, false, config)
-    -- No band (Myo, 2026-11-23): pinned rows use the list's own background.
-    -- To bring the band back, map both to `SnacksExplorerSticky` (still defined
-    -- in plugins/snacks.lua).
-    vim.wo[state.win].winhighlight = "Normal:SnacksPickerList,NormalFloat:SnacksPickerList"
+    vim.wo[state.win].winhighlight = "Normal:SnacksExplorerSticky,NormalFloat:SnacksExplorerSticky"
     vim.wo[state.win].wrap = false
   end
 end
