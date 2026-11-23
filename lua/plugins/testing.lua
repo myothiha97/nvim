@@ -176,7 +176,28 @@ return {
         -- Also: `q` closes the <leader>ta attach window (leave terminal mode first with
         -- <C-\><C-n>). Closing only detaches the view; the test keeps running.
         ui = function()
-          vim.diagnostic.config({ signs = false }, vim.api.nvim_create_namespace("neotest"))
+          -- Inline text: one compact line, as LazyVim's format, minus JS stack frames. Vitest / Jest
+          -- messages carry the whole stack ("    at file:///…/node_modules/…:155:11" lines), which
+          -- the joined line turned into ~1,500 chars of virtual text. Only frame lines are dropped
+          -- (indented "at …" ending in a position, "(<anonymous>)" or "(native)"); the float,
+          -- <leader>to and the Test Results panel still show the full message. Runs per diagnostic
+          -- when neotest sets results, not on keystrokes.
+          local function compact(diagnostic)
+            local kept = {}
+            for line in (diagnostic.message .. "\n"):gmatch("(.-)\n") do
+              local frame = line:match("^%s+at%s")
+                and (line:match("%d+:%d+%)?$") or line:match("%(<anonymous>%)$") or line:match("%(native%)$"))
+              if not frame then
+                kept[#kept + 1] = line
+              end
+            end
+            local message = table.concat(kept, " "):gsub("%s+", " "):gsub("^%s+", "")
+            return message
+          end
+          vim.diagnostic.config(
+            { signs = false, virtual_text = { format = compact } },
+            vim.api.nvim_create_namespace("neotest")
+          )
           vim.api.nvim_create_autocmd("FileType", {
             pattern = "neotest-attach",
             callback = function(ev)
