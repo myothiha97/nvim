@@ -73,7 +73,7 @@ disabled one in `breakpoints.lua`; colours link to diagnostic groups so they fol
 | `<leader>dB` | Clear breakpoints in this file |
 | `<leader>dX` | Clear all breakpoints in this project (incl. function breakpoints) |
 | `<leader>dm` / `dM` | Breakpoint list (current file / project) in a picker with preview; `<CR>` jumps |
-| `<leader>dN` / `dH` / `dL` | Condition / hit count / log message for the line's breakpoint (float; empty answer clears that field) |
+| `<leader>dn` / `dh` / `dL` | Condition / hit count / log message for the line's breakpoint (float; empty answer clears that field) |
 | `<leader>dF` | Toggle function breakpoint by name (saved) |
 | `<leader>do` / `dO` | Step over / step out (swapped vs LazyVim) |
 | `<leader>dR` / `dt` | Restart / Terminate the top-level session (Node runs the program in a child session; identical to LazyVim's for Go) |

@@ -299,7 +299,7 @@ join the running gopls instead of starting a new one.
 | ----------------------------------------- | ------------------------------------------------------------- |
 | `<leader>dc`                              | Start / continue                                              |
 | `<leader>dd` · click the gutter           | Toggle breakpoint (saved per project)                         |
-| `<leader>dN` · `<leader>dH` · `<leader>dL` | Breakpoint condition · hit count · log point                 |
+| `<leader>dn` · `<leader>dh` · `<leader>dL` | Breakpoint condition · hit count · log point                 |
 | `<leader>db` · `<leader>dD`               | Disable this breakpoint · mute all                            |
 | `<leader>dm` · `<leader>dM`               | Breakpoint list: file · project                               |
 | `<leader>dB` · `<leader>dX`               | Clear breakpoints: file · project                             |

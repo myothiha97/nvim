@@ -85,11 +85,12 @@ return {
       { "<leader>dm", function() require("debugging.list").open("file") end, desc = "Breakpoints (current file)" },
       { "<leader>dM", function() require("debugging.list").open("project") end, desc = "Breakpoints (project)" },
       -- LazyVim: dB = condition. Clearing a file is more frequent, so dB clears
-      -- and the condition prompt moves to dN.
+      -- and the condition prompt moves to dn. Condition / hit count are lowercase (dn / dh, no
+      -- Shift); the log point stays dL because dl is Run Last, used far more often.
       { "<leader>dB", function() require("debugging.breakpoints").clear_buffer() end, desc = "Clear Breakpoints (File)" },
       { "<leader>dX", function() require("debugging.breakpoints").clear_all() end, desc = "Clear Breakpoints (Project)" },
-      { "<leader>dN", function() require("debugging.prompts").condition() end, desc = "Breakpoint Condition" },
-      { "<leader>dH", function() require("debugging.prompts").hit_condition() end, desc = "Breakpoint Hit Condition" },
+      { "<leader>dn", function() require("debugging.prompts").condition() end, desc = "Breakpoint Condition" },
+      { "<leader>dh", function() require("debugging.prompts").hit_condition() end, desc = "Breakpoint Hit Condition" },
       { "<leader>dL", function() require("debugging.prompts").log_point() end, desc = "Log Point" },
       { "<leader>dF", function() require("debugging.delve").toggle_fn_breakpoint() end, desc = "Toggle Function Breakpoint" },
       -- JetBrains "Disable breakpoint" / "Mute Breakpoints" (breakpoints.lua).
