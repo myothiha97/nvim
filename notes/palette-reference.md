@@ -1088,6 +1088,39 @@ snacks picker only.
 
 ---
 
+### Explorer sticky folders band (measured 2026-11-23, not yet chosen)
+
+Background for the pinned folder rows at the top of the `<leader>r` explorer
+(`SnacksExplorerSticky`, `lua/config/explorer-sticky.lua`). Reference is VS Code's
+sticky scroll, measured from a real screenshot: band `#1c2227` on list `#131519`
+is **+6.1 L\*, dE00 4.4**, with a 1px shadow line `#35363d` under it.
+
+Candidates are `lift(bg, a)` on `#171716`, scored by `scripts/palette/palette.py`:
+
+| a | value | dL\* | dE00 bg | dE00 active-file `#312f2b` | dE00 cursor `#383c4a` | names `#adb7b7` | tree guide on band |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0.03 | `#1e1e1d` | 3.5 | 2.2 | 5.8 | 13.0 | 8.13:1 | 1.68:1 |
+| 0.04 | `#20201f` | 4.5 | 2.8 | 5.2 | 12.6 | 7.95:1 | 1.65:1 |
+| **0.05** | **`#232322`** | **6.0** | **3.8** | **4.4** | **11.9** | **7.67:1** | **1.59:1** |
+| 0.06 | `#252524` | 6.9 | 4.4 | 3.9 | 11.5 | 7.48:1 | 1.55:1 |
+| 0.07 | `#272726` | 7.9 | 5.0 | 3.4 | 11.1 | 7.29:1 | 1.51:1 |
+| 0.09 | `#2c2c2b` | 10.3 | 6.6 | 2.3 | 10.1 | 6.81:1 | 1.41:1 |
+
+Proposed: **0.05**, the same lightness step as VS Code (+6.0 vs +6.1 L\*) while
+staying 4.4 dE00 from the active-file band. 0.06 matches VS Code's dE00 exactly
+but drops to 3.9 from the active-file band; 0.09 (`surface.raised`) is 2.3 from
+it, too close. Not yet checked on screen.
+
+Other values measured from the same two screenshots (emitted pixels, not
+authored hex):
+
+| what | VS Code | nvim |
+| --- | --- | --- |
+| file name | `#aaaeb4` | `#aaaeac` (authored `#adb7b7`), dE00 4.4 apart |
+| folder name | `#cfc0a8`, the git "modified" colour, not a folder colour | same grey as files |
+| folder icon | per-folder Material icons (`src` green, `class` red, ...) | one blue `#02affb` |
+| tree lines | none shown | `#333431` (authored `surface.guide` `#434342`) |
+
 ## Builds (`variants.lua`)
 
 | build | what it is |
