@@ -92,6 +92,11 @@ local function draw(list, state, items)
   if not (state.buf and vim.api.nvim_buf_is_valid(state.buf)) then
     state.buf = vim.api.nvim_create_buf(false, true)
     vim.bo[state.buf].bufhidden = "hide"
+    -- WARN: SILENT FAILURE. The global normal-mode <Esc> (config/keymaps.lua)
+    -- closes every float except buffers whose filetype starts with
+    -- `snacks_picker`. Without this name, <Esc> in the explorer closes the
+    -- pinned rows and they only come back on the next scroll.
+    vim.bo[state.buf].filetype = "snacks_picker_sticky"
   end
   local buf = state.buf
   local lines, marks = {}, {}
