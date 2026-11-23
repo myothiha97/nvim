@@ -154,11 +154,24 @@ local TITLES = {
   dapui_console = { "TERMINAL", "" },
 }
 
+-- Keep only the hint items that fit after the title. A winbar wider than its
+-- window is cut from the LEFT, which hid VARIABLES and CALL STACK at the
+-- sidebar's 46 columns ("< dbl-click expand ..."). Items drop from the end.
+local function fit_hint(title, hint, width)
+  local room = width - vim.fn.strdisplaywidth(title) - 3 -- " TITLE " + " " before the hint
+  local items = vim.split(hint, " · ", { plain = true })
+  while #items > 0 and vim.fn.strdisplaywidth(table.concat(items, " · ")) > room do
+    table.remove(items)
+  end
+  return table.concat(items, " · ")
+end
+
 local function decorate(win, buf)
   local ft = vim.bo[buf].filetype
   local title = TITLES[ft]
   if title and vim.api.nvim_win_get_config(win).relative == "" then
-    vim.wo[win].winbar = ("%%#Title# %s %%#Comment# %s"):format(title[1], title[2])
+    local hint = fit_hint(title[1], title[2], vim.api.nvim_win_get_width(win))
+    vim.wo[win].winbar = ("%%#Title# %s %%#Comment# %s"):format(title[1], hint)
   end
   if ft == "dapui_scopes" or ft == "dapui_stacks" or ft == "dapui_watches" then
     vim.wo[win].winfixwidth = true
@@ -213,6 +226,22 @@ function M.setup()
       if TITLES[ft] or ft == "dap-repl" then
         for _, win in ipairs(vim.fn.win_findbuf(args.buf)) do
           decorate(win, args.buf)
+        end
+      end
+    end,
+  })
+  -- The hint is fitted to the window width (fit_hint), and dap-ui sizes its
+  -- windows after BufWinEnter, so fit again once a panel's size settles or
+  -- changes. Fires on resizes only; one filetype lookup per resized window.
+  vim.api.nvim_create_autocmd("WinResized", {
+    group = group,
+    callback = function()
+      for _, win in ipairs(vim.v.event.windows or {}) do
+        if vim.api.nvim_win_is_valid(win) then
+          local buf = vim.api.nvim_win_get_buf(win)
+          if TITLES[vim.bo[buf].filetype] then
+            decorate(win, buf)
+          end
         end
       end
     end,
