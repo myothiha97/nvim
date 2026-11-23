@@ -987,7 +987,7 @@ floor documented in `lua/config/ui.lua`. Lightness is the only axis.
 
 ### Reference highlight (word under cursor)
 
-**LIVE at `#24282f` since 2026-11-23** (`surface.reference` in
+**LIVE at `#262b33` since 2026-11-23** (switched back from `#24282f` the same day; `surface.reference` in
 `lua/config/ui.lua`), used by `LspReferenceText`, `LspReferenceRead` and
 `LspReferenceWrite`. It paints the other uses of the symbol under the cursor
 (snacks words, LSP `documentHighlight`). The goal is a cue, not noise: the word
@@ -1006,13 +1006,13 @@ Measured against the live bg `#171716` with `scripts/palette/palette.py`
 | `#2f2f2d` | 7.6 | 1.4 | 110 | 7.02 | 4.20 | 3.97 | | neutral grey. dE 1.6 from the explorer's active-file row `#312f2b`: reads as the same mark |
 | `#25333a` | 11.1 | 7.3 | 239 | 6.81 | 4.07 | 3.86 | | teal-slate. Drifts toward the member cyan |
 | `#2b313a` | 10.3 | 6.6 | 269 | 6.85 | 4.10 | 3.88 | | tried as a separate WRITE step: only dE 2.0 from `#262b33`, invisible |
-| `#262b33` | 8.6 | 5.9 | 270 | 7.45 | 4.45 | 4.22 | `#252a34`, dE 10.3 | first live value. Clearest single word, but a screen full of matches got noisy |
-| **`#24282f`** | 7.5 | 5.2 | 271 | 7.74 | 4.63 | 4.38 | `#212930`, dE 8.1 to 8.9 | **live.** Quieter with many matches; red parameters pass AA |
+| **`#262b33`** | 8.6 | 5.9 | 270 | 7.45 | 4.45 | 4.22 | `#252a34`, dE 10.3 | **live.** Clearest single word. Was the first value, then replaced by `#24282f`, then chosen again. A screen full of matches is noisier |
+| `#24282f` | 7.5 | 5.2 | 271 | 7.74 | 4.63 | 4.38 | `#212930`, dE 8.1 to 8.9 | previous live value (same day). Quieter with many matches; red parameters pass AA. Step back down to this if matches feel noisy |
 | `#22262d` | 7.1 | 5.2 | 271 | 7.94 | 4.75 | 4.50 | | measured only. dE 0.6 from live: not a real step |
 | `#20242a` | 6.3 | 4.6 | 268 | 8.16 | 4.88 | 4.62 | | measured only. Starts to disappear |
 
 For scale, on the same screen: status line dE 3.1, explorer active row 7.8,
-`list_cursor` 15.6. The live band sits just above the active row, so it is
+`list_cursor` 15.6. The `#262b33` band (dE 8.6) sits just above the active row, so it is
 clearly visible but always weaker than a selected row.
 
 Rules this table settled:
@@ -1020,7 +1020,7 @@ Rules this table settled:
 - **One colour for read and write.** A visible write step needs a brighter band,
   and write spots are often parameters (`membership =>`), which would drop under
   AA. A step small enough to keep AA (`#2b313a`) is too small to see.
-- **Cool slate, not indigo.** Live is dE 15.4 from `Visual` (`#24275a`), so a
+- **Cool slate, not indigo.** `#262b33` is about dE 15 from `Visual` (`#24275a`), so a
   matched word never looks like a selection. Same hue family as `list_cursor`,
   which already means "cursor is here".
 - **The violet keyword under AA does not matter here.** The band lands on
@@ -1029,17 +1029,20 @@ Rules this table settled:
 **The final pick was between two good values, and it is a trade-off, not a
 winner.** Both were tested on screen in `ClassAddBookingDrawer.tsx`:
 
-| | `#262b33` | `#24282f` (live) |
+| | `#262b33` (live) | `#24282f` |
 | --- | --- | --- |
 | pro | clearest single match (screen dE 10.3) | quiet when 20+ matches fill the screen |
 | pro | | every text colour reads better on it; red parameters pass AA (4.63:1) |
 | con | noisy when many matches are on screen at once | a single match is fainter (screen dE 8.1 to 8.9) |
 | con | red parameters only just reach AA (4.45:1 authored) | |
 
-Chosen by Myo on 2026-11-23: matches usually come in groups (an object built
-from one variable, a long callback), so the quieter value wins in real files.
-If the band ever feels too faint, `#262b33` is the step back up; there is no
-useful value between them.
+History on 2026-11-23: `#24282f` was chosen first because matches usually come
+in groups (an object built from one variable, a long callback). After a trial,
+Myo went back to `#262b33` for READABILITY: the band stands out a little more
+from the background (dE 8.6 vs 7.5), so the matches are easier to find. The cost
+is slightly lower text contrast on the band (body 7.45:1 vs 7.74:1). If many matches feel
+noisy again, `#24282f` is the step back down; there is no useful value between
+them.
 
 ### Named constants
 
