@@ -150,7 +150,9 @@ return {
             "filename",
             path = 0,
             color = { fg = "#89b4fa", gui = "bold" },
-            padding = { left = 0, right = 0 },
+            -- The one cell before the scroll percentage lives here, so it only
+            -- exists while the filename does (see scroll_percent below).
+            padding = { left = 0, right = 1 },
             separator = "", -- no thin arrow between filename and the git markers
             file_status = false, -- suppress built-in [+]/[-]; we render our own green [+]
             cond = filename_shown,
@@ -274,7 +276,10 @@ return {
         end,
         color = percent_color,
         separator = "",
-        padding = { left = 1, right = 0 },
+        -- No left padding: with a tabline the filename is hidden and the
+        -- percentage follows the two-cell spacer after diagnostics directly;
+        -- without one, the filename's right padding is the gap.
+        padding = { left = 0, right = 0 },
       }
       local insert_at = #lualine_c + 1
       for i, component in ipairs(lualine_c) do
