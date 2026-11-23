@@ -261,10 +261,13 @@ return {
       -- teal was tuned for the retired teal background. It sits 6 L* below the
       -- slate cursor row, and warm against cool keeps the two rows apart.
       vim.api.nvim_set_hl(0, "SnacksExplorerActiveFile", { bg = require("config.ui").surface.active_file })
-      -- Pinned ancestor folders at the top of the explorer
-      -- (config/explorer-sticky.lua). Same surface as the list for now; band
-      -- candidates are measured in notes/palette-reference.md.
-      vim.api.nvim_set_hl(0, "SnacksExplorerSticky", { link = "SnacksPickerList" })
+      -- Band behind the pinned ancestor folders at the top of the explorer
+      -- (config/explorer-sticky.lua), so pinned rows read apart from the real
+      -- rows under them. `surface.sticky` in config/ui.lua; numbers there and in
+      -- notes/palette-reference.md. bg ONLY: every pinned row carries its own
+      -- text highlights, and reading the list's fg here is order-dependent (nil
+      -- at startup, set after a `:colorscheme`), so it would change on reload.
+      vim.api.nvim_set_hl(0, "SnacksExplorerSticky", { bg = require("config.ui").surface.sticky })
       -- Invisible text: fg matched to the background. Used only through the
       -- explorer input's `winhighlight`, to blank the `x/y` counter (see the
       -- explorer source below).
