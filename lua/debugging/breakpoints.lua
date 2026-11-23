@@ -96,7 +96,7 @@ local function place_disabled(buf, line, bp)
     -- A hollow dot (JetBrains' disabled breakpoint) beside the filled breakpoint
     -- dot (plugins/core.lua), greyed with the built-in Comment group, which every
     -- colorscheme defines (a custom group would be wiped by :colorscheme).
-    vim.fn.sign_define(SIGN, { text = "\u{f10c} ", texthl = "Comment" })
+    vim.fn.sign_define(SIGN, { text = "\u{f4c3} ", texthl = "Comment" })
   end
   local id = vim.fn.sign_place(0, GROUP, SIGN, buf, { lnum = line, priority = 21 })
   disabled[buf] = disabled[buf] or {}

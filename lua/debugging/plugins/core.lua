@@ -31,20 +31,22 @@ end
 
 return {
   -- Breakpoint signs, JetBrains-style and kept quiet: one shape (a dot), the colour says
-  -- what it is. Red = breakpoint, red with ? = condition / hit count, yellow = log point
+  -- what it is. Red = breakpoint, red ◉ = condition / hit count, yellow = log point
   -- (doesn't stop), hollow red = rejected by the adapter. Disabled / muted ones are a hollow
   -- grey dot (debugging/breakpoints.lua). Stopped keeps LazyVim's arrow. LazyVim's dap.core
   -- defines the signs from these icons when nvim-dap loads; colours link to diagnostic groups,
-  -- so they follow the theme. Nerd Font glyphs, all the same width.
+  -- so they follow the theme. Small dots (Octicons dot-fill / dot, ~half a cell, like VS Code's
+  -- gutter dot): Font Awesome's circle filled the whole cell and looked heavy. The conditional
+  -- one is the text fisheye ◉ at the same size (no small "dot with ?" glyph exists).
   {
     "LazyVim/LazyVim",
     opts = {
       icons = {
         dap = {
-          Breakpoint = { "\u{f111} ", "DiagnosticError" },
-          BreakpointCondition = { "\u{f059} ", "DiagnosticError" },
-          LogPoint = { "\u{f111} ", "DiagnosticWarn" },
-          BreakpointRejected = { "\u{f10c} ", "DiagnosticError" },
+          Breakpoint = { "\u{f444} ", "DiagnosticError" },
+          BreakpointCondition = { "\u{25c9} ", "DiagnosticError" },
+          LogPoint = { "\u{f444} ", "DiagnosticWarn" },
+          BreakpointRejected = { "\u{f4c3} ", "DiagnosticError" },
         },
       },
     },

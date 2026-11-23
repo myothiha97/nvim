@@ -58,7 +58,7 @@ disabled one in `breakpoints.lua`; colours link to diagnostic groups so they fol
 | Sign | Meaning |
 |---|---|
 | red dot | breakpoint |
-| red `?` dot | condition or hit count |
+| red ◉ (dot in a ring) | condition or hit count |
 | yellow dot | log point (doesn't stop) |
 | hollow grey dot | disabled (`<leader>db`) or muted (`<leader>dD`) |
 | hollow red dot | rejected by the adapter during a session |
