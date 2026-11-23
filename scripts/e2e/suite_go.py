@@ -32,22 +32,22 @@ def go(c, file="main.go"):
 @test("go/bp-toggle-persist-restore")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     s = st(n)
-    c.check(any(b["line"] == 38 for b in s["bps"]), "<leader>db sets breakpoint on line 38", s["bps"])
+    c.check(any(b["line"] == 38 for b in s["bps"]), "<BP> sets breakpoint on line 38", s["bps"])
     store = bp_store()
     c.check(any("38" in json.dumps(v) for v in store.values()), "breakpoint saved to disk immediately", store)
     c.check(n.lua("return #vim.fn.sign_getplaced(vim.api.nvim_get_current_buf(), {group='dap_breakpoints', lnum=38})[1].signs") == 1, "breakpoint sign drawn")
-    n.keys(":24<CR><leader>db")
+    n.keys(":24<CR><BP>")
     n.close()
     # restart nvim: breakpoints must come back
     c.n = n = open_nvim(GO, ["main.go"])
     n.wait("return package.loaded['dap.breakpoints'] and #(require('dap.breakpoints').get()[vim.api.nvim_get_current_buf()] or {}) == 2", 10, "restore")
     s = st(n)
     c.check(sorted(b["line"] for b in s["bps"]) == [24, 38], "both breakpoints restored after restart", s["bps"])
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     s = st(n)
-    c.check([b["line"] for b in s["bps"]] == [24], "<leader>db again removes it", s["bps"])
+    c.check([b["line"] for b in s["bps"]] == [24], "<BP> again removes it", s["bps"])
     n.keys("<leader>dB")
     time.sleep(0.3)
     c.check(st(n)["bps"] == [], "<leader>dB clears file", st(n)["bps"])
@@ -77,7 +77,7 @@ def _(c):
 @test("go/launch-layout-stop-continue-exit")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     pick_config(n)
     n.wait("return vim.tbl_contains(vim.tbl_map(function(w) return vim.bo[vim.api.nvim_win_get_buf(w)].filetype end, vim.api.nvim_tabpage_list_wins(0)), 'dap-repl')", 20, "tray opened")
     s = wait_stopped(n, line=38)
@@ -102,7 +102,7 @@ def _(c):
     layout_after = [(w["ft"], w["w"], w["h"]) for w in st(n)["wins"] if not w["float"]]
     c.check(layout_before == layout_after, "layout did not move between stops", (layout_before, layout_after))
     # remove bp and run to end
-    n.keys("<leader>db<leader>dc")
+    n.keys("<BP><leader>dc")
     n.wait("return package.loaded['dap'] and require('dap').session() == nil", 30, "program exit")
     time.sleep(0.6)
     b = bar(n) or ""
@@ -124,7 +124,7 @@ def _(c):
 @test("go/stepping")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     pick_config(n)
     wait_stopped(n, line=38)
     n.keys("<leader>di")
@@ -166,7 +166,7 @@ def _(c):
 @test("go/control-bar-mouse")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     pick_config(n)
     wait_stopped(n, line=38)
     time.sleep(0.5)
@@ -265,14 +265,14 @@ def _(c):
     n.keys("<leader>dt")
     wait_no_session(n)
     # disable line bp -> not hit
-    n.keys(":38<CR><leader>dd")
+    n.keys(":38<CR><BPD>")
     time.sleep(0.3)
     sign = n.lua("local s=vim.fn.sign_getplaced(vim.api.nvim_get_current_buf(), {group='*', lnum=38})[1].signs; return s[1] and s[1].name or ''")
     ext = n.lua("for _,m in ipairs(vim.api.nvim_buf_get_extmarks(0,-1,{37,0},{37,-1},{details=true})) do if m[4].sign_text then return m[4].sign_hl_group end end return ''")
     c.check(not any(b["line"] == 38 for b in st(n)["bps"]), "disabled bp removed from active set", st(n)["bps"])
     c.check(sign != "" or ext != "", "disabled bp keeps a (grey) sign", (sign, ext))
     c.shot("disabled_sign")
-    n.keys(":24<CR><leader>db")
+    n.keys(":24<CR><BP>")
     n.keys("<leader>dD")  # mute all
     time.sleep(0.3)
     n.keys("<leader>dl")
@@ -355,7 +355,7 @@ def _(c):
 @test("go/goroutines-callstack")
 def _(c):
     n = go(c)
-    n.keys(":30<CR><leader>db")
+    n.keys(":30<CR><BP>")
     pick_config(n)
     s = wait_stopped(n, line=30)
     time.sleep(0.8)
@@ -403,7 +403,7 @@ def _(c):
     n = go(c, "calc/calc_test.go")
     n.keys(":9<CR>")
     n.lua("vim.cmd('edit calc/calc.go')")
-    n.keys(":4<CR><leader>db")
+    n.keys(":4<CR><BP>")
     n.lua("vim.cmd('buffer calc_test.go')")
     n.keys(":10<CR><leader>td")
     try:
@@ -437,7 +437,7 @@ def _(c):
 @test("go/right-click-menu-hover")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     pick_config(n)
     wait_stopped(n, line=38)
     time.sleep(0.6)
@@ -466,7 +466,7 @@ def _(c):
 @test("go/breakpoint-list-picker")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db:24<CR><leader>db")
+    n.keys(":38<CR><BP>:24<CR><BP>")
     n.keys("<leader>dm")
     time.sleep(0.8)
     scr = n.screen()
@@ -487,7 +487,7 @@ def _(c):
 @test("go/regress-panel-titles-and-repl-key")
 def _(c):
     n = go(c)
-    n.keys(":38<CR><leader>db")
+    n.keys(":38<CR><BP>")
     pick_config(n)
     wait_stopped(n, line=38)
     time.sleep(0.6)

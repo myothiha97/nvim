@@ -80,7 +80,21 @@ def open_nvim(cwd, args, **kw):
     n = Nvim(cwd, args, **kw)
     n.wait("local c=require('lazy.core.config').plugins['which-key.nvim']; return c and c._.loaded ~= nil", 40, "VeryLazy")
     time.sleep(0.8)
+    resolve_aliases(n)
     return n
+
+
+# Keys looked up by their which-key description, so remapping a feature doesn't break tests.
+ALIASES = {"<BP>": "Toggle Breakpoint", "<BPD>": "Disable/Enable Breakpoint"}
+
+
+def resolve_aliases(n):
+    n.aliases = {}
+    for alias, desc in ALIASES.items():
+        lhs = n.lua("for _,m in ipairs(vim.api.nvim_get_keymap('n')) do if m.desc == ... then return m.lhs end end return nil", desc)
+        if not lhs:
+            raise RuntimeError(f"no normal-mode key with desc {desc!r}")
+        n.aliases[alias] = lhs.replace(" ", "<leader>", 1) if lhs.startswith(" ") else lhs
 
 
 def wait_stopped(n, timeout=40, line=None, fn=None):

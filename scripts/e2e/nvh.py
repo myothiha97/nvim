@@ -89,7 +89,11 @@ class Nvim:
 
     # ---------- input ----------
     def keys(self, s, settle=0.05):
-        """Vim-ish notation: '<leader>dc', '<F10>', 'iHello<Esc>'. <leader> is Space."""
+        """Vim-ish notation: '<leader>dc', '<F10>', 'iHello<Esc>'. <leader> is Space.
+        Aliases like <BP> (resolved from the config's keymap descriptions) keep the suites
+        independent of which key a feature is bound to."""
+        for alias, lhs in getattr(self, "aliases", {}).items():
+            s = s.replace(alias, lhs)
         s = s.replace("<leader>", " ")
         for part in TOKEN.split(s):
             if not part:

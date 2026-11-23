@@ -28,7 +28,7 @@ def launch(c, cwd, file):
 @test("node/launch-file-step-exit")
 def _(c):
     n = launch(c, NODE, "src/index.js")
-    n.keys(":4<CR><leader>db")
+    n.keys(":4<CR><BP>")
     pick_config(n, "Launch file")
     s = wait_stopped(n, line=4, timeout=40)
     c.shot("stop")
@@ -60,7 +60,7 @@ def _(c):
 @test("node/stop-restart-child-session")
 def _(c):
     n = launch(c, NODE, "src/index.js")
-    n.keys(":4<CR><leader>db")
+    n.keys(":4<CR><BP>")
     pick_config(n, "Launch file")
     wait_stopped(n, line=4, timeout=40)
     stacks = panel(n, "dapui_stacks")
@@ -83,7 +83,7 @@ def _(c):
 @test("node/npm-script")
 def _(c):
     n = launch(c, NODE, "src/index.js")
-    n.keys(":4<CR><leader>db")
+    n.keys(":4<CR><BP>")
     pick_config(n, "npm script")
     time.sleep(1.2)
     c.shot("script_picker")
@@ -100,7 +100,7 @@ def _(c):
 @test("node/typescript-launch-sourcemaps")
 def _(c):
     n = launch(c, NODE, "src/math.ts")
-    n.keys(":2<CR><leader>db")
+    n.keys(":2<CR><BP>")
     n.lua("vim.cmd('edit src/run.ts')")
     pick_config(n, "Launch file")
     s = wait_stopped(n, timeout=40)
@@ -114,7 +114,7 @@ def _(c):
 def _(c):
     n = launch(c, NODE, "src/math.test.ts")
     n.lua("vim.cmd('edit src/math.ts')")
-    n.keys(":2<CR><leader>db")
+    n.keys(":2<CR><BP>")
     n.lua("vim.cmd('buffer math.test.ts')")
     n.keys(":6<CR><leader>td")
     s = wait_stopped(n, timeout=60)
@@ -131,7 +131,7 @@ def _(c):
 def _(c):
     n = launch(c, JEST, "calc.test.js")
     n.lua("vim.cmd('edit calc.js')")
-    n.keys(":2<CR><leader>db")
+    n.keys(":2<CR><BP>")
     n.lua("vim.cmd('buffer calc.test.js')")
     n.keys(":4<CR><leader>td")
     s = wait_stopped(n, timeout=60)
@@ -145,7 +145,7 @@ def _(c):
 @test("py/launch-step-console")
 def _(c):
     n = launch(c, PY, "app.py")
-    n.keys(":2<CR><leader>db")
+    n.keys(":2<CR><BP>")
     pick_config(n)
     s = wait_stopped(n, line=2, timeout=40)
     time.sleep(0.8)
@@ -161,7 +161,7 @@ def _(c):
     s = wait_stopped(n)
     c.check(s["frame"]["name"] == "main" or "main" in s["frame"]["name"], "step out to main", s["frame"])
     n.lua("vim.cmd('edit app.py')")
-    n.keys(":2<CR><leader>db")
+    n.keys(":2<CR><BP>")
     n.keys("<leader>dc")
     n.wait("return package.loaded['dap'] and require('dap').session() == nil", 30, "exit")
     time.sleep(1)
@@ -177,7 +177,7 @@ def _(c):
 def _(c):
     n = launch(c, PY, "test_app.py")
     n.lua("vim.cmd('edit app.py')")
-    n.keys(":2<CR><leader>db")
+    n.keys(":2<CR><BP>")
     n.lua("vim.cmd('buffer test_app.py')")
     n.keys(":6<CR><leader>td")
     s = wait_stopped(n, timeout=60)

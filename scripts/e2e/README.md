@@ -14,6 +14,8 @@ Nothing here loads with Neovim. It runs only when you start it, like `scripts/pa
 - Each step **waits on a condition** (with a timeout), not on fixed sleeps. Keys are paced like
   a person: at least 40 ms between special keys and 150 ms after `<CR>`. Keys sent within
   50 ms of a `:cmd<CR>` can be lost, which is sub-human speed.
+- Breakpoint keys are written `<BP>` / `<BPD>` in the suites and looked up by their which-key
+  description (`dapkit.ALIASES`), so remapping them doesn't break the tests.
 - Saves a screenshot per key step to `shots/` (`.ans` = raw ANSI; `.png` when the
   JetBrains Mono font is installed, which is Linux-only paths in `render.py`).
 - Cleans up after each scenario: quits Neovim, then kills that Neovim's own process tree
