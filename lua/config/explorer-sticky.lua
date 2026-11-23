@@ -127,7 +127,11 @@ local function draw(list, state, items)
     height = #items,
     focusable = false,
     style = "minimal",
-    zindex = 45,
+    -- One step above the list (33 in the sidebar layout), so the pinned rows
+    -- sit with the explorer and under any float that covers it. A fixed 45 put
+    -- them ABOVE the <leader>e oil backdrop (40, plugins/oil.lua): the rest of
+    -- the sidebar went blank but the pinned rows stayed bright.
+    zindex = (vim.api.nvim_win_get_config(list_win).zindex or 44) + 1,
   }
   if state.win and vim.api.nvim_win_is_valid(state.win) then
     vim.api.nvim_win_set_config(state.win, config)
