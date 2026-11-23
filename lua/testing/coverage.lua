@@ -301,11 +301,12 @@ function M.consumer(client)
     end
     local lcov = table.concat(merged, "\n")
     if not lcov:find("SF:", 1, true) then
-      -- The tests ran but no source file was measured. Typical in Go when the code under test
-      -- lives in a _test.go file: Go never measures test files. Keep the previous report.
+      -- The tests ran but no source file was measured. In Go: a test panicked (the test binary
+      -- exits before writing coverage, leaving only the "mode:" line; checked with go 1.26), or
+      -- the code under test lives in a _test.go file (never measured). Keep the previous report.
       notify(
-        "Tests ran, but the coverage report has no source files. Go only measures non-test .go files"
-          .. " (code kept inside a _test.go file is never counted).",
+        "Tests ran, but the coverage report has no source files. In Go: a test panicked (Go then"
+          .. " writes no coverage), or the code under test is inside a _test.go file (never counted).",
         vim.log.levels.WARN
       )
       return
