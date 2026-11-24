@@ -23,6 +23,11 @@ return {
     -- setup opt. Each variant ships colors/material-<variant>.lua which sets
     -- vim.g.material_style. Plain "material" would fall back to darker.
     -- opts = { colorscheme = "material-deep-ocean" },
+
+    -- habamax: built into Neovim, no plugin or require() needed. It is also
+    -- LazyVim's fallback when the colorscheme above fails to load (seen
+    -- 2026-11-24 from a syntax error in variants.lua), and it looked good.
+    -- opts = { colorscheme = "habamax" },
   },
 
   require("colorschemes.solarized-osaka"),
