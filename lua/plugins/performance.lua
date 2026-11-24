@@ -242,16 +242,28 @@ return {
         percent_color = { fg = colors.yellow500 or colors.yellow, gui = "bold" }
       end
 
-      opts.sections.lualine_y = {
-        {
-          function()
-            local current = vim.fn.line(".")
-            local total = vim.api.nvim_buf_line_count(0)
-            return string.format("line %d/%d", current, total)
-          end,
-          padding = { left = 1, right = 1 },
-        },
-      }
+      -- Hidden 2026-11-25: the "line N/M" indicator and the clock. Uncomment the
+      -- block below (and drop the empty table) to bring "line N/M" back.
+      -- opts.sections.lualine_y = {
+      --   {
+      --     function()
+      --       local current = vim.fn.line(".")
+      --       local total = vim.api.nvim_buf_line_count(0)
+      --       return string.format("line %d/%d", current, total)
+      --     end,
+      --     padding = { left = 1, right = 1 },
+      --   },
+      -- }
+      opts.sections.lualine_y = {}
+
+      -- The clock is LazyVim's own default for lualine_z, set nowhere in this
+      -- config, so it is emptied here. LazyVim's default, to restore it:
+      -- opts.sections.lualine_z = {
+      --   function()
+      --     return " " .. os.date("%R")
+      --   end,
+      -- }
+      opts.sections.lualine_z = {}
 
       -- Scroll progress, then the git markers, then the aerial breadcrumb:
       --   [filename] 29%  [+] 4  Symbol › child
