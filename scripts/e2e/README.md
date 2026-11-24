@@ -77,3 +77,29 @@ How perf.py measures (all inside Nvim, so the RPC and the terminal are not in th
 - Keys are sent at human speed: `j` held (33 ms), typing at ~14 chars/s.
 - Numbers are relative: the sandbox CPU is slower than an M-series Mac. Compare config vs
   `MODE=clean`, or A vs B, in the same session.
+
+### Comparing configs: "is it still as fast as it was?" (added 2026-11-24)
+
+```sh
+scripts/e2e/setup_config_version.sh 9232680 nvim-jun     # this config as of 2026-06-23, side by side
+python3 compare.py --name history --configs now=ab: now2=ab: jun=app:nvim-jun \
+  --ref now --targets go-mid ts-mid tsx-mid py-mid --reps 5   # ~1 h; resumable
+python3 compare.py --name feat --configs now=ab: ibl=ab:no-indent-guides \
+  --ref now --targets go-mid --reps 5 --actions scroll_j,half_page,typing   # price one feature
+python3 compare.py --table compare-history.json          # re-print a finished comparison
+python3 e2e_latency.py go-mid                            # independent end-to-end check (raw pty)
+```
+
+- `now2=ab:` is the same config under a second label: an A/A run. Any difference between
+  `now` and `now2` is noise, the bar every other difference must clear.
+- Runs are interleaved (each round runs every config once, shuffled). Cells are the median of
+  runs [min–max] with a Mann-Whitney U p-value against `--ref`; 5 runs per side are the minimum
+  for p < 0.05.
+- Calibration: `AB=selftest-1ms|2ms|5ms|10ms` adds a known busy loop per key. The median
+  latency moved by +1.1 / +1.9 / +4.8 / +9.9 ms (2026-11-24), so the instrument resolves ~1 ms.
+  p95 is much noisier: treat p95 differences under ~5 ms as noise.
+- Every finished run is appended to `compare-<name>.jsonl`; the same command resumes after a crash
+  and retries failed runs.
+- Never run two harness sessions at once. The `AB=` spec variants write
+  `lua/plugins/zz_perf_ab.lua` into the shared config, and perf.py refuses to write it while
+  another test session is alive.
