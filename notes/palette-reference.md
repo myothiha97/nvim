@@ -55,8 +55,9 @@ higher.
 | role | hex | source | note |
 | --- | --- | --- | --- |
 | body / `@variable` | `#b1bebf` | `body.brighter` | L\* 76.0, 10.19:1 |
-| delimiter (operators, `.` `,` `;` `:`) | `#96abd3` | `delimiter.kanagawa_mid` (custom-latest) | base build uses `mid_high` `#7f9195` |
-| bracket | `#96abd3` | `delimiter.kanagawa_mid` (custom-latest) | same value as delimiter again |
+| delimiter (operators) | `#b98f79` | `delimiter.warm_taupe` (custom-latest, 2026-11-25) | base build uses `mid_high` `#7f9195` |
+| separator (`.` `,` `;` `:` `?.`) | `#8f9a9b` | `delimiter.separator_neutral` (custom-latest, 2026-11-25) | base build follows `delimiter` |
+| bracket | `#a9a88b` | `bracket.pale_yellow_dim` (custom-latest, 2026-11-25) | base build uses `mid_high` |
 | HTML/JSX/TSX/Vue tag wrappers | `#9eabac` | theme `base0`, hardcoded in `init.lua` | user preference |
 | function | `#359ee9` | `func.vivid` (custom-latest) | base build uses `azure` `#1d98cd` |
 | type | `#2ac3de` | `type.nvim_type` (custom-latest) | base build uses `tokyonight` `#7dcfff` |
@@ -287,13 +288,13 @@ variable.
 
 | value | hex | numbers | verdict |
 | --- | --- | --- | --- |
-| `kanagawa_mid` | `#96abd3` | L\* 69.7, C\* 22.7, 8.21:1 | **LIVE in custom-latest.** LCh midpoint between `kanagawa` and `kanagawa_saturated`, trialled 2026-09-07 |
+| `kanagawa_mid` | `#96abd3` | L\* 69.7, C\* 22.7, 8.21:1 | LCh midpoint between `kanagawa` and `kanagawa_saturated`, trialled 2026-09-07; live again 2026-11-20 to 11-24. As an operator colour its worst pair is func blue (11.3) |
 | `kanagawa_green` | `#8db488` | L\* 69.5, C\* 28.4, h140, 8.16:1 | rejected, user preferred returning to blue |
 | `kanagawa_saturated` | `#90abdd` | L\* 69.7, C\* 28.4, 8.20:1 | user liked it; kept as the stronger end of the comparison |
-| `pale_yellow` | `#cfcea7` | L\* 81.9, C\* 20.5, 11.81:1 | warmer comparison, user preferred Kanagawa's tone |
+| `pale_yellow` | `#cfcea7` | L\* 81.9, C\* 20.5, 11.81:1 | warmer comparison, user preferred Kanagawa's tone. Brackets 2026-11-24 for one day: 11.14:1 on `#171716`, brighter than body, so dimmed to `bracket.pale_yellow_dim` |
 | `pale_cyan` | `#9cc8ca` | L\* 77.7, C\* 15.1, 10.44:1 | closer to variables and cyan Type than Kanagawa |
 | `kanagawa` | `#9cabca` | L\* 69.8, C\* 17.6, 8.23:1 | user likes this tone; the reference for the trials |
-| `warm_taupe` | `#b98f79` | L\* 62.8, C\* 21.9, 6.58:1 | rejected: separates from variables but looks muddy |
+| `warm_taupe` | `#b98f79` | L\* 62.8, C\* 21.9, 6.58:1 | rejected 2026-09 as muddy for all punctuation. **LIVE for operators only since 2026-11-24** (6.21:1 on `#171716`); best worst-pair of every candidate here for operators, 12.8 vs `nil`/numbers |
 | `base0` | `#9eabac` | L\* 69.0, 8.23:1 | identical to `@variable`, the problem described above |
 | `base00` | `#637981` | L\* 49.4, 4.25:1 | dE 18.0 from base0 (the edge comes back) but **sub-AA** and only dE 4.7 from Comment, so punctuation starts reading as commented-out. Judged by eye 2026-09-05, lost to the maximin rung |
 | `base01` | `#576d74` | — | Comment itself. Listed to be explicit it is not a candidate |
@@ -302,6 +303,7 @@ variable.
 | `mid_low` | `#73878d` | L\* 55.0, 5.18:1 | most body edge, closest to Comment |
 | `brighter` | `#859699` | L\* 60.9, worst 12.1 | above the maximin, kept to show the curve turn over |
 | `brightest` | `#8b9b9e` | L\* 62.8, worst 10.4 | held `delimiter` for one day |
+| `separator_neutral` | `#8f9a9b` | L\* 62.8, C\* 4.2, 6.21:1 on `#171716` | **LIVE for the `separator` role since 2026-11-25.** Same contrast as `warm_taupe`, neutral hue; dE00 body 10.3, comment 12.0, bracket 13.7, operator 22.1 |
 
 ### The maximin ladder, and why not to rebuild it
 
@@ -329,6 +331,15 @@ dE 3.5, and this palette's own precedent treats dE 4.7 as the point where two
 colours read as one. It paid the delimiter's best body separation (13.8 → 10.4)
 for a difference nobody can see. The roles still exist separately so a future
 build can move them apart; `custom-latest` currently holds one value for both.
+
+**The split came back on 2026-11-25, by role rather than by rung.** Operators,
+separators and brackets are now three roles (`delimiter`, `separator`,
+`bracket`). The deciding observation was the member-access dot: on a warm hue it
+sat between two cool tokens (`config.Load`, `syscall.SIGINT`) at dE 36 from both,
+so a one-glyph mark read as an orange speck on most Go lines. Separators went to a
+neutral grey at the same 6.21:1; operators kept `warm_taupe`, which sits 22.1 from
+the separator grey, so `:=` and `.` read as two classes. Brackets went to
+`bracket.pale_yellow_dim` (7.40:1), the bright pale yellow dimmed under body.
 
 **Colour was tried here too, 2026-09-06, and lost.** The delimiter role is 10.5%
 of code ink in TS/TSX and 14.6% in Go, the highest dose in the palette. A sweep of
