@@ -1223,3 +1223,44 @@ recorded so it is not rediscovered as a bug. Salmon sits dE2000 11.8 from the
 error red, the tightest warm/error pair the palette has run; accepted because
 diagnostics are toggled on manually, with `#c87655` as the invisible-cost fix
 (13.7) if that ever changes.
+
+## 2026-11-25: punctuation split into operators, separators and brackets
+
+On the `#171716` background, after a contrast pass over the live build.
+
+| role | groups | value | contrast | why |
+| --- | --- | --- | --- | --- |
+| `delimiter` | `Operator` (`:=` `!=` `==` `<`) | `warm_taupe` `#b98f79` | 6.21:1 | best worst-pair of every `delimiter.*` candidate (12.8, vs `nil`/numbers); the only one apart from both body and the separator grey |
+| `separator` (new) | `@punctuation.delimiter` (`.` `,` `;` `:` `?.`) | `separator_neutral` `#8f9a9b` | 6.21:1 | the warm dot sat dE 36 from the blue/cyan either side of it and read as an orange speck |
+| `bracket` | `@punctuation.bracket` | `pale_yellow_dim` `#a9a88b` | 7.40:1 | `pale_yellow` `#cfcea7` was 11.14:1, the brightest ink on screen, above body (9.39:1) |
+
+`separator` defaults to `false` (follow `delimiter`), so every numbered build is
+unchanged. Verified by sampling rendered pixels of a Go screen: all three render
+at the expected values, shifted by the macOS screenshot profile by the same amount
+as body text. Rejected for operators: `kanagawa` (+0.6 worst-pair, invisible, a
+fourth blue), `kanagawa_saturated` (9.6 vs func), `pale_cyan` (8.9 vs members), and
+every grey rung (merges operators with separators).
+
+
+## 2026-11-25: full contrast audit before the config lock
+
+Every syntax role, UI text colour, diagnostic, guide and background band was
+measured on `#171716`. Two changes came out of it:
+
+- **`@module` moved to body text** (`palette.body`, 9.39:1). It was `c.base2`
+  `#ede7d4` at 14.51:1, the brightest ink on screen. Measured with the Go
+  tree-sitter grammar on prometheus, caddy and etcd: 1.4-2.1% of code ink and
+  6-8% of lines, 91-95% of it the package half of a qualified type
+  (`*slog.Logger`). Low dose, but a cream spike in signatures; body matches how
+  package names already render in calls (`config.Load` is `@variable`).
+- **`IncSearch` (and `CurSearch`, which links to it)** keeps the theme's
+  `#ca4c16` orange background, preferred by eye, with bold white text: 4.61:1,
+  up from cream at 3.73:1. Dark text on it only reaches 3.89:1. Dark text on the
+  lighter literal orange `#ed8e55` (7.35:1) was tried the same night and
+  rejected on look.
+
+Passed and left alone: all syntax roles 5.31-10.39:1 (comments 4.25:1), closest
+syntax pair body/separator at dE00 10.3; LineNr 2.60:1, inlay hints 3.91:1;
+indent guides 1.28/2.33:1, borders 1.42:1; body text on every selection and diff
+band 4.84-9.18:1. Known and accepted: warning virtual text `#e0af68` sits dE00
+5.1 from the type gold (diagnostics are toggled on manually).

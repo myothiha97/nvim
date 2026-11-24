@@ -107,6 +107,10 @@ return {
 
       local bracket = palette.bracket or palette.punctuation
 
+      -- `. , ; : ?.` on their own role since 2026-11-25; `delimiter` still paints
+      -- `Operator`. `false` keeps them together on `delimiter`.
+      local separator = palette.separator or delimiter
+
       -- Painted rather than left to the theme so a build can raise body text.
       -- `paint` merges, so `Normal` keeps its background. The other 15 groups the
       -- theme puts on base0 are chrome and stay put.
@@ -251,7 +255,7 @@ return {
 
       -- This group is `,` `;` `:` AND the `.` of every member access, so on the
       -- keyword colour it put an accent mark on nearly every line of Go and TS.
-      paint({ "@punctuation.delimiter" }, delimiter)
+      paint({ "@punctuation.delimiter" }, separator)
 
       -- Written as tables because `paint` skips bare string links, and these two
       -- link OUTSIDE the lists above, so skipping would leave them resolving
@@ -490,7 +494,6 @@ return {
         hl["@property.go"] = {
           fg = go_member_color,
         }
-        -- hl["@punctuation.delimiter.go"] = { fg = palette.variants.delimiter.kanagawa }
       end
       -- HCL/Terraform attribute names. The member link above is an ecma
       -- decision -- an object literal is a small part of a TS file -- but the HCL
@@ -515,7 +518,13 @@ return {
 
       -- @module links to PreProc -> an alarm red 31 degrees from the error red,
       -- so imports read as diagnostics in every language except Go.
-      hl["@module"] = { fg = c.base2 }
+      --
+      -- On body text since 2026-11-25. Was `c.base2` #ede7d4 at 14.5:1, the
+      -- brightest ink on screen (body is 9.4:1). In Go it is the package half of
+      -- a qualified type (`*slog.Logger`) plus `package main`: ~2% of ink in
+      -- prometheus/caddy/etcd, so low dose, but a cream outlier in signatures.
+      -- Package names in calls (`config.Load`) were already body (@variable).
+      hl["@module"] = { fg = palette.body or c.base0 }
 
       -- Selection band. Was tokyonight's `#3b4261`, an import that ended up being
       -- the LIGHTEST surface in the editor (L* 28.6, above even oil's list band)
@@ -873,6 +882,14 @@ return {
       -- blink handles the cmdline here). Slate for consistency.
       hl.WildMenu = { fg = c.base2, bg = ui_color.surface.list_cursor, bold = true }
 
+      -- Incremental and current search match, 2026-11-25. Keeps the theme's own
+      -- orange500 #ca4c16 background (preferred by eye over the lighter literal
+      -- orange #ed8e55, tried the same night), but the theme's cream text on it
+      -- was 3.73:1, under the 4.5:1 floor, on the match you step to with n/N.
+      -- White is 4.61:1; dark text would only reach 3.89:1. `CurSearch` links
+      -- here in the theme, so this covers both.
+      hl.IncSearch = { fg = "#ffffff", bg = c.orange500, bold = true }
+
       hl.DiagnosticVirtualTextError = { fg = "#ff3b30", bg = c.none }
       hl.DiagnosticVirtualTextWarn = { fg = "#e0af68", bg = c.none }
       hl.DiagnosticVirtualTextInfo = { bg = c.none }
@@ -924,7 +941,7 @@ return {
 
       -- grug-far match. Defaults to DiffText, a near-black green band here, so
       -- the match looks faded. Cyan deliberately, so it never reads like a vim
-      -- `/` hit (Search is yellow, IncSearch muted rose-red).
+      -- `/` hit (Search is yellow, IncSearch orange).
       hl.GrugFarResultsMatch = { fg = c.base04, bg = c.cyan300, bold = false }
 
       -- grug-far summary. Defaults to Comment, too dim against the panel.

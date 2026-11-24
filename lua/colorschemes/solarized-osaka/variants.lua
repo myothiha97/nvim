@@ -85,16 +85,25 @@ local builds = {
       -- type = palette.variants.type.sky_dimmer,
       -- type = palette.variants.type.sky_dimmest, -- start trialling at 2nd Oct 2026 and the trial end at 21 Oct 2026 due to color value being fade to my eye
       type = palette.variants.type.high_contrast_warn_gold, -- Warm Gold (High Contrast) -- start trialling at 21 Oct 2026,
-      -- Brackets and delimiters share the MAXIMIN grey rung, moved off
-      -- `kanagawa_mid` (#96abd3) 2026-09-09. The periwinkle was a fourth hue in
-      -- the blue band, carrying the third-highest contrast in the palette on its
-      -- least meaningful ink. Measured over Go/bash/devops/js-ts/jsx-tsx/python:
-      -- worst chromatic pair 14.2 -> 16.5, tightest colour-blind pair 2.3 -> 4.8.
+      -- Punctuation, three roles, SETTLED 2026-11-25 (measured on bg #171716):
+      --   delimiter  operators `:= != == < >`   warm_taupe        #b98f79  6.21:1
+      --   separator  `. , ; : ?.`               separator_neutral #8f9a9b  6.21:1
+      --   bracket    `( ) [ ] { }`              pale_yellow_dim   #a9a88b  7.40:1
+      -- Operators carry meaning, so they keep a hue; separators carry none, so they
+      -- go neutral (a warm dot read as an orange speck in `config.Load`); brackets
+      -- sit just under body text. Of every `delimiter.*` candidate, warm_taupe has
+      -- the best worst-pair for operators (12.8, vs `nil`/numbers).
       --
-      -- Back on `kanagawa_mid` since 2026-11-20, by preference. The grey rung was
-      -- `mid_high`; switch both lines back to it to undo.
-      delimiter = palette.variants.delimiter.kanagawa_mid,
-      bracket = palette.variants.delimiter.kanagawa_mid,
+      -- History: `mid_high` grey for all of them 2026-09-09; `kanagawa_mid`
+      -- #96abd3 from 2026-11-20; warm_taupe operators + bright `pale_yellow`
+      -- #cfcea7 brackets 2026-11-24 (brackets out-shone body at 11.1:1, dimmed
+      -- the next day). Every candidate and its numbers: notes/palette-reference.md,
+      -- "delimiter". To go back to one grey for all three, set `delimiter` and
+      -- `bracket` to `delimiter.mid_high` and `separator` to `false`.
+      delimiter = palette.variants.delimiter.warm_taupe,
+      separator = palette.variants.delimiter.separator_neutral,
+      bracket = palette.variants.bracket.pale_yellow_dim,
+
       -- Body text: `brighter` since 2026-09-24, replacing `tinted`. The 09-09
       -- "too bright" verdict below was made while strings sat 12 L* under body;
       -- the green strings rose to body level, and `tinted` then read dimmer than
@@ -158,7 +167,8 @@ local builds = {
       -- own again: set this to `punctuation.explored.salmon` (or `.coral`, which
       -- separates marginally better) and point init.lua's Go block back at
       -- `palette.member`.
-      member = false,
+      -- member = false, -- was a duplicate key: Lua keeps only the LAST `member`
+      -- below, so this line never took effect once the cyan was set.
       -- member = "#73daca", -- tokyo night cyan, S 58%
       -- member = "#77c5b9", -- tokyo night cyan, S 40%
       member = palette.variants.member.tokyonitght_cyan_S40,

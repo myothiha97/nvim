@@ -173,7 +173,7 @@ local variants = {
     pale_yellow = "#cfcea7",
     pale_cyan = "#9cc8ca",
     kanagawa = "#9cabca",
-    warm_taupe = "#b98f79",
+    warm_taupe = "#b98f79", -- LIVE for operators (`delimiter` role) since 2026-11-24
     base0 = "#9eabac", -- identical to @variable
     base00 = "#637981", -- sub-AA
     base01 = "#576d74", -- Comment itself. NOT a candidate.
@@ -182,6 +182,25 @@ local variants = {
     mid_low = "#73878d",
     brighter = "#859699",
     brightest = "#8b9b9e",
+    -- `separator` role: `. , ; : ?.` (`@punctuation.delimiter`) in EVERY language,
+    -- LIVE since 2026-11-25 (Go first, all languages the same night). Replaced
+    -- warm_taupe there, whose warm hue made the member-access dot an orange speck
+    -- between cool tokens (`config.Load`, `syscall.SIGINT`). Operators keep
+    -- warm_taupe through `delimiter` -> `Operator`, so `:=` and `.` read apart.
+    -- On bg #171716: 6.21:1 (same as warm_taupe), APCA Lc 45.6, L*62.8 C*4.2.
+    -- dE00: body 10.3, func 20.0, member 19.0, comment 12.0, bracket 13.7,
+    -- mid_high 4.4 (this is brighter and less blue than mid_high, 5.46:1).
+    separator_neutral = "#8f9a9b",
+  },
+
+  -- `bracket` role only. `delimiter.pale_yellow` #cfcea7 dimmed to just under
+  -- body text, LIVE since 2026-11-25: the bright one was the loudest ink on
+  -- screen (11.14:1, above body's 9.39:1) on the least meaningful glyphs.
+  bracket = {
+    -- Same hue as `delimiter.pale_yellow`. On bg #171716: 7.40:1, APCA Lc 53.3,
+    -- L*68.2 C*15.8. dE00: separator 13.7, body 14.4, type 16.0, comment 17.8,
+    -- string 17.9, operator 19.5. 4.08:1 inside the MatchParen box #434342.
+    pale_yellow_dim = "#a9a88b",
   },
 
   -- Special, Debug, @punctuation.bracket, @variable.builtin, JSX tags,
@@ -460,6 +479,9 @@ return {
   -- `false` here would mean "follow the theme's own base0" -- init.lua reads
   -- `palette.delimiter or c.base0`.
   delimiter = variants.delimiter.mid_high,
+  -- `. , ; : ?.` (`@punctuation.delimiter`). `false` follows `delimiter`, the
+  -- behaviour before 2026-11-25, so the numbered builds are unchanged.
+  separator = false,
   body = variants.body.brighter,
   comment = false,
   -- Brackets are the same "punctuation carrying no meaning worth a hue" class as

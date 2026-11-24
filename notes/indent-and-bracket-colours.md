@@ -61,6 +61,9 @@ background). The earlier grey `#7f9195` is listed for comparison.
 | `#4a4a49` (0.22) | 2.02:1 | 3.83:1 | 2.70:1 | |
 | `#535353` (0.26) | 2.33:1 | 3.32:1 | 2.34:1 | rejected: lowers bracket readability, and equals the active guide colour so the two blur |
 
+Re-checked 2026-11-25 with the bracket colour `bracket.pale_yellow_dim`
+`#a9a88b`: 4.08:1 on the chosen `#434342` box, so the box needs no change.
+
 A brighter box always lowers the bracket's contrast inside it. If it feels too
 faint, add `underline` rather than raising the box.
 
