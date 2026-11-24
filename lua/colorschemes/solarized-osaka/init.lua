@@ -882,12 +882,13 @@ return {
       -- blink handles the cmdline here). Slate for consistency.
       hl.WildMenu = { fg = c.base2, bg = ui_color.surface.list_cursor, bold = true }
 
-      -- Incremental and current search match, 2026-11-25. The theme's cream on
-      -- orange500 #ca4c16 was 3.73:1, under the 4.5:1 text floor, on the match
-      -- you step to with n/N. Dark text on the literal orange (`palette.boolean`
-      -- #ed8e55) is 7.35:1 and stays dE00 20.8 from the yellow `Search` band.
-      -- `CurSearch` links here in the theme, so this covers both.
-      hl.IncSearch = { fg = ui_color.bg, bg = palette.boolean, bold = true }
+      -- Incremental and current search match, 2026-11-25. Keeps the theme's own
+      -- orange500 #ca4c16 background (preferred by eye over the lighter literal
+      -- orange #ed8e55, tried the same night), but the theme's cream text on it
+      -- was 3.73:1, under the 4.5:1 floor, on the match you step to with n/N.
+      -- White is 4.61:1; dark text would only reach 3.89:1. `CurSearch` links
+      -- here in the theme, so this covers both.
+      hl.IncSearch = { fg = "#ffffff", bg = c.orange500, bold = true }
 
       hl.DiagnosticVirtualTextError = { fg = "#ff3b30", bg = c.none }
       hl.DiagnosticVirtualTextWarn = { fg = "#e0af68", bg = c.none }

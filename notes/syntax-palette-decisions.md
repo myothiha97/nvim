@@ -1253,9 +1253,11 @@ measured on `#171716`. Two changes came out of it:
   6-8% of lines, 91-95% of it the package half of a qualified type
   (`*slog.Logger`). Low dose, but a cream spike in signatures; body matches how
   package names already render in calls (`config.Load` is `@variable`).
-- **`IncSearch` (and `CurSearch`, which links to it)** moved to dark text on the
-  literal orange `#ed8e55`, bold: 7.35:1, up from cream on `#ca4c16` at 3.73:1.
-  It stays dE00 20.8 from the yellow `Search` band.
+- **`IncSearch` (and `CurSearch`, which links to it)** keeps the theme's
+  `#ca4c16` orange background, preferred by eye, with bold white text: 4.61:1,
+  up from cream at 3.73:1. Dark text on it only reaches 3.89:1. Dark text on the
+  lighter literal orange `#ed8e55` (7.35:1) was tried the same night and
+  rejected on look.
 
 Passed and left alone: all syntax roles 5.31-10.39:1 (comments 4.25:1), closest
 syntax pair body/separator at dE00 10.3; LineNr 2.60:1, inlay hints 3.91:1;
