@@ -890,6 +890,14 @@ return {
           -- which overrides `width` whenever 0.4 of the screen is under 120
           -- columns, i.e. on most screens. 0 removes the floor.
           min_width = 0,
+          -- WARN: SILENT FAILURE: same trap on the height side. Under 120 columns
+          -- snacks picks the `vertical` preset, which carries `min_height = 30`
+          -- (snacks/picker/config/layouts.lua). On a pane shorter than ~30 rows
+          -- the box is clamped to the screen but its children are laid out for
+          -- 30, so the list window starts one row too high and the input's
+          -- bottom border covers the FIRST result row. The counter says 7, six
+          -- rows show, and the best match is the one missing. 0 removes the floor.
+          min_height = 0,
           -- No dim behind a picker. The theme runs `transparent = true`, so the
           -- editor background is Ghostty's, while snacks' backdrop is a
           -- full-editor float of pure black at winblend 60 — with nothing else
