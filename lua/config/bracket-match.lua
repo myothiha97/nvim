@@ -86,6 +86,12 @@ local function find_enclosing(buf, row, col)
   end
 end
 
+-- True when the text at {row, col} really is a bracket.
+local function is_bracket_at(buf, p)
+  local line = vim.api.nvim_buf_get_lines(buf, p[1], p[1] + 1, false)[1]
+  return line ~= nil and PAIRS[line:sub(p[2] + 1, p[2] + 1)] ~= nil
+end
+
 local function update()
   local buf = vim.api.nvim_get_current_buf()
   local pos = vim.api.nvim_win_get_cursor(0)
@@ -100,7 +106,10 @@ local function update()
     -- Also covers a bracket that is only text (inside a string or comment).
     open, close = find_enclosing(buf, row, col)
   end
-  if not open then
+  -- The tree can be one edit behind (see the header), and error recovery adds
+  -- zero-width MISSING brackets that are not in the text. Either can point past
+  -- the end of a line, which made the extmark below throw on every move.
+  if not open or not is_bracket_at(buf, open) or not is_bracket_at(buf, close) then
     return
   end
   for _, p in ipairs({ open, close }) do
