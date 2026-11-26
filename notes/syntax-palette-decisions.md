@@ -1264,3 +1264,26 @@ syntax pair body/separator at dE00 10.3; LineNr 2.60:1, inlay hints 3.91:1;
 indent guides 1.28/2.33:1, borders 1.42:1; body text on every selection and diff
 band 4.84-9.18:1. Known and accepted: warning virtual text `#e0af68` sits dE00
 5.1 from the type gold (diagnostics are toggled on manually).
+
+
+## 2026-11-26: JetBrains parity, attributes, interfaces, write references
+
+From the GoLand/WebStorm highlight gap review. Three changes, each scoped so
+the numbered builds are unchanged:
+
+- **JSX/HTML attribute names** (`@tag.attribute.{tsx,javascript,html}`) link to
+  `@variable.member.key`. They were on the function blue through
+  `@tag.attribute` -> `@property` -> `Identifier`, so every prop read as a call.
+  A prop is a key of the props object, so it now matches `{ title: "x" }`. dE00
+  22.6 from the string green of its value, 24.9 from the function blue.
+- **Interfaces** get the new `interface` role (`@type.interface`), periwinkle in
+  `custom-latest`. TS via vtsls `interface` tokens, Go via gopls `type` tokens
+  with the `interface` modifier (gopls >= 0.17), builtins excluded. Numbers in
+  `palette-reference.md`, "interface".
+- **Write references** (`LspReferenceWrite`) get a warm band at the read band's
+  lightness: same contrast for every role, separated by hue. Numbers in
+  `palette-reference.md`, "Reference highlight".
+
+None of these were checked on screen when written (no Neovim in the session
+that made them). Check each by eye before treating it as settled.
+

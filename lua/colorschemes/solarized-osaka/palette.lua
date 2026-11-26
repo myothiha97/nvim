@@ -277,6 +277,11 @@ local variants = {
     sky_dim = "#39cce9",
     tokyonight = "#7dcfff", -- base build
     vscode_entity = "#c0caf5",
+    -- L*74.1 C*41.7 h289.8 8.85:1 on #171716 | SELECTED 2026-11-26 for the
+    -- `interface` role (custom-latest), against the gold type: dE00 45.9 from
+    -- it; nearest neighbours func blue 14.6 and keyword violet 17.3 (the
+    -- `interface` keyword sits right before the name, 16 L* darker). Runner-up
+    -- `vscode_entity` (nearest: body 16.9) reads as tinted body text.
     periwinkle = "#a7b1fe",
     nvim_type = "#2ac3de", -- LIVE in custom-latest
     vscode_support = "#0db9d7",
@@ -490,6 +495,9 @@ return {
   bracket = variants.delimiter.mid_high,
   func = variants.func.azure,
   type = variants.type.tokyonight,
+  -- Interface names (`@type.interface`, TS + Go). `false` follows `type`, the
+  -- behaviour before 2026-11-26, so the numbered builds are unchanged.
+  interface = false,
   -- Booleans. Painted by `hl.Boolean` in init.lua, which `@boolean` links to.
   boolean = variants.boolean.amber,
   -- `false` keeps the theme's own cyan500, so the numbered builds are unchanged.

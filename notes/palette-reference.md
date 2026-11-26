@@ -510,8 +510,19 @@ practical issue. See item 8 of `../todos/theme/syntax-palette-followups.md`.
 | `tokyonight` | `#7dcfff` | h249, L\* 79.7, C\* 33.5, 11.08:1 | **the base selection.** Restored 2026-08-09 after three replacements were tried and rejected on real files. Shares h249 with Function and splits on lightness alone (dE 16.2), rule 1 broken knowingly. What carries the pair is the 20.6 L\* gap, the largest of any candidate; it is also 25.5 from String where the closest rival managed 18.8 |
 | `vscode_entity` | `#c0caf5` | h284, C\* 22.9 | rejected 2026-08-09, read "flat". De-accenting via chroma failed here exactly as on the keyword ladder: treat chroma as presence in this palette, never as the calming lever |
 | `periwinkle` | `#a7b1fe` | h290, C\* 42.0 | measured best of everything tried (worst 20.9, and it dissolved the Type/Function pair entirely) and still lost on looks |
-| `nvim_type` | `#2ac3de` | 15.2 from func, 16.4 from string | **LIVE in custom-latest** |
+| `nvim_type` | `#2ac3de` | 15.2 from func, 16.4 from string | live in custom-latest until 2026-10-21 (now the gold `high_contrast_warn_gold`) |
 | `vscode_support` | `#0db9d7` | 12.7 from func | rejected |
+
+### interface (`@type.interface`, 2026-11-26)
+
+Its own role so TS and Go interfaces read apart from classes, structs, enums and
+aliases (GoLand/WebStorm parity). `false` follows `type`; `custom-latest` uses
+`periwinkle` `#a7b1fe`: 8.85:1, dE00 45.9 from the gold type, nearest neighbours
+the function blue (14.6) and the keyword violet (17.3, the `interface` keyword
+right before the name, 16 L\* darker). `periwinkle` lost on looks as the colour
+for ALL types on 2026-08-09; this is a much lower dose (interface names only),
+so it is a fresh trial, not a reopening. Painted from LSP tokens only
+(`lua/plugins/lsp.lua`); builtin `error`/`any`/`comparable` stay gold.
 
 ## boolean
 
@@ -1028,9 +1039,14 @@ clearly visible but always weaker than a selected row.
 
 Rules this table settled:
 
-- **One colour for read and write.** A visible write step needs a brighter band,
+- **One LIGHTNESS for read and write.** A visible write step needs a brighter band,
   and write spots are often parameters (`membership =>`), which would drop under
   AA. A step small enough to keep AA (`#2b313a`) is too small to see.
+  **Superseded 2026-11-26 on the other axis:** writes now differ by HUE at the
+  same L\* (`surface.reference_write` `#352822`, warm, L\* 17.4 C\* 8 h51), the
+  way JetBrains tints write usages. Every syntax role keeps exactly its contrast
+  on the read band (red parameter 4.45:1, keyword 4.21:1), dE00 12.2 from the
+  read band, 10.1 from the background. Not checked on screen yet.
 - **Cool slate, not indigo.** `#262b33` is about dE 15 from `Visual` (`#24275a`), so a
   matched word never looks like a selection. Same hue family as `list_cursor`,
   which already means "cursor is here".

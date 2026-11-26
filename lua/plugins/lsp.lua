@@ -389,6 +389,20 @@ return {
         -- Go type parameter declarations: `T` in `[T any]` was body coloured
         -- while every use of it was a type.
         ["@lsp.type.typeParameter.go"] = "@type",
+        -- TypeScript interface names, declaration and every use (WebStorm
+        -- parity). Unscoped is safe: only vtsls sends an `interface` token type;
+        -- gopls says `type` + an `interface` modifier (handled below). Classes,
+        -- enums and aliases keep the treesitter type colour.
+        ["@lsp.type.interface"] = "@type.interface",
+        -- TS/JS namespaces (`React` in `React.useState`, `ns.X`), which
+        -- treesitter only knows at the import. Same colour as body text today;
+        -- this keeps them on `@module` if it ever gets its own.
+        -- NOT Go: gopls also marks the package part INSIDE an import path
+        -- string (`http` in "net/http"), which would split the string colour.
+        ["@lsp.type.namespace.typescript"] = "@module",
+        ["@lsp.type.namespace.typescriptreact"] = "@module",
+        ["@lsp.type.namespace.javascript"] = "@module",
+        ["@lsp.type.namespace.javascriptreact"] = "@module",
       }
       local function paint_lsp_highlights()
         for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
@@ -397,9 +411,55 @@ return {
         for group, target in pairs(lsp_highlight_links) do
           vim.api.nvim_set_hl(0, group, { link = target })
         end
+        -- `@type.interface` is our own group (no treesitter capture), set by the
+        -- solarized-osaka build. `default`: a theme that defines it wins, any
+        -- other theme shows interfaces as plain types instead of uncoloured.
+        vim.api.nvim_set_hl(0, "@type.interface", { link = "@type", default = true })
       end
       paint_lsp_highlights()
       vim.api.nvim_create_autocmd("ColorScheme", { callback = paint_lsp_highlights })
+
+      -- Go interfaces (GoLand parity): gopls >= 0.17 sends a `type` token with an
+      -- `interface` modifier, declaration and every use.
+      --
+      -- WHY A HOOK AND NOT A LINK: gopls also tags `error`, `any` and
+      -- `comparable` as interfaces (plus `defaultLibrary`), and GoLand keeps those
+      -- on the builtin-type colour. Excluding them would need two typemod links
+      -- on one token, and Nvim applies a token's modifier groups in `pairs()`
+      -- order at the same priority, so which one wins is not defined. The hook
+      -- decides in Lua and paints one group at a priority above both.
+      --
+      -- ACCEPTED COST: one Lua call per visible gopls token, only when tokens are
+      -- (re)marked: after each debounced edit response and for lines newly
+      -- scrolled into view. Nvim already fires LspTokenUpdate for every token;
+      -- this adds the callback. Go buffers only (registered per gopls buffer),
+      -- and it returns on the first check for anything that is not a type.
+      local go_interface_group = vim.api.nvim_create_augroup("go_interface_tokens", { clear = true })
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = go_interface_group,
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if not client or client.name ~= "gopls" then
+            return
+          end
+          -- A restarted gopls attaches again: replace, never stack, the hook.
+          vim.api.nvim_clear_autocmds({ group = go_interface_group, event = "LspTokenUpdate", buffer = args.buf })
+          vim.api.nvim_create_autocmd("LspTokenUpdate", {
+            group = go_interface_group,
+            buffer = args.buf,
+            callback = function(ev)
+              local token = ev.data.token
+              if token.type ~= "type" then
+                return
+              end
+              local mods = token.modifiers
+              if mods.interface and not mods.defaultLibrary then
+                vim.lsp.semantic_tokens.highlight_token(token, ev.buf, ev.data.client_id, "@type.interface")
+              end
+            end,
+          })
+        end,
+      })
 
       -- Restart LSP to refresh type diagnostics after external file changes (e.g., Grug-far).
       -- :checktime reloads buffers changed on disk (asks first if a buffer has

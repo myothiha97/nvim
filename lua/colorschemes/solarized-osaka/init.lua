@@ -514,10 +514,32 @@ return {
         hl["@variable.member.key." .. lang] = { link = "@property" }
       end
 
+      -- JSX / HTML attribute NAMES (`className=`, `onClick=`, `href=`), 2026-11-26,
+      -- WebStorm parity (it gives attribute names their own colour). The theme
+      -- links `@tag.attribute` -> `@property` -> `Identifier`, which is painted
+      -- with the FUNCTION blue above, so every prop read as a call.
+      --
+      -- Linked to the KEY capture, not given a new hue: a JSX attribute is a
+      -- prop, i.e. a key of the props object, so `<Card title="x">` and
+      -- `{ title: "x" }` now read the same. Member cyan vs the string green of
+      -- the value: dE00 22.6; vs the function blue: 24.9; vs the yellow tag
+      -- name: 32.7. Language-scoped, so `@property` elsewhere is untouched.
+      for _, lang in ipairs({ "tsx", "javascript", "html" }) do
+        hl["@tag.attribute." .. lang] = { link = "@variable.member.key" }
+      end
+
+      -- Interface names, TypeScript and Go (`@type.interface`), 2026-11-26,
+      -- WebStorm/GoLand parity: interfaces read apart from classes, structs,
+      -- enums and aliases, which stay on the type colour. Not a treesitter
+      -- capture: plugins/lsp.lua routes vtsls `interface` tokens and gopls
+      -- `type` + `interface` tokens here. Builtin `error`/`any` stay on the type
+      -- colour. `false` follows `type`, so the numbered builds are unchanged.
+      hl["@type.interface"] = { fg = palette.interface or palette.type }
+
       -- OPEN FOLLOW-UP, non-Go `@property`. A different group from the two above,
       -- still at the theme default where it exactly duplicates Function:
-      -- struct-literal keys, object/dict keys and JSX attributes
-      -- (`@tag.attribute` links to it). So a TS `mode: 'x'` renders its key in
+      -- struct-literal keys and object/dict keys (JSX/HTML attributes moved off
+      -- it, above). So a TS `mode: 'x'` renders its key in
       -- the function colour, and a YAML manifest is ~59% function-blue.
       --
       -- WARN: SILENT NO-OP if you reach for `palette.member` here -- the build
@@ -655,10 +677,14 @@ return {
       -- parameters. Value: `surface.reference` in lua/config/ui.lua. Every tested
       -- value: notes/palette-reference.md, "Reference highlight".
       -- Cool slate, dE00 15.4 from the indigo of `Visual` (`#24275a`), so a
-      -- reference never looks like a selection. Read and write share it.
-      for _, group in ipairs({ "LspReferenceText", "LspReferenceRead", "LspReferenceWrite" }) do
+      -- reference never looks like a selection.
+      for _, group in ipairs({ "LspReferenceText", "LspReferenceRead" }) do
         hl[group] = { bg = ui_color.surface.reference }
       end
+      -- Writes get a warm band at the same lightness (JetBrains parity: where is
+      -- this variable assigned?). Same contrast as reads; see `reference_write`
+      -- in config/ui.lua. Only servers that report the write kind show it.
+      hl.LspReferenceWrite = { bg = ui_color.surface.reference_write }
 
       -- The focused row of a LIST panel -- picker, picker preview, and the outline
       -- panel, which remaps its CursorLine here (lua/plugins/trouble.lua).
