@@ -306,8 +306,25 @@ return {
       -- Written as tables, not `paint`: both groups are bare string links in the
       -- theme, and `paint` skips those by design (see the helper). Going through
       -- `paint` here silently did nothing.
-      hl["@function.builtin"] = { fg = palette.func }
-      hl["@function.method.builtin"] = { fg = palette.func }
+      hl["@function.builtin"] = { fg = palette.func_call or palette.func }
+      hl["@function.method.builtin"] = { fg = palette.func_call or palette.func }
+
+      -- Declarations vs calls (2026-11-26, trial). The base queries capture
+      -- `@function` / `@function.method` ONLY at a definition and `.call` at a
+      -- call site, in every language (checked against the pinned
+      -- nvim-treesitter), so two group values are the whole change: no query,
+      -- no runtime cost. Builtin calls (above) follow the call colour.
+      --
+      -- WARN: SILENT FAILURE. The theme links `@function.call` -> `@function`
+      -- and `@function.method.call` -> `@function.method`, so all four are set
+      -- explicitly; setting only the declaration pair would drag calls with it.
+      -- With both roles `false` all four equal `palette.func`, as before.
+      local func_declaration = palette.func_declaration or palette.func
+      local func_call = palette.func_call or palette.func
+      hl["@function"] = { fg = func_declaration }
+      hl["@function.method"] = { fg = func_declaration }
+      hl["@function.call"] = { fg = func_call }
+      hl["@function.method.call"] = { fg = func_call }
 
       -- The theme overrides `@variable.typescript`/`.javascript` yellow but has
       -- no `.tsx`/`.jsx` equivalent, so `.ts` variables were yellow while `.tsx`

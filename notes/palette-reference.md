@@ -482,6 +482,31 @@ the punctuation **value**, not the punctuation **role**, so a build that moves
 | `brighter` | `#268bd2` | — | the theme's own blue500 |
 | `blue300` | `#49aef5` | — | — |
 | `balanced` | `#4488ab` | C\* 27.2 | reads muddy on this background |
+| `onedark_pro_func_blue` | `#61afef` | L\* 69.1 C\* 39.6 h262, 7.59:1 | **live `func` in custom-latest** since 2026-10-21 |
+
+### Declaration vs call split (TRIAL from 2026-11-26)
+
+Roles `func_declaration` (`@function`, `@function.method`) and `func_call`
+(`@function.call`, `@function.method.call`, builtin calls). Constraint: blue hue
+only; bold rejected. On `#171716`, separation as Ghostty draws it (P3):
+
+| option | declaration | call | call WCAG / APCA | call P3 C\* | decl vs call | notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| today | `#61afef` | `#61afef` | 7.59 / 54.7 | 44 | 0 | |
+| 1 | `#61afef` | `#96aac5` | 7.56 / 54.3 | 18 | 12.2 | readable, but greyish: risk of "tinted body text" |
+| 2 | `#61afef` | `#879dbb` | 6.47 / 47.3 | 20 | 12.2 | readability loss |
+| — | `#61afef` | `#7090bb` | 5.46 / 40.6 | 28 | 12.2 | best CLEARLY-blue call with decl kept; too dark |
+| **4 (trial)** | **`#5cc3fe`** | **`#8db0e0`** | **8.05 / 57.3** | **31** | **12.3** | calls stay blue AND gain readability; decl lifts dE 6.7 |
+
+Why the declaration has to move for option 4: `#61afef` sits near the top of
+the blue gamut at its lightness, so a call colour 12 away must go greyish or
+dark. Lifting the declaration by the little room above it (max 6.7) lets the
+call stay saturated. Costs: the declaration blue changes slightly; red-green
+(deutan) separation of calls from the lavender interface drops to 4.7 (7.5 for
+today's blue). Also ruled out: cyan-blue h225 `#30a3bd` (off-hue), violet-blues
+(crowd keyword + lavender), a stronger declaration with calls unchanged (6.7 max).
+
+Verdict: _pending_. Record it here (kept / reverted, and why).
 
 ## type
 

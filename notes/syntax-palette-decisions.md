@@ -1329,5 +1329,10 @@ ceiling at this lightness; best step 6.7, under the ~10 needed to see it); the
 cyan-blue `#30a3bd` / `#0c9eba` (h225, best separation but off the blue hue) and
 the violet-blues (crowd the keyword and the lavender interface). Leading
 candidate `#96aac5`; its risk is reading as tinted body text (low chroma, the
-"reads flat" failure recorded twice here). Verdict: pending.
+"reads flat" failure recorded twice here).
+
+**Trial started the same day: option 4** (Myo's pick), declarations `#5cc3fe`,
+calls `#8db0e0`: both move a little instead of calls moving a lot, so calls stay
+clearly blue and become MORE readable than today (APCA 57.3 vs 54.7). Full
+table: `palette-reference.md`, "Declaration vs call split". Verdict: pending.
 

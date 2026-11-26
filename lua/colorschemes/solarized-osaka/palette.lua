@@ -261,6 +261,19 @@ local variants = {
 
     onedark_pro_func_blue = "#61afef", -- start trialling at 21 Oct 2026, the color is value reference from vscode_onedark_pro and webstorm one dark pro theme
 
+    -- Declaration / call split, TRIAL from 2026-11-26 (option 4 in
+    -- notes/syntax-palette-decisions.md). Blue hue only, by request. On #171716,
+    -- separation as Ghostty draws it (P3):
+    --
+    -- `func_declaration` role: L*75 C*40 h252, 9.13:1, APCA 63.8. dE00 6.7 from
+    -- onedark_pro_func_blue (a small, visible lift: that blue is near the top of
+    -- the gamut, so this is about all the room there is). Nearest body 19.8.
+    declaration_bright = "#5cc3fe",
+    -- `func_call` role: L*71 C*28 h270, 8.05:1, APCA 57.3 (today's call blue:
+    -- 7.59:1 / 54.7), drawn at C*31 vs 44. dE00 12.3 from `declaration_bright`;
+    -- nearest interface lavender 15.8, body 17.2. Deutan: 4.7 from the lavender.
+    call_soft = "#8db0e0",
+
     --NOTE: below color codes are based on above color code used in one dark pro theme for its function color
     -- onedark_pro_func_blue_1= "#47b3ff", -- Option 1: More Saturated (Vibrant)
     -- onedark_pro_func_blue_2 = "#7bc6ff", -- Option 2: Higher Contrast (Lighter)
@@ -500,6 +513,11 @@ return {
   -- Separate from `delimiter` so a build can split the two; custom-latest does.
   bracket = variants.delimiter.mid_high,
   func = variants.func.azure,
+  -- Function/method DECLARATION names and CALLS (incl. builtin calls). `false`
+  -- follows `func`, the behaviour before 2026-11-26. Everything else on the
+  -- function blue (`Identifier`, `@property`, plugin groups) stays on `func`.
+  func_declaration = false,
+  func_call = false,
   type = variants.type.tokyonight,
   -- Interface names (`@type.interface`, TS + Go). `false` follows `type`, the
   -- behaviour before 2026-11-26, so the numbered builds are unchanged.
