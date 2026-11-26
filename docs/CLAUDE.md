@@ -107,6 +107,16 @@ first. Every rejected candidate is recorded there with a dated reason, and most
 obvious ideas have already been measured and rejected. `scripts/palette/README.md`
 covers the measuring tools and how to read the numbers.
 
+**Record every colour trial once a decision is made (Myo's rule, 2026-11-26).**
+Whenever colours are tested, compared or trialled, and a decision lands (kept,
+reverted, or parked), write it down in the same change: the candidates with
+their hex and measurements, the winner, what was rejected and why, and the date.
+The role's section in `notes/palette-reference.md` holds the table; add a dated
+entry to `notes/syntax-palette-decisions.md`; update the value's comment in
+`palette.lua` / `variants.lua` / `config/ui.lua`. A trial still running is
+recorded as "trial" with a pending verdict, and the verdict is filled in when
+it ends.
+
 ## Terminal and keybinding context
 
 Primary usage is macOS + Ghostty + tmux. Review `~/.config/ghostty/config` and

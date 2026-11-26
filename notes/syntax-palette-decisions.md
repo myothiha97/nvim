@@ -1294,3 +1294,10 @@ The theme's `@function.call` -> `@function` link is cut so calls stay plain. No
 query change, so no treesitter cost. Checked against the pinned queries: every
 `@function`/`@function.method` capture is a definition.
 
+Same day, later: **interface colour moved from `periwinkle` to `lavender`
+`#c0b3f5` (trial).** A full-gamut sweep showed periwinkle only dE00 14.6 from the
+function blue, its most common neighbour; lavender is 21.6 from it at the cost of
+the keyword (17.3 -> 15.6). Contrast 9.40:1 (periwinkle 8.85:1). Pink/mauve
+measured best and was ruled out by taste. Table in `palette-reference.md`,
+"interface". Verdict pending a day or two of real Go/TSX use.
+

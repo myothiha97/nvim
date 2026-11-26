@@ -277,12 +277,18 @@ local variants = {
     sky_dim = "#39cce9",
     tokyonight = "#7dcfff", -- base build
     vscode_entity = "#c0caf5",
-    -- L*74.1 C*41.7 h289.8 8.85:1 on #171716 | SELECTED 2026-11-26 for the
-    -- `interface` role (custom-latest), against the gold type: dE00 45.9 from
-    -- it; nearest neighbours func blue 14.6 and keyword violet 17.3 (the
-    -- `interface` keyword sits right before the name, 16 L* darker). Runner-up
-    -- `vscode_entity` (nearest: body 16.9) reads as tinted body text.
+    -- L*74.1 C*41.7 h289.8 8.85:1 on #171716 | first pick for the `interface`
+    -- role, 2026-11-26, replaced by `lavender` below the same day. Its weak
+    -- spot: only dE00 14.6 from the func blue, its most common neighbour
+    -- (`Handle(r io.Reader)`). THE FALLBACK if lavender does not hold up.
     periwinkle = "#a7b1fe",
+    -- L*76.1 C*35.9 h300 9.40:1 on #171716 | TRIAL for the `interface` role
+    -- since 2026-11-26 (custom-latest). From a full-gamut sweep against all 13
+    -- code roles: func 21.6, keyword 15.6 (its nearest; it only meets an
+    -- interface name at the declaration), body 20.2, type 44.3. At body
+    -- lightness, the ceiling. Sweep and rejected alternatives:
+    -- notes/palette-reference.md, "interface".
+    lavender = "#c0b3f5",
     nvim_type = "#2ac3de", -- LIVE in custom-latest
     vscode_support = "#0db9d7",
     claude_desktop_number = "#72E5E7",

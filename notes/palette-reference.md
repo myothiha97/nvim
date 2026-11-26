@@ -516,13 +516,31 @@ practical issue. See item 8 of `../todos/theme/syntax-palette-followups.md`.
 ### interface (`@type.interface`, 2026-11-26)
 
 Its own role so TS and Go interfaces read apart from classes, structs, enums and
-aliases (GoLand/WebStorm parity). `false` follows `type`; `custom-latest` uses
-`periwinkle` `#a7b1fe`: 8.85:1, dE00 45.9 from the gold type, nearest neighbours
-the function blue (14.6) and the keyword violet (17.3, the `interface` keyword
-right before the name, 16 L\* darker). `periwinkle` lost on looks as the colour
-for ALL types on 2026-08-09; this is a much lower dose (interface names only),
-so it is a fresh trial, not a reopening. Painted from LSP tokens only
-(`lua/plugins/lsp.lua`); builtin `error`/`any`/`comparable` stay gold.
+aliases (GoLand/WebStorm parity). `false` follows `type`. Painted from LSP tokens
+only (`lua/plugins/lsp.lua`); builtin `error`/`any`/`comparable` stay gold.
+
+**ON TRIAL: `lavender` `#c0b3f5` in `custom-latest` since 2026-11-26.**
+Fallback: `periwinkle`, one line in `variants.lua`.
+
+Sweep, 2026-11-26: every in-gamut LCh value at L\* 62-76 (not above body),
+C\* 20-60, every 5 degrees of hue, scored by worst dE00 against the 13 live code
+roles on `#171716` (body, keyword, func, type, string, literal, parameter,
+member, accent, operator, separator, bracket, comment).
+
+| value | hex | L\* | C\* | h | contrast | vs func | vs keyword | vs body | worst | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `periwinkle` | `#a7b1fe` | 74.1 | 41.7 | 290 | 8.85:1 | **14.6** | 17.3 | 20.6 | func 14.6 | first pick (best of the 6 existing type candidates); too close to the function blue it sits beside in every signature. Fallback |
+| **`lavender`** | `#c0b3f5` | 76.1 | 35.9 | 300 | 9.40:1 | 21.6 | **15.6** | 20.2 | keyword 15.6 | **trial.** Trades keyword distance (a neighbour only at the declaration) for function distance (a neighbour at every use). Less saturated than periwinkle but 2 L\* lighter, at the body ceiling |
+| muted lavender | `#c6b5d8` | 76.1 | 19.9 | 309 | 9.40:1 | 27.0 | 18.1 | 19.3 | keyword 18.1 | not tried: low chroma, the "reads flat / tinted body" failure of `vscode_entity` on 2026-08-09 |
+| dusty mauve | `#d9b0c8` | 76.1 | 19.9 | 341 | 9.39:1 | 34.0 | 20.9 | 22.8 | keyword 20.9 | best measured, not tried: pink, rejected twice in these notes ("pink, not wanted") |
+| `vscode_entity` | `#c0caf5` | 81.9 | 22.9 | 284 | 11.11:1 | 17.8 | | 16.9 | body 16.9 | above body lightness; rejected for types 2026-08-09 as flat |
+
+The pink/mauve band (h 340s) is the only open space left in this palette; every
+non-pink option trades function distance against keyword distance.
+Not measured: the hover-doc inline-code blue `#8ab4d8` (dE00 9.3 from
+periwinkle), a different surface that never sits next to code.
+
+Verdict after the trial: _pending_. Record it here (kept / reverted, and why).
 
 ## boolean
 

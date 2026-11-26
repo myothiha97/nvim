@@ -87,7 +87,8 @@ local builds = {
       type = palette.variants.type.high_contrast_warn_gold, -- Warm Gold (High Contrast) -- start trialling at 21 Oct 2026,
       -- Interfaces apart from classes/structs (GoLand/WebStorm parity), 2026-11-26.
       -- `false` puts them back on the gold type colour.
-      interface = palette.variants.type.periwinkle,
+      -- interface = palette.variants.type.periwinkle, -- 2026-11-26, first pick; the fallback
+      interface = palette.variants.type.lavender, -- trial from 2026-11-26
       -- Punctuation, three roles, SETTLED 2026-11-25 (measured on bg #171716):
       --   delimiter  operators `:= != == < >`   warm_taupe        #b98f79  6.21:1
       --   separator  `. , ; : ?.`               separator_neutral #8f9a9b  6.21:1
