@@ -63,7 +63,9 @@ return false
 
 def start(c, t, lsp=True):
     reset_fixture(t["cwd"], t["file"])
-    n = c.n = Nvim(t["cwd"], [t["file"]], name="big")
+    # NVIM_APPNAME: run the suite against another config side by side (e.g. a trial merge)
+    env = {"NVIM_APPNAME": os.environ["NVIM_APPNAME"]} if os.environ.get("NVIM_APPNAME") else None
+    n = c.n = Nvim(t["cwd"], [t["file"]], name="big", env=env)
     n.wait(VERYLAZY, 40, "VeryLazy")
     if lsp:
         n.wait(LSP_READY.replace("...", repr(t["lsp"])), 240, t["lsp"] + " ready", interval=0.3)
