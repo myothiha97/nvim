@@ -1287,3 +1287,9 @@ the numbered builds are unchanged:
 None of these were checked on screen when written (no Neovim in the session
 that made them). Check each by eye before treating it as settled.
 
+Same day, later: **function/method declarations in bold, calls plain**
+(`BOLD_FUNCTION_DECLARATIONS` in `init.lua`). Weight instead of a second blue.
+The theme's `@function.call` -> `@function` link is cut so calls stay plain. No
+query change, so no treesitter cost. Checked against the pinned queries: every
+`@function`/`@function.method` capture is a definition.
+
