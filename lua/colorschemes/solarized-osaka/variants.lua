@@ -133,12 +133,12 @@ local builds = {
       -- func = palette.variants.func.vivid, -- current live before onedark_pro_func_blue
       -- func = palette.variants.func.azure, -- Second-best option after func.vivid and func.onedark_pro_func_blue.
       func = palette.variants.func.onedark_pro_func_blue, -- start trialling at 21 Oct 2026, the color code is reference from vscode_onedark_pro and webstorm one dark pro theme
-      -- Declarations keep `func` (#61afef); calls the same blue, less saturated.
-      -- TRIAL from 2026-11-26 (rung C*33). Option 4 (`declaration_bright` + `call_soft`) was
-      -- rejected the same day. Revert: `func_call = false`.
+      -- Declarations and calls share `func` (#61afef). CLOSED 2026-11-27: every
+      -- split trial (bold, #5cc3fe/#8db0e0, #7aadde, #73aee3) was dropped for one
+      -- blue. Do not reopen without reading notes/palette-reference.md,
+      -- "Declaration vs call split".
       func_declaration = false,
-      -- func_call = palette.variants.func.call_desaturated, -- #7aadde, dE 3.9
-      func_call = palette.variants.func.call_subtle, -- #73aee3, dE 2.6, trial
+      func_call = false,
 
       -- One value for every language, Go included. Tokyo Night's hue at our
       -- L*68, chosen by eye 2026-09-08 for the widest separation from the accent

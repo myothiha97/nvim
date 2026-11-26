@@ -517,7 +517,34 @@ call stay saturated (on paper). Costs: the declaration blue changes slightly; re
 today's blue). Also ruled out: cyan-blue h225 `#30a3bd` (off-hue), violet-blues
 (crowd keyword + lavender), a stronger declaration with calls unchanged (6.7 max).
 
-Verdict: _pending_. Record it here (kept / reverted, and why).
+**VERDICT, 2026-11-27: CLOSED. One blue, `#61afef`, for declarations AND calls,
+no bold.** `func_declaration` and `func_call` are both `false` (the roles and the
+four group assignments in `init.lua` stay, as a no-op, so a future split is one
+line). No new colour introduced.
+
+Why, in Myo's words first: a softer call blue like `#73aee3` needs more on-screen
+testing to judge, and the colour work was already tiring; the config is being
+wrapped up and needs quick decisions. Supporting evidence:
+
+- **The trialled split could not be decided.** Side-by-side splits of the same
+  file (2026-11-27, Ghostty screenshots, call-name pixels sampled): `#61afef`
+  calls drew at C\* 26-27, `#73aee3` at C\* 20-23, a measured on-screen dE00
+  of 3.2-3.6. Visible as "calmer", not as a role change, and not decidable.
+- **Bold was measured and still declined.** Bold declaration ink drew at L\* 64
+  C\* 30.5 (~6.46:1) against plain calls at L\* 61-62 C\* 26-27 (~5.9:1), about
+  9% more contrast and 20-35% more ink per glyph. Effective, but disliked on
+  look; in TSX every `const handleX = () =>` would be bold.
+- **Popular themes do not split.** Checked from their sources, 2026-11-27:
+
+| ecosystem | same colour for declaration and call | splits |
+| --- | --- | --- |
+| VS Code (resolved for TS + Go scopes) | Dark Modern, Dark+, One Dark Pro, Tokyo Night, Monokai, Night Owl, Ayu Dark, Dracula, GitHub Dark, Catppuccin (10/10) | none |
+| Neovim (treesitter groups) | Tokyo Night, Catppuccin, Kanagawa, Gruvbox, OneDark, Nightfox, Everforest, Material, Sonokai, Dracula, vscode.nvim (11/13) | Rosé Pine: method calls only (`iris` vs `rose`); GitHub theme: bash commands only |
+| JetBrains (`DefaultColorSchemesManager.xml`, Dracula theme) | Dracula | **Darcula**: declarations `#ffc66d`, calls uncoloured (plain text) |
+
+  No theme uses a same-hue softer call colour. Not verified: JetBrains' New UI
+  dark default, GoLand/WebStorm language-specific defaults (not public),
+  Cyberdream, VS Code Nord and Gruvbox (files not found).
 
 ## type
 

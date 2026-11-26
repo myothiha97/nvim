@@ -275,12 +275,11 @@ local variants = {
     --
     -- C*30: 7.57:1, APCA 54.4, drawn at C*34 (vs 44), dE00 3.9 from the
     -- declaration blue. First same-hue trial, 2026-11-26, swapped the same day
-    -- for the rung above before it had been judged on screen.
+    -- for the rung above before it had been judged on screen. NOT USED.
     call_desaturated = "#7aadde",
     -- C*33: 7.60:1, APCA 54.6, drawn at C*37, dE00 2.6 from the declaration
-    -- blue: right at the just-noticeable difference (~2.3). `func_call` TRIAL
-    -- from 2026-11-26. Least faded option; buys a slightly calmer call blue
-    -- rather than a visible declaration/call split.
+    -- blue (3.2-3.6 measured in screenshots). Trialled 2026-11-26/27, side by
+    -- side with #61afef; closed 2026-11-27 for one blue. NOT USED.
     call_subtle = "#73aee3",
 
     --NOTE: below color codes are based on above color code used in one dark pro theme for its function color

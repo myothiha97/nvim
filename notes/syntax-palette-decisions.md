@@ -1349,3 +1349,15 @@ declaration blue, at the just-noticeable difference: expected to read as a
 slightly calmer call blue rather than a visible split. If the split is wanted
 after all, the next step is `#81add8` (dE 5.3), not further up. Verdict: pending.
 
+## 2026-11-27: function declaration vs call, CLOSED on one blue
+
+Declarations and calls both stay on the function blue `#61afef`, no bold, no new
+colour. Every split tried on 2026-11-26/27 is dropped: bold declarations, option
+4 (`#5cc3fe` / `#8db0e0`), and the same-hue call rungs `#7aadde` and `#73aee3`.
+Myo's reason: a softer call blue needs more testing to judge, colour work is
+tiring, and the config is being wrapped up. The side-by-side test could not be
+decided (on-screen dE00 3.2-3.6), and a source check of 25 popular themes found
+that VS Code and Neovim themes almost all use one colour for both; only JetBrains
+Darcula splits (calls uncoloured). Full record: `palette-reference.md`,
+"Declaration vs call split".
+
