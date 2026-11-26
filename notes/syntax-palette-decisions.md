@@ -1301,8 +1301,9 @@ the keyword (17.3 -> 15.6). Contrast 9.40:1 (periwinkle 8.85:1). Pink/mauve
 measured best and was ruled out by taste. Table in `palette-reference.md`,
 "interface". Verdict pending a day or two of real Go/TSX use.
 
-Same day, later: **Go interface declarations on `periwinkle`, uses on
-`lavender`** (Myo's choice). New `go_interface_declaration` role, painted by the
-gopls hook from the token's `definition` modifier. TS unchanged (lavender for
-both).
+Same day, later: **Go interface declarations briefly on `periwinkle`, then back
+on `lavender`** (Myo). The worry was lavender mixing with the `type`/`interface`
+keywords around the name; measured at dE00 15.6, above every neighbouring pair
+the palette accepts, separated mainly by lightness. One value for declaration and
+use; bold declined. Numbers in `palette-reference.md`, "interface".
 

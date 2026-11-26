@@ -504,9 +504,6 @@ return {
   -- Interface names (`@type.interface`, TS + Go). `false` follows `type`, the
   -- behaviour before 2026-11-26, so the numbered builds are unchanged.
   interface = false,
-  -- Go interface DECLARATION names only (`type Context interface {`), so a
-  -- definition reads apart from its uses. `false` follows `interface`.
-  go_interface_declaration = false,
   -- Booleans. Painted by `hl.Boolean` in init.lua, which `@boolean` links to.
   boolean = variants.boolean.amber,
   -- `false` keeps the theme's own cyan500, so the numbered builds are unchanged.

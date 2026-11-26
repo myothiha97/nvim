@@ -563,12 +563,6 @@ return {
       -- `type` + `interface` tokens here. Builtin `error`/`any` stay on the type
       -- colour. `false` follows `type`, so the numbered builds are unchanged.
       hl["@type.interface"] = { fg = palette.interface or palette.type }
-      -- Go interface DECLARATION names (`type Context interface {`) on their own
-      -- value, set by the gopls hook in plugins/lsp.lua. Go only by
-      -- construction: nothing else paints this group.
-      hl["@type.interface.declaration.go"] = {
-        fg = palette.go_interface_declaration or palette.interface or palette.type,
-      }
 
       -- OPEN FOLLOW-UP, non-Go `@property`. A different group from the two above,
       -- still at the theme default where it exactly duplicates Function:

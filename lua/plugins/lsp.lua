@@ -454,12 +454,7 @@ return {
               end
               local mods = token.modifiers
               if mods.interface and not mods.defaultLibrary then
-                -- The defining name (`type Context interface {`) carries
-                -- `definition` (older gopls: `declaration`) and gets its own
-                -- group; with no theme value it falls back to `@type.interface`.
-                local group = (mods.definition or mods.declaration) and "@type.interface.declaration.go"
-                  or "@type.interface"
-                vim.lsp.semantic_tokens.highlight_token(token, ev.buf, ev.data.client_id, group)
+                vim.lsp.semantic_tokens.highlight_token(token, ev.buf, ev.data.client_id, "@type.interface")
               end
             end,
           })

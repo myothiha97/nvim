@@ -540,11 +540,17 @@ non-pink option trades function distance against keyword distance.
 Not measured: the hover-doc inline-code blue `#8ab4d8` (dE00 9.3 from
 periwinkle), a different surface that never sits next to code.
 
-**Go declarations split off, 2026-11-26 (Myo's choice):** the defining name in
-`type Context interface {` uses `periwinkle` (`go_interface_declaration` role,
-`@type.interface.declaration.go`), every use stays `lavender`. The two are dE00
-7.1 apart: a deliberate small step, so a definition reads as a variant of the
-same colour, not a different kind of symbol. TS keeps one colour for both.
+**Go declarations: tried on `periwinkle`, back on `lavender` the same day
+(2026-11-26, Myo).** Worry: in `type Context interface {` the name sits between
+two keywords, and lavender is the same purple family as the keyword violet
+(hue 300 vs 310, only 10 degrees). Measured: dE00 15.6 from the keyword, wider
+than pairs this palette already lives with side by side (body/separator 10.3,
+operator/literal 12.8), and lavender actually separates by LIGHTNESS more than
+periwinkle does (18 L\*, luminance ratio 1.77 vs 1.67); periwinkle's edge is
+hue (20 degrees). So one value for every interface, declaration and use, Go and
+TS. Bold on the declaration was offered (to match bold function declarations)
+and declined. Periwinkle for declarations was a separate role for a few
+minutes; removed, not parked.
 
 Verdict after the trial: _pending_. Record it here (kept / reverted, and why).
 
