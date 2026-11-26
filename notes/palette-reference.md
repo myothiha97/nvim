@@ -487,9 +487,9 @@ the punctuation **value**, not the punctuation **role**, so a build that moves
 
 `Type`, `@type.builtin`, `@constructor`. Setting the base `Type` group is the
 whole fix: `@type`, `@type.builtin`, `@type.definition`, `Typedef` and `Structure`
-all link to it, and so does every `@lsp.type.*` group (inert here, since
-`lua/plugins/lsp.lua` nils `semanticTokensProvider` on attach, so treesitter is
-the only painter).
+all link to it, and so does every `@lsp.type.*` group (inert here:
+`lua/plugins/lsp.lua` clears every `@lsp` group except a short list of links,
+so treesitter stays the main painter).
 
 Hard to place for two reasons. TSX tags every imported PascalCase name as `@type`,
 React components included, so it is the densest capture there and genuinely rare

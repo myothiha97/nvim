@@ -131,7 +131,7 @@ consistently — keep it up.
 | `lazyredraw` | **Do NOT enable** | Already tried & reverted — causes async UI freezes with LSP. See comment in `options.lua:153`. |
 | `foldmethod = "expr"` **globally** | **Avoid** | Triggers a synchronous per-line treesitter scan on every buffer open, blocking render. UFO handles folds async/per-buffer instead — see the long comment in `options.lua:161`. |
 | `updatetime` very low (<300ms) | Careful | Drives `CursorHold` frequency. 400ms here is a deliberate balance. Lowering it multiplies all CursorHold work. |
-| LSP `semantic tokens` | Keep disabled | Computes/sends token payloads per change. Nil'd at `LspAttach` in `lsp.lua`. |
+| LSP `semantic tokens` | Only vtsls and gopls | Computes/sends token payloads per change. Nil'd at `LspAttach` in `lsp.lua` for every other server. Measured cost for the two: notes/large-file-performance.md. |
 | LSP `inlay_hints` | On since 2026-11-12 (was off) | A whole-buffer hint request after every change. Kept cheap by sending parameter names only; `<leader>uh` turns them off per buffer. Measured cost is in `lsp.lua`. |
 | `diagnostics.update_in_insert` | Keep `false` | Recomputing diagnostics on every insert keystroke is brutal. |
 | `vim.lsp.document_color` (0.12+) | Disabled here | Polls colors; `enable` is stubbed in `lsp.lua:140`. |
@@ -243,7 +243,7 @@ Copy these proven patterns instead of inventing new ones:
   `notes/large-file-performance.md`.
 - **Async folds, not global `foldexpr`** — UFO on the manual/async path; see
   the rationale comment in `options.lua`.
-- **LSP trimming** — semantic tokens nil'd, `document_color` stubbed,
+- **LSP trimming** — semantic tokens nil'd except vtsls/gopls, `document_color` stubbed,
   `update_in_insert = false`, per-server `debounce_text_changes = 300`,
   `vtsls` auto-import/watcher disabling.
 - **Throttled statusline** — lualine `refresh = 1000ms`, copilot indicator

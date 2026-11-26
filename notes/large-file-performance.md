@@ -77,13 +77,33 @@ Papercut: the "Big file detected" notice opens as a **Press ENTER** prompt,
 because noice's message view and notify are both off, so the multi-line
 message falls back to Vim's hit-enter prompt.
 
-## Semantic tokens: stay off
+## Semantic tokens: on for vtsls and gopls only (2026-11-26)
 
-- gopls refuses files over 100,000 bytes ("too large").
-- In Go it adds doc links in comments (`[Attr]`, `[Logger.Log]`), `//go:`
-  directives and printf verbs. It does NOT highlight plain words the way
-  GoLand does.
-- The `@lsp.type.*` groups are not mapped to the palette, so types and
-  functions across all code would change colour.
-- basedpyright made scrolling slower (`<C-d>` p50 3 to 20 ms, wheel 1 to 15 ms);
-  vtsls returned no tokens at all.
+Treesitter has no scopes, so it colours a parameter only where it is declared.
+Semantic tokens add the uses in the body (and, for Go, constant uses and type
+parameter declarations). `lua/plugins/lsp.lua` keeps tokens only for vtsls and
+gopls and clears every `@lsp` group except a short list of links, so nothing
+else changes colour.
+
+Measured with the same tmux harness, 3 rounds, tokens off -> on, p50/p95 ms:
+
+| file | scroll `<C-d>` | `j` | typing |
+| --- | --- | --- | --- |
+| Go 3.8k lines, 98 KB | 2.4/10.7 -> 3.6/14.8 | 2.9/8.1 -> 4.5/9.5 | 4.7/9.9 -> 4.7/8.5 |
+| Go 33k lines, 847 KB (sqlc parser) | 3.1/16.8 -> 3.4/17.2 | 3.2/10.1 -> 3.4/11.3 | 8.0/12.8 -> 8.3/14.0 |
+| ClassAddBookingDrawer.tsx (67K chars) | 2.6/15.4 -> 3.3/17.4 | 3.2/9.2 -> 4.4/11.1 | 5.2/13.3 -> 6.6/14.1 |
+| TransactionDetailsCard.tsx (78K chars) | 2.7/15.2 -> 3.7/16.6 | 2.8/11.7 -> 3.8/12.2 | 4.7/13.7 -> 5.3/13.0 |
+
+About 1 ms per key at p50, inside one frame. The ~135 ms stalls in TSX files
+show up with tokens off too, so they are not from tokens.
+
+- gopls sent tokens for an 847 KB file. The old "refuses over 100,000 bytes"
+  note no longer holds for the current gopls.
+- vtsls (like VS Code) returns NO tokens for a full request above 100,000
+  characters but still answers range requests, so Nvim painted the range and
+  then wiped it. That is why the first test "returned no tokens at all".
+  `range` is turned off for vtsls: those files stay on treesitter colours.
+- TypeScript relabels a callable parameter (`onClose()`) as `function`, so it
+  stays function blue. A name-based workaround was considered and dropped.
+- basedpyright stays off: it made scrolling slower (`<C-d>` p50 3 to 20 ms,
+  wheel 1 to 15 ms).

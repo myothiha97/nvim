@@ -198,6 +198,10 @@ return {
       -- a literal, so no hue is added. `${}` joined it (see above). Rejected
       -- candidates: notes/string-and-member-colours.md.
       hl["@string.escape"] = { fg = palette.escape or palette.punctuation }
+      -- Format verbs (`%s %d %w` in Go's printf family) read as escapes, as in
+      -- GoLand. The base queries capture them, but the theme leaves the group
+      -- unset, so they fell back to the string green.
+      hl["@character.printf"] = { link = "@string.escape" }
 
       -- Legacy configuration: Constructors and parameters were previously coupled.
       -- paint({
