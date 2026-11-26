@@ -540,6 +540,12 @@ non-pink option trades function distance against keyword distance.
 Not measured: the hover-doc inline-code blue `#8ab4d8` (dE00 9.3 from
 periwinkle), a different surface that never sits next to code.
 
+**Go declarations split off, 2026-11-26 (Myo's choice):** the defining name in
+`type Context interface {` uses `periwinkle` (`go_interface_declaration` role,
+`@type.interface.declaration.go`), every use stays `lavender`. The two are dE00
+7.1 apart: a deliberate small step, so a definition reads as a variant of the
+same colour, not a different kind of symbol. TS keeps one colour for both.
+
 Verdict after the trial: _pending_. Record it here (kept / reverted, and why).
 
 ## boolean
