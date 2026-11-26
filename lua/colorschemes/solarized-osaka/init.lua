@@ -17,10 +17,6 @@ local ui_color = require("config.ui")
 -- Details: notes/git/hunk-preview-colours.md
 local GITSIGNS_WORDS = "dark"
 
--- Function/method declarations in bold, calls plain. `false` = one weight for
--- both, the look before 2026-11-26. See the block next to `@function.builtin`.
-local BOLD_FUNCTION_DECLARATIONS = true
-
 -- Terminal background shows through the editor when true. Read by `transparent`
 -- below and by the TabLineFill pin in on_highlights.
 --
@@ -312,30 +308,6 @@ return {
       -- `paint` here silently did nothing.
       hl["@function.builtin"] = { fg = palette.func }
       hl["@function.method.builtin"] = { fg = palette.func }
-
-      -- Function and method DECLARATIONS in bold, calls plain (2026-11-26,
-      -- JetBrains parity: definitions stand out, calls do not). Weight, not a
-      -- second blue: two blues this close read as "identical but not".
-      --
-      -- The base queries capture `@function` / `@function.method` ONLY at a
-      -- definition (Go func/method/interface-method names, TS/JS function, method
-      -- and `const f = () =>` names, Lua/Python/bash/Rust definitions; checked
-      -- against the pinned nvim-treesitter). Calls are always `.call`. Object
-      -- keys holding a function stay keys: after/queries re-capture those.
-      --
-      -- WARN: SILENT FAILURE. The theme links `@function.call` -> `@function` and
-      -- `@function.method.call` -> `@function.method`, so the bold would reach
-      -- every call. The two call groups are pointed at `Function` (blue, no
-      -- bold) to cut that chain; drop those two lines and every call goes bold.
-      --
-      -- No query or runtime cost: only group attributes change. Revert: set
-      -- BOLD_FUNCTION_DECLARATIONS to false at the top of this file.
-      if BOLD_FUNCTION_DECLARATIONS then
-        hl["@function.call"] = { link = "Function" }
-        hl["@function.method.call"] = { link = "Function" }
-        hl["@function"] = { fg = palette.func, bold = true }
-        hl["@function.method"] = { fg = palette.func, bold = true }
-      end
 
       -- The theme overrides `@variable.typescript`/`.javascript` yellow but has
       -- no `.tsx`/`.jsx` equivalent, so `.ts` variables were yellow while `.tsx`

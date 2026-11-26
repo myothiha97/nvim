@@ -1307,3 +1307,27 @@ keywords around the name; measured at dE00 15.6, above every neighbouring pair
 the palette accepts, separated mainly by lightness. One value for declaration and
 use; bold declined. Numbers in `palette-reference.md`, "interface".
 
+Same day, later: **bold function declarations dropped** (Myo: no bold for
+declarations). Declarations and calls are one weight again; declarations keep
+the function blue `#61afef`. Bold was tried for a few hours as the zero-cost way
+to tell a declaration from a call.
+
+**OPEN, 2026-11-26: a quieter colour for function CALLS** (declarations stay
+`#61afef`). Constraint from Myo: blue hue only, no cyan-blue / violet / lavender.
+Measured so far, on `#171716`, separation as Ghostty draws it (P3):
+
+| call colour | how | WCAG / APCA | P3 C\* | vs decl | nearest | deutan worst |
+| --- | --- | --- | --- | --- | --- | --- |
+| `#61afef` (today) | | 7.59 / 54.7 | 44 | 0 | body 20.6 | keyword 7.5 |
+| `#96aac5` | less saturated, same L\* | 7.56 / 54.3 | 18 | 12.2 | separator 12.5, body 12.7 | 9.0 |
+| `#879dbb` | less saturated, darker | 6.47 / 47.3 | 20 | 12.2 | separator 12.5, interface 15.1 | 8.3 |
+| `#7992b7` | darker | 5.65 / 41.8 | 24 | 13.2 | separator 14.8 | 5.0 |
+| `#6e94ba` | first guess | 5.65 / 41.8 | 27 | 10.1 | separator 14.9 | 4.1 |
+
+Ruled out: a STRONGER declaration blue with calls unchanged (blue is at its
+ceiling at this lightness; best step 6.7, under the ~10 needed to see it); the
+cyan-blue `#30a3bd` / `#0c9eba` (h225, best separation but off the blue hue) and
+the violet-blues (crowd the keyword and the lavender interface). Leading
+candidate `#96aac5`; its risk is reading as tinted body text (low chroma, the
+"reads flat" failure recorded twice here). Verdict: pending.
+
