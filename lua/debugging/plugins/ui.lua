@@ -14,8 +14,10 @@ return {
       { "<leader>de", function() require("debugging.menu").eval() end, desc = "Eval", mode = { "n", "x" } },
     },
     opts = function(_, opts)
-      -- Long values (a sync.WaitGroup prints ~200 chars) stay inside the panel.
-      --   wrap = false         cuts the value off at the panel edge
+      -- Rows are cut to the panel width already (debugging/variables.lua);
+      -- wrap = true only catches a row that still overflows (a resized
+      -- panel before its next render).
+      --   wrap = false         would cut the value off at the panel edge
       --   expand_lines = true  opens a borderless float as wide as the value on
       --                        cursor, painting over the editor
       opts.wrap = true
@@ -44,6 +46,12 @@ return {
       -- nvim-dap-ui is updated. Check Call Stack after every dap-ui update;
       -- delete this line to roll back. Details: debugging/stacks.lua.
       package.loaded["dapui.components.threads"] = require("debugging.stacks")
+      -- GoLand-style one-line rows `name = {type} value` in Variables and
+      -- Watches. Same warning (dap-ui INTERNAL modules); details and checks in
+      -- debugging/variables.lua and debugging/watches.lua. Delete both lines to
+      -- roll back to stock rows.
+      package.loaded["dapui.components.variables"] = require("debugging.variables")
+      package.loaded["dapui.components.watches"] = require("debugging.watches")
       require("dapui").setup(opts)
       require("debugging.controls").setup()
       require("debugging.layout").setup()

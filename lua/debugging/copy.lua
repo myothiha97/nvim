@@ -93,11 +93,22 @@ local function request(session, command, args)
   return result
 end
 
-local function find(session, ref, name)
-  for _, v in ipairs(request(session, "variables", { variablesReference = ref }).variables or {}) do
-    if v.name == name then
-      return v
+-- The panels open a pointer or interface straight on its fields
+-- (debugging/variables.lua), so the row path skips Delve's unnamed / `data`
+-- level; skip it here too (values.unwrap, the same rule).
+local function find(session, ref, name, parent_type)
+  for _ = 1, 4 do
+    local vars = request(session, "variables", { variablesReference = ref }).variables or {}
+    for _, v in ipairs(vars) do
+      if v.name == name then
+        return v
+      end
     end
+    local inner = require("debugging.values").unwrap(parent_type, vars)
+    if not inner then
+      break
+    end
+    ref, parent_type = inner.variablesReference, inner.type
   end
   error("'" .. name .. "' is no longer in scope", 0)
 end
@@ -123,7 +134,7 @@ function M.copy()
 
   coroutine.wrap(function()
     local ok, err = pcall(function()
-      local ref, expr
+      local ref, expr, parent_type
       if path.root == "scope" then
         for _, s in ipairs(request(session, "scopes", { frameId = frame_id }).scopes or {}) do
           if s.name == path.scope then
@@ -140,17 +151,18 @@ function M.copy()
         end
         expr = watch.expression
         if #path.names > 0 then
-          ref = request(session, "evaluate", { expression = expr, frameId = frame_id, context = "watch" }).variablesReference
+          local res = request(session, "evaluate", { expression = expr, frameId = frame_id, context = "watch" })
+          ref, parent_type = res.variablesReference, res.type
         end
       end
 
       local value, label = nil, expr
       for i, name in ipairs(path.names) do
-        local v = find(session, ref, name)
+        local v = find(session, ref, name, parent_type)
         if i == #path.names then
           value, label, expr = v.value, name, v.evaluateName
         else
-          ref = v.variablesReference
+          ref, parent_type = v.variablesReference, v.type
         end
       end
       if expr then

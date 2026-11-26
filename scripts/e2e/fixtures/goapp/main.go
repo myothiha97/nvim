@@ -32,7 +32,7 @@ func worker(id int, wg *sync.WaitGroup, out chan<- int) {
 }
 
 func main() {
-	u := User{Name: "Myo", Age: 29, Tags: []string{"go", "nvim"}, Meta: map[string]int{"a": 1, "b": 2}, Inner: &Inner{Note: "deep"}}
+	u := User{Name: "Myo", Age: 29, Tags: []string{"go", "nvim"}, Meta: map[string]int{"a": 1, "b": 2}, Inner: &Inner{Note: "deep note: a value long enough to be cut in the 46-column debug sidebar"}}
 	total := 0
 	for i := 0; i < 5; i++ {
 		total += calc.Add(i, total)

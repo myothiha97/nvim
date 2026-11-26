@@ -28,6 +28,8 @@ Plan and research: `/mnt/project-files/go-debugger/go-debugger-gui-plan.md`
 | `menu.lua` | Right-click menu: debug entries for the clicked line, at most 5, chosen per state (stopped / breakpoint / test file); in test files also Run Test, Run File Tests, Show Test Output (not counted in the 5) |
 | `hover.lua` | While stopped, mouse hover shows the value of the hovered expression (called from `config/mouse-hover.lua`; LSP hover is the fallback) |
 | `copy.lua` | Copy Value: `y` or right-click in Variables / Watches copies the full value (adapter's clipboard context) |
+| `values.lua` | How a value reads in a panel row: type prefix dropped, `len:3, cap:8`, error messages, decimal integers, cut to fit (pure string functions) |
+| `variables.lua`, `watches.lua` | Variables and Watches rows, GoLand-style `name = {type} value`, one line each (replace dap-ui's row renderers) |
 | `repl_complete.lua` | REPL completion: blink source fed by the adapter's `completions` request (dap-repl only) |
 | `list.lua` | Breakpoint list picker (`<leader>dm` file, `<leader>dM` project), same look as `<leader>xd` |
 
@@ -105,6 +107,31 @@ kept only in memory (no sign, lost on restart); `<leader>db` / right-click is
 ours (grey sign, saved, listed as "disabled" in `<leader>dm`), and those do
 not appear in the Breakpoints panel.
 
+## Variables and Watches rows
+
+One line per variable, GoLand-style (`values.lua`, `variables.lua`, `watches.lua`):
+
+```
+ ▸ jobs = {chan main.Order} len:3, cap:8
+ ▸ srv = {*main.Server} {…}
+ ▸ orders = {[]main.Order} len:3, cap:3
+ ▸ err = {*errors.errorString} "order rejected: bad status"
+   i = {int} 3
+```
+
+- The value loses the type Delve repeats in front of it; unsigned integers lose
+  Delve's ` = 0x…`; `time.Time` shows its readable form.
+- Slices and channels show `len:N, cap:M`; an error shows its message.
+- A struct, map or pointer shows its fields inline only if they fit the row
+  whole, else `{…}` / `[…]`: expand for the fields. A long interface type keeps
+  its concrete type (`{*context.timerCtx}`).
+- Every row is cut to the panel width with `…`. Double-click (or `<CR>`) on a
+  cut value that has no children opens the whole value in a float.
+- A pointer or interface expands straight to its fields (Delve's unnamed /
+  `data` level is skipped).
+- Other adapters (js-debug, debugpy, netcoredbg) get the same one-line rows;
+  their values pass through unchanged apart from the cut.
+
 ## Languages
 
 | Language | Adapter (installed by) | Start | Tests |
@@ -152,6 +179,8 @@ pinned; check their rows after `:Lazy update`):
 | File | Internal used | Check | Rollback |
 |---|---|---|---|
 | `stacks.lua` + `plugins/ui.lua` | replaces `dapui.components.threads` | Call Stack shows goroutines, click/za collapses | delete the `package.loaded[...]` line in `plugins/ui.lua` |
+| `variables.lua` + `plugins/ui.lua` | replaces `dapui.components.variables` (based on upstream at the pinned commit) | Variables shows `name = {type} value` rows; expand a struct and a pointer; `e` edits; `w` adds a watch; the e2e scenario `go/panel-rows` | delete the `dapui.components.variables` line in `plugins/ui.lua` |
+| `watches.lua` + `plugins/ui.lua` | replaces `dapui.components.watches` (based on upstream at the pinned commit) | add a watch (`<leader>dW`, `i`), expand, edit (`e`), remove (`d`); `go/panel-rows` | delete the `dapui.components.watches` line in `plugins/ui.lua` |
 | `controls.lua` | replaces `dapui.controls.controls` | bar shows 6 buttons; after exit shows Run Again + exit code; after Close -> Run Again the first stop shows Continue (not Pause) | remove `require("dapui.controls").controls = M.render` |
 | `plugins/core.lua` | nvim-dap `session.dirty`, `session:update_threads` | `dlv config hideSystemGoroutines false` updates Call Stack at once | delete the two `debugging_threads` listeners |
 | `layout.lua` | dap-ui `require("dapui.windows").layouts[i]:is_open()` (no public "is this layout open") | first stop opens the sidebar once; first watch swaps in the Watches variant; `<leader>du` toggles | none short of rewriting the open/close logic; if it breaks, panels may open twice or not swap |

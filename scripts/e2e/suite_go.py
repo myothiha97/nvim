@@ -92,13 +92,13 @@ def _(c):
     stl = n.lua("return vim.api.nvim_eval_statusline(vim.o.statusline, {}).str")
     c.check("Stopped at line 38" in stl, "statusline shows stopped line", stl)
     vars_txt = n.lua("for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].filetype=='dapui_scopes' then return table.concat(vim.api.nvim_buf_get_lines(b,0,-1,false),'\\n') end end")
-    c.check("total" in vars_txt and "i" in vars_txt and "Myo" in vars_txt, "Variables shows locals incl. struct", vars_txt)
+    c.check("total" in vars_txt and "i" in vars_txt and "u = {main.User}" in vars_txt, "Variables shows locals incl. struct", vars_txt)
     layout_before = [(w["ft"], w["w"], w["h"]) for w in st(n)["wins"] if not w["float"]]
     # continue -> same bp next iteration
     n.keys("<leader>dc")
     wait_stopped(n, line=38)
     vars_txt = n.lua("for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].filetype=='dapui_scopes' then return table.concat(vim.api.nvim_buf_get_lines(b,0,-1,false),'\\n') end end")
-    c.check(re.search(r"\bi int = 1\b", vars_txt), "Variables updated after continue (i = 1)", vars_txt)
+    c.check(re.search(r"\bi = \{int\} 1\b", vars_txt), "Variables updated after continue (i = 1)", vars_txt)
     layout_after = [(w["ft"], w["w"], w["h"]) for w in st(n)["wins"] if not w["float"]]
     c.check(layout_before == layout_after, "layout did not move between stops", (layout_before, layout_after))
     # remove bp and run to end
@@ -205,13 +205,13 @@ def _(c):
     wait_stopped(n, line=38)
     n.keys("<leader>dc")
     wait_stopped(n, line=38)
-    c.check(re.search(r"\bi int = 2\b", scopes(n)), "advanced to i = 2 before restart", scopes(n))
+    c.check(re.search(r"\bi = \{int\} 2\b", scopes(n)), "advanced to i = 2 before restart", scopes(n))
     n.keys("<leader>dR")
     n.wait("local s=require('dap').session(); return s and s.stopped_thread_id ~= nil and s.current_frame ~= nil and s.current_frame.line == 38", 30)
     time.sleep(1.0)
     s = st(n)
     c.check(s["nsessions"] == 1, "<leader>dR restart -> exactly one session", s["nsessions"])
-    c.check(re.search(r"\bi int = 0\b", scopes(n)), "restart really restarted the program (i = 0)", scopes(n))
+    c.check(re.search(r"\bi = \{int\} 0\b", scopes(n)), "restart really restarted the program (i = 0)", scopes(n))
     n.keys("<leader>dt")
     wait_no_session(n)
 
@@ -241,7 +241,7 @@ def _(c):
     pick_config(n)
     s = wait_stopped(n, line=38)
     vars_txt = n.lua("for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].filetype=='dapui_scopes' then return table.concat(vim.api.nvim_buf_get_lines(b,0,-1,false),'\\n') end end")
-    c.check(re.search(r"\bi int = 3\b", vars_txt), "conditional bp stops only when i == 3", vars_txt)
+    c.check(re.search(r"\bi = \{int\} 3\b", vars_txt), "conditional bp stops only when i == 3", vars_txt)
     n.keys("<leader>dc")
     n.wait("return package.loaded['dap'] and require('dap').session() == nil", 30, "exit")
     time.sleep(0.5)
@@ -261,7 +261,7 @@ def _(c):
     n.keys("<leader>dl")
     wait_stopped(n, line=38)
     vars_txt = n.lua("for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].filetype=='dapui_scopes' then return table.concat(vim.api.nvim_buf_get_lines(b,0,-1,false),'\\n') end end")
-    c.check(re.search(r"\bi int = 1\b", vars_txt), "hit count 2 stops on second hit (i = 1)", vars_txt)
+    c.check(re.search(r"\bi = \{int\} 1\b", vars_txt), "hit count 2 stops on second hit (i = 1)", vars_txt)
     n.keys("<leader>dt")
     wait_no_session(n)
     # disable line bp -> not hit
@@ -341,11 +341,95 @@ def _(c):
     time.sleep(0.4)
     n.lua("vim.fn.setreg('+','') vim.fn.setreg('\"','')")
     n.keys("gg")
-    n.lua("local l=vim.api.nvim_buf_get_lines(0,0,-1,false) for i,x in ipairs(l) do if x:find('u main.User') or x:find(' u ') then vim.api.nvim_win_set_cursor(0,{i,0}) return end end")
+    n.lua("local l=vim.api.nvim_buf_get_lines(0,0,-1,false) for i,x in ipairs(l) do if x:find(' u = ') then vim.api.nvim_win_set_cursor(0,{i,0}) return end end")
     n.keys("y")
     time.sleep(0.6)
     reg = n.lua("return vim.fn.getreg('+') .. ' | ' .. vim.fn.getreg('\"')")
     c.check("Myo" in reg, "y in Variables copies full value", reg)
+    n.keys("<leader>dt")
+    wait_no_session(n)
+    bad, _ = errors_in_messages(n)
+    c.check(not bad, "no Lua errors", "\n".join(bad))
+
+# ------------------------------------------------------- panel rows (GoLand)
+def panel_cursor(n, ft, pat):
+    """Focus the panel `ft` and put the cursor on the first line containing `pat`."""
+    return n.lua("""
+      local ft, pat = ...
+      for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        local b = vim.api.nvim_win_get_buf(w)
+        if vim.bo[b].filetype == ft then
+          vim.api.nvim_set_current_win(w)
+          for i, l in ipairs(vim.api.nvim_buf_get_lines(b, 0, -1, false)) do
+            if l:find(pat, 1, true) then vim.api.nvim_win_set_cursor(w, {i, 0}) return i end
+          end
+        end
+      end
+      return nil""", ft, pat)
+
+
+def panel_text(n, ft):
+    return n.lua("local ft = ... for _,b in ipairs(vim.api.nvim_list_bufs()) do if vim.bo[b].filetype==ft then return table.concat(vim.api.nvim_buf_get_lines(b,0,-1,false),'\\n') end end return ''", ft) or ""
+
+
+@test("go/panel-rows")
+def _(c):
+    n = go(c)
+    n.keys(":25<CR><BP>")
+    pick_config(n)
+    wait_stopped(n, line=25)
+    time.sleep(0.8)
+    v = scopes(n)
+    rows = [l for l in v.splitlines() if l.strip() and not l.strip().endswith(":")]
+    c.check(rows and all(" = " in l for l in rows), "every Variables line is a `name = ...` row (no wrapped value lines)", v)
+    c.check("u = {main.User}" in v and "main.User = main.User" not in v, "row reads `u = {main.User}`, type not repeated", v)
+    c.check('msg = {string} "hi Myo (29)"' in v, 'scalar row `msg = {string} "hi Myo (29)"`', v)
+    width = n.lua("for _,w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do if vim.bo[vim.api.nvim_win_get_buf(w)].filetype=='dapui_scopes' then local i=vim.fn.getwininfo(w)[1] return i.width - i.textoff end end")
+    wide = [l for l in v.splitlines() if n.lua("return vim.fn.strdisplaywidth(...)", l) > width]
+    c.check(width and not wide, f"no row wider than the panel text area ({width} cells)", wide)
+    # expand u, then the pointer Inner: its field shows directly (no unnamed level)
+    panel_cursor(n, "dapui_scopes", " u = ")
+    n.keys("<CR>")
+    time.sleep(0.8)
+    v = scopes(n)
+    c.check(re.search(r"Tags = \{\[\]string\} len:2, cap:2$", v, re.M), "slice row: len/cap (elements dropped: they don't fit 46 columns)", v)
+    c.check("Inner = {*main.Inner}" in v, "pointer row `Inner = {*main.Inner}`", v)
+    panel_cursor(n, "dapui_scopes", "Inner = ")
+    n.keys("<CR>")
+    time.sleep(0.8)
+    v = scopes(n)
+    lines = v.splitlines()
+    i = next((k for k, l in enumerate(lines) if "Inner = " in l), None)
+    nxt = lines[i + 1] if i is not None and i + 1 < len(lines) else ""
+    c.check("Note = {string}" in nxt, "pointer opens straight on its field (Note right under Inner)", v)
+    c.check("= {main.Inner}" not in v, "no unnamed `= {main.Inner}` level", v)
+    c.check("…" in nxt and "debug sidebar" not in nxt, "long string is cut to one line with …", nxt)
+    c.shot("rows")
+    # y copies the whole value through the skipped pointer level
+    panel_cursor(n, "dapui_scopes", "Note = ")
+    n.lua("vim.fn.setreg('+','') vim.fn.setreg('\"','')")
+    n.keys("y")
+    time.sleep(0.8)
+    reg = n.lua("return vim.fn.getreg('\"')")
+    c.check("46-column debug sidebar" in reg, "y on a field under a pointer copies the full value", reg)
+    # <CR> on the cut value opens it whole in a float
+    panel_cursor(n, "dapui_scopes", "Note = ")
+    n.keys("<CR>")
+    time.sleep(1)
+    fl = n.lua("for _,w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do if vim.api.nvim_win_get_config(w).relative ~= '' then local t=table.concat(vim.api.nvim_buf_get_lines(vim.api.nvim_win_get_buf(w),0,-1,false),' ') if t:find('sidebar') then return t end end end return ''")
+    c.check("46-column debug sidebar" in fl, "<CR> on a cut value shows the whole value in a float", fl)
+    c.shot("full_value")
+    n.keys("<Esc>")
+    # Watches use the same row
+    n.keys("<leader>dW")
+    time.sleep(0.6)
+    n.keys("i")
+    n.keys("u.Tags<CR>")
+    time.sleep(1)
+    n.keys("<Esc>")
+    time.sleep(0.6)
+    w_txt = panel_text(n, "dapui_watches")
+    c.check(re.search(r"u\.Tags = \{\[\]string\} len:2, cap:2$", w_txt, re.M), "watch row uses the same format", w_txt)
     n.keys("<leader>dt")
     wait_no_session(n)
     bad, _ = errors_in_messages(n)
