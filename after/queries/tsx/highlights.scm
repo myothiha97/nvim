@@ -73,3 +73,27 @@
     (named_imports
       (import_specifier
         name: (identifier) @type))))
+
+; Optional marker `?` onto the delimiter grey. Reasoning lives in
+; after/queries/typescript/highlights.scm; repeated here for the same
+; precedence reason as the operators above.
+(property_signature
+  "?" @punctuation.delimiter)
+
+(optional_parameter
+  "?" @punctuation.delimiter)
+
+(method_signature
+  "?" @punctuation.delimiter)
+
+(abstract_method_signature
+  "?" @punctuation.delimiter)
+
+(method_definition
+  "?" @punctuation.delimiter)
+
+(public_field_definition
+  "?" @punctuation.delimiter)
+
+(optional_type
+  "?" @punctuation.delimiter)
