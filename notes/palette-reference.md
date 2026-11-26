@@ -497,7 +497,8 @@ only; bold rejected. On `#171716`, separation as Ghostty draws it (P3):
 | 2 | `#61afef` | `#879dbb` | 6.47 / 47.3 | 20 | 12.2 | readability loss |
 | — | `#61afef` | `#7090bb` | 5.46 / 40.6 | 28 | 12.2 | best CLEARLY-blue call with decl kept; too dark |
 | 4 | `#5cc3fe` | `#8db0e0` | 8.05 / 57.3 | 31 | 12.3 | **REJECTED on screen 2026-11-26**: call too faded, hue drifted (h270 vs 262) |
-| **6 (trial)** | **`#61afef`** | **`#7aadde`** | **7.57 / 54.4** | **34** | **3.9** | same hue + lightness, chroma 40 -> 30. Subtle by design |
+| 6 | `#61afef` | `#7aadde` | 7.57 / 54.4 | 34 | 3.9 | same hue + lightness, chroma 40 -> 30. Swapped for 7 the same day before an on-screen verdict |
+| **7 (trial)** | **`#61afef`** | **`#73aee3`** | **7.60 / 54.6** | **37** | **2.6** | chroma 40 -> 33, Myo's pick. At the JND: a calmer call blue, not a visible split |
 
 Same-hue ladder behind option 6 (L\* 69, h262, only chroma moves, so every rung
 reads 7.56-7.61:1 / APCA 54.3-54.6): C\*36 `#6caee9` dE 1.6, C\*33 `#73aee3`

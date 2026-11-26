@@ -1343,3 +1343,9 @@ hue and lightness with chroma 40 -> 30. Readability unchanged; dE00 3.9, a
 subtle step by design (anything clearer reads faded). Ladder and reasoning in
 `palette-reference.md`, "Declaration vs call split". Verdict: pending.
 
+Same day, later: **calls moved one rung up to `#73aee3`** (C\* 33, option 7,
+Myo's pick) before `#7aadde` had been judged on screen. dE00 2.6 from the
+declaration blue, at the just-noticeable difference: expected to read as a
+slightly calmer call blue rather than a visible split. If the split is wanted
+after all, the next step is `#81add8` (dE 5.3), not further up. Verdict: pending.
+

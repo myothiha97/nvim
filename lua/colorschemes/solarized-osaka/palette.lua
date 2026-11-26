@@ -270,13 +270,18 @@ local variants = {
     --   declaration L*75 C*40 h252 9.13:1 | call L*71 C*28 h270 8.05:1, P3 C*31
     declaration_bright = "#5cc3fe",
     call_soft = "#8db0e0",
-    -- `func_call` TRIAL from 2026-11-26: `onedark_pro_func_blue` with only the
-    -- chroma lowered (C*40 -> 30), same hue h262 and L*69, so readability is
-    -- identical (7.57:1, APCA 54.4) and it is drawn at C*34 (vs 44). dE00 3.9
-    -- from the declaration blue: a SUBTLE step by design, the most that stays
-    -- un-faded (rungs at C*27 and below draw at <= C*30, where `call_soft`
-    -- already read faded). Nearest body / separator 17.8.
+    -- Same-hue rungs of `onedark_pro_func_blue`: only chroma lowered, h262 and
+    -- L*69 kept, so readability is identical on both.
+    --
+    -- C*30: 7.57:1, APCA 54.4, drawn at C*34 (vs 44), dE00 3.9 from the
+    -- declaration blue. First same-hue trial, 2026-11-26, swapped the same day
+    -- for the rung above before it had been judged on screen.
     call_desaturated = "#7aadde",
+    -- C*33: 7.60:1, APCA 54.6, drawn at C*37, dE00 2.6 from the declaration
+    -- blue: right at the just-noticeable difference (~2.3). `func_call` TRIAL
+    -- from 2026-11-26. Least faded option; buys a slightly calmer call blue
+    -- rather than a visible declaration/call split.
+    call_subtle = "#73aee3",
 
     --NOTE: below color codes are based on above color code used in one dark pro theme for its function color
     -- onedark_pro_func_blue_1= "#47b3ff", -- Option 1: More Saturated (Vibrant)
