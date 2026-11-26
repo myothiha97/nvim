@@ -319,6 +319,11 @@ return {
       -- this or it reaches them via @keyword.operator -> @operator -> Operator.
       hl.Operator = { fg = delimiter }
 
+      -- The ternary `?` and `:` are symbolic operators too, but the base queries
+      -- capture them as @keyword.conditional.ternary, which falls back to the
+      -- keyword colour. Link them to the neutral Operator above.
+      hl["@keyword.conditional.ternary"] = { link = "Operator" }
+
       -- Native CSS fallback: reuse syntax roles instead of Function/PreProc/Noise.
       -- Explicit links survive css.vim's later `hi def link` without buffer hooks.
       -- Function regions supply the colour of otherwise uncaptured calc operators.

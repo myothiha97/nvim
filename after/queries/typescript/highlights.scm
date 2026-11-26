@@ -78,3 +78,29 @@
     (named_imports
       (import_specifier
         name: (identifier) @type))))
+
+; The optional marker `?` in `name?: T`, `(v?: T)` and `[T?]` reads as one `?:`
+; delimiter with its colon. The base typescript query files it under
+; @punctuation.special, which the theme paints in the escape yellow meant for
+; template `${}`, so it stood out as a lone yellow mark. Moved onto the colon's
+; @punctuation.delimiter. The definite-assignment `!` stays where it is.
+(property_signature
+  "?" @punctuation.delimiter)
+
+(optional_parameter
+  "?" @punctuation.delimiter)
+
+(method_signature
+  "?" @punctuation.delimiter)
+
+(abstract_method_signature
+  "?" @punctuation.delimiter)
+
+(method_definition
+  "?" @punctuation.delimiter)
+
+(public_field_definition
+  "?" @punctuation.delimiter)
+
+(optional_type
+  "?" @punctuation.delimiter)
