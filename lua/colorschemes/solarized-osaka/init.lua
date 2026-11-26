@@ -309,7 +309,9 @@ return {
       hl["@function.builtin"] = { fg = palette.func_call or palette.func }
       hl["@function.method.builtin"] = { fg = palette.func_call or palette.func }
 
-      -- Declarations vs calls (2026-11-26, trial). The base queries capture
+      -- Declarations vs calls. CLOSED 2026-11-27 on one blue: both roles are
+      -- `false` in every build, so all four groups equal `palette.func` and this
+      -- block only keeps a future split to one line. The base queries capture
       -- `@function` / `@function.method` ONLY at a definition and `.call` at a
       -- call site, in every language (checked against the pinned
       -- nvim-treesitter), so two group values are the whole change: no query,
