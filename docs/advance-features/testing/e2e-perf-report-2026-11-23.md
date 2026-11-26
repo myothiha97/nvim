@@ -44,6 +44,13 @@ interleaved runs and significance tests.
 - **UI suite:** 37 scenarios × 3 runs = 111 runs (final pass: **108/111**). The only failures are the 3
   `[known F24]` checks. No flaky results.
 
+> **Note added 2026-11-26:** all numbers are for `main` at `9ed46d8`. Since then `main` turned
+> LSP semantic tokens on for vtsls and gopls (`bc40aac`, parameter colouring), and changed
+> bracket-match, the explorer and `scrolloff` (now 8). Those changes are **not** in these
+> measurements; semantic tokens add per-redraw work, so price them with `compare.py` if typing
+> or scrolling feels heavier after that change. The trial merge of this PR into `main`
+> (`99a7aa1`) was clean, and the large-file UI suite passed 36/37 on it (the 1 = `[known F24]`).
+
 ## 1a. Still as snappy as 4–5 months ago?
 
 Method:
@@ -328,7 +335,7 @@ Slowest single keys: `o` (new line) is the slowest key in every TS/TSX/Python ty
 | go | no-indent-guides | 8.9 | 16.3 | 17.7 | 27.7 | 15.6 | 44.3 |
 | go | no-lualine | 10.4 | 23.0 | 26.1 | 34.9 | 33.2 | 57.4 |
 | go | no-scrollview | 9.3 | 22.5 | 24.7 | 35.1 | 26.9 | 64.9 |
-| go | no-semantic-tokens (already off in `lsp.lua`: a no-change control) | 11.7 | 25.5 | 26.8 | 38.2 | 28.2 | 55.6 |
+| go | no-semantic-tokens (off in `lsp.lua` at the tested commit: a no-change control) | 11.7 | 25.5 | 26.8 | 38.2 | 28.2 | 55.6 |
 | go | no-statuscolumn | 9.1 | 20.8 | 24.0 | 31.6 | 30.4 | 51.2 |
 | go | no-ufo | 11.7 | 25.5 | 27.5 | 34.3 | 19.3 | 64.2 |
 | go | no-words | 11.4 | 25.2 | 27.9 | 38.0 | 18.4 | 91.8 |
