@@ -88,7 +88,7 @@ local builds = {
       -- Interfaces apart from classes/structs (GoLand/WebStorm parity), 2026-11-26.
       -- `false` puts them back on the gold type colour.
       -- interface = palette.variants.type.periwinkle, -- 2026-11-26, first pick; the fallback
-      interface = palette.variants.type.lavender, -- trial from 2026-11-26
+      interface = palette.variants.type.lavender, -- kept 2026-11-27, provisional (todos/theme/interface-colour-revisit.md)
       -- Punctuation, three roles, SETTLED 2026-11-25 (measured on bg #171716):
       --   delimiter  operators `:= != == < >`   warm_taupe        #b98f79  6.21:1
       --   separator  `. , ; : ?.`               separator_neutral #8f9a9b  6.21:1

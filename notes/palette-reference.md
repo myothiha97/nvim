@@ -615,7 +615,11 @@ TS. Bold on the declaration was offered (to match bold function declarations)
 and declined. Periwinkle for declarations was a separate role for a few
 minutes; removed, not parked.
 
-Verdict after the trial: _pending_. Record it here (kept / reverted, and why).
+**Verdict, 2026-11-27: KEPT FOR NOW, provisional.** Lavender does its job
+(interfaces read apart from classes/structs) but is not a favourite colour (Myo).
+Kept to wrap the config up; a better colour may replace it later, tracked in
+`todos/theme/interface-colour-revisit.md`. Start any revisit from the sweep
+table above (it holds every measured candidate) and record the outcome here.
 
 ## boolean
 

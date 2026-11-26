@@ -1361,3 +1361,10 @@ that VS Code and Neovim themes almost all use one colour for both; only JetBrain
 Darcula splits (calls uncoloured). Full record: `palette-reference.md`,
 "Declaration vs call split".
 
+## 2026-11-27: interface colour, lavender kept for now
+
+Lavender `#c0b3f5` stays on interface names (TS and Go). Myo: not a favourite,
+but it does the job, and the config is being wrapped up. Provisional; the
+revisit is filed in `todos/theme/interface-colour-revisit.md`, starting from the
+measured sweep in `palette-reference.md`, "interface".
+

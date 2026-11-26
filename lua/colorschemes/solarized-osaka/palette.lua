@@ -303,8 +303,8 @@ local variants = {
     -- spot: only dE00 14.6 from the func blue, its most common neighbour
     -- (`Handle(r io.Reader)`). THE FALLBACK if lavender does not hold up.
     periwinkle = "#a7b1fe",
-    -- L*76.1 C*35.9 h300 9.40:1 on #171716 | TRIAL for the `interface` role
-    -- since 2026-11-26 (custom-latest). From a full-gamut sweep against all 13
+    -- L*76.1 C*35.9 h300 9.40:1 on #171716 | LIVE for the `interface` role,
+    -- kept 2026-11-27 as provisional (works, not a favourite). From a full-gamut sweep against all 13
     -- code roles: func 21.6, keyword 15.6 (its nearest; it only meets an
     -- interface name at the declaration), body 20.2, type 44.3. At body
     -- lightness, the ceiling. Sweep and rejected alternatives:
