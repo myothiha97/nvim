@@ -306,8 +306,27 @@ return {
       -- Written as tables, not `paint`: both groups are bare string links in the
       -- theme, and `paint` skips those by design (see the helper). Going through
       -- `paint` here silently did nothing.
-      hl["@function.builtin"] = { fg = palette.func }
-      hl["@function.method.builtin"] = { fg = palette.func }
+      hl["@function.builtin"] = { fg = palette.func_call or palette.func }
+      hl["@function.method.builtin"] = { fg = palette.func_call or palette.func }
+
+      -- Declarations vs calls. CLOSED 2026-11-27 on one blue: both roles are
+      -- `false` in every build, so all four groups equal `palette.func` and this
+      -- block only keeps a future split to one line. The base queries capture
+      -- `@function` / `@function.method` ONLY at a definition and `.call` at a
+      -- call site, in every language (checked against the pinned
+      -- nvim-treesitter), so two group values are the whole change: no query,
+      -- no runtime cost. Builtin calls (above) follow the call colour.
+      --
+      -- WARN: SILENT FAILURE. The theme links `@function.call` -> `@function`
+      -- and `@function.method.call` -> `@function.method`, so all four are set
+      -- explicitly; setting only the declaration pair would drag calls with it.
+      -- With both roles `false` all four equal `palette.func`, as before.
+      local func_declaration = palette.func_declaration or palette.func
+      local func_call = palette.func_call or palette.func
+      hl["@function"] = { fg = func_declaration }
+      hl["@function.method"] = { fg = func_declaration }
+      hl["@function.call"] = { fg = func_call }
+      hl["@function.method.call"] = { fg = func_call }
 
       -- The theme overrides `@variable.typescript`/`.javascript` yellow but has
       -- no `.tsx`/`.jsx` equivalent, so `.ts` variables were yellow while `.tsx`
@@ -514,10 +533,24 @@ return {
         hl["@variable.member.key." .. lang] = { link = "@property" }
       end
 
+      -- JSX / HTML attribute NAMES (`className=`, `onClick=`, `href=`), 2026-11-26,
+      -- WebStorm parity (it gives attribute names their own colour). The theme
+      -- links `@tag.attribute` -> `@property` -> `Identifier`, which is painted
+      -- with the FUNCTION blue above, so every prop read as a call.
+      --
+      -- Linked to the KEY capture, not given a new hue: a JSX attribute is a
+      -- prop, i.e. a key of the props object, so `<Card title="x">` and
+      -- `{ title: "x" }` now read the same. Member cyan vs the string green of
+      -- the value: dE00 22.6; vs the function blue: 24.9; vs the yellow tag
+      -- name: 32.7. Language-scoped, so `@property` elsewhere is untouched.
+      for _, lang in ipairs({ "tsx", "javascript", "html" }) do
+        hl["@tag.attribute." .. lang] = { link = "@variable.member.key" }
+      end
+
       -- OPEN FOLLOW-UP, non-Go `@property`. A different group from the two above,
       -- still at the theme default where it exactly duplicates Function:
-      -- struct-literal keys, object/dict keys and JSX attributes
-      -- (`@tag.attribute` links to it). So a TS `mode: 'x'` renders its key in
+      -- struct-literal keys and object/dict keys (JSX/HTML attributes moved off
+      -- it, above). So a TS `mode: 'x'` renders its key in
       -- the function colour, and a YAML manifest is ~59% function-blue.
       --
       -- WARN: SILENT NO-OP if you reach for `palette.member` here -- the build
@@ -655,7 +688,9 @@ return {
       -- parameters. Value: `surface.reference` in lua/config/ui.lua. Every tested
       -- value: notes/palette-reference.md, "Reference highlight".
       -- Cool slate, dE00 15.4 from the indigo of `Visual` (`#24275a`), so a
-      -- reference never looks like a selection. Read and write share it.
+      -- reference never looks like a selection. Read and write share it, by
+      -- preference: a warm write band (`#352822`) was tried 2026-11-26 and
+      -- worked, but one colour was preferred. Numbers in the doc above.
       for _, group in ipairs({ "LspReferenceText", "LspReferenceRead", "LspReferenceWrite" }) do
         hl[group] = { bg = ui_color.surface.reference }
       end

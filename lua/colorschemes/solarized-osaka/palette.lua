@@ -261,6 +261,27 @@ local variants = {
 
     onedark_pro_func_blue = "#61afef", -- start trialling at 21 Oct 2026, the color is value reference from vscode_onedark_pro and webstorm one dark pro theme
 
+    -- Declaration / call split (notes/palette-reference.md, "Declaration vs
+    -- call split"). Blue hue only, by request. On #171716, separation as
+    -- Ghostty draws it (P3).
+    --
+    -- Option 4, REJECTED 2026-11-26 after a few hours on screen: the call blue
+    -- read too faded, and its hue had visibly drifted (h270 vs 262).
+    --   declaration L*75 C*40 h252 9.13:1 | call L*71 C*28 h270 8.05:1, P3 C*31
+    declaration_bright = "#5cc3fe",
+    call_soft = "#8db0e0",
+    -- Same-hue rungs of `onedark_pro_func_blue`: only chroma lowered, h262 and
+    -- L*69 kept, so readability is identical on both.
+    --
+    -- C*30: 7.57:1, APCA 54.4, drawn at C*34 (vs 44), dE00 3.9 from the
+    -- declaration blue. First same-hue trial, 2026-11-26, swapped the same day
+    -- for the rung above before it had been judged on screen. NOT USED.
+    call_desaturated = "#7aadde",
+    -- C*33: 7.60:1, APCA 54.6, drawn at C*37, dE00 2.6 from the declaration
+    -- blue (3.2-3.6 measured in screenshots). Trialled 2026-11-26/27, side by
+    -- side with #61afef; closed 2026-11-27 for one blue. NOT USED.
+    call_subtle = "#73aee3",
+
     --NOTE: below color codes are based on above color code used in one dark pro theme for its function color
     -- onedark_pro_func_blue_1= "#47b3ff", -- Option 1: More Saturated (Vibrant)
     -- onedark_pro_func_blue_2 = "#7bc6ff", -- Option 2: Higher Contrast (Lighter)
@@ -277,7 +298,13 @@ local variants = {
     sky_dim = "#39cce9",
     tokyonight = "#7dcfff", -- base build
     vscode_entity = "#c0caf5",
+    -- NOT USED. Interface-colour candidates, 2026-11-26/27; the interface colour
+    -- was dropped on 2026-11-27 (interfaces keep the type colour). Measurements
+    -- and the sweep: notes/palette-reference.md, "interface".
+    -- L*74.1 C*41.7 h289.8 8.85:1, dE00 14.6 from the func blue.
     periwinkle = "#a7b1fe",
+    -- L*76.1 C*35.9 h300 9.40:1; func 21.6, keyword 15.6, body 20.2, type 44.3.
+    lavender = "#c0b3f5",
     nvim_type = "#2ac3de", -- LIVE in custom-latest
     vscode_support = "#0db9d7",
     claude_desktop_number = "#72E5E7",
@@ -489,6 +516,11 @@ return {
   -- Separate from `delimiter` so a build can split the two; custom-latest does.
   bracket = variants.delimiter.mid_high,
   func = variants.func.azure,
+  -- Function/method DECLARATION names and CALLS (incl. builtin calls). `false`
+  -- follows `func`, the behaviour before 2026-11-26. Everything else on the
+  -- function blue (`Identifier`, `@property`, plugin groups) stays on `func`.
+  func_declaration = false,
+  func_call = false,
   type = variants.type.tokyonight,
   -- Booleans. Painted by `hl.Boolean` in init.lua, which `@boolean` links to.
   boolean = variants.boolean.amber,

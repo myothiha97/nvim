@@ -1264,3 +1264,119 @@ syntax pair body/separator at dE00 10.3; LineNr 2.60:1, inlay hints 3.91:1;
 indent guides 1.28/2.33:1, borders 1.42:1; body text on every selection and diff
 band 4.84-9.18:1. Known and accepted: warning virtual text `#e0af68` sits dE00
 5.1 from the type gold (diagnostics are toggled on manually).
+
+
+## 2026-11-26: JetBrains parity, attributes, interfaces, write references
+
+From the GoLand/WebStorm highlight gap review. Three changes, each scoped so
+the numbered builds are unchanged:
+
+- **JSX/HTML attribute names** (`@tag.attribute.{tsx,javascript,html}`) link to
+  `@variable.member.key`. They were on the function blue through
+  `@tag.attribute` -> `@property` -> `Identifier`, so every prop read as a call.
+  A prop is a key of the props object, so it now matches `{ title: "x" }`. dE00
+  22.6 from the string green of its value, 24.9 from the function blue.
+- **Interfaces** get the new `interface` role (`@type.interface`), periwinkle in
+  `custom-latest`. TS via vtsls `interface` tokens, Go via gopls `type` tokens
+  with the `interface` modifier (gopls >= 0.17), builtins excluded. Numbers in
+  `palette-reference.md`, "interface".
+- **Write references** (`LspReferenceWrite`) got a warm band at the read band's
+  lightness the same day, then went back to the shared read colour by
+  preference after an on-screen check. Numbers in `palette-reference.md`,
+  "Reference highlight".
+
+None of these were checked on screen when written (no Neovim in the session
+that made them). Check each by eye before treating it as settled.
+
+Same day, later: **function/method declarations in bold, calls plain**
+(`BOLD_FUNCTION_DECLARATIONS` in `init.lua`). Weight instead of a second blue.
+The theme's `@function.call` -> `@function` link is cut so calls stay plain. No
+query change, so no treesitter cost. Checked against the pinned queries: every
+`@function`/`@function.method` capture is a definition.
+
+Same day, later: **interface colour moved from `periwinkle` to `lavender`
+`#c0b3f5` (trial).** A full-gamut sweep showed periwinkle only dE00 14.6 from the
+function blue, its most common neighbour; lavender is 21.6 from it at the cost of
+the keyword (17.3 -> 15.6). Contrast 9.40:1 (periwinkle 8.85:1). Pink/mauve
+measured best and was ruled out by taste. Table in `palette-reference.md`,
+"interface". Verdict pending a day or two of real Go/TSX use.
+
+Same day, later: **Go interface declarations briefly on `periwinkle`, then back
+on `lavender`** (Myo). The worry was lavender mixing with the `type`/`interface`
+keywords around the name; measured at dE00 15.6, above every neighbouring pair
+the palette accepts, separated mainly by lightness. One value for declaration and
+use; bold declined. Numbers in `palette-reference.md`, "interface".
+
+Same day, later: **bold function declarations dropped** (Myo: no bold for
+declarations). Declarations and calls are one weight again; declarations keep
+the function blue `#61afef`. Bold was tried for a few hours as the zero-cost way
+to tell a declaration from a call.
+
+**OPEN, 2026-11-26: a quieter colour for function CALLS** (declarations stay
+`#61afef`). Constraint from Myo: blue hue only, no cyan-blue / violet / lavender.
+Measured so far, on `#171716`, separation as Ghostty draws it (P3):
+
+| call colour | how | WCAG / APCA | P3 C\* | vs decl | nearest | deutan worst |
+| --- | --- | --- | --- | --- | --- | --- |
+| `#61afef` (today) | | 7.59 / 54.7 | 44 | 0 | body 20.6 | keyword 7.5 |
+| `#96aac5` | less saturated, same L\* | 7.56 / 54.3 | 18 | 12.2 | separator 12.5, body 12.7 | 9.0 |
+| `#879dbb` | less saturated, darker | 6.47 / 47.3 | 20 | 12.2 | separator 12.5, interface 15.1 | 8.3 |
+| `#7992b7` | darker | 5.65 / 41.8 | 24 | 13.2 | separator 14.8 | 5.0 |
+| `#6e94ba` | first guess | 5.65 / 41.8 | 27 | 10.1 | separator 14.9 | 4.1 |
+
+Ruled out: a STRONGER declaration blue with calls unchanged (blue is at its
+ceiling at this lightness; best step 6.7, under the ~10 needed to see it); the
+cyan-blue `#30a3bd` / `#0c9eba` (h225, best separation but off the blue hue) and
+the violet-blues (crowd the keyword and the lavender interface). Leading
+candidate `#96aac5`; its risk is reading as tinted body text (low chroma, the
+"reads flat" failure recorded twice here).
+
+**Trial started the same day: option 4** (Myo's pick), declarations `#5cc3fe`,
+calls `#8db0e0`: both move a little instead of calls moving a lot, so calls stay
+clearly blue and become MORE readable than today (APCA 57.3 vs 54.7). Full
+table: `palette-reference.md`, "Declaration vs call split". Verdict: pending.
+
+Same day, later: **option 4 rejected on screen** (Myo): the call blue
+`#8db0e0` read too faded and its hue visibly drifted (h270 vs `#61afef`'s 262).
+**New trial, option 6:** declarations stay `#61afef`, calls `#7aadde`, the same
+hue and lightness with chroma 40 -> 30. Readability unchanged; dE00 3.9, a
+subtle step by design (anything clearer reads faded). Ladder and reasoning in
+`palette-reference.md`, "Declaration vs call split". Verdict: pending.
+
+Same day, later: **calls moved one rung up to `#73aee3`** (C\* 33, option 7,
+Myo's pick) before `#7aadde` had been judged on screen. dE00 2.6 from the
+declaration blue, at the just-noticeable difference: expected to read as a
+slightly calmer call blue rather than a visible split. If the split is wanted
+after all, the next step is `#81add8` (dE 5.3), not further up. Verdict: pending.
+
+## 2026-11-27: function declaration vs call, CLOSED on one blue
+
+Declarations and calls both stay on the function blue `#61afef`, no bold, no new
+colour. Every split tried on 2026-11-26/27 is dropped: bold declarations, option
+4 (`#5cc3fe` / `#8db0e0`), and the same-hue call rungs `#7aadde` and `#73aee3`.
+Myo's reason: a softer call blue needs more testing to judge, colour work is
+tiring, and the config is being wrapped up. The side-by-side test could not be
+decided (on-screen dE00 3.2-3.6), and a source check of 25 popular themes found
+that VS Code and Neovim themes almost all use one colour for both; only JetBrains
+Darcula splits (calls uncoloured). Full record: `palette-reference.md`,
+"Declaration vs call split".
+
+## 2026-11-27: interface colour, lavender kept for now
+
+Lavender `#c0b3f5` stays on interface names (TS and Go). Myo: not a favourite,
+but it does the job, and the config is being wrapped up. Provisional; the
+revisit is filed in `todos/theme/interface-colour-revisit.md`, starting from the
+measured sweep in `palette-reference.md`, "interface".
+
+Same day, later: **TypeScript interfaces back on the type colour** (Myo: no
+separate colour needed in TS). Lavender now applies to Go interfaces only; the
+vtsls interface link is removed.
+
+## 2026-11-27: interface colour DROPPED, all languages
+
+Go interfaces join TS on the type colour; lavender is gone. Myo's call after a
+source survey: no popular VS Code, Neovim or JetBrains theme colours interfaces
+apart from structs, at declarations or uses. The palette role, the highlight
+group and the gopls hook were removed. Details: `palette-reference.md`,
+"interface". The revisit todo is closed (`todos/done/`).
+

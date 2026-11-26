@@ -389,6 +389,20 @@ return {
         -- Go type parameter declarations: `T` in `[T any]` was body coloured
         -- while every use of it was a type.
         ["@lsp.type.typeParameter.go"] = "@type",
+        -- NO interface colour, by choice (2026-11-27): interfaces in TS and Go
+        -- keep the treesitter type colour, like every other type. A lavender
+        -- interface colour was tried (TS via `@lsp.type.interface`, Go via an
+        -- LspTokenUpdate hook on gopls `type` + `interface` tokens) and dropped:
+        -- no popular theme splits them. notes/palette-reference.md, "interface".
+        -- TS/JS namespaces (`React` in `React.useState`, `ns.X`), which
+        -- treesitter only knows at the import. Same colour as body text today;
+        -- this keeps them on `@module` if it ever gets its own.
+        -- NOT Go: gopls also marks the package part INSIDE an import path
+        -- string (`http` in "net/http"), which would split the string colour.
+        ["@lsp.type.namespace.typescript"] = "@module",
+        ["@lsp.type.namespace.typescriptreact"] = "@module",
+        ["@lsp.type.namespace.javascript"] = "@module",
+        ["@lsp.type.namespace.javascriptreact"] = "@module",
       }
       local function paint_lsp_highlights()
         for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do

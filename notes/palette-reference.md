@@ -482,6 +482,69 @@ the punctuation **value**, not the punctuation **role**, so a build that moves
 | `brighter` | `#268bd2` | — | the theme's own blue500 |
 | `blue300` | `#49aef5` | — | — |
 | `balanced` | `#4488ab` | C\* 27.2 | reads muddy on this background |
+| `onedark_pro_func_blue` | `#61afef` | L\* 69.1 C\* 39.6 h262, 7.59:1 | **live `func` in custom-latest** since 2026-10-21 |
+
+### Declaration vs call split (TRIAL from 2026-11-26)
+
+Roles `func_declaration` (`@function`, `@function.method`) and `func_call`
+(`@function.call`, `@function.method.call`, builtin calls). Constraint: blue hue
+only; bold rejected. On `#171716`, separation as Ghostty draws it (P3):
+
+| option | declaration | call | call WCAG / APCA | call P3 C\* | decl vs call | notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| today | `#61afef` | `#61afef` | 7.59 / 54.7 | 44 | 0 | |
+| 1 | `#61afef` | `#96aac5` | 7.56 / 54.3 | 18 | 12.2 | readable, but greyish: risk of "tinted body text" |
+| 2 | `#61afef` | `#879dbb` | 6.47 / 47.3 | 20 | 12.2 | readability loss |
+| — | `#61afef` | `#7090bb` | 5.46 / 40.6 | 28 | 12.2 | best CLEARLY-blue call with decl kept; too dark |
+| 4 | `#5cc3fe` | `#8db0e0` | 8.05 / 57.3 | 31 | 12.3 | **REJECTED on screen 2026-11-26**: call too faded, hue drifted (h270 vs 262) |
+| 6 | `#61afef` | `#7aadde` | 7.57 / 54.4 | 34 | 3.9 | same hue + lightness, chroma 40 -> 30. Swapped for 7 the same day before an on-screen verdict |
+| **7 (trial)** | **`#61afef`** | **`#73aee3`** | **7.60 / 54.6** | **37** | **2.6** | chroma 40 -> 33, Myo's pick. At the JND: a calmer call blue, not a visible split |
+
+Same-hue ladder behind option 6 (L\* 69, h262, only chroma moves, so every rung
+reads 7.56-7.61:1 / APCA 54.3-54.6): C\*36 `#6caee9` dE 1.6, C\*33 `#73aee3`
+2.6, **C\*30 `#7aadde` 3.9**, C\*27 `#81add8` 5.3, C\*24 `#86acd3` 6.7, C\*21
+`#8cacce` 8.3, C\*18 `#91abc8` 10.1. The tension it shows: rungs drawn at P3
+C\* <= 30 (C\*27 and below) are as desaturated as `#8db0e0`, which read faded,
+while every rung that stays vivid is under dE 4 from the declaration. A
+same-hue split here is a calmer page, not an obvious role change. If no
+difference is visible after the trial, keeping one blue is the honest verdict.
+
+Why the declaration has to move for option 4: `#61afef` sits near the top of
+the blue gamut at its lightness, so a call colour 12 away must go greyish or
+dark. Lifting the declaration by the little room above it (max 6.7) lets the
+call stay saturated (on paper). Costs: the declaration blue changes slightly; red-green
+(deutan) separation of calls from the lavender interface drops to 4.7 (7.5 for
+today's blue). Also ruled out: cyan-blue h225 `#30a3bd` (off-hue), violet-blues
+(crowd keyword + lavender), a stronger declaration with calls unchanged (6.7 max).
+
+**VERDICT, 2026-11-27: CLOSED. One blue, `#61afef`, for declarations AND calls,
+no bold.** `func_declaration` and `func_call` are both `false` (the roles and the
+four group assignments in `init.lua` stay, as a no-op, so a future split is one
+line). No new colour introduced.
+
+Why, in Myo's words first: a softer call blue like `#73aee3` needs more on-screen
+testing to judge, and the colour work was already tiring; the config is being
+wrapped up and needs quick decisions. Supporting evidence:
+
+- **The trialled split could not be decided.** Side-by-side splits of the same
+  file (2026-11-27, Ghostty screenshots, call-name pixels sampled): `#61afef`
+  calls drew at C\* 26-27, `#73aee3` at C\* 20-23, a measured on-screen dE00
+  of 3.2-3.6. Visible as "calmer", not as a role change, and not decidable.
+- **Bold was measured and still declined.** Bold declaration ink drew at L\* 64
+  C\* 30.5 (~6.46:1) against plain calls at L\* 61-62 C\* 26-27 (~5.9:1), about
+  9% more contrast and 20-35% more ink per glyph. Effective, but disliked on
+  look; in TSX every `const handleX = () =>` would be bold.
+- **Popular themes do not split.** Checked from their sources, 2026-11-27:
+
+| ecosystem | same colour for declaration and call | splits |
+| --- | --- | --- |
+| VS Code (resolved for TS + Go scopes) | Dark Modern, Dark+, One Dark Pro, Tokyo Night, Monokai, Night Owl, Ayu Dark, Dracula, GitHub Dark, Catppuccin (10/10) | none |
+| Neovim (treesitter groups) | Tokyo Night, Catppuccin, Kanagawa, Gruvbox, OneDark, Nightfox, Everforest, Material, Sonokai, Dracula, vscode.nvim (11/13) | Rosé Pine: method calls only (`iris` vs `rose`); GitHub theme: bash commands only |
+| JetBrains (`DefaultColorSchemesManager.xml`, Dracula theme) | Dracula | **Darcula**: declarations `#ffc66d`, calls uncoloured (plain text) |
+
+  No theme uses a same-hue softer call colour. Not verified: JetBrains' New UI
+  dark default, GoLand/WebStorm language-specific defaults (not public),
+  Cyberdream, VS Code Nord and Gruvbox (files not found).
 
 ## type
 
@@ -510,8 +573,76 @@ practical issue. See item 8 of `../todos/theme/syntax-palette-followups.md`.
 | `tokyonight` | `#7dcfff` | h249, L\* 79.7, C\* 33.5, 11.08:1 | **the base selection.** Restored 2026-08-09 after three replacements were tried and rejected on real files. Shares h249 with Function and splits on lightness alone (dE 16.2), rule 1 broken knowingly. What carries the pair is the 20.6 L\* gap, the largest of any candidate; it is also 25.5 from String where the closest rival managed 18.8 |
 | `vscode_entity` | `#c0caf5` | h284, C\* 22.9 | rejected 2026-08-09, read "flat". De-accenting via chroma failed here exactly as on the keyword ladder: treat chroma as presence in this palette, never as the calming lever |
 | `periwinkle` | `#a7b1fe` | h290, C\* 42.0 | measured best of everything tried (worst 20.9, and it dissolved the Type/Function pair entirely) and still lost on looks |
-| `nvim_type` | `#2ac3de` | 15.2 from func, 16.4 from string | **LIVE in custom-latest** |
+| `nvim_type` | `#2ac3de` | 15.2 from func, 16.4 from string | live in custom-latest until 2026-10-21 (now the gold `high_contrast_warn_gold`) |
 | `vscode_support` | `#0db9d7` | 12.7 from func | rejected |
+
+### interface (`@type.interface`, 2026-11-26)
+
+Its own role so TS and Go interfaces read apart from classes, structs, enums and
+aliases (GoLand/WebStorm parity). `false` follows `type`. Painted from LSP tokens
+only (`lua/plugins/lsp.lua`); builtin `error`/`any`/`comparable` stay gold.
+
+**ON TRIAL: `lavender` `#c0b3f5` in `custom-latest` since 2026-11-26.**
+Fallback: `periwinkle`, one line in `variants.lua`.
+
+Sweep, 2026-11-26: every in-gamut LCh value at L\* 62-76 (not above body),
+C\* 20-60, every 5 degrees of hue, scored by worst dE00 against the 13 live code
+roles on `#171716` (body, keyword, func, type, string, literal, parameter,
+member, accent, operator, separator, bracket, comment).
+
+| value | hex | L\* | C\* | h | contrast | vs func | vs keyword | vs body | worst | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `periwinkle` | `#a7b1fe` | 74.1 | 41.7 | 290 | 8.85:1 | **14.6** | 17.3 | 20.6 | func 14.6 | first pick (best of the 6 existing type candidates); too close to the function blue it sits beside in every signature. Fallback |
+| **`lavender`** | `#c0b3f5` | 76.1 | 35.9 | 300 | 9.40:1 | 21.6 | **15.6** | 20.2 | keyword 15.6 | **trial.** Trades keyword distance (a neighbour only at the declaration) for function distance (a neighbour at every use). Less saturated than periwinkle but 2 L\* lighter, at the body ceiling |
+| muted lavender | `#c6b5d8` | 76.1 | 19.9 | 309 | 9.40:1 | 27.0 | 18.1 | 19.3 | keyword 18.1 | not tried: low chroma, the "reads flat / tinted body" failure of `vscode_entity` on 2026-08-09 |
+| dusty mauve | `#d9b0c8` | 76.1 | 19.9 | 341 | 9.39:1 | 34.0 | 20.9 | 22.8 | keyword 20.9 | best measured, not tried: pink, rejected twice in these notes ("pink, not wanted") |
+| `vscode_entity` | `#c0caf5` | 81.9 | 22.9 | 284 | 11.11:1 | 17.8 | | 16.9 | body 16.9 | above body lightness; rejected for types 2026-08-09 as flat |
+
+The pink/mauve band (h 340s) is the only open space left in this palette; every
+non-pink option trades function distance against keyword distance.
+Not measured: the hover-doc inline-code blue `#8ab4d8` (dE00 9.3 from
+periwinkle), a different surface that never sits next to code.
+
+**Go declarations: tried on `periwinkle`, back on `lavender` the same day
+(2026-11-26, Myo).** Worry: in `type Context interface {` the name sits between
+two keywords, and lavender is the same purple family as the keyword violet
+(hue 300 vs 310, only 10 degrees). Measured: dE00 15.6 from the keyword, wider
+than pairs this palette already lives with side by side (body/separator 10.3,
+operator/literal 12.8), and lavender actually separates by LIGHTNESS more than
+periwinkle does (18 L\*, luminance ratio 1.77 vs 1.67); periwinkle's edge is
+hue (20 degrees). So one value for every interface, declaration and use, Go and
+TS. Bold on the declaration was offered (to match bold function declarations)
+and declined. Periwinkle for declarations was a separate role for a few
+minutes; removed, not parked.
+
+**Scope cut, 2026-11-27 (Myo): Go only.** TypeScript interfaces went back to
+the gold type colour, like every other TS type; the vtsls
+`@lsp.type.interface` link was removed from `lua/plugins/lsp.lua`. Go
+interfaces keep lavender through the gopls hook.
+
+~~Verdict, 2026-11-27: kept for now, provisional~~ (superseded the same day).
+
+**FINAL VERDICT, 2026-11-27: DROPPED. Interfaces use the type colour in every
+language** (Myo). The `interface` role, the `@type.interface` group and the
+gopls `LspTokenUpdate` hook were removed; the candidates above stay as measured
+values only. Why: a source check of popular themes found none that colours an
+interface apart from a struct, in Go or TS, at the declaration or at a use:
+
+- VS Code (10 themes): the Go grammar tags every type name, declared or used
+  (params, vars, fields, assertions, generics, maps, switch), as
+  `entity.name.type.go`, so a theme cannot tell them apart. Ayu's semantic
+  `interface`/`struct` colours match token TYPES other servers send; gopls sends
+  `type` + an `interface` modifier, which they do not match.
+- Neovim (13 themes): tree-sitter tags all Go type names `@type`. Several themes
+  colour `@lsp.type.interface` (Gruvbox, Material, Rose Pine), but none defines
+  the gopls form `@lsp.typemod.type.interface.go`.
+- JetBrains Dracula: every Go interface/struct key, declaration and reference,
+  is the same cyan `#8be9fd`. GoLand's own defaults are not public; the shared
+  Darcula scheme leaves interface and class names uncoloured.
+
+The original gap report listed this as GoLand parity because GoLand has separate
+keys; it did not verify GoLand's defaults colour them differently. Dropping it
+also removed the only runtime cost the change carried (the per-token hook).
 
 ## boolean
 
@@ -1028,9 +1159,15 @@ clearly visible but always weaker than a selected row.
 
 Rules this table settled:
 
-- **One colour for read and write.** A visible write step needs a brighter band,
+- **One LIGHTNESS for read and write.** A visible write step needs a brighter band,
   and write spots are often parameters (`membership =>`), which would drop under
   AA. A step small enough to keep AA (`#2b313a`) is too small to see.
+  **Tried 2026-11-26 on the other axis, and dropped by preference:** a write band
+  differing by HUE at the same L\* (`#352822`, warm, L\* 17.4 C\* 8 h51), the
+  way JetBrains tints write usages. Every syntax role kept exactly its contrast
+  (red parameter 4.45:1), dE00 12.2 from the read band. Checked on screen: it
+  worked and read well, but one colour for both was preferred. It is the value
+  to use if a write cue is ever wanted.
 - **Cool slate, not indigo.** `#262b33` is about dE 15 from `Visual` (`#24275a`), so a
   matched word never looks like a selection. Same hue family as `list_cursor`,
   which already means "cursor is here".
