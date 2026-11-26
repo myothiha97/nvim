@@ -1336,3 +1336,10 @@ calls `#8db0e0`: both move a little instead of calls moving a lot, so calls stay
 clearly blue and become MORE readable than today (APCA 57.3 vs 54.7). Full
 table: `palette-reference.md`, "Declaration vs call split". Verdict: pending.
 
+Same day, later: **option 4 rejected on screen** (Myo): the call blue
+`#8db0e0` read too faded and its hue visibly drifted (h270 vs `#61afef`'s 262).
+**New trial, option 6:** declarations stay `#61afef`, calls `#7aadde`, the same
+hue and lightness with chroma 40 -> 30. Readability unchanged; dE00 3.9, a
+subtle step by design (anything clearer reads faded). Ladder and reasoning in
+`palette-reference.md`, "Declaration vs call split". Verdict: pending.
+

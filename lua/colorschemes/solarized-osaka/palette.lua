@@ -261,18 +261,22 @@ local variants = {
 
     onedark_pro_func_blue = "#61afef", -- start trialling at 21 Oct 2026, the color is value reference from vscode_onedark_pro and webstorm one dark pro theme
 
-    -- Declaration / call split, TRIAL from 2026-11-26 (option 4 in
-    -- notes/syntax-palette-decisions.md). Blue hue only, by request. On #171716,
-    -- separation as Ghostty draws it (P3):
+    -- Declaration / call split (notes/palette-reference.md, "Declaration vs
+    -- call split"). Blue hue only, by request. On #171716, separation as
+    -- Ghostty draws it (P3).
     --
-    -- `func_declaration` role: L*75 C*40 h252, 9.13:1, APCA 63.8. dE00 6.7 from
-    -- onedark_pro_func_blue (a small, visible lift: that blue is near the top of
-    -- the gamut, so this is about all the room there is). Nearest body 19.8.
+    -- Option 4, REJECTED 2026-11-26 after a few hours on screen: the call blue
+    -- read too faded, and its hue had visibly drifted (h270 vs 262).
+    --   declaration L*75 C*40 h252 9.13:1 | call L*71 C*28 h270 8.05:1, P3 C*31
     declaration_bright = "#5cc3fe",
-    -- `func_call` role: L*71 C*28 h270, 8.05:1, APCA 57.3 (today's call blue:
-    -- 7.59:1 / 54.7), drawn at C*31 vs 44. dE00 12.3 from `declaration_bright`;
-    -- nearest interface lavender 15.8, body 17.2. Deutan: 4.7 from the lavender.
     call_soft = "#8db0e0",
+    -- `func_call` TRIAL from 2026-11-26: `onedark_pro_func_blue` with only the
+    -- chroma lowered (C*40 -> 30), same hue h262 and L*69, so readability is
+    -- identical (7.57:1, APCA 54.4) and it is drawn at C*34 (vs 44). dE00 3.9
+    -- from the declaration blue: a SUBTLE step by design, the most that stays
+    -- un-faded (rungs at C*27 and below draw at <= C*30, where `call_soft`
+    -- already read faded). Nearest body / separator 17.8.
+    call_desaturated = "#7aadde",
 
     --NOTE: below color codes are based on above color code used in one dark pro theme for its function color
     -- onedark_pro_func_blue_1= "#47b3ff", -- Option 1: More Saturated (Vibrant)

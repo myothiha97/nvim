@@ -496,12 +496,22 @@ only; bold rejected. On `#171716`, separation as Ghostty draws it (P3):
 | 1 | `#61afef` | `#96aac5` | 7.56 / 54.3 | 18 | 12.2 | readable, but greyish: risk of "tinted body text" |
 | 2 | `#61afef` | `#879dbb` | 6.47 / 47.3 | 20 | 12.2 | readability loss |
 | — | `#61afef` | `#7090bb` | 5.46 / 40.6 | 28 | 12.2 | best CLEARLY-blue call with decl kept; too dark |
-| **4 (trial)** | **`#5cc3fe`** | **`#8db0e0`** | **8.05 / 57.3** | **31** | **12.3** | calls stay blue AND gain readability; decl lifts dE 6.7 |
+| 4 | `#5cc3fe` | `#8db0e0` | 8.05 / 57.3 | 31 | 12.3 | **REJECTED on screen 2026-11-26**: call too faded, hue drifted (h270 vs 262) |
+| **6 (trial)** | **`#61afef`** | **`#7aadde`** | **7.57 / 54.4** | **34** | **3.9** | same hue + lightness, chroma 40 -> 30. Subtle by design |
+
+Same-hue ladder behind option 6 (L\* 69, h262, only chroma moves, so every rung
+reads 7.56-7.61:1 / APCA 54.3-54.6): C\*36 `#6caee9` dE 1.6, C\*33 `#73aee3`
+2.6, **C\*30 `#7aadde` 3.9**, C\*27 `#81add8` 5.3, C\*24 `#86acd3` 6.7, C\*21
+`#8cacce` 8.3, C\*18 `#91abc8` 10.1. The tension it shows: rungs drawn at P3
+C\* <= 30 (C\*27 and below) are as desaturated as `#8db0e0`, which read faded,
+while every rung that stays vivid is under dE 4 from the declaration. A
+same-hue split here is a calmer page, not an obvious role change. If no
+difference is visible after the trial, keeping one blue is the honest verdict.
 
 Why the declaration has to move for option 4: `#61afef` sits near the top of
 the blue gamut at its lightness, so a call colour 12 away must go greyish or
 dark. Lifting the declaration by the little room above it (max 6.7) lets the
-call stay saturated. Costs: the declaration blue changes slightly; red-green
+call stay saturated (on paper). Costs: the declaration blue changes slightly; red-green
 (deutan) separation of calls from the lavender interface drops to 4.7 (7.5 for
 today's blue). Also ruled out: cyan-blue h225 `#30a3bd` (off-hue), violet-blues
 (crowd keyword + lavender), a stronger declaration with calls unchanged (6.7 max).
