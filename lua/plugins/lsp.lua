@@ -1,6 +1,8 @@
 -- previously we used, the 300 value for performance case
 -- but 300 feels a bit slow and so i re-adjusted to 200 for more snappier feeling at - 09 June 2026
 local debounce_text_change = 200
+-- Servers allowed to send semantic tokens (see the LspAttach hook in `init`).
+local semantic_token_servers = { vtsls = true, gopls = true }
 local lsp_hover_popup_opts = {
   border = "rounded",
   max_width = 65,
@@ -352,15 +354,52 @@ return {
         vim.lsp.document_color.enable(false)
       end
 
-      -- Disable semantic tokens globally: stops LSP from computing/sending token payloads.
+      -- Semantic tokens stay off except where they add what treesitter cannot:
+      -- parameter USES in a body (`data` in `data.id`). Treesitter has no scopes,
+      -- so it only knows the declaration. Off elsewhere because basedpyright made
+      -- scrolling slower (notes/large-file-performance.md).
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client then
+          local provider = client and client.server_capabilities.semanticTokensProvider
+          if not provider then
+            return
+          end
+          if not semantic_token_servers[client.name] then
             client.server_capabilities.semanticTokensProvider = nil
+          elseif client.name == "vtsls" then
+            -- vtsls answers full requests with no tokens above 100,000 characters
+            -- but still answers range requests, so Nvim painted the range and then
+            -- wiped it. Full only: big files simply stay on treesitter colours.
+            provider.range = false
           end
         end,
       })
+
+      -- Only the groups below are painted. Every other @lsp group is cleared, or
+      -- Nvim's default @lsp.type.* links would recolour types, properties and
+      -- functions over the treesitter palette. Each one fills a gap treesitter
+      -- cannot see, because it has no scopes: it only knows the declaration.
+      local lsp_highlight_links = {
+        -- Parameter uses in a body.
+        ["@lsp.type.parameter"] = "@variable.parameter",
+        -- Go constant uses (gopls marks constants readonly). Go only: vtsls
+        -- marks every TS `const` readonly too.
+        ["@lsp.typemod.variable.readonly.go"] = "@constant",
+        -- Go type parameter declarations: `T` in `[T any]` was body coloured
+        -- while every use of it was a type.
+        ["@lsp.type.typeParameter.go"] = "@type",
+      }
+      local function paint_lsp_highlights()
+        for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
+          vim.api.nvim_set_hl(0, group, {})
+        end
+        for group, target in pairs(lsp_highlight_links) do
+          vim.api.nvim_set_hl(0, group, { link = target })
+        end
+      end
+      paint_lsp_highlights()
+      vim.api.nvim_create_autocmd("ColorScheme", { callback = paint_lsp_highlights })
 
       -- Restart LSP to refresh type diagnostics after external file changes (e.g., Grug-far).
       -- :checktime reloads buffers changed on disk (asks first if a buffer has
