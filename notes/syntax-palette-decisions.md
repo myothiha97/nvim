@@ -1280,9 +1280,10 @@ the numbered builds are unchanged:
   `custom-latest`. TS via vtsls `interface` tokens, Go via gopls `type` tokens
   with the `interface` modifier (gopls >= 0.17), builtins excluded. Numbers in
   `palette-reference.md`, "interface".
-- **Write references** (`LspReferenceWrite`) get a warm band at the read band's
-  lightness: same contrast for every role, separated by hue. Numbers in
-  `palette-reference.md`, "Reference highlight".
+- **Write references** (`LspReferenceWrite`) got a warm band at the read band's
+  lightness the same day, then went back to the shared read colour by
+  preference after an on-screen check. Numbers in `palette-reference.md`,
+  "Reference highlight".
 
 None of these were checked on screen when written (no Neovim in the session
 that made them). Check each by eye before treating it as settled.

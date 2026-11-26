@@ -705,14 +705,12 @@ return {
       -- parameters. Value: `surface.reference` in lua/config/ui.lua. Every tested
       -- value: notes/palette-reference.md, "Reference highlight".
       -- Cool slate, dE00 15.4 from the indigo of `Visual` (`#24275a`), so a
-      -- reference never looks like a selection.
-      for _, group in ipairs({ "LspReferenceText", "LspReferenceRead" }) do
+      -- reference never looks like a selection. Read and write share it, by
+      -- preference: a warm write band (`#352822`) was tried 2026-11-26 and
+      -- worked, but one colour was preferred. Numbers in the doc above.
+      for _, group in ipairs({ "LspReferenceText", "LspReferenceRead", "LspReferenceWrite" }) do
         hl[group] = { bg = ui_color.surface.reference }
       end
-      -- Writes get a warm band at the same lightness (JetBrains parity: where is
-      -- this variable assigned?). Same contrast as reads; see `reference_write`
-      -- in config/ui.lua. Only servers that report the write kind show it.
-      hl.LspReferenceWrite = { bg = ui_color.surface.reference_write }
 
       -- The focused row of a LIST panel -- picker, picker preview, and the outline
       -- panel, which remaps its CursorLine here (lua/plugins/trouble.lua).

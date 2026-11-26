@@ -148,22 +148,13 @@ M.surface = {
   -- list_cursor = "#353845",
   -- Other uses of the symbol under the cursor (LspReference*, snacks words).
   -- Same cool-slate family as `list_cursor` ("cursor here"), far quieter: it sits
-  -- under code, so the word keeps its syntax colour. Read (and plain text)
-  -- matches; writes use `reference_write` below. dE00 8.6 from bg, red parameter
-  -- 4.45:1. Chosen for readability: the
+  -- under code, so the word keeps its syntax colour. Same value for read AND
+  -- write. dE00 8.6 from bg, red parameter 4.45:1. Chosen for readability: the
   -- band stands out more, so matches are easier to find. Noisier with many
   -- matches on screen. Step down if that bites: `#24282f`
   -- (dE00 7.5, red parameter 4.63:1 AA). Every tested value and its numbers:
   -- notes/palette-reference.md, "Reference highlight".
   reference = "#262b33",
-  -- WRITE uses of the symbol under the cursor (LspReferenceWrite): an
-  -- assignment, `x :=`, `x++`, a parameter declaration. JetBrains parity: it
-  -- tints writes warm and reads cool. Separated by HUE at the SAME lightness
-  -- (L* 17.4, C* 8, h 51), so every syntax role keeps exactly the contrast it
-  -- has on `reference` (red parameter 4.45:1). dE00 12.2 from `reference`,
-  -- 10.1 from bg. The rejected 2026-11-23 write step `#2b313a` was a lightness
-  -- step on the same hue (dE00 2.0, invisible); this is the other axis.
-  reference_write = "#352822",
   guide = lift(M.bg, 0.19), -- explorer tree lines and indent guides
   -- Active indent scope (ibl's IblScope). 0.19 read too faint beside the idle
   -- guides (2026-11-20). 0.26 = 2.33:1, L* 35 vs 18 for idle guides. Ceiling

@@ -1042,11 +1042,12 @@ Rules this table settled:
 - **One LIGHTNESS for read and write.** A visible write step needs a brighter band,
   and write spots are often parameters (`membership =>`), which would drop under
   AA. A step small enough to keep AA (`#2b313a`) is too small to see.
-  **Superseded 2026-11-26 on the other axis:** writes now differ by HUE at the
-  same L\* (`surface.reference_write` `#352822`, warm, L\* 17.4 C\* 8 h51), the
-  way JetBrains tints write usages. Every syntax role keeps exactly its contrast
-  on the read band (red parameter 4.45:1, keyword 4.21:1), dE00 12.2 from the
-  read band, 10.1 from the background. Not checked on screen yet.
+  **Tried 2026-11-26 on the other axis, and dropped by preference:** a write band
+  differing by HUE at the same L\* (`#352822`, warm, L\* 17.4 C\* 8 h51), the
+  way JetBrains tints write usages. Every syntax role kept exactly its contrast
+  (red parameter 4.45:1), dE00 12.2 from the read band. Checked on screen: it
+  worked and read well, but one colour for both was preferred. It is the value
+  to use if a write cue is ever wanted.
 - **Cool slate, not indigo.** `#262b33` is about dE 15 from `Visual` (`#24275a`), so a
   matched word never looks like a selection. Same hue family as `list_cursor`,
   which already means "cursor is here".
