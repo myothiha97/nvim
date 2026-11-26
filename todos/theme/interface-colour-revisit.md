@@ -7,8 +7,8 @@ it in a scheduled theme session, not on impulse (`rules.md`).
 
 ## The Idea
 
-Interface names (TS and Go, `@type.interface`) use lavender `#c0b3f5` since
-2026-11-26. It separates interfaces from the gold classes/structs, but it is not
+Go interface names (`@type.interface`) use lavender `#c0b3f5` since
+2026-11-26 (TypeScript interfaces keep the gold type colour since 2026-11-27). It separates interfaces from the gold structs, but it is not
 a favourite colour. Find a value that does the same job and looks better.
 
 ## Start Here

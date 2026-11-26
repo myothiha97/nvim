@@ -389,11 +389,10 @@ return {
         -- Go type parameter declarations: `T` in `[T any]` was body coloured
         -- while every use of it was a type.
         ["@lsp.type.typeParameter.go"] = "@type",
-        -- TypeScript interface names, declaration and every use (WebStorm
-        -- parity). Unscoped is safe: only vtsls sends an `interface` token type;
-        -- gopls says `type` + an `interface` modifier (handled below). Classes,
-        -- enums and aliases keep the treesitter type colour.
-        ["@lsp.type.interface"] = "@type.interface",
+        -- NO TS interface link, by choice (2026-11-27): TypeScript interfaces
+        -- keep the treesitter type colour, like every other TS type. Only Go
+        -- interfaces get `@type.interface` (the gopls hook below). Linking
+        -- `@lsp.type.interface` here would bring the TS split back.
         -- TS/JS namespaces (`React` in `React.useState`, `ns.X`), which
         -- treesitter only knows at the import. Same colour as body text today;
         -- this keeps them on `@module` if it ever gets its own.
@@ -412,8 +411,9 @@ return {
           vim.api.nvim_set_hl(0, group, { link = target })
         end
         -- `@type.interface` is our own group (no treesitter capture), set by the
-        -- solarized-osaka build. `default`: a theme that defines it wins, any
-        -- other theme shows interfaces as plain types instead of uncoloured.
+        -- solarized-osaka build and painted only by the Go hook below. `default`:
+        -- a theme that defines it wins, any other theme shows Go interfaces as
+        -- plain types instead of uncoloured.
         vim.api.nvim_set_hl(0, "@type.interface", { link = "@type", default = true })
       end
       paint_lsp_highlights()

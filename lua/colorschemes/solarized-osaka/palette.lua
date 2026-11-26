@@ -527,7 +527,7 @@ return {
   func_declaration = false,
   func_call = false,
   type = variants.type.tokyonight,
-  -- Interface names (`@type.interface`, TS + Go). `false` follows `type`, the
+  -- Go interface names (`@type.interface`; TS interfaces keep `type`). `false` follows `type`, the
   -- behaviour before 2026-11-26, so the numbered builds are unchanged.
   interface = false,
   -- Booleans. Painted by `hl.Boolean` in init.lua, which `@boolean` links to.

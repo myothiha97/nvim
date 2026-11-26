@@ -85,7 +85,8 @@ local builds = {
       -- type = palette.variants.type.sky_dimmer,
       -- type = palette.variants.type.sky_dimmest, -- start trialling at 2nd Oct 2026 and the trial end at 21 Oct 2026 due to color value being fade to my eye
       type = palette.variants.type.high_contrast_warn_gold, -- Warm Gold (High Contrast) -- start trialling at 21 Oct 2026,
-      -- Interfaces apart from classes/structs (GoLand/WebStorm parity), 2026-11-26.
+      -- Go interfaces apart from structs (GoLand parity), 2026-11-26. TS
+      -- interfaces keep the gold type colour (2026-11-27).
       -- `false` puts them back on the gold type colour.
       -- interface = palette.variants.type.periwinkle, -- 2026-11-26, first pick; the fallback
       interface = palette.variants.type.lavender, -- kept 2026-11-27, provisional (todos/theme/interface-colour-revisit.md)

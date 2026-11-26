@@ -547,12 +547,12 @@ return {
         hl["@tag.attribute." .. lang] = { link = "@variable.member.key" }
       end
 
-      -- Interface names, TypeScript and Go (`@type.interface`), 2026-11-26,
-      -- WebStorm/GoLand parity: interfaces read apart from classes, structs,
-      -- enums and aliases, which stay on the type colour. Not a treesitter
-      -- capture: plugins/lsp.lua routes vtsls `interface` tokens and gopls
-      -- `type` + `interface` tokens here. Builtin `error`/`any` stay on the type
-      -- colour. `false` follows `type`, so the numbered builds are unchanged.
+      -- GO interface names (`@type.interface`), 2026-11-26, GoLand parity:
+      -- interfaces read apart from structs and other types, which stay on the
+      -- type colour. Not a treesitter capture: the gopls hook in plugins/lsp.lua
+      -- paints `type` + `interface` tokens here; builtin `error`/`any` stay on
+      -- the type colour. TypeScript interfaces deliberately keep the type colour
+      -- (2026-11-27). `false` follows `type`, so the numbered builds are unchanged.
       hl["@type.interface"] = { fg = palette.interface or palette.type }
 
       -- OPEN FOLLOW-UP, non-Go `@property`. A different group from the two above,

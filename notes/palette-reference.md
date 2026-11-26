@@ -615,6 +615,11 @@ TS. Bold on the declaration was offered (to match bold function declarations)
 and declined. Periwinkle for declarations was a separate role for a few
 minutes; removed, not parked.
 
+**Scope cut, 2026-11-27 (Myo): Go only.** TypeScript interfaces went back to
+the gold type colour, like every other TS type; the vtsls
+`@lsp.type.interface` link was removed from `lua/plugins/lsp.lua`. Go
+interfaces keep lavender through the gopls hook.
+
 **Verdict, 2026-11-27: KEPT FOR NOW, provisional.** Lavender does its job
 (interfaces read apart from classes/structs) but is not a favourite colour (Myo).
 Kept to wrap the config up; a better colour may replace it later, tracked in

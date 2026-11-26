@@ -1368,3 +1368,7 @@ but it does the job, and the config is being wrapped up. Provisional; the
 revisit is filed in `todos/theme/interface-colour-revisit.md`, starting from the
 measured sweep in `palette-reference.md`, "interface".
 
+Same day, later: **TypeScript interfaces back on the type colour** (Myo: no
+separate colour needed in TS). Lavender now applies to Go interfaces only; the
+vtsls interface link is removed.
+
