@@ -2,8 +2,10 @@
 
 ## Status
 
-Open. Filed 2026-11-27. Not urgent: lavender `#c0b3f5` is live and works. Handle
-it in a scheduled theme session, not on impulse (`rules.md`).
+CLOSED 2026-11-27, the same day it was filed: the interface colour was dropped
+altogether (interfaces use the type colour in every language), so there is no
+colour left to improve. Reason and survey: `notes/palette-reference.md`,
+"interface".
 
 ## The Idea
 

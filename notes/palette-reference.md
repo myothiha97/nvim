@@ -620,11 +620,29 @@ the gold type colour, like every other TS type; the vtsls
 `@lsp.type.interface` link was removed from `lua/plugins/lsp.lua`. Go
 interfaces keep lavender through the gopls hook.
 
-**Verdict, 2026-11-27: KEPT FOR NOW, provisional.** Lavender does its job
-(interfaces read apart from classes/structs) but is not a favourite colour (Myo).
-Kept to wrap the config up; a better colour may replace it later, tracked in
-`todos/theme/interface-colour-revisit.md`. Start any revisit from the sweep
-table above (it holds every measured candidate) and record the outcome here.
+~~Verdict, 2026-11-27: kept for now, provisional~~ (superseded the same day).
+
+**FINAL VERDICT, 2026-11-27: DROPPED. Interfaces use the type colour in every
+language** (Myo). The `interface` role, the `@type.interface` group and the
+gopls `LspTokenUpdate` hook were removed; the candidates above stay as measured
+values only. Why: a source check of popular themes found none that colours an
+interface apart from a struct, in Go or TS, at the declaration or at a use:
+
+- VS Code (10 themes): the Go grammar tags every type name, declared or used
+  (params, vars, fields, assertions, generics, maps, switch), as
+  `entity.name.type.go`, so a theme cannot tell them apart. Ayu's semantic
+  `interface`/`struct` colours match token TYPES other servers send; gopls sends
+  `type` + an `interface` modifier, which they do not match.
+- Neovim (13 themes): tree-sitter tags all Go type names `@type`. Several themes
+  colour `@lsp.type.interface` (Gruvbox, Material, Rose Pine), but none defines
+  the gopls form `@lsp.typemod.type.interface.go`.
+- JetBrains Dracula: every Go interface/struct key, declaration and reference,
+  is the same cyan `#8be9fd`. GoLand's own defaults are not public; the shared
+  Darcula scheme leaves interface and class names uncoloured.
+
+The original gap report listed this as GoLand parity because GoLand has separate
+keys; it did not verify GoLand's defaults colour them differently. Dropping it
+also removed the only runtime cost the change carried (the per-token hook).
 
 ## boolean
 

@@ -1372,3 +1372,11 @@ Same day, later: **TypeScript interfaces back on the type colour** (Myo: no
 separate colour needed in TS). Lavender now applies to Go interfaces only; the
 vtsls interface link is removed.
 
+## 2026-11-27: interface colour DROPPED, all languages
+
+Go interfaces join TS on the type colour; lavender is gone. Myo's call after a
+source survey: no popular VS Code, Neovim or JetBrains theme colours interfaces
+apart from structs, at declarations or uses. The palette role, the highlight
+group and the gopls hook were removed. Details: `palette-reference.md`,
+"interface". The revisit todo is closed (`todos/done/`).
+

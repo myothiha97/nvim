@@ -547,14 +547,6 @@ return {
         hl["@tag.attribute." .. lang] = { link = "@variable.member.key" }
       end
 
-      -- GO interface names (`@type.interface`), 2026-11-26, GoLand parity:
-      -- interfaces read apart from structs and other types, which stay on the
-      -- type colour. Not a treesitter capture: the gopls hook in plugins/lsp.lua
-      -- paints `type` + `interface` tokens here; builtin `error`/`any` stay on
-      -- the type colour. TypeScript interfaces deliberately keep the type colour
-      -- (2026-11-27). `false` follows `type`, so the numbered builds are unchanged.
-      hl["@type.interface"] = { fg = palette.interface or palette.type }
-
       -- OPEN FOLLOW-UP, non-Go `@property`. A different group from the two above,
       -- still at the theme default where it exactly duplicates Function:
       -- struct-literal keys and object/dict keys (JSX/HTML attributes moved off

@@ -298,17 +298,12 @@ local variants = {
     sky_dim = "#39cce9",
     tokyonight = "#7dcfff", -- base build
     vscode_entity = "#c0caf5",
-    -- L*74.1 C*41.7 h289.8 8.85:1 on #171716 | first pick for the `interface`
-    -- role, 2026-11-26, replaced by `lavender` below the same day. Its weak
-    -- spot: only dE00 14.6 from the func blue, its most common neighbour
-    -- (`Handle(r io.Reader)`). THE FALLBACK if lavender does not hold up.
+    -- NOT USED. Interface-colour candidates, 2026-11-26/27; the interface colour
+    -- was dropped on 2026-11-27 (interfaces keep the type colour). Measurements
+    -- and the sweep: notes/palette-reference.md, "interface".
+    -- L*74.1 C*41.7 h289.8 8.85:1, dE00 14.6 from the func blue.
     periwinkle = "#a7b1fe",
-    -- L*76.1 C*35.9 h300 9.40:1 on #171716 | LIVE for the `interface` role,
-    -- kept 2026-11-27 as provisional (works, not a favourite). From a full-gamut sweep against all 13
-    -- code roles: func 21.6, keyword 15.6 (its nearest; it only meets an
-    -- interface name at the declaration), body 20.2, type 44.3. At body
-    -- lightness, the ceiling. Sweep and rejected alternatives:
-    -- notes/palette-reference.md, "interface".
+    -- L*76.1 C*35.9 h300 9.40:1; func 21.6, keyword 15.6, body 20.2, type 44.3.
     lavender = "#c0b3f5",
     nvim_type = "#2ac3de", -- LIVE in custom-latest
     vscode_support = "#0db9d7",
@@ -527,9 +522,6 @@ return {
   func_declaration = false,
   func_call = false,
   type = variants.type.tokyonight,
-  -- Go interface names (`@type.interface`; TS interfaces keep `type`). `false` follows `type`, the
-  -- behaviour before 2026-11-26, so the numbered builds are unchanged.
-  interface = false,
   -- Booleans. Painted by `hl.Boolean` in init.lua, which `@boolean` links to.
   boolean = variants.boolean.amber,
   -- `false` keeps the theme's own cyan500, so the numbered builds are unchanged.
