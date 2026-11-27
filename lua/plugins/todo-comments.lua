@@ -1,15 +1,45 @@
+-- Tag colours are chosen to stay clear of the function blue. Measured 2026-11-27 against
+-- the LIVE groups (nvim_get_hl), not a written palette table: function #61afef, string
+-- #9ece6a, keyword #a17bcc, parameter #e06c75. Contrast is on the emitted background
+-- #141514 (the theme is transparent, so the terminal's background is what sits behind).
+--
+-- `hint` (TODO, todo) is royal blue #5a7fe0: dE 15.9 from the function blue, 17.0 from
+-- keywords, 4.84:1. Personal `todo` used `info` (DiagnosticInfo #268bd3,
+-- dE 11.5) and read as a function call. Sage #8bcb8a was tried the same day and dropped:
+-- dE 7.9 from the green strings, so it blended into JSX class names.
+--
+-- `default` (PERF, REFACTOR) and `test` (TEST) ship as `Identifier`, which this theme paints
+-- the function blue. Rose: 7.98:1, nearest code colour dE 11.7 (parameters).
+-- The plugin's own lists are merged by index, so the hex in slot 1 replaces `Identifier`.
+-- Every value tried, with numbers: notes/todo-comment-colours.md
+local palette = require("colorschemes.solarized-osaka.palette").variants
+local colors = {
+  hint = { palette.todo_tag.royal },
+  default = { palette.member.rose_soft },
+  test = { palette.member.rose_soft },
+  -- NOTE stays on the theme's hint teal (#29a298) by choice, read live from the group.
+  note = { "DiagnosticHint" },
+}
+
 local keywords = {
   -- Two distinct keywords on purpose. Matching is case-sensitive (highlight.lua uses `\C`),
   -- so `TODO:` and `todo:` resolve to separate tags and can be filtered independently:
   --   TODO -> teammates' shouty uppercase comments, listed by <leader>sT
   --   todo -> your own personal marker, this is what <leader>st lists
+  --
+  -- WARN: SILENT FAILURE: the personal key must NOT be `todo`. The plugin names highlight
+  -- groups `TodoBg<key>`, and Neovim group names ignore case, so `TodoBgTODO` and
+  -- `TodoBgtodo` are ONE group. It is defined with `hi def`, so whichever key `pairs()`
+  -- visits first paints both tags and the other colour is dropped. The key below is only
+  -- an internal name; `todo` still matches through `alt`, and the pickers still filter
+  -- on `todo` / `TODO`.
   TODO = { icon = " ", color = "hint" },
-  todo = { icon = " ", color = "info", alt = { "Todo" } },
+  todo_mine = { icon = " ", color = "hint", alt = { "todo", "Todo" } },
   PERF = { icon = " ", alt = { "OPTIM", "PERFORMANCE", "OPTIMIZE", "Perf", "perf", "Opt" } },
   REFACTOR = { icon = " ", color = "default", alt = { "Refactor", "REF", "ref", "REFACTOR" } },
   HACK = { icon = " ", color = "warning" },
   WARN = { icon = " ", color = "warning", alt = { "WARNING", "XXX" } },
-  NOTE = { icon = " ", color = "hint", alt = { "INFO" } },
+  NOTE = { icon = " ", color = "note", alt = { "INFO", "Note", "note" } },
   TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
   -- Same split rationale as TODO/todo above: uppercase = teammates (kept out of <leader>se),
   -- lowercase/titlecase = your own, which is what <leader>se lists.
@@ -94,6 +124,7 @@ return {
     "folke/todo-comments.nvim",
     opts = {
       keywords = keywords,
+      colors = colors,
     },
     keys = {
       {

@@ -1380,3 +1380,15 @@ apart from structs, at declarations or uses. The palette role, the highlight
 group and the gopls hook were removed. Details: `palette-reference.md`,
 "interface". The revisit todo is closed (`todos/done/`).
 
+
+## 2026-11-27: todo-comment tags moved off the function blue
+
+Personal `todo` and team `TODO` take royal `#5a7fe0` (`todo_tag.royal`, new role in
+`palette.lua`): dE00 15.9 from the function blue, 4.84:1. `PERF`, `REFACTOR` and
+`TEST` take rose `#e197a3` (`member.rose_soft`). `NOTE` stays on the theme's hint
+teal by Myo's choice. Sage `#8bcb8a` was tried first and rejected the same day: it
+was picked against the stale `CLAUDE.md` table and sat dE00 7.9 from the live
+green strings. Also fixed: `TODO` and `todo` shared one highlight group (names
+ignore case), see `silent-failure-surfaces.md` #21. Details:
+`palette-reference.md`, "Todo-comment tags"; every candidate:
+`todo-comment-colours.md`.

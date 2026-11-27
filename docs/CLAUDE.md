@@ -137,7 +137,7 @@ affected workflow, and checking for startup errors or regressions. For plugin,
 completion, formatting or LSP changes, do a manual pass over the related feature
 and run `:Lazy sync` when specs changed.
 
-**A clean result is not proof — parts of this config fail silently.** Twenty
+**A clean result is not proof — parts of this config fail silently.** Twenty-one
 known places accept a wrong value and simply do nothing instead of erroring: an
 unresolved picker action name is typed as keystrokes, an action name matching a
 snacks built-in replaces it everywhere, spelling out a layout `box` drops the

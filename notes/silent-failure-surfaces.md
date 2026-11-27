@@ -180,6 +180,16 @@ appear in a snapshot. Fixed by pinning `@markup.raw` to the theme cyan. The chec
 that sees it is a real hover float probed with `vim.inspect_pos`.
 *File:* `lua/colorschemes/solarized-osaka/init.lua` (string block)
 
+### 21. Two todo-comments keywords that differ only by case share ONE colour
+Found on 2026-11-27. todo-comments names its groups `TodoBg<key>` / `TodoFg<key>`, and
+Neovim highlight group names ignore case, so the keys `TODO` and `todo` define the same
+group. It is defined with `hi def`, so whichever key `pairs()` reaches first paints both
+tags and the other colour is dropped. Changing only the colour of `todo` turned both tags
+teal on one run. Fixed by giving the personal keyword the key `todo_mine` and matching
+`todo` through `alt`. The check that sees it reads the extmark `hl_group` per line and
+that group's colour, run against `main` first, where both lines came out the same blue.
+*File:* `lua/plugins/todo-comments.lua` (keywords)
+
 ## Related
 
 - Structural traps and the parked-plugin rule: repo-root `CLAUDE.md`

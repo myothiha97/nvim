@@ -1399,3 +1399,21 @@ marked in code with `-- WARN: SILENT FAILURE`.
   help since its target is in the same list. `paint` also merges `fg` rather than
   assigning a bare table, to preserve italic on keywords, bold on markdown
   delimiters, underline on links, and the background on markdown code.
+
+### Todo-comment tags (chosen 2026-11-27: `todo_tag.royal`, `#5a7fe0`)
+
+Rule: no tag colour may sit on the function blue. Before, personal `todo` used
+`DiagnosticInfo` `#268bd3` (dE00 11.5 from function `#61afef`), and `PERF`,
+`REFACTOR` and `TEST` used `Identifier`, which IS the function blue.
+
+Measured against the LIVE groups, on the emitted background `#141514`:
+
+| tags | value | contrast | nearest (dE00) |
+| --- | --- | --- | --- |
+| `todo`, `TODO` | royal `#5a7fe0` (`todo_tag.royal`) | 4.84:1 | function 15.9, keyword 17.0 |
+| `PERF`, `REFACTOR`, `TEST` | rose `#e197a3` (`member.rose_soft`) | 7.98:1 | parameter 11.7 |
+| `NOTE` | theme hint teal `#29a298` | | kept by choice |
+
+Rejected: sage `#8bcb8a` (dE00 7.9 from the green string, blended into JSX class
+names). Fallback: periwinkle `#9aa5f0` (7.86:1, function 14.0, keyword 15.0).
+Every candidate with its numbers: [`todo-comment-colours.md`](todo-comment-colours.md).
