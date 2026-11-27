@@ -440,8 +440,10 @@ local variants = {
     -- custom-latest has strings on the green `string.tokyodark` (h124) since
     -- 2026-09-24, and object keys now follow this role. Re-measure all of these
     -- against that green before using any of them.
+    -- sage: tried for todo tags 2026-11-27 and REJECTED, dE 7.9 from the live green string.
     sage = "#8bcb8a", -- L*76 C*42 h142 9.97:1 | SELECTED: worst 20.6 vs the git-add green
     sage_dim = "#88be87", -- L*72 C*36 h142 8.84:1 | dimmer, worst 19.0 vs string cyan
+    -- rose_soft: LIVE on todo tags PERF/REFACTOR/TEST since 2026-11-27 (todo-comments.lua).
     rose_soft = "#e197a3", -- L*70 C*30 h10 8.29:1 | best measured (23.5) but pink, not wanted
     rose = "#b67faf", -- base-build default
     iris = "#8d8de3",
@@ -466,6 +468,16 @@ local variants = {
     -- member = "#77c5b9", -- tokyo night cyan, S 40%
     -- member = "#7ab8ae", -- tokyo night cyan, S 30%
     -- member = "#73aba2", -- tokyo night cyan, S 25%
+  },
+
+  -- todo-comments tag colours (lua/plugins/todo-comments.lua). Not a syntax group:
+  -- read there by role, so the tags follow an edit here. Rule: never the function
+  -- blue. Measured 2026-11-27 against the LIVE groups on the emitted background
+  -- #141514; full table in notes/todo-comment-colours.md.
+  -- `PERF`/`REFACTOR`/`TEST` use `member.rose_soft`, not a value here.
+  todo_tag = {
+    royal = "#5a7fe0", -- SELECTED for todo/TODO | 4.84:1, dE function 15.9, keyword 17.0
+    periwinkle = "#9aa5f0", -- fallback | 7.86:1, dE function 14.0, keyword 15.0 (drifts violet)
   },
 }
 
