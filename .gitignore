@@ -18,3 +18,12 @@ __pycache__/
 .agents/
 /AGENTS.md
 /CLAUDE.md
+
+# E2E harness output (scripts/e2e/)
+scripts/e2e/shots/
+scripts/e2e/results*.json
+scripts/e2e/perf-*.json
+scripts/e2e/compare-*.json
+scripts/e2e/compare-*.jsonl
+# written and removed by scripts/e2e/perf.py AB=...; must never be committed
+lua/plugins/zz_perf_ab.lua

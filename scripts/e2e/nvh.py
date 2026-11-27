@@ -106,7 +106,7 @@ class Nvim:
             elif part.startswith("<") and part.endswith(">") and len(part) > 2:
                 raise ValueError("unknown key " + part)
             else:
-                sh(TMUX + ["send-keys", "-t", self.name, "-l", part])
+                sh(TMUX + ["send-keys", "-t", self.name, "-l", tmux_literal(part)])
         time.sleep(settle)
 
     def mouse(self, row, col, button="left", action="click", mods=0, settle=0.15):
@@ -203,6 +203,24 @@ class Nvim:
                         kids.add(int(p_)); changed = True
             sh(["bash", "-c", "kill -9 " + " ".join(map(str, kids)) + " 2>/dev/null; true"])
         sh(["bash", "-c", f"pkill -9 -f 'listen {self.sock}'"])
+
+
+def reset_fixture(cwd, file):
+    """Undo leftovers of an aborted run on a fixture file: its swap file (else the next start
+    stops at the E325 ATTENTION prompt) and uncommitted edits. Only that one file is touched."""
+    path = os.path.realpath(os.path.join(cwd, file))
+    app = os.environ.get("NVIM_APPNAME") or "nvim"  # compare.py runs other configs side by side
+    swap = os.path.expanduser(f"~/.local/state/{app}/swap/") + path.replace("/", "%")
+    for ext in (".swp", ".swo", ".swn"):
+        if os.path.exists(swap + ext):
+            os.remove(swap + ext)
+    sh(["git", "-C", cwd, "checkout", "--", file])
+
+
+def tmux_literal(s):
+    """tmux ends a command at an argument ending in an unescaped `;`, so `send-keys -l ';'` sent
+    nothing (the `;` of a typed statement was silently dropped). Escape it."""
+    return s[:-1] + "\\;" if s.endswith(";") else s
 
 
 def _cells(s):
