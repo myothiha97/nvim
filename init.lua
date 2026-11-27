@@ -1,3 +1,17 @@
+-- LuaJIT on arm64 macOS must place compiled code near its own binary. With the
+-- default small chunks it needs a new placement often, the placement fails
+-- ("failed to allocate mcode memory"), and every failure FLUSHES ALL compiled
+-- Lua: treesitter highlighting, statuscolumn and bufferline then recompile on
+-- every scroll. Measured 2026-11-27 in a long session: 419 failures in 20 s,
+-- keys up to 527 ms; with bigger chunks 0 failures and half the cost per key.
+-- Raising maxtrace or maxmcode alone does nothing; the chunk size is the fix.
+-- Keep it the first line: it only affects chunks allocated after it runs.
+-- `jit` is nil on a PUC-Lua build of Nvim, and the failures were only measured
+-- on arm64, so both of those are left as they are.
+if jit and jit.arch == "arm64" then
+  jit.opt.start("sizemcode=1024", "maxmcode=8192")
+end
+
 -- Neovide must be configured before lazy loads
 require("config.neovide")
 
